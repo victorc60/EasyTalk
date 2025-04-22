@@ -4,66 +4,60 @@ const axios = require('axios');
 
 // Проверка наличия токенов перед началом работы
 if (!process.env.TELEGRAM_BOT_TOKEN) {
-    console.error('❌ Ошибка: TELEGRAM_BOT_TOKEN не указан в файле .env');
-    process.exit(1); // Завершаем выполнение программы
+    console.error('ERROR: TELEGRAM_BOT_TOKEN is not set in .env file');
+    process.exit(1);
 }
 
 if (!process.env.GROK_API_KEY) {
-    console.error('❌ Ошибка: GROK_API_KEY не указан в файле .env');
-    process.exit(1); // Завершаем выполнение программы
+    console.error('ERROR: GROK_API_KEY is not set in .env file');
+    process.exit(1);
 }
 
-// Инициализация Telegram бота
 let bot;
 try {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     bot = new TelegramBot(botToken, { polling: true });
-    console.log('✅ Telegram бот успешно инициализирован');
+    console.log('Telegram bot initialized successfully');
 } catch (error) {
-    console.error('❌ Ошибка при инициализации Telegram бота:', error.message);
+    console.error('ERROR initializing Telegram bot:', error.message);
     if (error.response && error.response.statusCode === 401) {
-        console.error('❌ Проблема с TELEGRAM_BOT_TOKEN: неверный или неавторизованный токен');
+        console.error('ERROR with TELEGRAM_BOT_TOKEN: Invalid or unauthorized token');
     }
-    process.exit(1); // Завершаем выполнение программы
+    process.exit(1);
 }
 
-// Grok API ключ
 const grokApiKey = process.env.GROK_API_KEY;
 
-// Приветственное сообщение для команды /start
 bot.onText(/\/start/, (msg) => {
     try {
         const chatId = msg.chat.id;
         if (!chatId) {
-            throw new Error('Не удалось определить chatId из сообщения');
+            throw new Error('Unable to determine chatId from message');
         }
         bot.sendMessage(chatId, 'Привет! Я AI-ассистент, работающий на Grok 3. Напиши мне что-нибудь, и я отвечу! 😊');
-        console.log(`ℹ️ Команда /start выполнена для chatId: ${chatId}`);
+        console.log(`INFO: /start command executed for chatId: ${chatId}`);
     } catch (error) {
-        console.error('❌ Ошибка при обработке команды /start:', error.message);
+        console.error('ERROR processing /start command:', error.message);
     }
 });
 
-// Обработка текстовых сообщений
 bot.on('message', async (msg) => {
     try {
         const chatId = msg.chat.id;
         const text = msg.text;
 
         if (!chatId) {
-            throw new Error('Не удалось определить chatId из сообщения');
+            throw new Error('Unable to determine chatId from message');
         }
 
         if (!text) {
-            throw new Error('Сообщение пустое или не содержит текст');
+            throw new Error('Message is empty or contains no text');
         }
 
-        // Игнорируем команды
         if (text.startsWith('/')) return;
 
-        console.log(`ℹ️ Получено сообщение от chatId ${chatId}: ${text}`);
+        console.log(`INFO: Received message from chatId ${chatId}: ${text}`);
 
-        // Отправляем запрос в Grok API
         const response = await axios.post('https://api.x.ai/v1/completions', {
             model: 'grok-beta',
             messages: [
@@ -78,30 +72,56 @@ bot.on('message', async (msg) => {
             }
         });
 
-        // Проверка ответа от Grok API
         if (!response.data || !response.data.choices || !response.data.choices[0]) {
-            throw new Error('Некорректный ответ от Grok API: структура данных не соответствует ожидаемой');
+            throw new Error('Invalid response from Grok API: Data structure does not match expected format');
         }
 
-        // Получаем ответ от Grok
         const grokResponse = response.data.choices[0].message.content;
 
         if (!grokResponse) {
-            throw new Error('Ответ от Grok API пустой');
+            throw new Error('Response from Grok API is empty');
         }
 
-        // Отправляем ответ пользователю
         await bot.sendMessage(chatId, grokResponse);
-        console.log(`✅ Ответ отправлен chatId ${chatId}: ${grokResponse}`);
+        console.log(`SUCCESS: Response sent to chatId ${chatId}: ${grokResponse}`);
 
     } catch (error) {
-        // Логирование ошибок
         if (error.response) {
-            // Ошибка от Grok API (например, 401, 429 и т.д.)
-            console.error('❌ Ошибка при запросе к Grok API:');
-            console.error(`Статус: ${error.response.status}`);
-            console.error(`Данные ошибки:`, error.response.data);
+            console.error('ERROR requesting Grok API:');
+            console.error(`Status: ${error.response.status}`);
+            console.error(`Error details:`, error.response.data);
             if (error.response.status === 401) {
-                console.error('❌ Проблема с GROK_API_KEY: неверный или неавторизованный ключ');
+                console.error('ERROR with GROK_API_KEY: Invalid or unauthorized key');
             } else if (error.response.status === 429) {
-                console.error('❌ Д
+                console.error('ERROR: Grok API rate limit reached (1 request per second or 60/1200 per hour)');
+            }
+            bot.sendMessage(msg.chat.id, 'Произошла ошибка при общении с Grok API. Попробуй снова позже!');
+        } else if (error.message.includes('chatId')) {
+            console.error('LOGICAL ERROR:', error.message);
+        } else if (error.message.includes('empty')) {
+            console.error('LOGICAL ERROR:', error.message);
+            bot.sendMessage(msg.chat.id, 'Пожалуйста, отправь текстовое сообщение!');
+        } else {
+            console.error('UNKNOWN ERROR:', error.message);
+            bot.sendMessage(msg.chat.id, 'Произошла неизвестная ошибка. Попробуй снова позже!');
+        }
+    }
+});
+
+bot.on('polling_error', (error) => {
+    console.error('ERROR in Telegram API polling:', error.message);
+    if (error.code === 'ETELEGRAM') {
+        console.error('ERROR: Check TELEGRAM_BOT_TOKEN or internet connection');
+    }
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('UNEXPECTED ERROR:', error.message);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('UNHANDLED PROMISE REJECTION:', reason);
+});
+
+console.log('Bot started...');
