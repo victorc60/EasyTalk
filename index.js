@@ -2,7 +2,8 @@ import 'dotenv/config';
 import TelegramBot from 'node-telegram-bot-api';
 import { OpenAI } from 'openai';
 import schedule from 'node-schedule';
-import User from './models/User.js';
+import sequelize from './database/database.js';
+import User from './models/User.js'; // Оставляем только один импорт
 
 // Проверка переменных окружения
 if (!process.env.TELEGRAM_BOT_TOKEN) {
@@ -14,9 +15,6 @@ if (!process.env.OPENAI_API_KEY) {
   console.error('ERROR: OPENAI_API_KEY не установлен в .env');
   process.exit(1);
 }
-// Подключаем базу данных
-import sequelize from './database/database.js';
-import User from './models/User.js';
 
 // Синхронизация моделей с базой данных
 (async () => {
@@ -129,7 +127,7 @@ async function sendDailyFactToAllUsers() {
 
     // Получаем всех пользователей из базы
     const users = await User.findAll();
-    console.log(`📊 Найдено пользователей: ${users.length}`)
+    console.log(`📊 Найдено пользователей: ${users.length}`);
 
     let successCount = 0;
     let failCount = 0;
