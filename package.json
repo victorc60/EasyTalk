@@ -27,5 +27,6 @@
     "npm": "9.x"
   },
   "author": "Your Name",
-  "license": "ISC"
+  "license": "ISC",
+  "type": "module"
 }

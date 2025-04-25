@@ -1,7 +1,8 @@
-require('dotenv').config();
-const TelegramBot = require('node-telegram-bot-api');
-const { OpenAI } = require('openai');
+import 'dotenv/config';
+import TelegramBot from 'node-telegram-bot-api';
+import { OpenAI } from 'openai';
 import schedule from 'node-schedule';
+import User from './models/User.js';
 
 // Проверка переменных окружения
 if (!process.env.TELEGRAM_BOT_TOKEN) {
@@ -19,16 +20,17 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
+
 // Устанавливаем ежедневную рассылку в 14:30 по Москве
-const job = schedule.scheduleJob('30 14 * * *', {
-  timezone: 'Europe/Moscow'
-}, sendDailyFactToAllUsers);
+const job = schedule.scheduleJob(
+  { hour: 14, minute: 30, tz: 'Europe/Moscow' },
+  sendDailyFactToAllUsers
+);
 
 console.log(`⏰ Рассылка настроена на 14:30 по Москве`);
 
 // Обработчик команды /start
 bot.onText(/\/start/, (msg) => {
-  
   const chatId = msg.chat.id;
   const welcomeText = `
 👋 Привет! Я AI-ассистент для учителя английского. Я могу:
@@ -39,7 +41,7 @@ bot.onText(/\/start/, (msg) => {
 ✓ Помогать с переводом
 
 Просто напиши свой вопрос!`;
-  
+
   bot.sendMessage(chatId, welcomeText);
 });
 
@@ -57,42 +59,41 @@ bot.on('message', async (msg) => {
 
     // Запрос к OpenAI
     const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo-0125",
-        messages: [
-          { 
-            role: "system", 
-            content: `Ты — дружелюбный учитель английского для подростков. Твоя задача:
-      1. Исправь ошибки в предложении пользователя (если они есть) и покажи правильный вариант
-      2. Объясни правило, связанное с ошибкой, простыми словами
-      3. Задай интересный вопрос по теме для продолжения диалога (на английском) + перевод вопроса на русский
-      
-      Формат ответа:
-      ---
-      ✅ Правильный вариант: [исправленное предложение]
-      
-      📖 Правило: [простое объяснение на русском]
-      
-      💬 Let's talk: [вопрос на английском]
-      (Перевод: [перевод вопроса на русский])
-      ---`
-          },
-          { role: "user", content: text }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      });
+      model: 'gpt-3.5-turbo-0125',
+      messages: [
+        {
+          role: 'system',
+          content: `Ты — дружелюбный учитель английского для подростков. Твоя задача:
+    1. Исправь ошибки в предложении пользователя (если они есть) и покажи правильный вариант
+    2. Объясни правило, связанное с ошибкой, простыми словами
+    3. Задай интересный вопрос по теме для продолжения диалога (на английском) + перевод вопроса на русский
+
+    Формат ответа:
+    ---
+    ✅ Правильный вариант: [исправленное предложение]
+
+    📖 Правило: [простое объяснение на русском]
+
+    💬 Let's talk: [вопрос на английском]
+    (Перевод: [перевод вопроса на русский])
+    ---`
+        },
+        { role: 'user', content: text }
+      ],
+      temperature: 0.7,
+      max_tokens: 500
+    });
 
     const aiResponse = completion.choices[0]?.message?.content;
-    
+
     if (aiResponse) {
       await bot.sendMessage(chatId, aiResponse);
     } else {
       throw new Error('Пустой ответ от OpenAI');
     }
-
   } catch (error) {
     console.error('Ошибка OpenAI:', error);
-    
+
     let errorMessage = '⚠️ Произошла ошибка. Попробуйте позже!';
     if (error instanceof OpenAI.APIError) {
       if (error.status === 401) {
@@ -101,21 +102,19 @@ bot.on('message', async (msg) => {
         errorMessage = '🌀 Слишком много запросов. Подождите 20 секунд.';
       }
     }
-    
+
     await bot.sendMessage(chatId, errorMessage);
   }
 });
 
-
-
 async function sendDailyFactToAllUsers() {
   try {
-    // Получаем факт (ваша реализация может отличаться)
+    // Получаем факт
     const fact = await generateDailyFact();
-    
+
     // Получаем всех пользователей из базы
     const users = await User.findAll();
-    
+
     let successCount = 0;
     let failCount = 0;
 
@@ -123,12 +122,12 @@ async function sendDailyFactToAllUsers() {
       try {
         await bot.telegram.sendMessage(user.telegram_id, fact);
         successCount++;
-        
+
         // Обновляем время последней активности
         await user.update({ last_activity: new Date() });
       } catch (error) {
         failCount++;
-        
+
         // Если пользователь заблокировал бота (403) - удаляем из базы
         if (error.response?.error_code === 403) {
           await user.destroy();
@@ -138,14 +137,14 @@ async function sendDailyFactToAllUsers() {
         }
       }
     }
-    
+
     console.log(`📢 Рассылка завершена. Успешно: ${successCount}, Не удалось: ${failCount}`);
   } catch (error) {
     console.error('❌ Ошибка в ежедневной рассылке:', error);
   }
 }
 
-// Генерация факта (замените на вашу реализацию)
+// Генерация факта
 async function generateDailyFact() {
   const facts = [
     "🇬🇧 The English word with the most definitions is 'set' (over 430 meanings).\n🇷🇺 Английское слово с наибольшим количеством значений - 'set' (более 430 определений).",
@@ -154,11 +153,12 @@ async function generateDailyFact() {
   return facts[Math.floor(Math.random() * facts.length)];
 }
 
-bot.command('test_fact', async (ctx) => {
-  if (ctx.from.id !== ADMIN_ID) return;
-  
+bot.onText(/\/test_fact/, async (msg) => {
+  const ADMIN_ID = process.env.ADMIN_ID; // Убедитесь, что ADMIN_ID есть в .env
+  if (msg.from.id.toString() !== ADMIN_ID) return;
+
   await sendDailyFactToAllUsers();
-  await ctx.reply('Тестовая рассылка запущена!');
+  await bot.sendMessage(msg.chat.id, 'Тестовая рассылка запущена!');
 });
 
 // Обработчики ошибок
