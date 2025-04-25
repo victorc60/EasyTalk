@@ -14,6 +14,21 @@ if (!process.env.OPENAI_API_KEY) {
   console.error('ERROR: OPENAI_API_KEY не установлен в .env');
   process.exit(1);
 }
+// Подключаем базу данных
+import sequelize from './database/database.js';
+import User from './models/User.js';
+
+// Синхронизация моделей с базой данных
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Соединение с базой данных успешно установлено');
+    await sequelize.sync({ force: false }); // force: false сохраняет существующие данные
+    console.log('✅ Таблицы синхронизированы с базой данных');
+  } catch (error) {
+    console.error('❌ Ошибка подключения к базе данных:', error);
+  }
+})();
 
 // Инициализация бота и OpenAI
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
@@ -114,6 +129,7 @@ async function sendDailyFactToAllUsers() {
 
     // Получаем всех пользователей из базы
     const users = await User.findAll();
+    console.log(`📊 Найдено пользователей: ${users.length}`)
 
     let successCount = 0;
     let failCount = 0;
