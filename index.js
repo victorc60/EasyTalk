@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { OpenAI } from 'openai';
 import schedule from 'node-schedule';
 import sequelize from './database/database.js';
-import User from './models/User.js'; // Оставляем только один импорт
+import User from './models/User.js';
 
 // Проверка переменных окружения
 if (!process.env.TELEGRAM_BOT_TOKEN) {
@@ -13,6 +13,11 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 
 if (!process.env.OPENAI_API_KEY) {
   console.error('ERROR: OPENAI_API_KEY не установлен в .env');
+  process.exit(1);
+}
+
+if (!process.env.ADMIN_ID) {
+  console.error('ERROR: ADMIN_ID не установлен в .env');
   process.exit(1);
 }
 
@@ -34,17 +39,39 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Устанавливаем ежедневную рассылку в 14:30 по Москве
+// Устанавливаем ежедневную рассылку в 16:30 по молдавскому времени
 const job = schedule.scheduleJob(
-  { hour: 14, minute: 30, tz: 'Europe/Moscow' },
+  { hour: 16, minute: 30, tz: 'Europe/Chisinau' },
   sendDailyFactToAllUsers
 );
 
-console.log(`⏰ Рассылка настроена на 14:30 по Москве`);
+console.log(`⏰ Рассылка настроена на 16:30 по молдавскому времени`);
 
 // Обработчик команды /start
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
+  const username = msg.from.username || null;
+
+  try {
+    // Проверяем, есть ли пользователь в базе
+    let user = await User.findOne({ where: { telegram_id: chatId } });
+    if (!user) {
+      // Создаём нового пользователя
+      user = await User.create({
+        telegram_id: chatId,
+        username,
+        first_activity: new Date(),
+        last_activity: new Date()
+      });
+      console.log(`🆕 Новый пользователь добавлен: ${chatId}`);
+    } else {
+      // Обновляем время последней активности
+      await user.update({ last_activity: new Date() });
+    }
+  } catch (error) {
+    console.error('❌ Ошибка при работе с пользователем:', error);
+  }
+
   const welcomeText = `
 👋 Привет! Я AI-ассистент для учителя английского. Я могу:
 
@@ -158,17 +185,38 @@ async function sendDailyFactToAllUsers() {
   }
 }
 
-// Генерация факта
+// Генерация факта через OpenAI
 async function generateDailyFact() {
-  const facts = [
-    "🇬🇧 The English word with the most definitions is 'set' (over 430 meanings).\n🇷🇺 Английское слово с наибольшим количеством значений - 'set' (более 430 определений).",
-    "🇬🇧 Shakespeare invented over 1700 English words.\n🇷🇺 Шекспир изобрёл более 1700 английских слов."
-  ];
-  return facts[Math.floor(Math.random() * facts.length)];
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo-0125',
+      messages: [
+        {
+          role: 'system',
+          content: `Ты — эксперт по английскому языку. Сгенерируй один интересный и краткий факт об английском языке на английском, а затем переведи его на русский. Формат ответа:  
+          🇬🇧 [факт на английском]  
+          🇷🇺 [перевод на русский]`
+        }
+      ],
+      temperature: 0.8,
+      max_tokens: 100
+    });
+
+    const fact = completion.choices[0]?.message?.content;
+    if (!fact) {
+      throw new Error('Пустой ответ от OpenAI');
+    }
+    return fact;
+  } catch (error) {
+    console.error('Ошибка генерации факта через OpenAI:', error);
+    // Запасной факт на случай ошибки
+    return `🇬🇧 The English word 'set' has over 430 meanings.  
+🇷🇺 Английское слово 'set' имеет более 430 значений.`;
+  }
 }
 
 bot.onText(/\/test_fact/, async (msg) => {
-  const ADMIN_ID = process.env.ADMIN_ID; // Убедитесь, что ADMIN_ID есть в .env
+  const ADMIN_ID = process.env.ADMIN_ID;
   if (msg.from.id.toString() !== ADMIN_ID) return;
 
   await sendDailyFactToAllUsers();
@@ -180,8 +228,15 @@ bot.on('polling_error', (error) => {
   console.error('Ошибка polling:', error.message);
 });
 
-process.on('unhandledRejection', (error) => {
+process.on('unhandledRejection', async (error) => {
   console.error('Необработанное исключение:', error);
+  if (process.env.ADMIN_ID) {
+    try {
+      await bot.sendMessage(process.env.ADMIN_ID, `❌ Ошибка: ${error.message}`);
+    } catch (e) {
+      console.error('Ошибка отправки уведомления админу:', e);
+    }
+  }
 });
 
 console.log('🤖 Бот успешно запущен и готов к работе!');
