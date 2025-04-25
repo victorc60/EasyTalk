@@ -2,15 +2,12 @@ import { Sequelize } from 'sequelize';
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'mysql',
-  logging: console.log, // Логируем SQL-запросы для отладки
+  logging: false, // Отключаем логирование в консоль
   dialectOptions: {
-    ssl: { // Обязательно для Railway
+    ssl: {
       require: true,
       rejectUnauthorized: false
     }
-  },
-  define: {
-    freezeTableName: true // Отключаем автоматическое добавление множественного числа
   }
 });
 
