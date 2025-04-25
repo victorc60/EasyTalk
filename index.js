@@ -49,19 +49,30 @@ bot.on('message', async (msg) => {
 
     // Запрос к OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { 
-          role: "system", 
-          content: "You are a helpful English teacher assistant for students under 18. " +
-                   "Explain concepts simply, use examples, and be encouraging. " +
-                   "Respond in Russian unless asked to use English."
-        },
-        { role: "user", content: text }
-      ],
-      temperature: 0.7,
-      max_tokens: 500
-    });
+        model: "gpt-3.5-turbo",
+        messages: [
+          { 
+            role: "system", 
+            content: `Ты — дружелюбный учитель английского для подростков. Твоя задача:
+      1. Исправь ошибки в предложении пользователя (если они есть) и покажи правильный вариант
+      2. Объясни правило, связанное с ошибкой, простыми словами
+      3. Задай интересный вопрос по теме для продолжения диалога (на английском) + перевод вопроса на русский
+      
+      Формат ответа:
+      ---
+      ✅ Правильный вариант: [исправленное предложение]
+      
+      📖 Правило: [простое объяснение на русском]
+      
+      💬 Let's talk: [вопрос на английском]
+      (Перевод: [перевод вопроса на русский])
+      ---`
+          },
+          { role: "user", content: text }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      });
 
     const aiResponse = completion.choices[0]?.message?.content;
     
