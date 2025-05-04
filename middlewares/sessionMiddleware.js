@@ -1,4 +1,5 @@
-import { NodeCache } from 'node-cache';
+import pkg from 'node-cache';
+const NodeCache = pkg;
 
 const sessionCache = new NodeCache({ 
   stdTTL: 86400, // 24 часа
