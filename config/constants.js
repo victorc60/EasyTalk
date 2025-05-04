@@ -7,7 +7,7 @@ export const CONFIG = {
     GPT_MODEL: 'gpt-4'
   };
   
-  export const COMMANDS = [
+  export  const COMMANDS = [
     { command: 'start', description: 'Главное меню' },
     { command: 'roleplay', description: 'Ролевая игра' },
     { command: 'topic', description: 'Тема для обсуждения' },
