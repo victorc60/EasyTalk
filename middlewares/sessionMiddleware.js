@@ -10,6 +10,7 @@ class SessionManager {
   getWordGame(userId) {
     return sessionCache.get(`wordGame_${userId}`);
   }
+ 
 
   setWordGame(userId, data) {
     return sessionCache.set(`wordGame_${userId}`, data);
