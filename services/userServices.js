@@ -1,4 +1,4 @@
-import { User } from '../models/User';
+import { User } from '../models/User.js';
 import { sequelize } from '../database/database';
 import constants from '../config/constants';
 import logger from '../utils/logger';

@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize';
+import UserModel from '../models/User.js';
 
 export const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -10,6 +11,7 @@ export const sequelize = new Sequelize(
     logging: false
   }
 );
+const User = UserModel(sequelize);
 
 export async function initializeDatabase() {
   try {
