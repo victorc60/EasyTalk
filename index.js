@@ -6,7 +6,7 @@ import logger from './utils/logger.js';
 import { sessionManager } from './middlewares/sessionMiddleware.js';
 import { botControllers } from './controllers/botControllers.js';
 import { userServices } from './services/userServices.js';
-import { setupScheduledTasks } from './services/schedule.js';
+import { setupScheduledTasks } from './config/schedule.js';
 
 // Инициализация Express приложения (для вебхуков)
 const app = express();
