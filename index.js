@@ -4,107 +4,109 @@ import TelegramBot from 'node-telegram-bot-api';
 import { sequelize } from './database/database.js';
 import logger from './utils/logger.js';
 import { sessionManager } from './middlewares/sessionMiddleware.js';
-import { botControllers } from './controllers/botControllers.js';
-import { userServices } from './services/userServices.js';
+import { setupBotControllers } from './controllers/botControllers.js';
+import { UserService } from './services/userServices.js';
 import { setupScheduledTasks } from './config/schedule.js';
 
-// Инициализация Express приложения (для вебхуков)
+// Инициализация Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Проверка обязательных переменных окружения
-const requiredEnvVars = [
-  'TELEGRAM_BOT_TOKEN',
-  'OPENAI_API_KEY',
-  'ADMIN_ID',
-  'DB_NAME',
-  'DB_USER',
-  'DB_HOST'
-];
+// Валидация переменных окружения
+const validateEnvironment = () => {
+  const requiredEnvVars = [
+    'TELEGRAM_BOT_TOKEN',
+    'OPENAI_API_KEY',
+    'ADMIN_ID',
+    'DB_NAME',
+    'DB_USER',
+    'DB_HOST'
+  ];
 
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    logger.error(`Missing required environment variable: ${envVar}`);
+  const missingVars = requiredEnvVars.filter(v => !process.env[v]);
+  if (missingVars.length > 0) {
+    logger.error('Missing required environment variables:', missingVars);
     process.exit(1);
   }
-}
+};
 
-// Инициализация Telegram бота
-function initializeBot() {
-  const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
-    polling: process.env.NODE_ENV !== 'production',
-    webHook: process.env.NODE_ENV === 'production'
-      ? { port: PORT, host: process.env.WEBHOOK_HOST }
-      : false
-  });
-
-  // Настройка вебхука для production
-  if (process.env.NODE_ENV === 'production') {
-    app.use(express.json());
-    app.post(`/bot${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
-      bot.processUpdate(req.body);
-      res.sendStatus(200);
-    });
-  }
-
-  return bot;
-}
-
-async function startApplication() {
+// Инициализация бота с обработкой ошибок
+const initializeBot = () => {
   try {
-    // 1. Инициализация базы данных
-    await sequelize.authenticate();
-    await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
-    logger.info('Database connected and synced');
+    const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
+      polling: process.env.NODE_ENV !== 'production',
+      webHook: process.env.NODE_ENV === 'production' ? { 
+        port: PORT, 
+        host: process.env.WEBHOOK_HOST 
+      } : false,
+      request: {
+        timeout: 10000,
+        agent: process.env.NODE_ENV === 'production' ? 
+          new (require('https')).Agent({ keepAlive: true }) : null
+      }
+    });
 
-    // 2. Инициализация бота
-    const bot = initializeBot();
-    
-    // 3. Настройка контроллеров
-    botControllers(bot);
-    
-    // 4. Запуск планировщика задач
-    setupScheduledTasks(bot);
-    
-    // 5. Запуск сервера (для вебхуков)
     if (process.env.NODE_ENV === 'production') {
-      app.listen(PORT, () => {
-        logger.info(`Server running on port ${PORT}`);
-        logger.info(`Webhook URL: https://${process.env.WEBHOOK_HOST}/bot${process.env.TELEGRAM_BOT_TOKEN}`);
+      app.use(express.json());
+      app.post(`/bot${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
+        bot.processUpdate(req.body);
+        res.sendStatus(200);
       });
-    } else {
-      logger.info('Bot running in polling mode');
     }
 
-    // 6. Отправка уведомления админу
-    try {
-      await bot.sendMessage(
-        process.env.ADMIN_ID,
-        `🟢 Бот запущен\n` +
-        `⏰ Время сервера: ${new Date().toLocaleString('ru-RU')}\n` +
-        `🔧 Режим: ${process.env.NODE_ENV || 'development'}`
-      );
-    } catch (adminError) {
-      logger.error('Failed to send startup notification to admin', adminError);
-    }
-
+    return bot;
   } catch (error) {
-    logger.error('Application startup failed:', error);
+    logger.error('Bot initialization failed:', error);
     process.exit(1);
   }
-}
+};
 
-// Обработка ошибок процесса
-process.on('unhandledRejection', (reason) => {
-  logger.error('Unhandled Rejection:', reason);
-});
-
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', error);
-  process.exit(1);
-});
-
-// Запуск приложения
-startApplication();
-
-export { app }; // Для тестирования
+// Основная функция запуска
+const startApplication = async () => {
+    validateEnvironment();
+  
+    try {
+      // 1. Инициализация базы данных
+      await sequelize.authenticate();
+      await sequelize.sync({ 
+        alter: process.env.NODE_ENV !== 'production',
+        logging: msg => logger.debug(msg)
+      });
+      logger.info('Database connected and synced');
+  
+      // 2. Инициализация бота
+      const bot = initializeBot();
+      
+      // 3. Настройка контроллеров
+      setupBotControllers(bot);
+      
+      // 4. Запуск планировщика задач
+      setupScheduledTasks(bot);
+      
+      // 5. Запуск сервера
+      if (process.env.NODE_ENV === 'production') {
+        const server = app.listen(PORT, () => {
+          logger.info(`Server running on port ${PORT}`);
+        });
+      }
+  
+      return { app, bot }; // Явно возвращаем объект с app и bot
+    } catch (error) {
+      logger.error('Application startup failed:', error);
+      throw error; // Пробрасываем ошибку для обработки выше
+    }
+  };
+  
+  // Запуск приложения
+  let appInstance, botInstance;
+  
+  try {
+    const { app, bot } = await startApplication();
+    appInstance = app;
+    botInstance = bot;
+  } catch (error) {
+    logger.error('Fatal error during startup:', error);
+    process.exit(1);
+  }
+  
+  export { appInstance as app, botInstance as bot };
