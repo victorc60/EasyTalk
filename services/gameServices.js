@@ -1,7 +1,7 @@
 import { sessionManager } from '../middlewares/sessionMiddleware.js';
 import { contentGenerators } from './contentGenerators.js';
 import { awardPoints, getUser } from './userServices.js';
-import constants from '../config/constants.js';
+import { CONFIG } from '../config/constants.js'
 import logger from '../utils/logger.js';
 
 export const gameServices = {
@@ -28,7 +28,7 @@ export const gameServices = {
             `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\nПример: ${wordData.example}\n💡 ${wordData.fact}`
           );
         }
-      }, constants.WORD_GAME_TIMEOUT);
+      }, CONFIG.WORD_GAME_TIMEOUT);
 
       // Сохраняем сессию игры
       sessionManager.setWordGame(userId, {
@@ -67,10 +67,10 @@ export const gameServices = {
       sessionManager.deleteWordGame(userId);
 
       if (isCorrect) {
-        await awardPoints(userId, constants.POINTS.WORD_GAME_CORRECT);
+        await awardPoints(userId, CONFIG.POINTS.WORD_GAME_CORRECT);
         await bot.sendMessage(
           userId,
-          `🎉 <b>Правильно!</b> +${constants.POINTS.WORD_GAME_CORRECT} очков!\n\n` +
+          `🎉 <b>Правильно!</b> +${CONFIG.POINTS.WORD_GAME_CORRECT} очков!\n\n` +
           `Слово "${gameSession.word}" означает "${gameSession.translation}"`,
           { parse_mode: 'HTML' }
         );
@@ -107,7 +107,7 @@ export const gameServices = {
       // Сохраняем сессию диалога
       sessionManager.setDialog(chatId, {
         character,
-        messagesLeft: constants.MAX_DIALOG_MESSAGES,
+        messagesLeft: CONFIG.MAX_DIALOG_MESSAGES,
         dialogHistory: [
           { 
             role: "system", 
@@ -124,7 +124,7 @@ export const gameServices = {
         `🎭 <b>Role Play: ${character.name}</b>\n\n` +
         `<i>${character.description}</i>\n\n` +
         `${character.greeting}\n\n` +
-        `У вас ${constants.MAX_DIALOG_MESSAGES} сообщений для диалога.`,
+        `У вас ${CONFIG.MAX_DIALOG_MESSAGES} сообщений для диалога.`,
         { parse_mode: 'HTML' }
       );
 
@@ -154,11 +154,11 @@ export const gameServices = {
       // Проверяем окончание диалога
       if (dialog.messagesLeft <= 0) {
         sessionManager.deleteDialog(chatId);
-        await awardPoints(userId, constants.POINTS.ROLE_PLAY_COMPLETE);
+        await awardPoints(userId, CONFIG.POINTS.ROLE_PLAY_COMPLETE);
         await bot.sendMessage(
           chatId,
           `👋 ${dialog.character.farewell}\n\n` +
-          `Диалог завершён! +${constants.POINTS.ROLE_PLAY_COMPLETE} очков за практику!`,
+          `Диалог завершён! +${CONFIG.POINTS.ROLE_PLAY_COMPLETE} очков за практику!`,
           { parse_mode: 'HTML' }
         );
       } else {
@@ -195,11 +195,11 @@ export const gameServices = {
     if (!dialog) return;
 
     sessionManager.deleteDialog(chatId);
-    await awardPoints(userId, Math.floor(constants.POINTS.ROLE_PLAY_COMPLETE / 2));
+    await awardPoints(userId, Math.floor(CONFIG.POINTS.ROLE_PLAY_COMPLETE / 2));
     await bot.sendMessage(
       chatId,
       `🏁 Диалог с ${dialog.character.name} завершён досрочно. ` +
-      `Вы получили ${Math.floor(constants.POINTS.ROLE_PLAY_COMPLETE / 2)} очков.`
+      `Вы получили ${Math.floor(CONFIG.POINTS.ROLE_PLAY_COMPLETE / 2)} очков.`
     );
   }
 };
