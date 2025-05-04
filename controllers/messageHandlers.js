@@ -1,9 +1,9 @@
-const { contentGenerators } = require('../services/contentGenerators');
-const { sessionManager } = require('../middlewares/sessionMiddleware');
-const { awardPoints, getUser } = require('../services/userServices');
-const { client: metricsClient, messageCounter } = require('../utils/metrics');
-const constants = require('../config/constants');
-const logger = require('../utils/logger');
+const { contentGenerators } = require('../services/contentGenerators.js');
+const { sessionManager } = require('../middlewares/sessionMiddleware.js');
+const { awardPoints, getUser } = require('../services/userServices.js');
+const { client: metricsClient, messageCounter } = require('../utils/metrics.js');
+const constants = require('../config/constants.js');
+const logger = require('../utils/logger.js');
 const { OpenAI } = require('openai');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

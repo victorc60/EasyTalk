@@ -1,8 +1,8 @@
-import { sessionManager } from '../middlewares/sessionMiddleware';
-import { contentGenerators } from './contentGenerators';
-import { awardPoints, getUser } from './userServices';
-import constants from '../config/constants';
-import logger from '../utils/logger';
+import { sessionManager } from '../middlewares/sessionMiddleware.js';
+import { contentGenerators } from './contentGenerators.js';
+import { awardPoints, getUser } from './userServices.js';
+import constants from '../config/constants.js';
+import logger from '../utils/logger.js';
 
 export const gameServices = {
   /**

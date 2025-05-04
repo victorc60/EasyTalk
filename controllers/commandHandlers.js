@@ -1,11 +1,11 @@
-const User = require('../models/User');
-const { contentGenerators } = require('../services/contentGenerators');
-const { sessionManager } = require('../middlewares/sessionMiddleware');
-const { awardPoints, getLeaderboard } = require('../services/userServices');
-const { startRolePlay, sendConversationStarter } = require('../services/gameServices');
-const { client: metricsClient, messageCounter } = require('../utils/metrics');
-const constants = require('../config/constants');
-const logger = require('../utils/logger');
+const User = require('../models/User.js');
+const { contentGenerators } = require('../services/contentGenerators.js');
+const { sessionManager } = require('../middlewares/sessionMiddleware.js');
+const { awardPoints, getLeaderboard } = require('../services/userServices.js');
+const { startRolePlay, sendConversationStarter } = require('../services/gameServices.js');
+const { client: metricsClient, messageCounter } = require('../utils/metrics.js');
+const constants = require('../config/constants.js');
+const logger = require('../utils/logger.js');
 
 module.exports = {
   /**

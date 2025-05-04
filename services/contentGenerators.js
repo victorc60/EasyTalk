@@ -1,7 +1,7 @@
 import { OpenAI } from 'openai';
 import { NodeCache } from 'node-cache';
-import logger from '../utils/logger';
-import constants from '../config/constants';
+import logger from '../utils/logger.js';
+import constants from '../config/constants.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const contentCache = new NodeCache({ stdTTL: 3600 }); // Кэш на 1 час
