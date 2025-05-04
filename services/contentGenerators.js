@@ -2,7 +2,7 @@ import { OpenAI } from 'openai';
 import pkg from 'node-cache';
 const NodeCache = pkg;
 import logger from '../utils/logger.js';
-import constants from '../config/constants.js';
+import { CONSTANTS } from '../config/constants.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const contentCache = new NodeCache({ stdTTL: 3600 }); // Кэш на 1 час
@@ -76,7 +76,7 @@ async function generateWithAI(prompt, { format = 'text', validator = null, cache
 
   try {
     const completion = await openai.chat.completions.create({
-      model: constants.GPT_MODEL,
+      model: CONSTANTS.GPT_MODEL,
       messages: [{ role: 'system', content: prompt }],
       temperature: 0.8,
       max_tokens: format === 'json' ? 500 : 300,
