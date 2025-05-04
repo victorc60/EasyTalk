@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
-import { NodeCache } from 'node-cache';
+import pkg from 'node-cache';
+const NodeCache = pkg;
 import logger from '../utils/logger.js';
 import constants from '../config/constants.js';
 
