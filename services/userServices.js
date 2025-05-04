@@ -1,7 +1,7 @@
 import { User } from '../models/User.js';
-import { sequelize } from '../database/database';
-import constants from '../config/constants';
-import logger from '../utils/logger';
+import { sequelize } from '../database/database.js';
+import constants from '../config/constants.js';
+import logger from '../utils/logger.js';
 import { Op } from 'sequelize';
 
 export const userServices = {
