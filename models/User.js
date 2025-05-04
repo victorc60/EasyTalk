@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../database/database.js';
+import { sequelize } from '../database/database.js';
 
 const User = sequelize.define('User', {
   telegram_id: {
