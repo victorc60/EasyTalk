@@ -1,14 +1,23 @@
 import { Sequelize } from 'sequelize';
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'mysql',
-  logging: false, // Отключаем логирование в консоль
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    }
+export const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: 'postgres',
+    logging: false
   }
-});
+);
 
-export default sequelize;
+export async function initializeDatabase() {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: true });
+    console.log('✅ База данных подключена и синхронизирована');
+  } catch (error) {
+    console.error('❌ Ошибка базы данных:', error);
+    process.exit(1);
+  }
+}
