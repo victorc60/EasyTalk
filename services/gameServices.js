@@ -1,6 +1,7 @@
 import { sessionManager } from '../middlewares/sessionMiddleware.js';
 import { contentGenerators } from './contentGenerators.js';
-import { awardPoints, getUser } from './userServices.js';
+import { userServices } from './userServices.js';
+
 import { CONFIG } from '../config/constants.js'
 import logger from '../utils/logger.js';
 
@@ -67,7 +68,7 @@ export const gameServices = {
       sessionManager.deleteWordGame(userId);
 
       if (isCorrect) {
-        await awardPoints(userId, CONFIG.POINTS.WORD_GAME_CORRECT);
+        await userServices.awardPoints(userId, CONFIG.POINTS.WORD_GAME_CORRECT);
         await bot.sendMessage(
           userId,
           `🎉 <b>Правильно!</b> +${CONFIG.POINTS.WORD_GAME_CORRECT} очков!\n\n` +
@@ -154,7 +155,7 @@ export const gameServices = {
       // Проверяем окончание диалога
       if (dialog.messagesLeft <= 0) {
         sessionManager.deleteDialog(chatId);
-        await awardPoints(userId, CONFIG.POINTS.ROLE_PLAY_COMPLETE);
+        await userServices.awardPoints(userId, CONFIG.POINTS.ROLE_PLAY_COMPLETE);
         await bot.sendMessage(
           chatId,
           `👋 ${dialog.character.farewell}\n\n` +
@@ -195,7 +196,7 @@ export const gameServices = {
     if (!dialog) return;
 
     sessionManager.deleteDialog(chatId);
-    await awardPoints(userId, Math.floor(CONFIG.POINTS.ROLE_PLAY_COMPLETE / 2));
+     await userServices.awardPoints(userId, Math.floor(CONFIG.POINTS.ROLE_PLAY_COMPLETE / 2));
     await bot.sendMessage(
       chatId,
       `🏁 Диалог с ${dialog.character.name} завершён досрочно. ` +
