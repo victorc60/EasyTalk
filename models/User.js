@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/database.js';
 
 // Определение модели
-const User = syncDatabase.define('User', {
+const User = sequelize.define('User', {
   telegram_id: {
     type: DataTypes.BIGINT,
     primaryKey: true,
