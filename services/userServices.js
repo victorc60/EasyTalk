@@ -5,7 +5,7 @@ import { CONFIG } from '../config/constants.js';
 import logger from '../utils/logger.js';
 import { Op } from 'sequelize';
 
-export const userServices = {
+ const userServices = {
   /**
    * Регистрация/получение пользователя
    */
@@ -238,3 +238,4 @@ export const userServices = {
     }
   }
 };
+export default userServices;
