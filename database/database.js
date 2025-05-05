@@ -1,25 +1,28 @@
 import { Sequelize } from 'sequelize';
-import UserModel from '../models/User.js';
+import config from '../config/constants.js';
 
-export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+// Инициализация Sequelize
+const sequelize = new Sequelize(
+  config.DB_NAME,
+  config.DB_USER,
+  config.DB_PASSWORD,
   {
-    host: process.env.DB_HOST,
+    host: config.DB_HOST,
+    port: config.DB_PORT,
     dialect: 'postgres',
-    logging: false
+    logging: config.NODE_ENV === 'development' ? console.log : false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
   }
 );
-const User = UserModel(sequelize);
 
-export async function initializeDatabase() {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync({ alter: true });
-    console.log('✅ База данных подключена и синхронизирована');
-  } catch (error) {
-    console.error('❌ Ошибка базы данных:', error);
-    process.exit(1);
-  }
-}
+// Тестовое подключение
+sequelize.authenticate()
+  .then(() => console.log('Database connection established'))
+  .catch(err => console.error('Unable to connect to the database:', err));
+
+export { sequelize };
