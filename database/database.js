@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 // 
 
-export async function syncDatabase() {
+export async function sequelize() {
   try {
     await sequelize.authenticate();
     console.log('✅ Соединение с базой данных успешно установлено');
