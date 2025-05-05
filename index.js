@@ -5,14 +5,11 @@ import sequelize from './database/database.js';
 import logger from './utils/logger.js';
 import { sessionManager } from './middlewares/sessionMiddleware.js';
 import setupBotControllers from './controllers/botControllers.js';
-
 import { setupScheduledTasks } from './config/schedule.js';
 
-// Инициализация Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Валидация переменных окружения
 const validateEnvironment = () => {
   const requiredEnvVars = [
     'TELEGRAM_BOT_TOKEN',
@@ -30,7 +27,6 @@ const validateEnvironment = () => {
   }
 };
 
-// Инициализация бота с обработкой ошибок
 const initializeBot = () => {
   try {
     const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
@@ -61,52 +57,40 @@ const initializeBot = () => {
   }
 };
 
-// Основная функция запуска
-const startApplication = async () => {
-    validateEnvironment();
-  
-    try {
-      // 1. Инициализация базы данных
-      await sequelize.authenticate();
-      await sequelize.sync({ 
-        alter: process.env.NODE_ENV !== 'production',
-        logging: msg => logger.debug(msg)
-      });
-      logger.info('Database connected and synced');
-  
-      // 2. Инициализация бота
-      const bot = initializeBot();
-      
-      // 3. Настройка контроллеров
-      setupBotControllers(bot);
-      
-      // 4. Запуск планировщика задач
-      setupScheduledTasks(bot);
-      
-      // 5. Запуск сервера
-      if (process.env.NODE_ENV === 'production') {
-        const server = app.listen(PORT, () => {
-          logger.info(`Server running on port ${PORT}`);
-        });
-      }
-  
-      return { app, bot }; // Явно возвращаем объект с app и bot
-    } catch (error) {
-      logger.error('Application startup failed:', error);
-      throw error; // Пробрасываем ошибку для обработки выше
-    }
-  };
-  
-  // Запуск приложения
-  let appInstance, botInstance;
-  
+async function startApplication() {
+  validateEnvironment();
+
   try {
-    const { app, bot } = await startApplication();
-    appInstance = app;
-    botInstance = bot;
+    await sequelize.authenticate();
+    await sequelize.sync({ 
+      alter: process.env.NODE_ENV !== 'production',
+      logging: msg => logger.debug(msg)
+    });
+    logger.info('Database connected and synced');
+
+    const bot = initializeBot();
+    setupBotControllers(bot);
+    setupScheduledTasks(bot);
+
+    if (process.env.NODE_ENV === 'production') {
+      app.listen(PORT, () => {
+        logger.info(`Server running on port ${PORT}`);
+      });
+    }
+
+    return { app, bot };
   } catch (error) {
-    logger.error('Fatal error during startup:', error);
+    logger.error('Application startup failed:', error);
     process.exit(1);
   }
-  
-  export { appInstance as app, botInstance as bot };
+}
+
+startApplication()
+  .then(({ app: appInstance, bot: botInstance }) => {
+    // Экспорт для внешнего использования (если нужно)
+    
+  })
+  .catch(err => {
+    logger.error('Fatal startup error:', err);
+    process.exit(1);
+  });
