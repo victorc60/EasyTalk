@@ -1,11 +1,11 @@
-// services/userServices.js
-import User from '../models/User.js';  // Без фигурных скобок для default export
+// services/userService.js
+import User from '../models/User.js'; // Без фигурных скобок для default export
 import { sequelize } from '../database/database.js';
 import { CONFIG } from '../config/constants.js';
 import logger from '../utils/logger.js';
 import { Op } from 'sequelize';
 
- const userServices = {
+const UserService = {
   /**
    * Регистрация/получение пользователя
    */
@@ -20,8 +20,8 @@ import { Op } from 'sequelize';
           points: 0,
           is_active: true,
           first_activity: new Date(),
-          last_activity: new Date()
-        }
+          last_activity: new Date(),
+        },
       });
 
       if (!created) {
@@ -30,7 +30,7 @@ import { Op } from 'sequelize';
           is_active: true,
           ...(userData.username && { username: userData.username }),
           ...(userData.firstName && { first_name: userData.firstName }),
-          ...(userData.lastName && { last_name: userData.lastName })
+          ...(userData.lastName && { last_name: userData.lastName }),
         });
       }
 
@@ -54,7 +54,7 @@ import { Op } from 'sequelize';
       const result = await User.increment('points', {
         by: points,
         where: { telegram_id: telegramId },
-        returning: true
+        returning: true,
       });
 
       if (result[0][1] === 0) {
@@ -78,7 +78,7 @@ import { Op } from 'sequelize';
         where: { is_active: true },
         order: [['points', 'DESC']],
         limit: parseInt(limit),
-        attributes: ['telegram_id', 'username', 'first_name', 'points']
+        attributes: ['telegram_id', 'username', 'first_name', 'points'],
       });
     } catch (error) {
       logger.error(`Leaderboard error: ${error.message}`);
@@ -100,8 +100,8 @@ import { Op } from 'sequelize';
           'points',
           'first_activity',
           'last_activity',
-          'is_active'
-        ]
+          'is_active',
+        ],
       });
     } catch (error) {
       logger.error(`Get user info error: ${error.message}`, { telegramId });
@@ -122,8 +122,8 @@ import { Op } from 'sequelize';
         {
           where: {
             last_activity: { [Op.lt]: inactiveDate },
-            is_active: true
-          }
+            is_active: true,
+          },
         }
       );
 
@@ -142,7 +142,7 @@ import { Op } from 'sequelize';
     try {
       const result = await User.update(updateData, {
         where: { telegram_id: telegramId },
-        returning: true
+        returning: true,
       });
 
       if (result[0] === 0) {
@@ -180,11 +180,11 @@ import { Op } from 'sequelize';
           [Op.or]: [
             { username: { [Op.iLike]: `%${query}%` } },
             { first_name: { [Op.iLike]: `%${query}%` } },
-            { last_name: { [Op.iLike]: `%${query}%` } }
-          ]
+            { last_name: { [Op.iLike]: `%${query}%` } },
+          ],
         },
         limit: parseInt(limit),
-        attributes: ['telegram_id', 'username', 'first_name', 'last_name']
+        attributes: ['telegram_id', 'username', 'first_name', 'last_name'],
       });
     } catch (error) {
       logger.error(`User search error: ${error.message}`, { query });
@@ -207,7 +207,7 @@ import { Op } from 'sequelize';
           const content = await messageGenerator();
           await bot.sendMessage(user.telegram_id, content, {
             parse_mode: 'HTML',
-            disable_web_page_preview: true
+            disable_web_page_preview: true,
           });
 
           await user.update({ last_activity: new Date() });
@@ -236,6 +236,7 @@ import { Op } from 'sequelize';
       logger.error(`Broadcast failed: ${error.message}`);
       throw error;
     }
-  }
+  },
 };
-export default userServices;
+
+export default UserService;
