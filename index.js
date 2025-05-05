@@ -4,7 +4,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { sequelize } from './database/database.js';
 import logger from './utils/logger.js';
 import { sessionManager } from './middlewares/sessionMiddleware.js';
-import { setupBotControllers } from './controllers/botControllers.js';
+import setupBotControllers from './controllers/botControllers.js';
 import UserService from './services/userServices.js';
 import { setupScheduledTasks } from './config/schedule.js';
 
