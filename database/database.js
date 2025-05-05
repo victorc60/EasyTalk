@@ -1,28 +1,14 @@
 import { Sequelize } from 'sequelize';
-import { CONFIG } from '../config/constants.js';
+// 
 
-// Инициализация Sequelize
-const sequelize = new Sequelize(
-  config.DB_NAME,
-  config.DB_USER,
-  config.DB_PASSWORD,
-  {
-    host: config.DB_HOST,
-    port: config.DB_PORT,
-    dialect: 'postgres',
-    logging: config.NODE_ENV === 'development' ? console.log : false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+export async function syncDatabase() {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Соединение с базой данных успешно установлено');
+    await sequelize.sync({ force: false }); // force: false сохраняет существующие данные
+    console.log('✅ Таблицы синхронизированы с базой данных');
+  } catch (error) {
+    console.error('❌ Ошибка подключения к базе данных:', error);
+    throw error; // пробрасываем ошибку для обработки снаружи
   }
-);
-
-// Тестовое подключение
-sequelize.authenticate()
-  .then(() => console.log('Database connection established'))
-  .catch(err => console.error('Unable to connect to the database:', err));
-
-export { sequelize };
+}
