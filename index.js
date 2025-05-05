@@ -1,4 +1,3 @@
-
 import 'dotenv/config';
 import TelegramBot from 'node-telegram-bot-api';
 import { OpenAI } from 'openai';
@@ -12,8 +11,8 @@ const CONFIG = {
   WORD_GAME_TIME: { hour: 18, minute: 30, tz: 'Europe/Moscow' },
   CLEANUP_TIME: '0 12 * * 0', // Каждое воскресенье в 12:00
   WORD_GAME_TIMEOUT: 300000, // 5 минут
-  MAX_DIALOG_MESSAGES: 8, // Увеличено для более длинных диалогов
-  GPT_MODEL: 'gpt-4' // Используем более мощную модель
+  MAX_DIALOG_MESSAGES: 8,
+  GPT_MODEL: 'gpt-4'
 };
 
 // Проверка переменных окружения
@@ -29,9 +28,9 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // === Хранилища состояний ===
 const userSessions = {
-  wordGames: new Map(),       // {userId: {word, translation, timer}}
-  activeDialogs: new Map(),   // {chatId: {character, messagesLeft, dialogHistory}}
-  conversationModes: new Map() // {userId: mode} // 'free_talk', 'role_play', 'correction'
+  wordGames: new Map(),
+  activeDialogs: new Map(),
+  conversationModes: new Map()
 };
 
 // === Инициализация базы данных ===
@@ -81,7 +80,8 @@ const contentGenerators = {
     🇷🇺 [translation]
     💡 [explanation]`;
     
-    return await this.generateEnglishContent(prompt) || 
+    const fact = await this.generateEnglishContent(prompt);
+    return fact || 
       `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
   },
 
@@ -156,20 +156,45 @@ const contentGenerators = {
 const services = {
   async sendToAllUsers(messageGenerator, errorHandler) {
     try {
-      const users = await User.findAll({ where: { isActive: true } });
+      const users = await User.findAll({ 
+        where: { isActive: true },
+        attributes: ['telegram_id'] // Выбираем только telegram_id
+      });
       let results = { success: 0, fails: 0 };
 
+      console.log(`Найдено активных пользователей: ${users.length}`);
+
       for (const user of users) {
+        // Проверяем, что telegram_id существует и является валидным
+        if (!user.telegram_id || isNaN(user.telegram_id)) {
+          console.error(`Некорректный telegram_id для пользователя: ${JSON.stringify(user)}`);
+          results.fails++;
+          continue;
+        }
+
         try {
-          const content = await messageGenerator();
+          const content = await messageGenerator(user.telegram_id);
+          if (!content) {
+            console.error(`Пустой контент для пользователя ${user.telegram_id}`);
+            results.fails++;
+            continue;
+          }
+
           await bot.sendMessage(user.telegram_id, content);
           await user.update({ last_activity: new Date() });
           results.success++;
-          await new Promise(resolve => setTimeout(resolve, 500)); // Более безопасный rate limit
+          console.log(`Сообщение успешно отправлено пользователю ${user.telegram_id}`);
+          await new Promise(resolve => setTimeout(resolve, 500)); // Rate limit
         } catch (error) {
           results.fails++;
-          if (errorHandler) errorHandler(error, user);
-          else console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error);
+          console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error.message);
+          if (errorHandler) {
+            errorHandler(error, user);
+          }
+          if (error.response?.statusCode === 403) {
+            console.log(`Пользователь ${user.telegram_id} заблокировал бота`);
+            await user.update({ isActive: false });
+          }
         }
       }
 
@@ -182,7 +207,7 @@ const services = {
 
   async cleanupInactiveUsers() {
     const inactivePeriod = new Date();
-    inactivePeriod.setMonth(inactivePeriod.getMonth() - 3); // 3 месяца неактивности
+    inactivePeriod.setMonth(inactivePeriod.getMonth() - 3);
     
     const users = await User.findAll({
       where: {
@@ -217,45 +242,81 @@ const services = {
 // === Основные функции ===
 const features = {
   async dailyFactBroadcast() {
-    const { success, fails } = await services.sendToAllUsers(
-      contentGenerators.dailyFact,
-      (error, user) => {
-        if (error.response?.statusCode === 403) { // Пользователь заблокировал бота
-          user.update({ isActive: false });
-        }
+    try {
+      console.log('Запуск рассылки ежедневного факта...');
+      
+      // Предварительно генерируем факт, чтобы использовать один и тот же для всех
+      const fact = await contentGenerators.dailyFact();
+      if (!fact) {
+        console.error('Не удалось сгенерировать ежедневный факт');
+        await bot.sendMessage(
+          process.env.ADMIN_ID,
+          '⚠️ Не удалось сгенерировать ежедневный факт'
+        );
+        return;
       }
-    );
 
-    await bot.sendMessage(
-      process.env.ADMIN_ID,
-      `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
-    );
+      const { success, fails } = await services.sendToAllUsers(
+        async () => fact, // Возвращаем готовый факт
+        (error, user) => {
+          console.error(`Ошибка для пользователя ${user.telegram_id}: ${error.message}`);
+          if (error.response?.statusCode === 403) {
+            user.update({ isActive: false });
+          }
+        }
+      );
+
+      console.log(`Рассылка завершена. Успешно: ${success}, Ошибок: ${fails}`);
+      
+      // Уведомление админа
+      await bot.sendMessage(
+        process.env.ADMIN_ID,
+        `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
+      );
+    } catch (error) {
+      console.error('Ошибка в dailyFactBroadcast:', error);
+      await bot.sendMessage(
+        process.env.ADMIN_ID,
+        `‼️ Ошибка рассылки ежедневного факта: ${error.message}`
+      );
+    }
   },
 
   async wordGameBroadcast() {
-    const wordData = await contentGenerators.wordOfTheDay();
-    const { success, fails } = await services.sendToAllUsers(
-      async () => {
-        const userId = this.telegram_id; // В контексте sendToAllUsers
-        userSessions.wordGames.set(userId, {
-          word: wordData.word,
-          translation: wordData.translation.toLowerCase(),
-          timer: setTimeout(() => {
-            if (userSessions.wordGames.has(userId)) {
-              bot.sendMessage(
-                userId,
-                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\nПример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes}`
-              );
-              userSessions.wordGames.delete(userId);
-            }
-          }, CONFIG.WORD_GAME_TIMEOUT)
-        });
+    try {
+      const wordData = await contentGenerators.wordOfTheDay();
+      const { success, fails } = await services.sendToAllUsers(
+        async (userId) => {
+          userSessions.wordGames.set(userId, {
+            word: wordData.word,
+            translation: wordData.translation.toLowerCase(),
+            timer: setTimeout(() => {
+              if (userSessions.wordGames.has(userId)) {
+                bot.sendMessage(
+                  userId,
+                  `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\nПример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes}`
+                );
+                userSessions.wordGames.delete(userId);
+              }
+            }, CONFIG.WORD_GAME_TIMEOUT)
+          });
 
-        return `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nУ вас 5 минут чтобы угадать перевод этого слова!`;
-      }
-    );
+          return `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nУ вас 5 минут чтобы угадать перевод этого слова!`;
+        }
+      );
 
-    console.log(`Слово дня отправлено. Успешно: ${success}, Ошибок: ${fails}`);
+      console.log(`Слово дня отправлено. Успешно: ${success}, Ошибок: ${fails}`);
+      await bot.sendMessage(
+        process.env.ADMIN_ID,
+        `📊 Слово дня отправлено\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
+      );
+    } catch (error) {
+      console.error('Ошибка в wordGameBroadcast:', error);
+      await bot.sendMessage(
+        process.env.ADMIN_ID,
+        `‼️ Ошибка рассылки слова дня: ${error.message}`
+      );
+    }
   },
 
   async startRolePlay(chatId, character = null) {
@@ -487,7 +548,6 @@ async function setupBot() {
           Keep explanations simple and clear.`;
           break;
         case 'role_play':
-          // Если нет активной ролевой игры, предлагаем начать
           await features.startRolePlay(chatId);
           return;
       }
@@ -503,7 +563,7 @@ async function setupBot() {
       });
 
       await bot.sendMessage(chatId, choices[0]?.message?.content);
-      await services.awardPoints(userId, 1); // Начисляем очки за активность
+      await services.awardPoints(userId, 1);
 
     } catch (error) {
       console.error('Ошибка обработки сообщения:', error);
