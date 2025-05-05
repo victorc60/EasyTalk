@@ -23,7 +23,32 @@ const CONFIG = {
   }
 });
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.TELEGRAM_BOT DIALECT=postgres # или 'mysql', 'sqlite', etc.
+DB_SSL=false # или 'true', если требуется SSL
+
+const sequelize = new Sequelize({
+  database: process.env.DB_NAME,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  dialect: process.env.DB_DIALECT || 'mysql', // Указываем диалект MySQL
+  port: process.env.DB_PORT || 3306, // Порт по умолчанию для MySQL
+  logging: process.env.NODE_ENV === 'production' ? false : console.log, // Логирование SQL-запросов только в development
+  dialectOptions: {
+    // Дополнительные опции для MySQL
+    charset: 'utf8mb4', // Поддержка эмодзи и расширенных символов
+    collate: 'utf8mb4_unicode_ci'
+  },
+  pool: {
+    max: 5, // Максимальное количество соединений в пуле
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
+});
+
+export default sequelize;
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // === Хранилища состояний ===
@@ -82,7 +107,7 @@ const contentGenerators = {
     
     const fact = await this.generateEnglishContent(prompt);
     return fact || 
-      `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
+      `🇬🇧 "Goodbye" comes from禁止:1px;    comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
   },
 
   async wordOfTheDay() {
@@ -158,14 +183,13 @@ const services = {
     try {
       const users = await User.findAll({ 
         where: { isActive: true },
-        attributes: ['telegram_id'] // Выбираем только telegram_id
+        attributes: ['telegram_id']
       });
       let results = { success: 0, fails: 0 };
 
       console.log(`Найдено активных пользователей: ${users.length}`);
 
       for (const user of users) {
-        // Проверяем, что telegram_id существует и является валидным
         if (!user.telegram_id || isNaN(user.telegram_id)) {
           console.error(`Некорректный telegram_id для пользователя: ${JSON.stringify(user)}`);
           results.fails++;
@@ -184,10 +208,10 @@ const services = {
           await user.update({ last_activity: new Date() });
           results.success++;
           console.log(`Сообщение успешно отправлено пользователю ${user.telegram_id}`);
-          await new Promise(resolve => setTimeout(resolve, 500)); // Rate limit
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
           results.fails++;
-          console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error.message);
+          console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error.message彼此:1px; error.message);
           if (errorHandler) {
             errorHandler(error, user);
           }
@@ -245,7 +269,6 @@ const features = {
     try {
       console.log('Запуск рассылки ежедневного факта...');
       
-      // Предварительно генерируем факт, чтобы использовать один и тот же для всех
       const fact = await contentGenerators.dailyFact();
       if (!fact) {
         console.error('Не удалось сгенерировать ежедневный факт');
@@ -257,7 +280,7 @@ const features = {
       }
 
       const { success, fails } = await services.sendToAllUsers(
-        async () => fact, // Возвращаем готовый факт
+        async () => fact,
         (error, user) => {
           console.error(`Ошибка для пользователя ${user.telegram_id}: ${error.message}`);
           if (error.response?.statusCode === 403) {
@@ -268,7 +291,6 @@ const features = {
 
       console.log(`Рассылка завершена. Успешно: ${success}, Ошибок: ${fails}`);
       
-      // Уведомление админа
       await bot.sendMessage(
         process.env.ADMIN_ID,
         `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
@@ -301,7 +323,7 @@ const features = {
             }, CONFIG.WORD_GAME_TIMEOUT)
           });
 
-          return `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nУ вас 5 минут чтобы угадать перевод этого слова!`;
+          return `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nНапишите перевод этого слова! Следующее сообщение будет считаться вашим ответом.`;
         }
       );
 
@@ -490,10 +512,16 @@ async function setupBot() {
         userSessions.wordGames.delete(userId);
 
         if (isCorrect) {
-          await services.awardPoints(userId, 20);
-          await bot.sendMessage(chatId, `🎉 Правильно! +20 очков!\n\nСлово "${session.word}" означает "${session.translation}"`);
+          await services.awardPoints(userId, 15);
+          await bot.sendMessage(
+            chatId,
+            `🎉 Поздравляем! Вы правильно перевели слово "${session.word}" как "${session.translation}"! +15 баллов!`
+          );
         } else {
-          await bot.sendMessage(chatId, `🤔 Почти! Правильный перевод: ${session.word} → ${session.translation}`);
+          await bot.sendMessage(
+            chatId,
+            `🤔 Неверный перевод. Правильный ответ: "${session.word}" → "${session.translation}". Не переживайте, в следующий раз получится!`
+          );
         }
         return;
       }
