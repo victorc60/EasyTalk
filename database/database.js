@@ -7,7 +7,8 @@ const sequelizeInstance = new Sequelize(
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
-    dialect: 'postgres',
+    dialect: 'mysql', // ⚠️ Изменили 'postgres' на 'mysql'
+    dialectModule: require('mysql2'), // Явно указываем использовать mysql2
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
       max: 5,
