@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize';
+import mysql2 from 'mysql2'; // Импортируем mysql2 через ES Modules
 
 // Инициализация подключения
 const sequelizeInstance = new Sequelize(
@@ -7,8 +8,8 @@ const sequelizeInstance = new Sequelize(
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
-    dialect: 'mysql', // ⚠️ Изменили 'postgres' на 'mysql'
-    dialectModule: require('mysql2'), // Явно указываем использовать mysql2
+    dialect: 'mysql',
+    dialectModule: mysql2, // Передаем импортированный модуль
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
       max: 5,
