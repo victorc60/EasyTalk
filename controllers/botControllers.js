@@ -4,12 +4,11 @@ import UserService from '../services/userServices.js';
 import { gameServices } from '../services/gameServices.js';
 import logger from '../utils/logger.js';
 
-
-export default function(bot) {
+const setupBotControllers = (bot) => {
   // Обработчик команды /start
   bot.onText(/\/start/, async (msg) => {
     try {
-      const user = await userServices.findOrCreateUser(msg.chat.id, {
+      const user = await UserService.findOrCreateUser(msg.chat.id, {
         username: msg.from.username,
         firstName: msg.from.first_name,
         lastName: msg.from.last_name
@@ -34,8 +33,8 @@ export default function(bot) {
       await bot.sendMessage(msg.chat.id, welcomeMessage, { parse_mode: 'HTML' });
       logger.info(`New user started: ${msg.chat.id}`);
     } catch (error) {
-      logger.error(`Start command error: ${error.message}`);
-      bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при запуске. Пожалуйста, попробуйте позже.');
+      logger.error(`Start command error: ${error.message}`, { error });
+      await bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при запуске. Пожалуйста, попробуйте позже.');
     }
   });
 
@@ -51,18 +50,28 @@ export default function(bot) {
 
   // Обработчик команды /dailyfact
   bot.onText(/\/dailyfact/, async (msg) => {
-    const fact = await contentGenerators.dailyFact();
-    await bot.sendMessage(msg.chat.id, fact);
+    try {
+      const fact = await contentGenerators.dailyFact();
+      await bot.sendMessage(msg.chat.id, fact);
+    } catch (error) {
+      logger.error(`Daily fact error: ${error.message}`, { error });
+      await bot.sendMessage(msg.chat.id, '⚠️ Не удалось получить факт дня. Попробуйте позже.');
+    }
   });
 
   // Обработчик команды /topic
   bot.onText(/\/topic/, async (msg) => {
-    const topic = await contentGenerators.conversationTopic();
-    let message = `💬 <b>Тема:</b> ${topic.topic}\n\n<b>Вопросы:</b>\n`;
-    topic.questions.forEach((q, i) => message += `${i+1}. ${q}\n`);
-    message += `\n<b>Словарь:</b>\n`;
-    topic.vocabulary.forEach((v, i) => message += `${i+1}. ${v.word} - ${v.translation}\n`);
-    await bot.sendMessage(msg.chat.id, message, { parse_mode: 'HTML' });
+    try {
+      const topic = await contentGenerators.conversationTopic();
+      let message = `💬 <b>Тема:</b> ${topic.topic}\n\n<b>Вопросы:</b>\n`;
+      topic.questions.forEach((q, i) => message += `${i+1}. ${q}\n`);
+      message += `\n<b>Словарь:</b>\n`;
+      topic.vocabulary.forEach((v, i) => message += `${i+1}. ${v.word} - ${v.translation}\n`);
+      await bot.sendMessage(msg.chat.id, message, { parse_mode: 'HTML' });
+    } catch (error) {
+      logger.error(`Topic error: ${error.message}`, { error });
+      await bot.sendMessage(msg.chat.id, '⚠️ Не удалось загрузить тему. Попробуйте позже.');
+    }
   });
 
   // Обработчик обычных сообщений
@@ -92,17 +101,19 @@ export default function(bot) {
       }
 
       await bot.sendMessage(msg.chat.id, response);
-      await userServices.awardPoints(msg.from.id, 1);
+      await UserService.awardPoints(msg.from.id, 1);
     } catch (error) {
-      logger.error(`Message handling error: ${error.message}`);
-      bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при обработке сообщения.');
+      logger.error(`Message handling error: ${error.message}`, { error });
+      await bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при обработке сообщения.');
     }
   });
 
   // Обработчик ошибок бота
   bot.on('polling_error', (error) => {
-    logger.error(`Polling error: ${error.message}`);
+    logger.error(`Polling error: ${error.message}`, { error });
   });
 
   logger.info('Bot controllers initialized');
-}
+};
+
+export default setupBotControllers;
