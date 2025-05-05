@@ -1,6 +1,6 @@
 import { sessionManager } from '../middlewares/sessionMiddleware.js';
 import { contentGenerators } from './contentGenerators.js';
-import UserService from './services/userServices.js';
+import UserService from './userServices.js';
 
 import { CONFIG } from '../config/constants.js'
 import logger from '../utils/logger.js';
