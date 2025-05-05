@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
-import { sequelize } from './database/database.js';
+import sequelize from '../database/database.js'; 
 import logger from './utils/logger.js';
 import { sessionManager } from './middlewares/sessionMiddleware.js';
 import setupBotControllers from './controllers/botControllers.js';
