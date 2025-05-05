@@ -1,6 +1,6 @@
 // services/userService.js
 import User from '../models/User.js'; // Без фигурных скобок для default export
-import { sequelize } from '../database/database.js';
+import sequelize from '../database/database.js'; 
 import { CONFIG } from '../config/constants.js';
 import logger from '../utils/logger.js';
 import { Op } from 'sequelize';
