@@ -1,101 +1,548 @@
+Код 30.04 
 import 'dotenv/config';
-import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
-import sequelize from './database/database.js'; 
-import logger from './utils/logger.js';
-import { sessionManager } from './middlewares/sessionMiddleware.js';
-import setupBotControllers from './controllers/botControllers.js';
-import { setupScheduledTasks } from './config/schedule.js';
+import { OpenAI } from 'openai';
+import schedule from 'node-schedule';
+import sequelize from './database/database.js';
+import User from './models/User.js';
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Переменная для хранения экземпляра бота
-let bot;
-
-const validateEnvironment = () => {
-  const requiredEnvVars = [
-    'TELEGRAM_BOT_TOKEN',
-    'OPENAI_API_KEY',
-    'ADMIN_ID',
-    'DB_NAME',
-    'DB_USER',
-    'DB_HOST'
-  ];
-
-  const missingVars = requiredEnvVars.filter(v => !process.env[v]);
-  if (missingVars.length > 0) {
-    logger.error('Missing required environment variables:', missingVars);
-    process.exit(1);
-  }
+// === Конфигурация ===
+const CONFIG = {
+  DAILY_FACT_TIME: { hour: 16, minute: 30, tz: 'Europe/Moscow' },
+  WORD_GAME_TIME: { hour: 18, minute: 30, tz: 'Europe/Moscow' },
+  CLEANUP_TIME: '0 12 * * 0', // Каждое воскресенье в 12:00
+  WORD_GAME_TIMEOUT: 300000, // 5 минут
+  MAX_DIALOG_MESSAGES: 8, // Увеличено для более длинных диалогов
+  GPT_MODEL: 'gpt-4' // Используем более мощную модель
 };
 
-const initializeBot = () => {
-  try {
-    bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
-      polling: process.env.NODE_ENV !== 'production',
-      webHook: process.env.NODE_ENV === 'production' ? { 
-        port: PORT, 
-        host: process.env.WEBHOOK_HOST 
-      } : false,
-      request: {
-        timeout: 10000,
-        agent: process.env.NODE_ENV === 'production' ? 
-          new (require('https')).Agent({ keepAlive: true }) : null
-      }
-    });
-
-    if (process.env.NODE_ENV === 'production') {
-      app.use(express.json());
-      app.post(`/bot${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
-        bot.processUpdate(req.body);
-        res.sendStatus(200);
-      });
-    }
-
-    return bot;
-  } catch (error) {
-    logger.error('Bot initialization failed:', error);
+// Проверка переменных окружения
+['TELEGRAM_BOT_TOKEN', 'OPENAI_API_KEY', 'ADMIN_ID'].forEach(envVar => {
+  if (!process.env[envVar]) {
+    console.error(`ERROR: ${envVar} не установлен в .env`);
     process.exit(1);
   }
+});
+
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// === Хранилища состояний ===
+const userSessions = {
+  wordGames: new Map(),       // {userId: {word, translation, timer}}
+  activeDialogs: new Map(),   // {chatId: {character, messagesLeft, dialogHistory}}
+  conversationModes: new Map() // {userId: mode} // 'free_talk', 'role_play', 'correction'
 };
 
-async function startApplication() {
-  validateEnvironment();
-
+// === Инициализация базы данных ===
+async function initializeDatabase() {
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ 
-      alter: process.env.NODE_ENV !== 'production',
-      logging: msg => logger.debug(msg)
-    });
-    logger.info('Database connected and synced');
-
-    const botInstance = initializeBot();
-    setupBotControllers(botInstance);
-    setupScheduledTasks(botInstance);
-
-    if (process.env.NODE_ENV === 'production') {
-      app.listen(PORT, () => {
-        logger.info(`Server running on port ${PORT}`);
-      });
-    }
-
-    return { app, bot: botInstance };
+    await sequelize.sync({ force: false });
+    console.log('✅ База данных подключена');
   } catch (error) {
-    logger.error('Application startup failed:', error);
+    console.error('❌ Ошибка базы данных:', error);
     process.exit(1);
   }
 }
 
-// Экспортируем bot
-export { bot };
+// === Генераторы контента ===
+const contentGenerators = {
+  async generateEnglishContent(prompt, format = 'text') {
+    try {
+      const { choices } = await openai.chat.completions.create({
+        model: CONFIG.GPT_MODEL,
+        messages: [{ role: 'system', content: prompt }],
+        temperature: 0.8,
+        max_tokens: 300
+      });
+      
+      if (format === 'json') {
+        try {
+          return JSON.parse(choices[0]?.message?.content || '{}');
+        } catch {
+          return {};
+        }
+      }
+      return choices[0]?.message?.content || '';
+    } catch (error) {
+      console.error('Ошибка генерации контента:', error);
+      return null;
+    }
+  },
 
-startApplication()
-  .then(({ app: appInstance, bot: botInstance }) => {
-    // Экспорт для внешнего использования (если нужно)
-  })
-  .catch(err => {
-    logger.error('Fatal startup error:', err);
-    process.exit(1);
+  async dailyFact() {
+    const prompt = `Generate an interesting English language fact with Russian translation. Include:
+    - The fact in English
+    - Translation in Russian
+    - Brief explanation (1 sentence)
+    Format:
+    🇬🇧 [fact]
+    🇷🇺 [translation]
+    💡 [explanation]`;
+    
+    return await this.generateEnglishContent(prompt) || 
+      `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
+  },
+
+  async wordOfTheDay() {
+    const prompt = `Generate a B1-level English word with:
+    - The word
+    - Russian translation
+    - Example sentence
+    - Interesting fact about the word
+    - Common mistakes with this word
+    Return as JSON: {word, translation, example, fact, mistakes}`;
+    
+    const result = await this.generateEnglishContent(prompt, 'json');
+    
+    return result || {
+      word: "serendipity",
+      translation: "счастливая случайность",
+      example: "Finding this cafe was pure serendipity.",
+      fact: "Comes from Persian fairy tale 'The Three Princes of Serendip'",
+      mistakes: "Often confused with 'luck' - but implies unexpected discovery"
+    };
+  },
+
+  async randomCharacter() {
+    const types = ["famous actor", "historical figure", "book character", "scientist"];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const prompt = `Create a ${type} for English practice with:
+    - Name
+    - Short description (1 sentence)
+    - Greeting message
+    - Farewell message
+    - 3 personality traits
+    Return as JSON`;
+    
+    const result = await this.generateEnglishContent(prompt, 'json');
+    
+    return result || {
+      name: "Sherlock Holmes",
+      description: "Famous detective from London",
+      greeting: "Elementary, my dear friend. What brings you to Baker Street today?",
+      farewell: "The game is afoot! I must go now.",
+      traits: ["observant", "logical", "eccentric"]
+    };
+  },
+
+  async conversationTopic() {
+    const prompt = `Generate an interesting conversation topic for English learners (B1 level) with:
+    - The topic title
+    - 3 related questions
+    - 5 useful vocabulary words with translations
+    Return as JSON`;
+    
+    return await this.generateEnglishContent(prompt, 'json') || {
+      topic: "Travel experiences",
+      questions: [
+        "What's the most interesting place you've visited?",
+        "What do you usually pack in your suitcase?",
+        "Do you prefer beaches or mountains for vacation?"
+      ],
+      vocabulary: [
+        { word: "sightseeing", translation: "осмотр достопримечательностей" },
+        { word: "itinerary", translation: "маршрут" },
+        { word: "landmark", translation: "ориентир" },
+        { word: "jet lag", translation: "джетлаг" },
+        { word: "accommodation", translation: "жилье" }
+      ]
+    };
+  }
+};
+
+// === Сервисные функции ===
+const services = {
+  async sendToAllUsers(messageGenerator, errorHandler) {
+    try {
+      const users = await User.findAll({ where: { isActive: true } });
+      let results = { success: 0, fails: 0 };
+
+      for (const user of users) {
+        try {
+          const content = await messageGenerator();
+          await bot.sendMessage(user.telegram_id, content);
+          await user.update({ last_activity: new Date() });
+          results.success++;
+          await new Promise(resolve => setTimeout(resolve, 500)); // Более безопасный rate limit
+        } catch (error) {
+          results.fails++;
+          if (errorHandler) errorHandler(error, user);
+          else console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error);
+        }
+      }
+
+      return results;
+    } catch (error) {
+      console.error('Ошибка массовой рассылки:', error);
+      return { success: 0, fails: 0 };
+    }
+  },
+
+  async cleanupInactiveUsers() {
+    const inactivePeriod = new Date();
+    inactivePeriod.setMonth(inactivePeriod.getMonth() - 3); // 3 месяца неактивности
+    
+    const users = await User.findAll({
+      where: {
+        last_activity: { [sequelize.Op.lt]: inactivePeriod }
+      }
+    });
+    
+    for (const user of users) {
+      try {
+        await user.update({ isActive: false });
+        console.log(`Пользователь ${user.telegram_id} помечен как неактивный`);
+      } catch (error) {
+        console.error(`Ошибка обновления пользователя ${user.telegram_id}:`, error);
+      }
+    }
+  },
+
+  async awardPoints(userId, points) {
+    try {
+      await User.increment('points', {
+        where: { telegram_id: userId },
+        by: points
+      });
+      return true;
+    } catch (error) {
+      console.error('Ошибка начисления очков:', error);
+      return false;
+    }
+  }
+};
+
+// === Основные функции ===
+const features = {
+  async dailyFactBroadcast() {
+    const { success, fails } = await services.sendToAllUsers(
+      contentGenerators.dailyFact,
+      (error, user) => {
+        if (error.response?.statusCode === 403) { // Пользователь заблокировал бота
+          user.update({ isActive: false });
+        }
+      }
+    );
+
+    await bot.sendMessage(
+      process.env.ADMIN_ID,
+      `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
+    );
+  },
+
+  async wordGameBroadcast() {
+    const wordData = await contentGenerators.wordOfTheDay();
+    const { success, fails } = await services.sendToAllUsers(
+      async () => {
+        const userId = this.telegram_id; // В контексте sendToAllUsers
+        userSessions.wordGames.set(userId, {
+          word: wordData.word,
+          translation: wordData.translation.toLowerCase(),
+          timer: setTimeout(() => {
+            if (userSessions.wordGames.has(userId)) {
+              bot.sendMessage(
+                userId,
+                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\nПример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes}`
+              );
+              userSessions.wordGames.delete(userId);
+            }
+          }, CONFIG.WORD_GAME_TIMEOUT)
+        });
+
+        return `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nУ вас 5 минут чтобы угадать перевод этого слова!`;
+      }
+    );
+
+    console.log(`Слово дня отправлено. Успешно: ${success}, Ошибок: ${fails}`);
+  },
+
+  async startRolePlay(chatId, character = null) {
+    if (!character) {
+      character = await contentGenerators.randomCharacter();
+    }
+    
+    userSessions.activeDialogs.set(chatId, {
+      character,
+      messagesLeft: CONFIG.MAX_DIALOG_MESSAGES,
+      dialogHistory: [
+        { 
+          role: "system", 
+          content: `You are ${character.name}. ${character.description}. 
+          Personality traits: ${character.traits?.join(', ') || 'none specified'}.
+          Respond in character, keep answers under 2 sentences.`
+        }
+      ]
+    });
+
+    await bot.sendMessage(
+      chatId,
+      `🎭 <b>Role Play: ${character.name}</b>\n\n<i>${character.description}</i>\n\n${character.greeting}\n\nУ вас ${CONFIG.MAX_DIALOG_MESSAGES} сообщений для диалога.`,
+      { parse_mode: 'HTML' }
+    );
+  },
+
+  async sendConversationStarter(chatId) {
+    const topic = await contentGenerators.conversationTopic();
+    
+    let message = `💬 <b>Тема для обсуждения:</b> ${topic.topic}\n\n`;
+    message += `<b>Вопросы:</b>\n- ${topic.questions.join('\n- ')}\n\n`;
+    message += `<b>Полезные слова:</b>\n${topic.vocabulary.map(v => `• ${v.word} - ${v.translation}`).join('\n')}`;
+    
+    await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
+  }
+};
+
+// === Обработчики команд ===
+const commandHandlers = {
+  async start(msg) {
+    const [user] = await User.findOrCreate({
+      where: { telegram_id: msg.chat.id },
+      defaults: {
+        username: msg.from.username || `${msg.from.first_name}${msg.from.last_name ? ` ${msg.from.last_name}` : ''}`,
+        first_name: msg.from.first_name,
+        last_name: msg.from.last_name,
+        first_activity: new Date(),
+        last_activity: new Date(),
+        points: 0,
+        isActive: true
+      }
+    });
+
+    const welcomeMessage = `
+👋 <b>Привет, ${msg.from.first_name}!</b> Я твой помощник в изучении английского.
+
+📌 <b>Доступные режимы:</b>
+1. <b>Свободное общение</b> - просто пиши мне на английском
+2. <b>Ролевые игры</b> - общайся с разными персонажами
+3. <b>Проверка ошибок</b> - я исправлю твои ошибки
+
+🎮 <b>Игры и активность:</b>
+🔤 Слово дня в 18:00
+📚 Интересные факты в 16:30
+💬 /topic - тема для обсуждения
+🎭 /roleplay - ролевая игра
+
+📊 /progress - твой прогресс
+🏆 /top - таблица лидеров
+
+Выбирай что тебе интересно и практикуй английский!`;
+
+    await bot.sendMessage(msg.chat.id, welcomeMessage, { parse_mode: 'HTML' });
+  },
+
+  async leaderboard(msg) {
+    const topUsers = await User.findAll({
+      order: [['points', 'DESC']],
+      limit: 10,
+      attributes: ['username', 'points', 'first_name']
+    });
+
+    const leaderboard = topUsers.map((user, i) => 
+      `${i+1}. ${user.username || user.first_name || 'Аноним'}: ${user.points} очков`
+    ).join('\n');
+
+    await bot.sendMessage(
+      msg.chat.id,
+      `🏆 <b>Топ игроков:</b>\n\n${leaderboard}\n\nТвои очки: ${(await User.findByPk(msg.from.id))?.points || 0}`,
+      { parse_mode: 'HTML' }
+    );
+  },
+
+  async startRolePlay(msg) {
+    await features.startRolePlay(msg.chat.id);
+  },
+
+  async conversationTopic(msg) {
+    await features.sendConversationStarter(msg.chat.id);
+  },
+
+  async setMode(msg, mode) {
+    const validModes = ['free_talk', 'role_play', 'correction'];
+    if (!validModes.includes(mode)) {
+      await bot.sendMessage(msg.chat.id, '⚠️ Неверный режим. Доступные: free_talk, role_play, correction');
+      return;
+    }
+    
+    userSessions.conversationModes.set(msg.from.id, mode);
+    await bot.sendMessage(msg.chat.id, `✅ Режим установлен: ${mode}`);
+  },
+
+  async showProgress(msg) {
+    const user = await User.findByPk(msg.from.id);
+    if (!user) {
+      await bot.sendMessage(msg.chat.id, 'ℹ️ Сначала запустите бота командой /start');
+      return;
+    }
+    
+    const progressMessage = `
+📊 <b>Твой прогресс:</b>
+
+🏅 Очков: ${user.points}
+📅 Первый визит: ${user.first_activity.toLocaleDateString()}
+🔄 Последняя активность: ${user.last_activity.toLocaleDateString()}
+
+Продолжай практиковать английский!`;
+    
+    await bot.sendMessage(msg.chat.id, progressMessage, { parse_mode: 'HTML' });
+  }
+};
+
+// === Настройка бота ===
+async function setupBot() {
+  // Расписание
+  schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, features.dailyFactBroadcast);
+  schedule.scheduleJob(CONFIG.WORD_GAME_TIME, features.wordGameBroadcast);
+  schedule.scheduleJob(CONFIG.CLEANUP_TIME, services.cleanupInactiveUsers);
+
+  // Команды
+  bot.onText(/\/start/, commandHandlers.start);
+  bot.onText(/\/top/, commandHandlers.leaderboard);
+  bot.onText(/\/roleplay/, commandHandlers.startRolePlay);
+  bot.onText(/\/topic/, commandHandlers.conversationTopic);
+  bot.onText(/\/progress/, commandHandlers.showProgress);
+  bot.onText(/\/mode_(.+)/, (msg, match) => commandHandlers.setMode(msg, match[1]));
+
+  // Обработка сообщений
+  bot.on('message', async (msg) => {
+    if (!msg.text || msg.text.startsWith('/')) return;
+
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const text = msg.text.trim();
+    const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
+
+    try {
+      // Обновляем активность пользователя
+      await User.update(
+        { last_activity: new Date() },
+        { where: { telegram_id: userId } }
+      );
+
+      // Обработка игры "Слово дня"
+      if (userSessions.wordGames.has(userId)) {
+        const session = userSessions.wordGames.get(userId);
+        const isCorrect = text.toLowerCase() === session.translation;
+        
+        clearTimeout(session.timer);
+        userSessions.wordGames.delete(userId);
+
+        if (isCorrect) {
+          await services.awardPoints(userId, 20);
+          await bot.sendMessage(chatId, `🎉 Правильно! +20 очков!\n\nСлово "${session.word}" означает "${session.translation}"`);
+        } else {
+          await bot.sendMessage(chatId, `🤔 Почти! Правильный перевод: ${session.word} → ${session.translation}`);
+        }
+        return;
+      }
+
+      // Обработка ролевой игры
+      if (userSessions.activeDialogs.has(chatId)) {
+        const dialog = userSessions.activeDialogs.get(chatId);
+        dialog.messagesLeft--;
+        dialog.dialogHistory.push({ role: "user", content: text });
+
+        await bot.sendChatAction(chatId, 'typing');
+        
+        const { choices } = await openai.chat.completions.create({
+          model: CONFIG.GPT_MODEL,
+          messages: dialog.dialogHistory,
+          temperature: 0.9,
+          max_tokens: 150
+        });
+
+        const response = choices[0]?.message?.content;
+        dialog.dialogHistory.push({ role: "assistant", content: response });
+
+        if (dialog.messagesLeft <= 0) {
+          userSessions.activeDialogs.delete(chatId);
+          await services.awardPoints(userId, 30);
+          await bot.sendMessage(
+            chatId,
+            `👋 ${dialog.character.farewell}\n\nДиалог завершен! +30 очков за практику!`
+          );
+        } else {
+          await bot.sendMessage(
+            chatId,
+            `${response}\n\n(Осталось сообщений: ${dialog.messagesLeft})`
+          );
+        }
+        return;
+      }
+
+      // Обработка обычных сообщений в зависимости от режима
+      await bot.sendChatAction(chatId, 'typing');
+      
+      let systemPrompt = '';
+      switch (userMode) {
+        case 'free_talk':
+          systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping answers under 3 sentences. 
+          If they make mistakes, provide the correct version subtly in your response. 
+          Ask follow-up questions to continue the conversation.`;
+          break;
+        case 'correction':
+          systemPrompt = `You're an English corrector. Identify and correct any errors in the student's message. 
+          Provide the corrected version first, then briefly explain the mistakes in Russian. 
+          Keep explanations simple and clear.`;
+          break;
+        case 'role_play':
+          // Если нет активной ролевой игры, предлагаем начать
+          await features.startRolePlay(chatId);
+          return;
+      }
+
+      const { choices } = await openai.chat.completions.create({
+        model: CONFIG.GPT_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: text }
+        ],
+        temperature: 0.7,
+        max_tokens: 200
+      });
+
+      await bot.sendMessage(chatId, choices[0]?.message?.content);
+      await services.awardPoints(userId, 1); // Начисляем очки за активность
+
+    } catch (error) {
+      console.error('Ошибка обработки сообщения:', error);
+      await bot.sendMessage(chatId, "⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.");
+    }
   });
+
+  // Меню команд
+  await bot.setMyCommands([
+    { command: 'start', description: 'Главное меню' },
+    { command: 'roleplay', description: 'Ролевая игра с персонажем' },
+    { command: 'topic', description: 'Тема для обсуждения' },
+    { command: 'progress', description: 'Твой прогресс' },
+    { command: 'top', description: 'Таблица лидеров' }
+  ]);
+
+  console.log('🤖 Бот запущен и готов к работе!');
+}
+
+// === Запуск приложения ===
+(async () => {
+  try {
+    await initializeDatabase();
+    await setupBot();
+    
+    // Тестовое сообщение админу
+    await bot.sendMessage(
+      process.env.ADMIN_ID, 
+      `🟢 Бот запущен\n⏰ Время сервера: ${new Date().toLocaleString()}`
+    );
+  } catch (error) {
+    console.error('Ошибка запуска:', error);
+    process.exit(1);
+  }
+})();
+
+// Обработка ошибок
+process.on('unhandledRejection', (error) => {
+  console.error('Необработанная ошибка:', error);
+  bot.sendMessage(process.env.ADMIN_ID, `‼️ Критическая ошибка: ${error.message}`)
+     .catch(err => console.error('Не удалось отправить сообщение об ошибке:', err));
+});
