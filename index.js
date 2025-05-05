@@ -10,6 +10,9 @@ import { setupScheduledTasks } from './config/schedule.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Переменная для хранения экземпляра бота
+let bot;
+
 const validateEnvironment = () => {
   const requiredEnvVars = [
     'TELEGRAM_BOT_TOKEN',
@@ -29,7 +32,7 @@ const validateEnvironment = () => {
 
 const initializeBot = () => {
   try {
-    const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
+    bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
       polling: process.env.NODE_ENV !== 'production',
       webHook: process.env.NODE_ENV === 'production' ? { 
         port: PORT, 
@@ -68,9 +71,9 @@ async function startApplication() {
     });
     logger.info('Database connected and synced');
 
-    const bot = initializeBot();
-    setupBotControllers(bot);
-    setupScheduledTasks(bot);
+    const botInstance = initializeBot();
+    setupBotControllers(botInstance);
+    setupScheduledTasks(botInstance);
 
     if (process.env.NODE_ENV === 'production') {
       app.listen(PORT, () => {
@@ -78,17 +81,19 @@ async function startApplication() {
       });
     }
 
-    return { app, bot };
+    return { app, bot: botInstance };
   } catch (error) {
     logger.error('Application startup failed:', error);
     process.exit(1);
   }
 }
 
+// Экспортируем bot
+export { bot };
+
 startApplication()
   .then(({ app: appInstance, bot: botInstance }) => {
     // Экспорт для внешнего использования (если нужно)
-    
   })
   .catch(err => {
     logger.error('Fatal startup error:', err);
