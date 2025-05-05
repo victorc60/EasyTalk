@@ -23,32 +23,8 @@ const CONFIG = {
   }
 });
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT DIALECT=postgres # или 'mysql', 'sqlite', etc.
-DB_SSL=false # или 'true', если требуется SSL
-
-const sequelize = new Sequelize({
-  database: process.env.DB_NAME,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  dialect: process.env.DB_DIALECT || 'mysql', // Указываем диалект MySQL
-  port: process.env.DB_PORT || 3306, // Порт по умолчанию для MySQL
-  logging: process.env.NODE_ENV === 'production' ? false : console.log, // Логирование SQL-запросов только в development
-  dialectOptions: {
-    // Дополнительные опции для MySQL
-    charset: 'utf8mb4', // Поддержка эмодзи и расширенных символов
-    collate: 'utf8mb4_unicode_ci'
-  },
-  pool: {
-    max: 5, // Максимальное количество соединений в пуле
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  }
-});
-
-export default sequelize;
-
+// Инициализация Telegram бота
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // === Хранилища состояний ===
@@ -107,7 +83,7 @@ const contentGenerators = {
     
     const fact = await this.generateEnglishContent(prompt);
     return fact || 
-      `🇬🇧 "Goodbye" comes from禁止:1px;    comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
+      `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
   },
 
   async wordOfTheDay() {
@@ -211,7 +187,7 @@ const services = {
           await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
           results.fails++;
-          console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error.message彼此:1px; error.message);
+          console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error.message);
           if (errorHandler) {
             errorHandler(error, user);
           }
