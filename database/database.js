@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import config from '../config/constants.js';
+import { CONFIG } from '../config/constants.js';
 
 // Инициализация Sequelize
 const sequelize = new Sequelize(
