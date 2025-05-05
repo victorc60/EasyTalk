@@ -1,5 +1,5 @@
 import { contentGenerators } from './contentGenerators.js';
-import { userServices } from './userServices.js';
+import UserService from './services/userServices.js';
 import logger from '../utils/logger.js';
 import { bot } from '../index.js'; // Или импортируйте бота из нужного места
 
