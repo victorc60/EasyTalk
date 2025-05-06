@@ -66,10 +66,6 @@ const contentGenerators = {
       if (format === 'json') {
         try {
           const parsed = JSON.parse(content);
-          if (!parsed.name || !parsed.description || !parsed.greeting) {
-            console.error('Некорректный JSON от OpenAI:', content);
-            throw new Error('Invalid JSON structure');
-          }
           return parsed;
         } catch (error) {
           console.error('Ошибка парсинга JSON от OpenAI:', error.message, 'Content:', content);
@@ -118,7 +114,7 @@ const contentGenerators = {
     };
   },
 
-    async randomCharacter() {
+  async randomCharacter() {
     const types = ["famous actor", "historical figure", "book character", "scientist"];
     const type = types[Math.floor(Math.random() * types.length)];
     const prompt = `Create a ${type} for English practice with:
@@ -184,6 +180,15 @@ const services = {
       });
       let results = { success: 0, fails: 0 };
 
+      if (users.length === 0) {
+        console.log('Нет активных пользователей для рассылки');
+        await bot.sendMessage(
+          process.env.ADMIN_ID,
+          '⚠️ Рассылка не выполнена: нет активных пользователей в базе данных'
+        );
+        return results;
+      }
+
       console.log(`Найдено активных пользователей: ${users.length}`);
 
       for (const user of users) {
@@ -221,7 +226,11 @@ const services = {
 
       return results;
     } catch (error) {
-      console.error('Ошибка массовой рассылки:', error);
+      console.error('Ошибка массовой рассылки:', error.message);
+      await bot.sendMessage(
+        process.env.ADMIN_ID,
+        `‼️ Ошибка массовой рассылки: ${error.message}`
+      );
       return { success: 0, fails: 0 };
     }
   },
@@ -290,10 +299,10 @@ const features = {
       
       await bot.sendMessage(
         process.env.ADMIN_ID,
-        `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
+        `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Проверьте, есть ли активные пользователи в базе данных' : ''}`
       );
     } catch (error) {
-      console.error('Ошибка в dailyFactBroadcast:', error);
+      console.error('Ошибка в dailyFactBroadcast:', error.message);
       await bot.sendMessage(
         process.env.ADMIN_ID,
         `‼️ Ошибка рассылки ежедневного факта: ${error.message}`
@@ -377,20 +386,29 @@ const features = {
 // === Обработчики команд ===
 const commandHandlers = {
   async start(msg) {
-    const [user] = await User.findOrCreate({
-      where: { telegram_id: msg.chat.id },
-      defaults: {
-        username: msg.from.username || `${msg.from.first_name}${msg.from.last_name ? ` ${msg.from.last_name}` : ''}`,
-        first_name: msg.from.first_name,
-        last_name: msg.from.last_name,
-        first_activity: new Date(),
-        last_activity: new Date(),
-        points: 0,
-        isActive: true
-      }
-    });
+    try {
+      const [user, created] = await User.findOrCreate({
+        where: { telegram_id: msg.chat.id },
+        defaults: {
+          telegram_id: msg.chat.id,
+          username: msg.from.username || `${msg.from.first_name}${msg.from.last_name ? ` ${msg.from.last_name}` : ''}`,
+          first_name: msg.from.first_name,
+          last_name: msg.from.last_name,
+          first_activity: new Date(),
+          last_activity: new Date(),
+          points: 0,
+          isActive: true
+        }
+      });
 
-    const welcomeMessage = `
+      if (created) {
+        console.log(`Создан новый пользователь: ${msg.chat.id}`);
+      } else {
+        console.log(`Пользователь уже существует: ${msg.chat.id}, обновляем isActive`);
+        await user.update({ isActive: true, last_activity: new Date() });
+      }
+
+      const welcomeMessage = `
 👋 <b>Привет, ${msg.from.first_name}!</b> Я твой помощник в изучении английского.
 
 📌 <b>Доступные режимы:</b>
@@ -409,7 +427,11 @@ const commandHandlers = {
 
 Выбирай что тебе интересно и практикуй английский!`;
 
-    await bot.sendMessage(msg.chat.id, welcomeMessage, { parse_mode: 'HTML' });
+      await bot.sendMessage(msg.chat.id, welcomeMessage, { parse_mode: 'HTML' });
+    } catch (error) {
+      console.error('Ошибка при обработке команды /start:', error.message);
+      await bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при регистрации. Попробуйте еще раз.');
+    }
   },
 
   async leaderboard(msg) {
@@ -478,7 +500,7 @@ async function setupBot() {
 
   // Команды
   bot.onText(/\/start/, commandHandlers.start);
-  bot.onText(/\/leaders/, commandHandlers.leaderboard);
+  bot.onText(/\/top/, commandHandlers.leaderboard);
   bot.onText(/\/roleplay/, commandHandlers.startRolePlay);
   bot.onText(/\/topic/, commandHandlers.conversationTopic);
   bot.onText(/\/progress/, commandHandlers.showProgress);
@@ -602,7 +624,7 @@ async function setupBot() {
     { command: 'roleplay', description: 'Ролевая игра с персонажем' },
     { command: 'topic', description: 'Тема для обсуждения' },
     { command: 'progress', description: 'Твой прогресс' },
-    { command: 'leaders', description: 'Таблица лидеров' }
+    { command: 'top', description: 'Таблица лидеров' }
   ]);
 
   console.log('🤖 Бот запущен и готов к работе!');
