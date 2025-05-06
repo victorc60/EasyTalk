@@ -12,7 +12,8 @@ const CONFIG = {
   CLEANUP_TIME: '0 12 * * 0', // Каждое воскресенье в 12:00
   WORD_GAME_TIMEOUT: 300000, // 5 минут
   MAX_DIALOG_MESSAGES: 8,
-  GPT_MODEL: 'gpt-4'
+  GPT_MODEL: 'gpt-4',
+  OPENAI_MAX_TOKENS: 500 // Увеличиваем лимит токенов для больших ответов
 };
 
 // Проверка переменных окружения
@@ -27,7 +28,7 @@ const CONFIG = {
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// === Хранилища событий ===
+// === Хранилища состояний ===
 const userSessions = {
   wordGames: new Map(),
   activeDialogs: new Map(),
@@ -38,7 +39,7 @@ const userSessions = {
 async function initializeDatabase() {
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ alter: true }); // Автоматически добавляет новые столбцы
+    await sequelize.sync({ alter: true });
     console.log('✅ База данных подключена');
   } catch (error) {
     console.error('❌ Ошибка базы данных:', error);
@@ -54,22 +55,26 @@ const contentGenerators = {
         model: CONFIG.GPT_MODEL,
         messages: [{ role: 'system', content: prompt }],
         temperature: 0.8,
-        max_tokens: 300
+        max_tokens: CONFIG.OPENAI_MAX_TOKENS
       });
 
       const content = choices[0]?.message?.content;
       if (!content) {
         console.error('OpenAI вернул пустой ответ для prompt:', prompt);
-        throw new Error('Empty response from OpenAI');
+        return null; // Возвращаем null вместо выброса ошибки
       }
 
       if (format === 'json') {
         try {
           const parsed = JSON.parse(content);
+          if (!parsed || typeof parsed !== 'object') {
+            console.error('OpenAI вернул некорректный JSON:', content);
+            return null;
+          }
           return parsed;
         } catch (error) {
           console.error('Ошибка парсинга JSON от OpenAI:', error.message, 'Content:', content);
-          throw error;
+          return null; // Возвращаем null вместо выброса ошибки
         }
       }
       return content;
@@ -129,7 +134,13 @@ const contentGenerators = {
       const result = await this.generateEnglishContent(prompt, 'json');
       if (!result || !result.name) {
         console.error('randomCharacter: Получен некорректный результат:', result);
-        throw new Error('Invalid character data');
+        return {
+          name: "Sherlock Holmes",
+          description: "Famous detective from London",
+          greeting: "Elementary, my dear friend. What brings you to Baker Street today?",
+          farewell: "The game is afoot! I must go now.",
+          traits: ["observant", "logical", "eccentric"]
+        };
       }
       console.log('Сгенерирован персонаж:', result);
       return result;
@@ -147,12 +158,13 @@ const contentGenerators = {
 
   async conversationTopic() {
     const prompt = `Generate an interesting conversation topic for English learners (B1 level) with:
-    - The topic title
-    - 3 related questions
-    - 5 useful vocabulary words with translations
-    Return as JSON`;
+    - topic: The topic title
+    - questions: 3 related questions
+    - vocabulary: Array of 5 objects with word and translation
+    Return as JSON: {"topic": "", "questions": [], "vocabulary": [{"word": "", "translation": ""}, ...]}`;
     
-    return await this.generateEnglishContent(prompt, 'json') || {
+    const result = await this.generateEnglishContent(prompt, 'json');
+    return result || {
       topic: "Travel experiences",
       questions: [
         "What's the most interesting place you've visited?",
@@ -435,31 +447,28 @@ const commandHandlers = {
 
   async leaderboard(msg) {
     try {
-      // Получаем топ-10 активных пользователей с ненулевыми очками
       const topUsers = await User.findAll({
         where: {
           isActive: true,
-          points: { [sequelize.Op.gt]: 0 } // Только пользователи с очками > 0
+          points: { [sequelize.Op.gt]: 0 }
         },
         order: [['points', 'DESC']],
         limit: 10,
         attributes: ['telegram_id', 'username', 'first_name', 'points']
       });
 
-      // Формируем таблицу лидеров
       let leaderboardMessage = '🏆 <b>Топ игроков:</b>\n\n';
       if (topUsers.length === 0) {
         leaderboardMessage += 'ℹ️ Пока нет игроков с очками.\nНачните практиковать английский, чтобы попасть в топ!';
       } else {
         leaderboardMessage += topUsers
           .map((user, index) => {
-            const displayName = (user.username || user.first_name || 'Аноним').substring(0, 20); // Ограничиваем длину имени
+            const displayName = (user.username || user.first_name || 'Аноним').substring(0, 20);
             return `${index + 1}. ${displayName}: ${user.points} очков`;
           })
           .join('\n');
       }
 
-      // Получаем очки текущего пользователя
       const currentUser = await User.findOne({
         where: { telegram_id: msg.from.id }
       });
@@ -476,7 +485,6 @@ const commandHandlers = {
         '⚠️ Не удалось загрузить таблицу лидеров. Попробуйте позже.',
         { parse_mode: 'HTML' }
       );
-      // Уведомляем админа об ошибке
       await bot.sendMessage(
         process.env.ADMIN_ID,
         `‼️ Ошибка в leaderboard: ${error.message}`
@@ -530,20 +538,17 @@ const commandHandlers = {
 
 // === Настройка бота ===
 async function setupBot() {
-  // Расписание
   schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, features.dailyFactBroadcast);
   schedule.scheduleJob(CONFIG.WORD_GAME_TIME, features.wordGameBroadcast);
   schedule.scheduleJob(CONFIG.CLEANUP_TIME, services.cleanupInactiveUsers);
 
-  // Команды
   bot.onText(/\/start/, commandHandlers.start);
-  bot.onText(/\/leader/, commandHandlers.leaderboard);
+  bot.onText(/\/top/, commandHandlers.leaderboard);
   bot.onText(/\/roleplay/, commandHandlers.startRolePlay);
   bot.onText(/\/topic/, commandHandlers.conversationTopic);
   bot.onText(/\/progress/, commandHandlers.showProgress);
   bot.onText(/\/mode_(.+)/, (msg, match) => commandHandlers.setMode(msg, match[1]));
 
-  // Обработка сообщений
   bot.on('message', async (msg) => {
     if (!msg.text || msg.text.startsWith('/')) return;
 
@@ -553,13 +558,11 @@ async function setupBot() {
     const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
 
     try {
-      // Обновляем активность пользователя
       await User.update(
         { last_activity: new Date() },
         { where: { telegram_id: userId } }
       );
 
-      // Обработка игры "Слово дня"
       if (userSessions.wordGames.has(userId)) {
         const session = userSessions.wordGames.get(userId);
         const isCorrect = text.toLowerCase() === session.translation;
@@ -582,7 +585,6 @@ async function setupBot() {
         return;
       }
 
-      // Обработка ролевой игры
       if (userSessions.activeDialogs.has(chatId)) {
         const dialog = userSessions.activeDialogs.get(chatId);
         dialog.messagesLeft--;
@@ -616,7 +618,6 @@ async function setupBot() {
         return;
       }
 
-      // Обработка обычных сообщений в зависимости от режима
       await bot.sendChatAction(chatId, 'typing');
       
       let systemPrompt = '';
@@ -655,17 +656,33 @@ async function setupBot() {
     }
   });
 
-  // Меню команд
   await bot.setMyCommands([
     { command: 'start', description: 'Главное меню' },
     { command: 'roleplay', description: 'Ролевая игра с персонажем' },
     { command: 'topic', description: 'Тема для обсуждения' },
     { command: 'progress', description: 'Твой прогресс' },
-    { command: 'leaders', description: 'Таблица лидеров' }
+    { command: 'top', description: 'Таблица лидеров' }
   ]);
 
   console.log('🤖 Бот запущен и готов к работе!');
 }
+
+// === Обработка SIGTERM ===
+process.on('SIGTERM', async () => {
+  console.log('Получен сигнал SIGTERM. Завершаем работу...');
+  try {
+    await bot.sendMessage(
+      process.env.ADMIN_ID,
+      '🛑 Бот останавливается (SIGTERM)'
+    );
+    await sequelize.close();
+    console.log('Соединение с базой данных закрыто');
+    process.exit(0);
+  } catch (error) {
+    console.error('Ошибка при завершении работы:', error.message);
+    process.exit(1);
+  }
+});
 
 // === Запуск приложения ===
 (async () => {
@@ -673,13 +690,16 @@ async function setupBot() {
     await initializeDatabase();
     await setupBot();
     
-    // Тестовое сообщение админу
     await bot.sendMessage(
       process.env.ADMIN_ID, 
       `🟢 Бот запущен\n⏰ Время сервера: ${new Date().toLocaleString()}`
     );
   } catch (error) {
     console.error('Ошибка запуска:', error);
+    await bot.sendMessage(
+      process.env.ADMIN_ID,
+      `‼️ Ошибка запуска бота: ${error.message}`
+    ).catch(err => console.error('Не удалось отправить сообщение админу:', err));
     process.exit(1);
   }
 })();
@@ -688,5 +708,5 @@ async function setupBot() {
 process.on('unhandledRejection', (error) => {
   console.error('Необработанная ошибка:', error);
   bot.sendMessage(process.env.ADMIN_ID, `‼️ Критическая ошибка: ${error.message}`)
-     .catch(err => console.error('Не удалось отправить сообщение об ошибке:', err));
+    .catch(err => console.error('Не удалось отправить сообщение об ошибке:', err));
 });
