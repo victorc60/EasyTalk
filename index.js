@@ -7,7 +7,7 @@ import User from './models/User.js';
 
 // === Конфигурация ===
 const CONFIG = {
-  DAILY_FACT_TIME: { hour: 17, minute: 0, tz: 'Europe/Moscow' },
+  DAILY_FACT_TIME: { hour: 17, minute: 30, tz: 'Europe/Moscow' },
   WORD_GAME_TIME: { hour: 18, minute: 30, tz: 'Europe/Moscow' },
   CLEANUP_TIME: '0 12 * * 0', // Каждое воскресенье в 12:00
   WORD_GAME_TIMEOUT: 300000, // 5 минут
