@@ -56,17 +56,29 @@ const contentGenerators = {
         temperature: 0.8,
         max_tokens: 300
       });
-      
+
+      const content = choices[0]?.message?.content;
+      if (!content) {
+        console.error('OpenAI вернул пустой ответ для prompt:', prompt);
+        throw new Error('Empty response from OpenAI');
+      }
+
       if (format === 'json') {
         try {
-          return JSON.parse(choices[0]?.message?.content || '{}');
-        } catch {
-          return {};
+          const parsed = JSON.parse(content);
+          if (!parsed.name || !parsed.description || !parsed.greeting) {
+            console.error('Некорректный JSON от OpenAI:', content);
+            throw new Error('Invalid JSON structure');
+          }
+          return parsed;
+        } catch (error) {
+          console.error('Ошибка парсинга JSON от OpenAI:', error.message, 'Content:', content);
+          throw error;
         }
       }
-      return choices[0]?.message?.content || '';
+      return content;
     } catch (error) {
-      console.error('Ошибка генерации контента:', error);
+      console.error('Ошибка генерации контента:', error.message);
       return null;
     }
   },
@@ -106,7 +118,7 @@ const contentGenerators = {
     };
   },
 
-  async randomCharacter() {
+    async randomCharacter() {
     const types = ["famous actor", "historical figure", "book character", "scientist"];
     const type = types[Math.floor(Math.random() * types.length)];
     const prompt = `Create a ${type} for English practice with:
@@ -115,17 +127,26 @@ const contentGenerators = {
     - Greeting message
     - Farewell message
     - 3 personality traits
-    Return as JSON`;
-    
-    const result = await this.generateEnglishContent(prompt, 'json');
-    
-    return result || {
-      name: "Sherlock Holmes",
-      description: "Famous detective from London",
-      greeting: "Elementary, my dear friend. What brings you to Baker Street today?",
-      farewell: "The game is afoot! I must go now.",
-      traits: ["observant", "logical", "eccentric"]
-    };
+    Return as JSON: {"name": "", "description": "", "greeting": "", "farewell": "", "traits": []}`;
+
+    try {
+      const result = await this.generateEnglishContent(prompt, 'json');
+      if (!result || !result.name) {
+        console.error('randomCharacter: Получен некорректный результат:', result);
+        throw new Error('Invalid character data');
+      }
+      console.log('Сгенерирован персонаж:', result);
+      return result;
+    } catch (error) {
+      console.error('randomCharacter: Ошибка генерации персонажа, используется резервный:', error.message);
+      return {
+        name: "Sherlock Holmes",
+        description: "Famous detective from London",
+        greeting: "Elementary, my dear friend. What brings you to Baker Street today?",
+        farewell: "The game is afoot! I must go now.",
+        traits: ["observant", "logical", "eccentric"]
+      };
+    }
   },
 
   async conversationTopic() {
@@ -457,7 +478,7 @@ async function setupBot() {
 
   // Команды
   bot.onText(/\/start/, commandHandlers.start);
-  bot.onText(/\/top/, commandHandlers.leaderboard);
+  bot.onText(/\/leaders/, commandHandlers.leaderboard);
   bot.onText(/\/roleplay/, commandHandlers.startRolePlay);
   bot.onText(/\/topic/, commandHandlers.conversationTopic);
   bot.onText(/\/progress/, commandHandlers.showProgress);
@@ -581,7 +602,7 @@ async function setupBot() {
     { command: 'roleplay', description: 'Ролевая игра с персонажем' },
     { command: 'topic', description: 'Тема для обсуждения' },
     { command: 'progress', description: 'Твой прогресс' },
-    { command: 'top', description: 'Таблица лидеров' }
+    { command: 'leaders', description: 'Таблица лидеров' }
   ]);
 
   console.log('🤖 Бот запущен и готов к работе!');
