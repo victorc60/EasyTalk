@@ -38,7 +38,7 @@ const userSessions = {
 async function initializeDatabase() {
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ force: false });
+    await sequelize.sync({ alter: true }); // Автоматически добавляет новые столбцы
     console.log('✅ База данных подключена');
   } catch (error) {
     console.error('❌ Ошибка базы данных:', error);
@@ -175,21 +175,20 @@ const services = {
   async sendToAllUsers(messageGenerator, errorHandler) {
     try {
       const users = await User.findAll({ 
-        where: { isActive: true },
         attributes: ['telegram_id']
       });
       let results = { success: 0, fails: 0 };
 
       if (users.length === 0) {
-        console.log('Нет активных пользователей для рассылки');
+        console.log('Нет зарегистрированных пользователей для рассылки');
         await bot.sendMessage(
           process.env.ADMIN_ID,
-          '⚠️ Рассылка не выполнена: нет активных пользователей в базе данных'
+          '⚠️ Рассылка не выполнена: нет зарегистрированных пользователей в базе данных'
         );
         return results;
       }
 
-      console.log(`Найдено активных пользователей: ${users.length}`);
+      console.log(`Найдено пользователей для рассылки: ${users.length}`);
 
       for (const user of users) {
         if (!user.telegram_id || isNaN(user.telegram_id)) {
@@ -239,19 +238,19 @@ const services = {
     const inactivePeriod = new Date();
     inactivePeriod.setMonth(inactivePeriod.getMonth() - 3);
     
-    const users = await User.findAll({
-      where: {
-        last_activity: { [sequelize.Op.lt]: inactivePeriod }
-      }
-    });
-    
-    for (const user of users) {
-      try {
+    try {
+      const users = await User.findAll({
+        where: {
+          last_activity: { [sequelize.Op.lt]: inactivePeriod }
+        }
+      });
+      
+      for (const user of users) {
         await user.update({ isActive: false });
         console.log(`Пользователь ${user.telegram_id} помечен как неактивный`);
-      } catch (error) {
-        console.error(`Ошибка обновления пользователя ${user.telegram_id}:`, error);
       }
+    } catch (error) {
+      console.error('Ошибка очистки неактивных пользователей:', error.message);
     }
   },
 
@@ -263,7 +262,7 @@ const services = {
       });
       return true;
     } catch (error) {
-      console.error('Ошибка начисления очков:', error);
+      console.error('Ошибка начисления очков:', error.message);
       return false;
     }
   }
@@ -299,7 +298,7 @@ const features = {
       
       await bot.sendMessage(
         process.env.ADMIN_ID,
-        `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Проверьте, есть ли активные пользователи в базе данных' : ''}`
+        `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Нет зарегистрированных пользователей в базе данных' : ''}`
       );
     } catch (error) {
       console.error('Ошибка в dailyFactBroadcast:', error.message);
@@ -339,7 +338,7 @@ const features = {
         `📊 Слово дня отправлено\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
       );
     } catch (error) {
-      console.error('Ошибка в wordGameBroadcast:', error);
+      console.error('Ошибка в wordGameBroadcast:', error.message);
       await bot.sendMessage(
         process.env.ADMIN_ID,
         `‼️ Ошибка рассылки слова дня: ${error.message}`
@@ -418,7 +417,7 @@ const commandHandlers = {
 
 🎮 <b>Игры и активность:</b>
 🔤 Слово дня в 18:00
-📚 Интересные факты в 16:30
+📚 Интересные факты в 17:00
 💬 /topic - тема для обсуждения
 🎭 /roleplay - ролевая игра
 
@@ -435,21 +434,26 @@ const commandHandlers = {
   },
 
   async leaderboard(msg) {
-    const topUsers = await User.findAll({
-      order: [['points', 'DESC']],
-      limit: 10,
-      attributes: ['username', 'points', 'first_name']
-    });
+    try {
+      const topUsers = await User.findAll({
+        order: [['points', 'DESC']],
+        limit: 10,
+        attributes: ['username', 'points', 'first_name']
+      });
 
-    const leaderboard = topUsers.map((user, i) => 
-      `${i+1}. ${user.username || user.first_name || 'Аноним'}: ${user.points} очков`
-    ).join('\n');
+      const leaderboard = topUsers.map((user, i) => 
+        `${i+1}. ${user.username || user.first_name || 'Аноним'}: ${user.points} очков`
+      ).join('\n');
 
-    await bot.sendMessage(
-      msg.chat.id,
-      `🏆 <b>Топ игроков:</b>\n\n${leaderboard}\n\nТвои очки: ${(await User.findByPk(msg.from.id))?.points || 0}`,
-      { parse_mode: 'HTML' }
-    );
+      await bot.sendMessage(
+        msg.chat.id,
+        `🏆 <b>Топ игроков:</b>\n\n${leaderboard}\n\nТвои очки: ${(await User.findByPk(msg.from.id))?.points || 0}`,
+        { parse_mode: 'HTML' }
+      );
+    } catch (error) {
+      console.error('Ошибка при получении таблицы лидеров:', error.message);
+      await bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при загрузке таблицы лидеров.');
+    }
   },
 
   async startRolePlay(msg) {
@@ -472,13 +476,14 @@ const commandHandlers = {
   },
 
   async showProgress(msg) {
-    const user = await User.findByPk(msg.from.id);
-    if (!user) {
-      await bot.sendMessage(msg.chat.id, 'ℹ️ Сначала запустите бота командой /start');
-      return;
-    }
-    
-    const progressMessage = `
+    try {
+      const user = await User.findByPk(msg.from.id);
+      if (!user) {
+        await bot.sendMessage(msg.chat.id, 'ℹ️ Сначала запустите бота командой /start');
+        return;
+      }
+      
+      const progressMessage = `
 📊 <b>Твой прогресс:</b>
 
 🏅 Очков: ${user.points}
@@ -486,8 +491,12 @@ const commandHandlers = {
 🔄 Последняя активность: ${user.last_activity.toLocaleDateString()}
 
 Продолжай практиковать английский!`;
-    
-    await bot.sendMessage(msg.chat.id, progressMessage, { parse_mode: 'HTML' });
+      
+      await bot.sendMessage(msg.chat.id, progressMessage, { parse_mode: 'HTML' });
+    } catch (error) {
+      console.error('Ошибка при отображении прогресса:', error.message);
+      await bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при загрузке прогресса.');
+    }
   }
 };
 
@@ -613,8 +622,8 @@ async function setupBot() {
       await services.awardPoints(userId, 1);
 
     } catch (error) {
-      console.error('Ошибка обработки сообщения:', error);
-      await bot.sendMessage(chatId, "⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.");
+      console.error('Ошибка обработки сообщения:', error.message);
+      await bot.sendMessage(chatId, '⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.');
     }
   });
 
