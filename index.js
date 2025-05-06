@@ -27,7 +27,7 @@ const CONFIG = {
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// === Хранилища состояний ===
+// === Хранилища событий ===
 const userSessions = {
   wordGames: new Map(),
   activeDialogs: new Map(),
@@ -435,24 +435,52 @@ const commandHandlers = {
 
   async leaderboard(msg) {
     try {
+      // Получаем топ-10 активных пользователей с ненулевыми очками
       const topUsers = await User.findAll({
+        where: {
+          isActive: true,
+          points: { [sequelize.Op.gt]: 0 } // Только пользователи с очками > 0
+        },
         order: [['points', 'DESC']],
         limit: 10,
-        attributes: ['username', 'points', 'first_name']
+        attributes: ['telegram_id', 'username', 'first_name', 'points']
       });
 
-      const leaderboard = topUsers.map((user, i) => 
-        `${i+1}. ${user.username || user.first_name || 'Аноним'}: ${user.points} очков`
-      ).join('\n');
+      // Формируем таблицу лидеров
+      let leaderboardMessage = '🏆 <b>Топ игроков:</b>\n\n';
+      if (topUsers.length === 0) {
+        leaderboardMessage += 'ℹ️ Пока нет игроков с очками.\nНачните практиковать английский, чтобы попасть в топ!';
+      } else {
+        leaderboardMessage += topUsers
+          .map((user, index) => {
+            const displayName = (user.username || user.first_name || 'Аноним').substring(0, 20); // Ограничиваем длину имени
+            return `${index + 1}. ${displayName}: ${user.points} очков`;
+          })
+          .join('\n');
+      }
 
+      // Получаем очки текущего пользователя
+      const currentUser = await User.findOne({
+        where: { telegram_id: msg.from.id }
+      });
+
+      const userPoints = currentUser ? currentUser.points : 0;
+      leaderboardMessage += `\n\n📊 Твои очки: ${userPoints}`;
+
+      await bot.sendMessage(msg.chat.id, leaderboardMessage, { parse_mode: 'HTML' });
+      console.log(`Таблица лидеров отправлена пользователю ${msg.from.id}. Найдено активных пользователей: ${topUsers.length}`);
+    } catch (error) {
+      console.error('Ошибка при получении таблицы лидеров:', error.message, error.stack);
       await bot.sendMessage(
         msg.chat.id,
-        `🏆 <b>Топ игроков:</b>\n\n${leaderboard}\n\nТвои очки: ${(await User.findByPk(msg.from.id))?.points || 0}`,
+        '⚠️ Не удалось загрузить таблицу лидеров. Попробуйте позже.',
         { parse_mode: 'HTML' }
       );
-    } catch (error) {
-      console.error('Ошибка при получении таблицы лидеров:', error.message);
-      await bot.sendMessage(msg.chat.id, '⚠️ Произошла ошибка при загрузке таблицы лидеров.');
+      // Уведомляем админа об ошибке
+      await bot.sendMessage(
+        process.env.ADMIN_ID,
+        `‼️ Ошибка в leaderboard: ${error.message}`
+      );
     }
   },
 
@@ -477,7 +505,7 @@ const commandHandlers = {
 
   async showProgress(msg) {
     try {
-      const user = await User.findByPk(msg.from.id);
+      const user = await User.findOne({ where: { telegram_id: msg.from.id } });
       if (!user) {
         await bot.sendMessage(msg.chat.id, 'ℹ️ Сначала запустите бота командой /start');
         return;
@@ -511,7 +539,7 @@ async function setupBot() {
   bot.onText(/\/start/, commandHandlers.start);
   bot.onText(/\/top/, commandHandlers.leaderboard);
   bot.onText(/\/roleplay/, commandHandlers.startRolePlay);
-  bot.onText(/\/topic/, commandHandlers.conversationTopic);
+  bot.onText(/\/leaders/, commandHandlers.conversationTopic);
   bot.onText(/\/progress/, commandHandlers.showProgress);
   bot.onText(/\/mode_(.+)/, (msg, match) => commandHandlers.setMode(msg, match[1]));
 
@@ -633,7 +661,7 @@ async function setupBot() {
     { command: 'roleplay', description: 'Ролевая игра с персонажем' },
     { command: 'topic', description: 'Тема для обсуждения' },
     { command: 'progress', description: 'Твой прогресс' },
-    { command: 'top', description: 'Таблица лидеров' }
+    { command: 'leaders', description: 'Таблица лидеров' }
   ]);
 
   console.log('🤖 Бот запущен и готов к работе!');
