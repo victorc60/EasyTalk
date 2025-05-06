@@ -463,18 +463,22 @@ const commandHandlers = {
       } else {
         leaderboardMessage += topUsers
           .map((user, index) => {
-            const displayName = (user.username || user.first_name || 'Аноним').substring(0, 20);
+            const displayName = user.username || user.first_name || `Пользователь ${index + 1}`;
             return `${index + 1}. ${displayName}: ${user.points} очков`;
           })
           .join('\n');
       }
 
+      // Добавляем информацию о текущем пользователе
       const currentUser = await User.findOne({
         where: { telegram_id: msg.from.id }
       });
 
-      const userPoints = currentUser ? currentUser.points : 0;
-      leaderboardMessage += `\n\n📊 Твои очки: ${userPoints}`;
+      if (currentUser) {
+        leaderboardMessage += `\n\n📊 Твои очки: ${currentUser.points}`;
+      } else {
+        leaderboardMessage += `\n\nℹ️ Вы еще не зарегистрированы. Напишите /start`;
+      }
 
       await bot.sendMessage(msg.chat.id, leaderboardMessage, { parse_mode: 'HTML' });
       console.log(`Таблица лидеров отправлена пользователю ${msg.from.id}. Найдено активных пользователей: ${topUsers.length}`);
@@ -487,7 +491,7 @@ const commandHandlers = {
       );
       await bot.sendMessage(
         process.env.ADMIN_ID,
-        `‼️ Ошибка в leaderboard: ${error.message}`
+        `‼️ Ошибка в leaderboard: ${error.message}\nStack: ${error.stack}`
       );
     }
   },
