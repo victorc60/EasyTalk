@@ -537,9 +537,9 @@ async function setupBot() {
 
   // Команды
   bot.onText(/\/start/, commandHandlers.start);
-  bot.onText(/\/top/, commandHandlers.leaderboard);
+  bot.onText(/\/leader/, commandHandlers.leaderboard);
   bot.onText(/\/roleplay/, commandHandlers.startRolePlay);
-  bot.onText(/\/leaders/, commandHandlers.conversationTopic);
+  bot.onText(/\/topic/, commandHandlers.conversationTopic);
   bot.onText(/\/progress/, commandHandlers.showProgress);
   bot.onText(/\/mode_(.+)/, (msg, match) => commandHandlers.setMode(msg, match[1]));
 
