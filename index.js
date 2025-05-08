@@ -281,22 +281,23 @@ const services = {
 
   async getLeaderboard() {
     try {
-      return await User.findAll({
+      const users = await User.findAll({
         where: {
           isActive: true,
           points: { [sequelize.Op.gt]: 0 }
         },
         order: [['points', 'DESC']],
         limit: 10,
-        attributes: ['id', 'telegram_id', 'username', 'first_name', 'points']
+        attributes: ['telegram_id', 'username', 'first_name', 'points']
       });
+      
+      if (!users) throw new Error('Не удалось получить данные из базы');
+      return users;
     } catch (error) {
       console.error('Ошибка при получении таблицы лидеров:', error);
-      throw error;
+      throw new Error(`Database error: ${error.message}`);
     }
-  }
-};
-
+  };
 // === Основные функции ===
 const features = {
   async dailyFactBroadcast() {
@@ -410,41 +411,61 @@ const features = {
     await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
   },
 
-  async showLeaderboard(chatId, userId) {
+ async showLeaderboard(chatId, userId) {
     try {
       const topUsers = await services.getLeaderboard();
       const currentUser = await User.findOne({ where: { telegram_id: userId } });
 
-      let leaderboardMessage = '🏆 <b>Топ игроков:</b>\n\n';
+      // Эмодзи для первых трех мест
+      const medals = ['🥇', '🥈', '🥉'];
+      
+      let leaderboardMessage = '<b>🏆 Топ 10 игроков:</b>\n\n';
       
       if (topUsers.length === 0) {
-        leaderboardMessage += 'ℹ️ Пока нет игроков с очками.\nНачните практиковать английский, чтобы попасть в топ!';
+        leaderboardMessage += 'Список лидеров пуст. Будьте первым!\n';
       } else {
-        leaderboardMessage += topUsers
-          .map((user, index) => {
-            const displayName = user.username || user.first_name || `Игрок ${index + 1}`;
-            return `${index + 1}. ${displayName}: ${user.points} очков`;
-          })
-          .join('\n');
+        leaderboardMessage += topUsers.map((user, index) => {
+          const medal = index < 3 ? medals[index] + ' ' : '';
+          const name = user.username 
+            ? `@${user.username}` 
+            : user.first_name || `Игрок ${index + 1}`;
+          return `${medal}${index + 1}. ${name} — <b>${user.points}</b>`;
+        }).join('\n');
       }
 
+      // Добавляем информацию о текущем пользователе
       if (currentUser) {
-        leaderboardMessage += `\n\n📊 <b>Ваши очки:</b> ${currentUser.points}`;
+        const userPosition = await User.count({
+          where: {
+            points: { [sequelize.Op.gt]: currentUser.points },
+            isActive: true
+          }
+        });
+        
+        leaderboardMessage += `\n\n<b>Ваша позиция:</b> ${userPosition + 1}`;
+        leaderboardMessage += `\n<b>Ваши очки:</b> ${currentUser.points}`;
       } else {
-        leaderboardMessage += `\n\nℹ️ Вы еще не зарегистрированы. Напишите /start`;
+        leaderboardMessage += '\n\nℹ️ Вы не участвуете в рейтинге. Напишите /start';
       }
 
-      await bot.sendMessage(chatId, leaderboardMessage, { parse_mode: 'HTML' });
+      await bot.sendMessage(chatId, leaderboardMessage, { 
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+      });
     } catch (error) {
       console.error('Ошибка при отображении таблицы лидеров:', error);
+      
+      let errorMessage = '⚠️ Не удалось загрузить таблицу лидеров. ';
+      errorMessage += 'Попробуйте позже или сообщите об ошибке администратору.';
+      
+      await bot.sendMessage(chatId, errorMessage, { parse_mode: 'HTML' });
+      
       await bot.sendMessage(
-        chatId,
-        '⚠️ Произошла ошибка при загрузке таблицы лидеров. Попробуйте позже.',
-        { parse_mode: 'HTML' }
-      );
+        process.env.ADMIN_ID,
+        `‼️ Ошибка в команде /leaders:\n${error.stack || error.message}`
+      ).catch(err => console.error('Не удалось отправить ошибку админу:', err));
     }
   }
-};
 
 // === Обработчики команд ===
 const commandHandlers = {
@@ -501,12 +522,10 @@ const commandHandlers = {
     try {
       await features.showLeaderboard(msg.chat.id, msg.from.id);
     } catch (error) {
-      console.error('Ошибка в команде /top:', error.message, error.stack);
-      await bot.sendMessage(
-        msg.chat.id,
-        '⚠️ Не удалось загрузить таблицу лидеров. Попробуйте позже.',
-        { parse_mode: 'HTML' }
-      );
+      console.error('Ошибка в команде /leaders:', error);
+      // Ошибка уже обрабатывается в showLeaderboard
+    }
+  },
       await bot.sendMessage(
         process.env.ADMIN_ID,
         `‼️ Ошибка в команде /top:\n${error.message}\nStack: ${error.stack}`
