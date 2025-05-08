@@ -281,6 +281,7 @@ const services = {
 
   async getLeaderboard() {
     try {
+      console.log('Запрос таблицы лидеров из базы данных...');
       const users = await User.findAll({
         where: {
           isActive: true,
@@ -291,13 +292,19 @@ const services = {
         attributes: ['telegram_id', 'username', 'first_name', 'points']
       });
       
-      if (!users) throw new Error('Не удалось получить данные из базы');
+      console.log(`Найдено пользователей: ${users.length}`, users.map(u => ({
+        telegram_id: u.telegram_id,
+        username: u.username,
+        first_name: u.first_name,
+        points: u.points
+      })));
       return users;
     } catch (error) {
-      console.error('Ошибка при получении таблицы лидеров:', error);
-      throw new Error(`Database error: ${error.message}`);
+      console.error('Ошибка при получении таблицы лидеров:', error.message, error.stack);
+      throw error;
     }
-  };
+  }
+};
 // === Основные функции ===
 const features = {
   async dailyFactBroadcast() {
