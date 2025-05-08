@@ -486,7 +486,7 @@ const commandHandlers = {
 🎭 /roleplay - ролевая игра
 
 📊 /progress - твой прогресс
-🏆 /top - таблица лидеров
+🏆 /leaders - таблица лидеров
 
 Выбирай что тебе интересно и практикуй английский!`;
 
@@ -565,7 +565,7 @@ async function setupBot() {
   schedule.scheduleJob(CONFIG.CLEANUP_TIME, services.cleanupInactiveUsers);
 
   bot.onText(/\/start/, commandHandlers.start);
-  bot.onText(/\/top/, commandHandlers.leaderboard);
+  bot.onText(/\/leaders/, commandHandlers.leaderboard);
   bot.onText(/\/roleplay/, commandHandlers.startRolePlay);
   bot.onText(/\/topic/, commandHandlers.conversationTopic);
   bot.onText(/\/progress/, commandHandlers.showProgress);
@@ -683,7 +683,7 @@ async function setupBot() {
     { command: 'roleplay', description: 'Ролевая игра с персонажем' },
     { command: 'topic', description: 'Тема для обсуждения' },
     { command: 'progress', description: 'Твой прогресс' },
-    { command: 'top', description: 'Таблица лидеров' }
+    { command: 'leaders', description: 'Таблица лидеров' }
   ]);
 
   console.log('🤖 Бот запущен и готов к работе!');
