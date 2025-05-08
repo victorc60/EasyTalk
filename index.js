@@ -297,7 +297,7 @@ const services = {
       console.error('Ошибка при получении таблицы лидеров:', error);
       throw new Error(`Database error: ${error.message}`);
     }
-  };
+  }
 // === Основные функции ===
 const features = {
   async dailyFactBroadcast() {
