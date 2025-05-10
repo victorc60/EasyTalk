@@ -20,8 +20,10 @@ export async function setupBot(bot, userSessions, openai) {
   bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
   bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
-  bot.onText(/\/mode$/, (msg) => setMode(bot, msg, userSessions)); // Обработчик для /mode
-  bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1])); // Обработчик для /mode_<mode>
+  bot.onText(/\/mode$/, (msg) => setMode(bot, msg, userSessions));
+  bot.onText(/\/mode_free_talk/, (msg) => setMode(bot, msg, userSessions, 'free_talk'));
+  bot.onText(/\/mode_correction/, (msg) => setMode(bot, msg, userSessions, 'correction'));
+  bot.onText(/\/mode_role_play/, (msg) => setMode(bot, msg, userSessions, 'role_play'));
 
   // Обработчик сообщений
   bot.on('message', async (msg) => {
