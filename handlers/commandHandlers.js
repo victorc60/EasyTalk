@@ -57,7 +57,7 @@ export async function leaderboard(bot, msg) {
   try {
     await showLeaderboard(bot, msg.chat.id, msg.from.id);
   } catch (error) {
-    console.error('Ошибка в команде /top:', error.message, error.stack);
+    console.error('Ошибка в команде /leaders:', error.message, error.stack);
     await sendUserMessage(
       bot,
       msg.chat.id,

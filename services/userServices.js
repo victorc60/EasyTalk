@@ -1,7 +1,7 @@
 // services/userServices.js
 import User from '../models/User.js';
 import sequelize from '../database/database.js';
-import { Op } from 'sequelize'; 
+import { Op } from 'sequelize';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 
 export async function sendToAllUsers(bot, messageGenerator, errorHandler) {
@@ -78,7 +78,7 @@ export async function cleanupInactiveUsers() {
     });
     
     for (const user of users) {
-      await user.update({ isActive: false });
+      await user.update({ is_active: false });
       console.log(`Пользователь ${user.telegram_id} помечен как неактивный`);
     }
   } catch (error) {
@@ -107,12 +107,12 @@ export async function getLeaderboard() {
   try {
     return await User.findAll({
       where: {
-        isActive: true,
-        points: { [Op.gt]: 0 } // Используем Op.gt
+        is_active: true,
+        points: { [Op.gt]: 0 }
       },
       order: [['points', 'DESC']],
       limit: 10,
-      attributes: ['id', 'telegram_id', 'username', 'first_name', 'points']
+      attributes: ['telegram_id', 'username', 'first_name', 'points']
     });
   } catch (error) {
     console.error('Ошибка при получении таблицы лидеров:', error);
