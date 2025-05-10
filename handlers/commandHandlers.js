@@ -33,7 +33,7 @@ export async function start(bot, msg) {
 1. <b>Свободное общение</b> - /mode_free_talk
 2. <b>Ролевые игры</b> - /mode_role_play
 3. <b>Проверка ошибок</b> - /mode_correction
-📋 Показать все режимы: /mode
+📋 Показать режимы с выбором: /mode
 
 🎮 <b>Игры и активность:</b>
 🔤 Слово дня в 18:00
@@ -48,8 +48,9 @@ export async function start(bot, msg) {
 
     await sendUserMessage(bot, msg.chat.id, welcomeMessage, { parse_mode: 'HTML' });
   } catch (error) {
-    console.error('Ошибка при обработке команды /start:', error.message);
+    console.error('Ошибка при обработке команды /start:', error);
     await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при регистрации. Попробуйте еще раз.');
+    await sendAdminMessage(bot, `‼️ Ошибка команды /start: ${error.message}`);
   }
 }
 
@@ -57,7 +58,7 @@ export async function leaderboard(bot, msg) {
   try {
     await showLeaderboard(bot, msg.chat.id, msg.from.id);
   } catch (error) {
-    console.error('Ошибка в команде /leaders:', error.message, error.stack);
+    console.error('Ошибка в команде /leaders:', error);
     await sendUserMessage(
       bot,
       msg.chat.id,
@@ -66,36 +67,55 @@ export async function leaderboard(bot, msg) {
     );
     await sendAdminMessage(
       bot,
-      `‼️ Ошибка в команде /leaders:\n${error.message}\nStack: ${error.stack}`
+      `‼️ Ошибка в команде /leaders: ${error.message}\nStack: ${error.stack}`
     );
   }
 }
 
 export async function startRolePlayCommand(bot, msg, userSessions) {
-  await startRolePlay(bot, msg.chat.id, userSessions);
+  try {
+    await startRolePlay(bot, msg.chat.id, userSessions);
+  } catch (error) {
+    console.error('Ошибка в команде /roleplay:', error);
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '⚠️ Не удалось начать ролевую игру. Попробуйте позже.',
+      { parse_mode: 'HTML' }
+    );
+    await sendAdminMessage(
+      bot,
+      `‼️ Ошибка в команде /roleplay: ${error.message}\nStack: ${error.stack}`
+    );
+  }
 }
 
 export async function conversationTopic(bot, msg) {
-  await sendConversationStarter(bot, msg.chat.id);
+  try {
+    await sendConversationStarter(bot, msg.chat.id);
+  } catch (error) {
+    console.error('Ошибка в команде /topic:', error);
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '⚠️ Не удалось загрузить тему. Попробуйте позже.',
+      { parse_mode: 'HTML' }
+    );
+    await sendAdminMessage(
+      bot,
+      `‼️ Ошибка в команде /topic: ${error.message}\nStack: ${error.stack}`
+    );
+  }
 }
 
 export async function setMode(bot, msg, userSessions, mode) {
   const validModes = ['free_talk', 'role_play', 'correction'];
   
-  // Если mode не указан (вызов /mode), показываем список режимов
   if (!mode) {
-    const modeListMessage = `
-⚙️ <b>Доступные режимы общения:</b>
-
-1. <b>free_talk</b> - Свободное общение на английском с подсказками (/mode_free_talk)
-2. <b>role_play</b> - Ролевые игры с персонажами (/mode_role_play)
-3. <b>correction</b> - Проверка и исправление ошибок в сообщениях (/mode_correction)
-    `;
-    await sendUserMessage(bot, msg.chat.id, modeListMessage, { parse_mode: 'HTML' });
+    await showModeSelection(bot, msg.chat.id);
     return;
   }
 
-  // Установка режима
   if (!validModes.includes(mode)) {
     await sendUserMessage(
       bot,
@@ -134,7 +154,11 @@ export async function showProgress(bot, msg) {
     
     await sendUserMessage(bot, msg.chat.id, progressMessage, { parse_mode: 'HTML' });
   } catch (error) {
-    console.error('Ошибка при отображении прогресса:', error.message);
+    console.error('Ошибка при отображении прогресса:', error);
     await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при загрузке прогресса.');
+    await sendAdminMessage(
+      bot,
+      `‼️ Ошибка в команде /progress: ${error.message}\nStack: ${error.stack}`
+    );
   }
 }

@@ -59,12 +59,12 @@ function setupSchedulers(bot, userSessions) {
 
 async function setupBotCommands(bot) {
   try {
-    // Явное удаление всех команд
+    // Удаление всех существующих команд
     await bot.deleteMyCommands({ scope: { type: 'default' }, language_code: 'ru' });
     console.log('✅ Все команды бота удалены');
 
     // Установка новых команд
-    await bot.setMyCommands([
+    const commands = [
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
       { command: 'topic', description: 'Тема для обсуждения' },
@@ -74,11 +74,12 @@ async function setupBotCommands(bot) {
       { command: 'mode_free_talk', description: 'Свободное общение на английском' },
       { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
       { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
-    ], {
+    ];
+    await bot.setMyCommands(commands, {
       scope: { type: 'default' },
       language_code: 'ru'
     });
-    console.log('✅ Команды бота успешно установлены');
+    console.log('✅ Команды бота успешно установлены:', JSON.stringify(commands));
   } catch (error) {
     console.error('❌ Ошибка установки команд бота:', error);
     await sendAdminMessage(bot, `‼️ Ошибка установки команд бота: ${error.message}`);
@@ -243,7 +244,7 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
       Keep explanations simple and clear.`;
       break;
     case BOT_MODES.ROLE_PLAY.id:
-      await startRolePlay(bot, chatId, userSessions); // Синхронизация с текущей логикой
+      await startRolePlay(bot, chatId, userSessions);
       return;
     default: // FREE_TALK
       systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping answers under 3 sentences. 
