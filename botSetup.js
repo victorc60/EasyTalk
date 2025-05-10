@@ -56,6 +56,27 @@ function setupSchedulers(bot, userSessions) {
     sendAdminMessage(bot, `‼️ Ошибка настройки планировщиков: ${error.message}`);
   }
 }
+function setupCommandHandlers(bot, userSessions) {
+    // Основные команды
+    bot.onText(/\/start/, (msg) => start(bot, msg));
+    bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
+    bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
+    bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
+    bot.onText(/\/mode/, (msg) => showModeSelection(bot, msg.chat.id));
+  
+    // Админские команды
+    bot.onText(/\/stats/, (msg) => {
+      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
+        handleStatsCommand(bot, msg);
+      }
+    });
+  
+    bot.onText(/\/broadcast/, (msg) => {
+      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
+        handleBroadcastCommand(bot, msg);
+      }
+    });
+  }
 
 async function setupBotCommands(bot) {
     try {
@@ -94,27 +115,7 @@ async function setupBotCommands(bot) {
     }
   }
 
-  function setupCommandHandlers(bot, userSessions) {
-    // Основные команды
-    bot.onText(/\/start/, (msg) => start(bot, msg));
-    bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
-    bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
-    bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
-    bot.onText(/\/mode/, (msg) => showModeSelection(bot, msg.chat.id));
-  
-    // Админские команды
-    bot.onText(/\/stats/, (msg) => {
-      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
-        handleStatsCommand(bot, msg);
-      }
-    });
-  
-    bot.onText(/\/broadcast/, (msg) => {
-      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
-        handleBroadcastCommand(bot, msg);
-      }
-    });
-  }
+ 
 
 function setupCallbacks(bot, userSessions) {
   bot.on('callback_query', async (callbackQuery) => {
