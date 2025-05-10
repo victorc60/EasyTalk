@@ -1,0 +1,144 @@
+// features/botFeatures.js
+import { CONFIG } from '../config.js';
+import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
+import { dailyFact, wordOfTheDay, randomCharacter, conversationTopic } from '../content/contentGenerators.js';
+import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
+import User from '../models/User.js';
+
+export async function dailyFactBroadcast(bot) {
+  try {
+    console.log('Запуск рассылки ежедневного факта...');
+    
+    const fact = await dailyFact();
+    if (!fact) {
+      console.error('Не удалось сгенерировать ежедневный факт');
+      await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать ежедневный факт');
+      return;
+    }
+
+    const { success, fails } = await sendToAllUsers(
+      bot,
+      async () => fact,
+      (error, user) => {
+        console.error(`Ошибка для пользователя ${user.telegram_id}: ${error.message}`);
+        if (error.response?.statusCode === 403) {
+          user.update({ isActive: false });
+        }
+      }
+    );
+
+    console.log(`Рассылка завершена. Успешно: ${success}, Ошибок: ${fails}`);
+    
+    await sendAdminMessage(
+      bot,
+      `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Нет зарегистрированных пользователей в базе данных' : ''}`
+    );
+  } catch (error) {
+    console.error('Ошибка в dailyFactBroadcast:', error.message);
+    await sendAdminMessage(bot, `‼️ Ошибка рассылки ежедневного факта: ${error.message}`);
+  }
+}
+
+export async function wordGameBroadcast(bot, userSessions) {
+  try {
+    const wordData = await wordOfTheDay();
+    const { success, fails } = await sendToAllUsers(
+      bot,
+      async (userId) => {
+        userSessions.wordGames.set(userId, {
+          word: wordData.word,
+          translation: wordData.translation.toLowerCase(),
+          timer: setTimeout(() => {
+            if (userSessions.wordGames.has(userId)) {
+              sendUserMessage(
+                bot,
+                userId,
+                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\nПример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes}`
+              );
+              userSessions.wordGames.delete(userId);
+            }
+          }, CONFIG.WORD_GAME_TIMEOUT)
+        });
+
+        return `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nНапишите перевод этого слова! Следующее сообщение будет считаться вашим ответом.`;
+      }
+    );
+
+    console.log(`Слово дня отправлено. Успешно: ${success}, Ошибок: ${fails}`);
+    await sendAdminMessage(
+      bot,
+      `📊 Слово дня отправлено\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
+    );
+  } catch (error) {
+    console.error('Ошибка в wordGameBroadcast:', error.message);
+    await sendAdminMessage(bot, `‼️ Ошибка рассылки слова дня: ${error.message}`);
+  }
+}
+
+export async function startRolePlay(bot, chatId, userSessions, character = null) {
+  if (!character) {
+    character = await randomCharacter();
+  }
+  
+  userSessions.activeDialogs.set(chatId, {
+    character,
+    messagesLeft: CONFIG.MAX_DIALOG_MESSAGES,
+    dialogHistory: [
+      { 
+        role: "system", 
+        content: `You are ${character.name}. ${character.description}. 
+        Personality traits: ${character.traits?.join(', ') || 'none specified'}.
+        Respond in character, keep answers under 2 sentences.`
+      }
+    ]
+  });
+
+  await sendUserMessage(
+    bot,
+    chatId,
+    `🎭 <b>Role Play: ${character.name}</b>\n\n<i>${character.description}</i>\n\n${character.greeting}\n\nУ вас ${CONFIG.MAX_DIALOG_MESSAGES} сообщений для диалога.`,
+    { parse_mode: 'HTML' }
+  );
+}
+
+export async function sendConversationStarter(bot, chatId) {
+  const topic = await conversationTopic();
+  
+  let message = `💬 <b>Тема для обсуждения:</b> ${topic.topic}\n\n`;
+  message += `<b>Вопросы:</b>\n- ${topic.questions.join('\n- ')}\n\n`;
+  message += `<b>Полезные слова:</b>\n${topic.vocabulary.map(v => `• ${v.word} - ${v.translation}`).join('\n')}`;
+  
+  await sendUserMessage(bot, chatId, message, { parse_mode: 'HTML' });
+}
+
+export async function showLeaderboard(bot, chatId, userId) {
+  try {
+    const topUsers = await getLeaderboard();
+    const currentUser = await User.findOne({ where: { telegram_id: userId } });
+
+    let leaderboardMessage = '🏆 <b>Топ игроков:</b>\n\n';
+    
+    if (topUsers.length === 0) {
+      leaderboardMessage += 'ℹ️ Пока нет игроков с очками.\nНачните практиковать английский, чтобы попасть в топ!';
+    } else {
+      leaderboardMessage += topUsers
+        .map((user, index) => {
+          const displayName = user.username || user.first_name || `Игрок ${index + 1}`;
+          return `${index + 1}. ${displayName}: ${user.points} очков`;
+        })
+        .join('\n');
+    }
+
+    if (currentUser) {
+      leaderboardMessage += `\n\n📊 <b>Ваши очки:</b> ${currentUser.points}`;
+    } else {
+      leaderboardMessage += `\n\nℹ️ Вы еще не зарегистрированы. Напишите /start`;
+    }
+
+    await sendUserMessage(bot, chatId, leaderboardMessage, { parse_mode: 'HTML' });
+  } catch (error) {
+    console.error('Ошибка при отображении таблицы лидеров:', error);
+    await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при загрузке таблицы лидеров. Попробуйте позже.', { parse_mode: 'HTML' });
+    await sendAdminMessage(bot, `‼️ Ошибка в команде /top:\n${error.message}\nStack: ${error.stack}`);
+  }
+}
