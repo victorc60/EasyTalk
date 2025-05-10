@@ -62,16 +62,10 @@ async function setupBotCommands(bot) {
       await bot.deleteMyCommands();
       
       // Установка только нужных команд
-      await bot.setMyCommands([
-        { command: 'start', description: 'Главное меню' },
-        { command: 'topic', description: 'Тема для обсуждения' },
-        { command: 'progress', description: 'Твой прогресс' },
-        { command: 'leaders', description: 'Таблица лидеров' },
-        { command: 'mode', description: 'Выбор режима общения' }
-      ], {
-        scope: { type: 'default' }, // Для основного меню
-        language_code: 'ru'         // Для русскоязычных пользователей
-      });
+      await bot.setMyCommands([], { scope: { type: 'default' } }); // все чаты по умолчанию
+        await bot.setMyCommands([], { scope: { type: 'all_private_chats' } }); // приватные чаты
+        await bot.setMyCommands([], { scope: { type: 'all_group_chats' } }); // групповые
+        await bot.setMyCommands([], { scope: { type: 'all_chat_administrators' } }); 
       
       console.log('✅ Команды бота успешно обновлены');
     } catch (error) {
