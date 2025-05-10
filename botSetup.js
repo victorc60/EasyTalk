@@ -60,7 +60,7 @@ async function setupBotCommands(bot) {
   try {
     await bot.setMyCommands([
       { command: 'start', description: 'Главное меню' },
-      { command: 'roleplay', description: 'Ролевая игра с персонажем' },
+      
       { command: 'topic', description: 'Тема для обсуждения' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
