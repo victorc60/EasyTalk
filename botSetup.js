@@ -246,4 +246,62 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
       await startRolePlay(bot, chatId, userSessions); // Синхронизация с текущей логикой
       return;
     default: // FREE_TALK
-      systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping
+      systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping answers under 3 sentences. 
+      If they make mistakes, provide the correct version subtly in your response. 
+      Ask follow-up questions to continue the conversation.`;
+  }
+
+  const { choices } = await openai.chat.completions.create({
+    model: CONFIG.GPT_MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: text }
+    ],
+    temperature: 0.7,
+    max_tokens: 200
+  });
+
+  await sendUserMessage(bot, chatId, choices[0]?.message?.content);
+  await awardPoints(userId, 1);
+}
+
+async function showModeSelection(bot, chatId) {
+  try {
+    await sendUserMessage(
+      bot,
+      chatId,
+      '🔘 <b>Выберите режим общения:</b>\n\nКаждый режим предлагает разный подход к практике английского языка.\nИспользуйте /mode_free_talk, /mode_correction, /mode_role_play для быстрого выбора.',
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{
+              text: `${BOT_MODES.FREE_TALK.name} 🗣`,
+              callback_data: `mode_${BOT_MODES.FREE_TALK.id}`
+            }],
+            [{
+              text: `${BOT_MODES.CORRECTION.name} ✏️`,
+              callback_data: `mode_${BOT_MODES.CORRECTION.id}`
+            }],
+            [{
+              text: `${BOT_MODES.ROLE_PLAY.name} 🎭`,
+              callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}`
+            }]
+          ]
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Ошибка показа выбора режима:', error);
+    await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
+    await sendAdminMessage(bot, `‼️ Ошибка показа выбора режима: ${error.message}`);
+  }
+}
+
+function getModeName(modeId) {
+  return Object.values(BOT_MODES).find(mode => mode.id === modeId)?.name || 'Неизвестный режим';
+}
+
+function getModeDescription(modeId) {
+  return Object.values(BOT_MODES).find(mode => mode.id === modeId)?.description || '';
+}
