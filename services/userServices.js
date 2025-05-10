@@ -1,6 +1,7 @@
 // services/userServices.js
 import User from '../models/User.js';
 import sequelize from '../database/database.js';
+import { Op } from 'sequelize'; 
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 
 export async function sendToAllUsers(bot, messageGenerator, errorHandler) {
@@ -72,7 +73,7 @@ export async function cleanupInactiveUsers() {
   try {
     const users = await User.findAll({
       where: {
-        last_activity: { [sequelize.Op.lt]: inactivePeriod }
+        last_activity: { [Op.lt]: inactivePeriod }
       }
     });
     
@@ -107,7 +108,7 @@ export async function getLeaderboard() {
     return await User.findAll({
       where: {
         isActive: true,
-        points: { [sequelize.Op.gt]: 0 }
+        points: { [Op.gt]: 0 } // Используем Op.gt
       },
       order: [['points', 'DESC']],
       limit: 10,
