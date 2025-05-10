@@ -66,7 +66,7 @@ async function setupBotCommands(bot) {
     // Установка новых команд
     const commands = [
       { command: 'start', description: 'Главное меню' },
-      { command: 'roleplay', description: 'Ролевая игра с персонажем' },
+
       { command: 'topic', description: 'Тема для обсуждения' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
@@ -90,7 +90,7 @@ async function setupBotCommands(bot) {
 function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/start/, (msg) => start(bot, msg));
   bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
-  bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
+
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
   bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
   bot.onText(/\/mode$/, (msg) => showModeSelection(bot, msg.chat.id));
