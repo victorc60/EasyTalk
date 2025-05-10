@@ -57,20 +57,29 @@ function setupSchedulers(bot, userSessions) {
 }
 
 async function setupBotCommands(bot) {
-  try {
-    await bot.deleteMyCommands();
-    await bot.setMyCommands([
-      { command: 'start', description: 'Главное меню' },
+    try {
+      // Явное удаление всех команд перед установкой новых
+      await bot.deleteMyCommands();
       
-      { command: 'topic', description: 'Тема для обсуждения' },
-      { command: 'progress', description: 'Твой прогресс' },
-      { command: 'leaders', description: 'Таблица лидеров' },
-      { command: 'mode', description: 'Сменить режим общения' }
-    ]);
-  } catch (error) {
-    console.error('Ошибка установки команд бота:', error);
+      // Установка только нужных команд
+      await bot.setMyCommands([
+        { command: 'start', description: 'Главное меню' },
+        { command: 'topic', description: 'Тема для обсуждения' },
+        { command: 'progress', description: 'Твой прогресс' },
+        { command: 'leaders', description: 'Таблица лидеров' },
+        { command: 'mode', description: 'Выбор режима общения' }
+      ], {
+        scope: { type: 'default' }, // Для основного меню
+        language_code: 'ru'         // Для русскоязычных пользователей
+      });
+      
+      console.log('✅ Команды бота успешно обновлены');
+    } catch (error) {
+      console.error('❌ Ошибка обновления команд бота:', error);
+      throw error; // Можно пробросить ошибку выше для обработки
+    }
   }
-}
+  
 
 function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/start/, (msg) => start(bot, msg));
