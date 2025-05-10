@@ -20,8 +20,8 @@ export async function setupBot(bot, userSessions, openai) {
   bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
   bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
-  bot.onText(/\/mode$/, (msg) => setMode(bot, msg, userSessions)); // Новый обработчик для /mode
-  bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
+  bot.onText(/\/mode$/, (msg) => setMode(bot, msg, userSessions)); // Обработчик для /mode
+  bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1])); // Обработчик для /mode_<mode>
 
   // Обработчик сообщений
   bot.on('message', async (msg) => {
@@ -142,7 +142,10 @@ export async function setupBot(bot, userSessions, openai) {
     { command: 'topic', description: 'Тема для обсуждения' },
     { command: 'progress', description: 'Твой прогресс' },
     { command: 'leaders', description: 'Таблица лидеров' },
-    { command: 'mode', description: 'Выбрать режим общения' } // Добавлена команда /mode
+    { command: 'mode', description: 'Показать доступные режимы общения' },
+    { command: 'mode_free_talk', description: 'Свободное общение на английском' },
+    { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
+    { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
   ]);
 
   console.log('🤖 Бот запущен и готов к работе!');

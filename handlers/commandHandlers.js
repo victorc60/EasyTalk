@@ -30,9 +30,10 @@ export async function start(bot, msg) {
 👋 <b>Привет, ${msg.from.first_name}!</b> Я твой помощник в изучении английского.
 
 📌 <b>Доступные режимы:</b>
-1. <b>Свободное общение</b> - просто пиши мне на английском
-2. <b>Ролевые игры</b> - общайся с разными персонажами
-3. <b>Проверка ошибок</b> - я исправлю твои ошибки
+1. <b>Свободное общение</b> - /mode_free_talk
+2. <b>Ролевые игры</b> - /mode_role_play
+3. <b>Проверка ошибок</b> - /mode_correction
+📋 Показать все режимы: /mode
 
 🎮 <b>Игры и активность:</b>
 🔤 Слово дня в 18:00
@@ -42,7 +43,6 @@ export async function start(bot, msg) {
 
 📊 /progress - твой прогресс
 🏆 /leaders - таблица лидеров
-⚙️ /mode - выбрать режим общения
 
 Выбирай что тебе интересно и практикуй английский!`;
 
@@ -87,11 +87,9 @@ export async function setMode(bot, msg, userSessions, mode) {
     const modeListMessage = `
 ⚙️ <b>Доступные режимы общения:</b>
 
-1. <b>free_talk</b> - Свободное общение на английском с подсказками
-2. <b>role_play</b> - Ролевые игры с персонажами
-3. <b>correction</b> - Проверка и исправление ошибок в сообщениях
-
-📌 Используйте: /mode_free_talk, /mode_role_play, /mode_correction
+1. <b>free_talk</b> - Свободное общение на английском с подсказками (/mode_free_talk)
+2. <b>role_play</b> - Ролевые игры с персонажами (/mode_role_play)
+3. <b>correction</b> - Проверка и исправление ошибок в сообщениях (/mode_correction)
     `;
     await sendUserMessage(bot, msg.chat.id, modeListMessage, { parse_mode: 'HTML' });
     return;
