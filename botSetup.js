@@ -58,6 +58,7 @@ function setupSchedulers(bot, userSessions) {
 
 async function setupBotCommands(bot) {
   try {
+    await bot.setMyCommands([]);
     await bot.setMyCommands([
       { command: 'start', description: 'Главное меню' },
       
