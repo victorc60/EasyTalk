@@ -1,7 +1,7 @@
 // botSetup.js
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
-import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
+import { sendUserMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, startRolePlay } from './features/botFeatures.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress } from './handlers/commandHandlers.js';
@@ -53,69 +53,32 @@ function setupSchedulers(bot, userSessions) {
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, cleanupInactiveUsers);
   } catch (error) {
     console.error('Ошибка настройки планировщиков:', error);
-    sendAdminMessage(bot, `‼️ Ошибка настройки планировщиков: ${error.message}`);
   }
 }
-function setupCommandHandlers(bot, userSessions) {
-    // Основные команды
-    bot.onText(/\/start/, (msg) => start(bot, msg));
-    bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
-    bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
-    bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
-    bot.onText(/\/mode/, (msg) => showModeSelection(bot, msg.chat.id));
-  
-    // Админские команды
-    bot.onText(/\/stats/, (msg) => {
-      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
-        handleStatsCommand(bot, msg);
-      }
-    });
-  
-    bot.onText(/\/broadcast/, (msg) => {
-      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
-        handleBroadcastCommand(bot, msg);
-      }
-    });
-  }
 
 async function setupBotCommands(bot) {
-    try {
-      // Удаление всех существующих команд
-      await bot.deleteMyCommands();
-      console.log('✅ Все команды бота удалены');
-  
-      // Установка только основных команд
-      const commands = [
-        { command: 'start', description: 'Главное меню' },
-        { command: 'topic', description: 'Тема для обсуждения' },
-        { command: 'progress', description: 'Твой прогресс' },
-        { command: 'leaders', description: 'Таблица лидеров' },
-        { command: 'mode', description: 'Выбор режима общения' }
-      ];
-      
-      await bot.setMyCommands(commands);
-      console.log('✅ Основные команды бота установлены:', JSON.stringify(commands));
-  
-      // Для административных команд используем отдельную область видимости
-      if (CONFIG.ADMIN_IDS && CONFIG.ADMIN_IDS.length > 0) {
-        const adminCommands = [
-          { command: 'stats', description: 'Статистика бота' },
-          { command: 'broadcast', description: 'Рассылка сообщения' }
-        ];
-        
-        await bot.setMyCommands(adminCommands, {
-          scope: { type: 'chat', chat_id: CONFIG.ADMIN_IDS[0] }
-        });
-        console.log('✅ Админские команды установлены');
-      }
-    } catch (error) {
-      console.error('❌ Ошибка установки команд бота:', error);
-      await sendAdminMessage(bot, `‼️ Ошибка установки команд бота: ${error.message}`);
-      throw error;
-    }
+  try {
+    await bot.setMyCommands([
+      { command: 'start', description: 'Главное меню' },
+      { command: 'roleplay', description: 'Ролевая игра с персонажем' },
+      { command: 'topic', description: 'Тема для обсуждения' },
+      { command: 'progress', description: 'Твой прогресс' },
+      { command: 'leaders', description: 'Таблица лидеров' },
+      { command: 'mode', description: 'Сменить режим общения' }
+    ]);
+  } catch (error) {
+    console.error('Ошибка установки команд бота:', error);
   }
+}
 
- 
+function setupCommandHandlers(bot, userSessions) {
+  bot.onText(/\/start/, (msg) => start(bot, msg));
+  bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
+  bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
+  bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
+  bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
+  bot.onText(/\/mode/, (msg) => showModeSelection(bot, msg.chat.id));
+}
 
 function setupCallbacks(bot, userSessions) {
   bot.on('callback_query', async (callbackQuery) => {
@@ -127,30 +90,18 @@ function setupCallbacks(bot, userSessions) {
       // Обработка выбора режима
       if (data.startsWith('mode_')) {
         const selectedMode = data.split('_')[1];
-        const validModes = Object.values(BOT_MODES).map(mode => mode.id);
-        if (!validModes.includes(selectedMode)) {
-          await sendUserMessage(
-            bot,
-            chatId,
-            `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`,
-            { parse_mode: 'HTML' }
-          );
-        } else {
-          userSessions.conversationModes.set(userId, selectedMode);
-          await sendUserMessage(
-            bot,
-            chatId,
-            `✅ Режим изменен на: <b>${getModeName(selectedMode)}</b>\n\n${getModeDescription(selectedMode)}`,
-            { parse_mode: 'HTML' }
-          );
-        }
+        userSessions.conversationModes.set(userId, selectedMode);
+        
+        await bot.sendMessage(
+          chatId,
+          `✅ Режим изменен на: <b>${getModeName(selectedMode)}</b>\n\n${getModeDescription(selectedMode)}`,
+          { parse_mode: 'HTML' }
+        );
       }
 
       await bot.answerCallbackQuery(callbackQuery.id);
     } catch (error) {
       console.error('Ошибка обработки callback:', error);
-      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
-      await sendAdminMessage(bot, `‼️ Ошибка обработки callback: ${error.message}`);
     }
   });
 }
@@ -183,7 +134,6 @@ function setupMessageHandler(bot, userSessions, openai) {
     } catch (error) {
       console.error('Ошибка обработки сообщения:', error);
       await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.');
-      await sendAdminMessage(bot, `‼️ Ошибка обработки сообщения: ${error.message}`);
     }
   });
 }
@@ -264,8 +214,7 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
       Keep explanations simple and clear.`;
       break;
     case BOT_MODES.ROLE_PLAY.id:
-      await startRolePlay(bot, chatId, userSessions);
-      return;
+      return; // Ролевые игры обрабатываются в handleActiveDialogs
     default: // FREE_TALK
       systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping answers under 3 sentences. 
       If they make mistakes, provide the correct version subtly in your response. 
@@ -287,36 +236,29 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
 }
 
 async function showModeSelection(bot, chatId) {
-  try {
-    await sendUserMessage(
-      bot,
-      chatId,
-      '🔘 <b>Выберите режим общения:</b>\n\nКаждый режим предлагает разный подход к практике английского языка.\nИспользуйте /mode_free_talk, /mode_correction, /mode_role_play для быстрого выбора.',
-      {
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [{
-              text: `${BOT_MODES.FREE_TALK.name} 🗣`,
-              callback_data: `mode_${BOT_MODES.FREE_TALK.id}`
-            }],
-            [{
-              text: `${BOT_MODES.CORRECTION.name} ✏️`,
-              callback_data: `mode_${BOT_MODES.CORRECTION.id}`
-            }],
-            [{
-              text: `${BOT_MODES.ROLE_PLAY.name} 🎭`,
-              callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}`
-            }]
-          ]
-        }
+  await bot.sendMessage(
+    chatId,
+    '🔘 <b>Выберите режим общения:</b>\n\nКаждый режим предлагает разный подход к практике английского языка.',
+    {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{
+            text: `${BOT_MODES.FREE_TALK.name} 🗣`,
+            callback_data: `mode_${BOT_MODES.FREE_TALK.id}`
+          }],
+          [{
+            text: `${BOT_MODES.CORRECTION.name} ✏️`,
+            callback_data: `mode_${BOT_MODES.CORRECTION.id}`
+          }],
+          [{
+            text: `${BOT_MODES.ROLE_PLAY.name} 🎭`,
+            callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}`
+          }]
+        ]
       }
-    );
-  } catch (error) {
-    console.error('Ошибка показа выбора режима:', error);
-    await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
-    await sendAdminMessage(bot, `‼️ Ошибка показа выбора режима: ${error.message}`);
-  }
+    }
+  );
 }
 
 function getModeName(modeId) {
