@@ -1,7 +1,6 @@
 // handlers/commandHandlers.js
 import User from '../models/User.js';
-import { sendUserMessage } from '../utils/botUtils.js';
-import { sendAdminMessage } from '../utils/botUtils.js';
+import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter } from '../features/botFeatures.js';
 
 export async function start(bot, msg) {
@@ -16,15 +15,15 @@ export async function start(bot, msg) {
         first_activity: new Date(),
         last_activity: new Date(),
         points: 0,
-        isActive: true
+        is_active: true
       }
     });
 
     if (created) {
       console.log(`Создан новый пользователь: ${msg.chat.id}`);
     } else {
-      console.log(`Пользователь уже существует: ${msg.chat.id}, обновляем isActive`);
-      await user.update({ isActive: true, last_activity: new Date() });
+      console.log(`Пользователь уже существует: ${msg.chat.id}, обновляем is_active`);
+      await user.update({ is_active: true, last_activity: new Date() });
     }
 
     const welcomeMessage = `
@@ -42,7 +41,8 @@ export async function start(bot, msg) {
 🎭 /roleplay - ролевая игра
 
 📊 /progress - твой прогресс
-🏆 /top - таблица лидеров
+🏆 /leaders - таблица лидеров
+⚙️ /mode - выбрать режим общения
 
 Выбирай что тебе интересно и практикуй английский!`;
 
@@ -66,7 +66,7 @@ export async function leaderboard(bot, msg) {
     );
     await sendAdminMessage(
       bot,
-      `‼️ Ошибка в команде /top:\n${error.message}\nStack: ${error.stack}`
+      `‼️ Ошибка в команде /leaders:\n${error.message}\nStack: ${error.stack}`
     );
   }
 }
@@ -81,13 +81,40 @@ export async function conversationTopic(bot, msg) {
 
 export async function setMode(bot, msg, userSessions, mode) {
   const validModes = ['free_talk', 'role_play', 'correction'];
+  
+  // Если mode не указан (вызов /mode), показываем список режимов
+  if (!mode) {
+    const modeListMessage = `
+⚙️ <b>Доступные режимы общения:</b>
+
+1. <b>free_talk</b> - Свободное общение на английском с подсказками
+2. <b>role_play</b> - Ролевые игры с персонажами
+3. <b>correction</b> - Проверка и исправление ошибок в сообщениях
+
+📌 Используйте: /mode_free_talk, /mode_role_play, /mode_correction
+    `;
+    await sendUserMessage(bot, msg.chat.id, modeListMessage, { parse_mode: 'HTML' });
+    return;
+  }
+
+  // Установка режима
   if (!validModes.includes(mode)) {
-    await sendUserMessage(bot, msg.chat.id, '⚠️ Неверный режим. Доступные: free_talk, role_play, correction');
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`,
+      { parse_mode: 'HTML' }
+    );
     return;
   }
   
   userSessions.conversationModes.set(msg.from.id, mode);
-  await sendUserMessage(bot, msg.chat.id, `✅ Режим установлен: ${mode}`);
+  await sendUserMessage(
+    bot,
+    msg.chat.id,
+    `✅ Режим установлен: <b>${mode}</b>`,
+    { parse_mode: 'HTML' }
+  );
 }
 
 export async function showProgress(bot, msg) {

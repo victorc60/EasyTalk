@@ -1,142 +1,149 @@
-// handlers/commandHandlers.js
-import User from '../models/User.js';
-import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
-import { startRolePlay, showLeaderboard, sendConversationStarter } from '../features/botFeatures.js';
+// botSetup.js
+import schedule from 'node-schedule';
+import { CONFIG } from './config.js';
+import { sendUserMessage } from './utils/botUtils.js';
+import { dailyFactBroadcast, wordGameBroadcast, startRolePlay } from './features/botFeatures.js';
+import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress } from './handlers/commandHandlers.js';
+import User from './models/User.js';
+import { OpenAI } from 'openai';
 
-export async function start(bot, msg) {
-  try {
-    const [user, created] = await User.findOrCreate({
-      where: { telegram_id: msg.chat.id },
-      defaults: {
-        telegram_id: msg.chat.id,
-        username: msg.from.username || `${msg.from.first_name}${msg.from.last_name ? ` ${msg.from.last_name}` : ''}`,
-        first_name: msg.from.first_name,
-        last_name: msg.from.last_name,
-        first_activity: new Date(),
-        last_activity: new Date(),
-        points: 0,
-        is_active: true
+export async function setupBot(bot, userSessions, openai) {
+  // Настройка планировщиков
+  schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, () => dailyFactBroadcast(bot));
+  schedule.scheduleJob(CONFIG.WORD_GAME_TIME, () => wordGameBroadcast(bot, userSessions));
+  schedule.scheduleJob(CONFIG.CLEANUP_TIME, cleanupInactiveUsers);
+
+  // Настройка обработчиков команд
+  bot.onText(/\/start/, (msg) => start(bot, msg));
+  bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
+  bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
+  bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
+  bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
+  bot.onText(/\/mode$/, (msg) => setMode(bot, msg, userSessions)); // Новый обработчик для /mode
+  bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
+
+  // Обработчик сообщений
+  bot.on('message', async (msg) => {
+    if (!msg.text || msg.text.startsWith('/')) return;
+
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const text = msg.text.trim();
+    const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
+
+    try {
+      await User.update(
+        { last_activity: new Date() },
+        { where: { telegram_id: userId } }
+      );
+
+      if (userSessions.wordGames.has(userId)) {
+        const session = userSessions.wordGames.get(userId);
+        const isCorrect = text.toLowerCase() === session.translation;
+        
+        clearTimeout(session.timer);
+        userSessions.wordGames.delete(userId);
+
+        if (isCorrect) {
+          await awardPoints(userId, 15);
+          await sendUserMessage(
+            bot,
+            chatId,
+            `🎉 Поздравляем! Вы правильно перевели слово "${session.word}" как "${session.translation}"! +15 баллов!`
+          );
+        } else {
+          await sendUserMessage(
+            bot,
+            chatId,
+            `🤔 Неверный перевод. Правильный ответ: "${session.word}" → "${session.translation}". Не переживайте, в следующий раз получится!`
+          );
+        }
+        return;
       }
-    });
 
-    if (created) {
-      console.log(`Создан новый пользователь: ${msg.chat.id}`);
-    } else {
-      console.log(`Пользователь уже существует: ${msg.chat.id}, обновляем is_active`);
-      await user.update({ is_active: true, last_activity: new Date() });
+      if (userSessions.activeDialogs.has(chatId)) {
+        const dialog = userSessions.activeDialogs.get(chatId);
+        dialog.messagesLeft--;
+        dialog.dialogHistory.push({ role: "user", content: text });
+
+        await bot.sendChatAction(chatId, 'typing');
+        
+        const { choices } = await openai.chat.completions.create({
+          model: CONFIG.GPT_MODEL,
+          messages: dialog.dialogHistory,
+          temperature: 0.9,
+          max_tokens: 150
+        });
+
+        const response = choices[0]?.message?.content;
+        dialog.dialogHistory.push({ role: "assistant", content: response });
+
+        if (dialog.messagesLeft <= 0) {
+          userSessions.activeDialogs.delete(chatId);
+          await awardPoints(userId, 30);
+          await sendUserMessage(
+            bot,
+            chatId,
+            `👋 ${dialog.character.farewell}\n\nДиалог завершен! +30 очков за практику!`
+          );
+        } else {
+          await sendUserMessage(
+            bot,
+            chatId,
+            `${response}\n\n(Осталось сообщений: ${dialog.messagesLeft})`
+          );
+        }
+        return;
+      }
+
+      await bot.sendChatAction(chatId, 'typing');
+      
+      let systemPrompt = '';
+      switch (userMode) {
+        case 'free_talk':
+          systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping answers under 3 sentences. 
+          If they make mistakes, provide the correct version subtly in your response. 
+          Ask follow-up questions to continue the conversation.`;
+          break;
+        case 'correction':
+          systemPrompt = `You're an English corrector. Identify and correct any errors in the student's message. 
+          Provide the corrected version first, then briefly explain the mistakes in Russian. 
+          Keep explanations simple and clear.`;
+          break;
+        case 'role_play':
+          await startRolePlay(bot, chatId, userSessions);
+          return;
+      }
+
+      const { choices } = await openai.chat.completions.create({
+        model: CONFIG.GPT_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: text }
+        ],
+        temperature: 0.7,
+        max_tokens: 200
+      });
+
+      await sendUserMessage(bot, chatId, choices[0]?.message?.content);
+      await awardPoints(userId, 1);
+
+    } catch (error) {
+      console.error('Ошибка обработки сообщения:', error.message);
+      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.');
     }
+  });
 
-    const welcomeMessage = `
-👋 <b>Привет, ${msg.from.first_name}!</b> Я твой помощник в изучении английского.
+  // Установка команд бота
+  await bot.setMyCommands([
+    { command: 'start', description: 'Главное меню' },
+    { command: 'roleplay', description: 'Ролевая игра с персонажем' },
+    { command: 'topic', description: 'Тема для обсуждения' },
+    { command: 'progress', description: 'Твой прогресс' },
+    { command: 'leaders', description: 'Таблица лидеров' },
+    { command: 'mode', description: 'Выбрать режим общения' } // Добавлена команда /mode
+  ]);
 
-📌 <b>Доступные режимы:</b>
-1. <b>Свободное общение</b> - просто пиши мне на английском
-2. <b>Ролевые игры</b> - общайся с разными персонажами
-3. <b>Проверка ошибок</b> - я исправлю твои ошибки
-
-🎮 <b>Игры и активность:</b>
-🔤 Слово дня в 18:00
-📚 Интересные факты в 17:00
-💬 /topic - тема для обсуждения
-🎭 /roleplay - ролевая игра
-
-📊 /progress - твой прогресс
-🏆 /leaders - таблица лидеров
-⚙️ /mode - выбрать режим общения
-
-Выбирай что тебе интересно и практикуй английский!`;
-
-    await sendUserMessage(bot, msg.chat.id, welcomeMessage, { parse_mode: 'HTML' });
-  } catch (error) {
-    console.error('Ошибка при обработке команды /start:', error.message);
-    await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при регистрации. Попробуйте еще раз.');
-  }
-}
-
-export async function leaderboard(bot, msg) {
-  try {
-    await showLeaderboard(bot, msg.chat.id, msg.from.id);
-  } catch (error) {
-    console.error('Ошибка в команде /leaders:', error.message, error.stack);
-    await sendUserMessage(
-      bot,
-      msg.chat.id,
-      '⚠️ Не удалось загрузить таблицу лидеров. Попробуйте позже.',
-      { parse_mode: 'HTML' }
-    );
-    await sendAdminMessage(
-      bot,
-      `‼️ Ошибка в команде /leaders:\n${error.message}\nStack: ${error.stack}`
-    );
-  }
-}
-
-export async function startRolePlayCommand(bot, msg, userSessions) {
-  await startRolePlay(bot, msg.chat.id, userSessions);
-}
-
-export async function conversationTopic(bot, msg) {
-  await sendConversationStarter(bot, msg.chat.id);
-}
-
-export async function setMode(bot, msg, userSessions, mode) {
-  const validModes = ['free_talk', 'role_play', 'correction'];
-  
-  // Если mode не указан (вызов /mode), показываем список режимов
-  if (!mode) {
-    const modeListMessage = `
-⚙️ <b>Доступные режимы общения:</b>
-
-1. <b>free_talk</b> - Свободное общение на английском с подсказками
-2. <b>role_play</b> - Ролевые игры с персонажами
-3. <b>correction</b> - Проверка и исправление ошибок в сообщениях
-
-📌 Используйте: /mode_free_talk, /mode_role_play, /mode_correction
-    `;
-    await sendUserMessage(bot, msg.chat.id, modeListMessage, { parse_mode: 'HTML' });
-    return;
-  }
-
-  // Установка режима
-  if (!validModes.includes(mode)) {
-    await sendUserMessage(
-      bot,
-      msg.chat.id,
-      `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`,
-      { parse_mode: 'HTML' }
-    );
-    return;
-  }
-  
-  userSessions.conversationModes.set(msg.from.id, mode);
-  await sendUserMessage(
-    bot,
-    msg.chat.id,
-    `✅ Режим установлен: <b>${mode}</b>`,
-    { parse_mode: 'HTML' }
-  );
-}
-
-export async function showProgress(bot, msg) {
-  try {
-    const user = await User.findOne({ where: { telegram_id: msg.from.id } });
-    if (!user) {
-      await sendUserMessage(bot, msg.chat.id, 'ℹ️ Сначала запустите бота командой /start');
-      return;
-    }
-    
-    const progressMessage = `
-📊 <b>Твой прогресс:</b>
-
-🏅 Очков: ${user.points}
-📅 Первый визит: ${user.first_activity.toLocaleDateString()}
-🔄 Последняя активность: ${user.last_activity.toLocaleDateString()}
-
-Продолжай практиковать английский!`;
-    
-    await sendUserMessage(bot, msg.chat.id, progressMessage, { parse_mode: 'HTML' });
-  } catch (error) {
-    console.error('Ошибка при отображении прогресса:', error.message);
-    await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при загрузке прогресса.');
-  }
+  console.log('🤖 Бот запущен и готов к работе!');
 }
