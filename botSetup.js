@@ -58,44 +58,63 @@ function setupSchedulers(bot, userSessions) {
 }
 
 async function setupBotCommands(bot) {
-  try {
-    // Удаление всех существующих команд
-    await bot.deleteMyCommands({ scope: { type: 'default' }, language_code: 'ru' });
-    console.log('✅ Все команды бота удалены');
-
-    // Установка новых команд
-    const commands = [
-      { command: 'start', description: 'Главное меню' },
-
-      { command: 'topic', description: 'Тема для обсуждения' },
-      { command: 'progress', description: 'Твой прогресс' },
-      { command: 'leaders', description: 'Таблица лидеров' },
-      { command: 'mode', description: 'Выбор режима общения' },
-      { command: 'mode_free_talk', description: 'Свободное общение на английском' },
-      { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
-      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
-    ];
-    await bot.setMyCommands(commands, {
-      scope: { type: 'default' },
-      language_code: 'ru'
-    });
-    console.log('✅ Команды бота успешно установлены:', JSON.stringify(commands));
-  } catch (error) {
-    console.error('❌ Ошибка установки команд бота:', error);
-    await sendAdminMessage(bot, `‼️ Ошибка установки команд бота: ${error.message}`);
-    throw error;
+    try {
+      // Удаление всех существующих команд
+      await bot.deleteMyCommands();
+      console.log('✅ Все команды бота удалены');
+  
+      // Установка только основных команд
+      const commands = [
+        { command: 'start', description: 'Главное меню' },
+        { command: 'topic', description: 'Тема для обсуждения' },
+        { command: 'progress', description: 'Твой прогресс' },
+        { command: 'leaders', description: 'Таблица лидеров' },
+        { command: 'mode', description: 'Выбор режима общения' }
+      ];
+      
+      await bot.setMyCommands(commands);
+      console.log('✅ Основные команды бота установлены:', JSON.stringify(commands));
+  
+      // Для административных команд используем отдельную область видимости
+      if (CONFIG.ADMIN_IDS && CONFIG.ADMIN_IDS.length > 0) {
+        const adminCommands = [
+          { command: 'stats', description: 'Статистика бота' },
+          { command: 'broadcast', description: 'Рассылка сообщения' }
+        ];
+        
+        await bot.setMyCommands(adminCommands, {
+          scope: { type: 'chat', chat_id: CONFIG.ADMIN_IDS[0] }
+        });
+        console.log('✅ Админские команды установлены');
+      }
+    } catch (error) {
+      console.error('❌ Ошибка установки команд бота:', error);
+      await sendAdminMessage(bot, `‼️ Ошибка установки команд бота: ${error.message}`);
+      throw error;
+    }
   }
-}
 
-function setupCommandHandlers(bot, userSessions) {
-  bot.onText(/\/start/, (msg) => start(bot, msg));
-  bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
-
-  bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
-  bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
-  bot.onText(/\/mode$/, (msg) => showModeSelection(bot, msg.chat.id));
-  bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
-}
+  function setupCommandHandlers(bot, userSessions) {
+    // Основные команды
+    bot.onText(/\/start/, (msg) => start(bot, msg));
+    bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
+    bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
+    bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
+    bot.onText(/\/mode/, (msg) => showModeSelection(bot, msg.chat.id));
+  
+    // Админские команды
+    bot.onText(/\/stats/, (msg) => {
+      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
+        handleStatsCommand(bot, msg);
+      }
+    });
+  
+    bot.onText(/\/broadcast/, (msg) => {
+      if (CONFIG.ADMIN_IDS.includes(msg.from.id)) {
+        handleBroadcastCommand(bot, msg);
+      }
+    });
+  }
 
 function setupCallbacks(bot, userSessions) {
   bot.on('callback_query', async (callbackQuery) => {
