@@ -100,6 +100,35 @@ export async function startRolePlay(bot, chatId, userSessions, character = null)
     { parse_mode: 'HTML' }
   );
 }
+export async function broadcastMessage(bot, message) {
+  try {
+    const users = await User.findAll({ where: { is_active: true } });
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const user of users) {
+      try {
+        await sendUserMessage(
+          bot,
+          user.telegram_id,
+          message,
+          { parse_mode: 'HTML' }
+        );
+        successCount++;
+      } catch (error) {
+        console.error(`Ошибка отправки сообщения пользователю ${user.telegram_id}:`, error);
+        errorCount++;
+      }
+    }
+
+    const summary = `📢 Рассылка завершена:\n✅ Успешно отправлено: ${successCount} пользователям\n❌ Ошибок: ${errorCount}`;
+    await sendAdminMessage(bot, summary);
+    console.log(summary);
+  } catch (error) {
+    console.error('Ошибка при выполнении рассылки:', error);
+    await sendAdminMessage(bot, `‼️ Ошибка рассылки: ${error.message}`);
+  }
+}
 
 export async function sendConversationStarter(bot, chatId) {
   const topic = await conversationTopic();
@@ -110,6 +139,7 @@ export async function sendConversationStarter(bot, chatId) {
   
   await sendUserMessage(bot, chatId, message, { parse_mode: 'HTML' });
 }
+
 
 export async function showLeaderboard(bot, chatId, userId) {
   try {

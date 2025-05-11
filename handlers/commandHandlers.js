@@ -1,7 +1,7 @@
 // handlers/commandHandlers.js
 import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
-import { startRolePlay, showLeaderboard, sendConversationStarter } from '../features/botFeatures.js';
+import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 
 export async function start(bot, msg) {
   try {
@@ -160,5 +160,37 @@ export async function showProgress(bot, msg) {
       bot,
       `‼️ Ошибка в команде /progress: ${error.message}\nStack: ${error.stack}`
     );
+  }
+}
+
+export async function broadcast(bot, msg, userSessions) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '⚠️ Эта команда доступна только администратору.',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    userSessions.broadcastPending = true;
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '📢 Введите текст для рассылки всем пользователям:',
+      { parse_mode: 'HTML' }
+    );
+  } catch (error) {
+    console.error('Ошибка при обработке команды /broadcast:', error);
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '⚠️ Произошла ошибка при подготовке рассылки.',
+      { parse_mode: 'HTML' }
+    );
+    await sendAdminMessage(bot, `‼️ Ошибка команды /broadcast: ${error.message}`);
   }
 }

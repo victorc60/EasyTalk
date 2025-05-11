@@ -1,23 +1,21 @@
 // index.js
-import 'dotenv/config'; // Для локальной разработки, на Railway не обязательно
+import 'dotenv/config';
 import TelegramBot from 'node-telegram-bot-api';
 import { OpenAI } from 'openai';
 import sequelize from './database/database.js';
 import { sendAdminMessage } from './utils/botUtils.js';
 import { setupBot } from './botSetup.js';
 
-// Инициализация
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Хранилища состояний
 const userSessions = {
   wordGames: new Map(),
   activeDialogs: new Map(),
-  conversationModes: new Map()
+  conversationModes: new Map(),
+  broadcastPending: false // Добавлено для рассылки
 };
 
-// Инициализация базы данных
 async function initializeDatabase() {
   try {
     await sequelize.authenticate();
@@ -29,7 +27,6 @@ async function initializeDatabase() {
   }
 }
 
-// Обработка SIGTERM
 process.on('SIGTERM', async () => {
   console.log('Получен сигнал SIGTERM. Завершаем работу...');
   try {
@@ -38,19 +35,17 @@ process.on('SIGTERM', async () => {
     console.log('Соединение с базой данных закрыто');
     process.exit(0);
   } catch (error) {
-    console.error('Ошибка при завершении работы:', error.message);
+    console.error('Ошибка при завершении работы:', error);
     process.exit(1);
   }
 });
 
-// Обработка ошибок
 process.on('unhandledRejection', (error) => {
   console.error('Необработанная ошибка:', error);
   sendAdminMessage(bot, `‼️ Критическая ошибка: ${error.message}`)
     .catch(err => console.error('Не удалось отправить сообщение об ошибке:', err));
 });
 
-// Запуск приложения
 (async () => {
   try {
     await initializeDatabase();

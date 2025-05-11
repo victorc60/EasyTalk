@@ -1,10 +1,10 @@
 // botSetup.js
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
-import { sendUserMessage } from './utils/botUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, startRolePlay } from './features/botFeatures.js';
+import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
+import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast } from './handlers/commandHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
 
@@ -53,21 +53,37 @@ function setupSchedulers(bot, userSessions) {
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, cleanupInactiveUsers);
   } catch (error) {
     console.error('Ошибка настройки планировщиков:', error);
+    sendAdminMessage(bot, `‼️ Ошибка настройки планировщиков: ${error.message}`);
   }
 }
 
 async function setupBotCommands(bot) {
   try {
-    await bot.setMyCommands([
+    // Удаление всех существующих команд
+    await bot.deleteMyCommands({ scope: { type: 'default' }, language_code: 'ru' });
+    console.log('✅ Все команды бота удалены');
+
+    // Установка новых команд
+    const commands = [
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
       { command: 'topic', description: 'Тема для обсуждения' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
-      { command: 'mode', description: 'Сменить режим общения' }
-    ]);
+      { command: 'mode', description: 'Выбор режима общения' },
+      { command: 'mode_free_talk', description: 'Свободное общение на английском' },
+      { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
+      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
+    ];
+    await bot.setMyCommands(commands, {
+      scope: { type: 'default' },
+      language_code: 'ru'
+    });
+    console.log('✅ Команды бота успешно установлены:', JSON.stringify(commands));
   } catch (error) {
-    console.error('Ошибка установки команд бота:', error);
+    console.error('❌ Ошибка установки команд бота:', error);
+    await sendAdminMessage(bot, `‼️ Ошибка установки команд бота: ${error.message}`);
+    throw error;
   }
 }
 
@@ -77,7 +93,9 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
   bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
-  bot.onText(/\/mode/, (msg) => showModeSelection(bot, msg.chat.id));
+  bot.onText(/\/mode$/, (msg) => showModeSelection(bot, msg.chat.id));
+  bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
+  bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions)); // Новая команда
 }
 
 function setupCallbacks(bot, userSessions) {
@@ -90,18 +108,30 @@ function setupCallbacks(bot, userSessions) {
       // Обработка выбора режима
       if (data.startsWith('mode_')) {
         const selectedMode = data.split('_')[1];
-        userSessions.conversationModes.set(userId, selectedMode);
-        
-        await bot.sendMessage(
-          chatId,
-          `✅ Режим изменен на: <b>${getModeName(selectedMode)}</b>\n\n${getModeDescription(selectedMode)}`,
-          { parse_mode: 'HTML' }
-        );
+        const validModes = Object.values(BOT_MODES).map(mode => mode.id);
+        if (!validModes.includes(selectedMode)) {
+          await sendUserMessage(
+            bot,
+            chatId,
+            `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`,
+            { parse_mode: 'HTML' }
+          );
+        } else {
+          userSessions.conversationModes.set(userId, selectedMode);
+          await sendUserMessage(
+            bot,
+            chatId,
+            `✅ Режим изменен на: <b>${getModeName(selectedMode)}</b>\n\n${getModeDescription(selectedMode)}`,
+            { parse_mode: 'HTML' }
+          );
+        }
       }
 
       await bot.answerCallbackQuery(callbackQuery.id);
     } catch (error) {
       console.error('Ошибка обработки callback:', error);
+      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
+      await sendAdminMessage(bot, `‼️ Ошибка обработки callback: ${error.message}`);
     }
   });
 }
@@ -116,6 +146,13 @@ function setupMessageHandler(bot, userSessions, openai) {
     const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
 
     try {
+      // Проверка, ожидает ли админ текст для рассылки
+      if (userSessions.broadcastPending && userId.toString() === process.env.ADMIN_ID) {
+        userSessions.broadcastPending = false;
+        await broadcastMessage(bot, text); // Отправка введённого текста
+        return;
+      }
+
       // Обновляем время последней активности
       await User.update(
         { last_activity: new Date() },
@@ -134,6 +171,7 @@ function setupMessageHandler(bot, userSessions, openai) {
     } catch (error) {
       console.error('Ошибка обработки сообщения:', error);
       await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.');
+      await sendAdminMessage(bot, `‼️ Ошибка обработки сообщения: ${error.message}`);
     }
   });
 }
@@ -214,7 +252,8 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
       Keep explanations simple and clear.`;
       break;
     case BOT_MODES.ROLE_PLAY.id:
-      return; // Ролевые игры обрабатываются в handleActiveDialogs
+      await startRolePlay(bot, chatId, userSessions);
+      return;
     default: // FREE_TALK
       systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping answers under 3 sentences. 
       If they make mistakes, provide the correct version subtly in your response. 
@@ -236,29 +275,36 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
 }
 
 async function showModeSelection(bot, chatId) {
-  await bot.sendMessage(
-    chatId,
-    '🔘 <b>Выберите режим общения:</b>\n\nКаждый режим предлагает разный подход к практике английского языка.',
-    {
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [
-          [{
-            text: `${BOT_MODES.FREE_TALK.name} 🗣`,
-            callback_data: `mode_${BOT_MODES.FREE_TALK.id}`
-          }],
-          [{
-            text: `${BOT_MODES.CORRECTION.name} ✏️`,
-            callback_data: `mode_${BOT_MODES.CORRECTION.id}`
-          }],
-          [{
-            text: `${BOT_MODES.ROLE_PLAY.name} 🎭`,
-            callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}`
-          }]
-        ]
+  try {
+    await sendUserMessage(
+      bot,
+      chatId,
+      '🔘 <b>Выберите режим общения:</b>\n\nКаждый режим предлагает разный подход к практике английского языка.\nИспользуйте /mode_free_talk, /mode_correction, /mode_role_play для быстрого выбора.',
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{
+              text: `${BOT_MODES.FREE_TALK.name} 🗣`,
+              callback_data: `mode_${BOT_MODES.FREE_TALK.id}`
+            }],
+            [{
+              text: `${BOT_MODES.CORRECTION.name} ✏️`,
+              callback_data: `mode_${BOT_MODES.CORRECTION.id}`
+            }],
+            [{
+              text: `${BOT_MODES.ROLE_PLAY.name} 🎭`,
+              callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}`
+            }]
+          ]
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    console.error('Ошибка показа выбора режима:', error);
+    await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
+    await sendAdminMessage(bot, `‼️ Ошибка показа выбора режима: ${error.message}`);
+  }
 }
 
 function getModeName(modeId) {
