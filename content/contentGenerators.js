@@ -3,6 +3,7 @@ import { OpenAI } from 'openai';
 import { CONFIG } from '../config.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const usedFactsCache = new Set();
 
 async function generateEnglishContent(prompt, format = 'text') {
   try {
@@ -40,7 +41,7 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  const prompt = `Generate an interesting English language fact with Russian translation. Include:
+  const prompt = `Generate an interesting English language fact with Russian translation that hasn't been used recently. Include:
   - The fact in English
   - Translation in Russian
   - Brief explanation (1 sentence)
@@ -49,9 +50,40 @@ export async function dailyFact() {
   🇷🇺 [translation]
   💡 [explanation]`;
   
-  const fact = await generateEnglishContent(prompt);
-  return fact || 
-    `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
+  let attempts = 0;
+  const maxAttempts = 5;
+  let fact = null;
+
+  while (attempts < maxAttempts) {
+    fact = await generateEnglishContent(prompt);
+    
+    // Если не удалось сгенерировать факт, возвращаем дефолтный
+    if (!fact) {
+      const defaultFact = `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
+      return defaultFact;
+    }
+    
+    // Проверяем, не использовался ли этот факт ранее
+    const factKey = fact.substring(0, 100); // Берем начало для идентификации
+    if (!usedFactsCache.has(factKey)) {
+      usedFactsCache.add(factKey);
+      
+      // Ограничиваем размер кэша (например, храним 30 последних фактов)
+      if (usedFactsCache.size > 30) {
+        const oldest = usedFactsCache.values().next().value;
+        usedFactsCache.delete(oldest);
+      }
+      
+      return fact;
+    }
+    
+    attempts++;
+  }
+  
+  // Если после нескольких попыток все равно получаем повтор, возвращаем дефолтный
+  console.warn(`Не удалось сгенерировать уникальный факт после ${maxAttempts} попыток`);
+  const defaultFact = `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
+  return defaultFact;
 }
 
 export async function wordOfTheDay() {
