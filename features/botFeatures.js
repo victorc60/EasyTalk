@@ -130,7 +130,6 @@ export async function broadcastMessage(bot, content) {
         console.error(`Ошибка отправки сообщения пользователю ${user.telegram_id}:`, error);
         errorCount++;
       }
-      // Задержка для избежания лимитов Telegram
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 

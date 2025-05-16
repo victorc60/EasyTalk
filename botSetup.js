@@ -49,7 +49,13 @@ export async function setupBot(bot, userSessions, openai) {
 function setupSchedulers(bot, userSessions) {
   try {
     schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, () => dailyFactBroadcast(bot));
-    schedule.scheduleJob(CONFIG.WORD_GAME_TIME, () => wordGameBroadcast(bot, userSessions));
+    
+    CONFIG.WORD_GAME_TIMES.forEach((time, index) => {
+      schedule.scheduleJob(`wordGame${index}`, time, () => {
+        console.log(`Запуск wordGameBroadcast в ${time.hour}:${time.minute} ${time.tz}`);
+        wordGameBroadcast(bot, userSessions);
+      });
+    });
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, cleanupInactiveUsers);
   } catch (error) {
     console.error('Ошибка настройки планировщиков:', error);
@@ -164,11 +170,14 @@ function setupMessageHandler(bot, userSessions, openai) {
     const userId = msg.from.id;
     const text = msg.text?.trim();
     const photo = msg.photo;
+    const caption = msg.caption?.trim(); // Подпись к картинке
 
     try {
       // Проверка, ожидает ли админ контент для рассылки
-      if (userSessions.broadcastPending && userId.toString() === process.env.ADMIN_ID) {
-        if (!text && !photo) {
+      if (userSessions.broadcastPending && (userId.toString() === process.env.ADMIN_ID || userId.toString() === "340048933")) {
+        console.log('Получено сообщение для рассылки:', { text, caption, hasPhoto: !!photo });
+
+        if (!text && !photo && !caption) {
           await sendUserMessage(
             bot,
             chatId,
@@ -178,12 +187,14 @@ function setupMessageHandler(bot, userSessions, openai) {
           return;
         }
 
-        // Сохраняем текст, если есть
+        // Сохраняем текст из text или caption
         if (text) {
           userSessions.broadcastContent.text = text;
+        } else if (caption) {
+          userSessions.broadcastContent.text = caption;
         }
 
-        // Сохраняем картинку, если есть (берём фото с максимальным качеством)
+        // Сохраняем картинку, если есть
         if (photo) {
           const photoId = photo[photo.length - 1].file_id;
           const file = await bot.getFile(photoId);
@@ -192,6 +203,8 @@ function setupMessageHandler(bot, userSessions, openai) {
 
         // Показываем предпросмотр
         const previewMessage = userSessions.broadcastContent.text || '📷 Картинка без текста';
+        console.log('Предпросмотр рассылки:', userSessions.broadcastContent);
+
         if (userSessions.broadcastContent.photo) {
           await bot.sendPhoto(
             chatId,
@@ -245,9 +258,11 @@ function setupMessageHandler(bot, userSessions, openai) {
       // Обработка активных диалогов
       if (await handleActiveDialogs(bot, chatId, userId, text, userSessions, openai)) return;
 
-      // Основная обработка сообщений по режимам
-      const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
-      await handleRegularMessage(bot, chatId, userId, text, userMode, openai);
+      // Основная обработка текстовых сообщений
+      if (text) {
+        const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
+        await handleRegularMessage(bot, chatId, userId, text, userMode, openai);
+      }
 
     } catch (error) {
       console.error('Ошибка обработки сообщения:', error);
