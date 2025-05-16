@@ -65,7 +65,7 @@ export async function dailyFact() {
     
   
     
-  ];
+
   
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
