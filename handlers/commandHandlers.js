@@ -36,8 +36,8 @@ export async function start(bot, msg) {
 📋 Показать режимы с выбором: /mode
 
 🎮 <b>Игры и активность:</b>
-🔤 Слово дня в 18:00
-📚 Интересные факты в 17:00
+🔤 Слово дня в 18:30
+📚 Интересные факты в 17:3  0
 💬 /topic - тема для обсуждения
 🎭 /roleplay - ролевая игра
 
@@ -166,7 +166,7 @@ export async function showProgress(bot, msg) {
 export async function broadcast(bot, msg, userSessions) {
   try {
     const userId = msg.from.id.toString();
-    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+    if (userId !== process.env.ADMIN_ID) {
       await sendUserMessage(
         bot,
         msg.chat.id,
@@ -177,10 +177,11 @@ export async function broadcast(bot, msg, userSessions) {
     }
 
     userSessions.broadcastPending = true;
+    userSessions.broadcastContent = { text: null, photo: null };
     await sendUserMessage(
       bot,
       msg.chat.id,
-      '📢 Введите текст для рассылки всем пользователям:',
+      '📢 Отправьте текст, картинку или оба для рассылки всем пользователям.',
       { parse_mode: 'HTML' }
     );
   } catch (error) {

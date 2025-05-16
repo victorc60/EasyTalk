@@ -100,7 +100,7 @@ export async function startRolePlay(bot, chatId, userSessions, character = null)
     { parse_mode: 'HTML' }
   );
 }
-export async function broadcastMessage(bot, message) {
+export async function broadcastMessage(bot, content) {
   try {
     const users = await User.findAll({ where: { is_active: true } });
     let successCount = 0;
@@ -108,17 +108,30 @@ export async function broadcastMessage(bot, message) {
 
     for (const user of users) {
       try {
-        await sendUserMessage(
-          bot,
-          user.telegram_id,
-          message,
-          { parse_mode: 'HTML' }
-        );
+        if (content.photo) {
+          await bot.sendPhoto(
+            user.telegram_id,
+            content.photo,
+            {
+              caption: content.text || undefined,
+              parse_mode: 'HTML'
+            }
+          );
+        } else if (content.text) {
+          await sendUserMessage(
+            bot,
+            user.telegram_id,
+            content.text,
+            { parse_mode: 'HTML' }
+          );
+        }
         successCount++;
       } catch (error) {
         console.error(`Ошибка отправки сообщения пользователю ${user.telegram_id}:`, error);
         errorCount++;
       }
+      // Задержка для избежания лимитов Telegram
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     const summary = `📢 Рассылка завершена:\n✅ Успешно отправлено: ${successCount} пользователям\n❌ Ошибок: ${errorCount}`;

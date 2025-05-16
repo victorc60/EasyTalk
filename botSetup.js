@@ -95,7 +95,7 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
   bot.onText(/\/mode$/, (msg) => showModeSelection(bot, msg.chat.id));
   bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
-  bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions)); // Новая команда
+  bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions));
 }
 
 function setupCallbacks(bot, userSessions) {
@@ -127,10 +127,32 @@ function setupCallbacks(bot, userSessions) {
         }
       }
 
+      // Обработка подтверждения рассылки
+      if (data === 'confirm_broadcast') {
+        if (userId.toString() !== process.env.ADMIN_ID) {
+          await sendUserMessage(bot, chatId, '⚠️ Только админ может подтвердить рассылку.', { parse_mode: 'HTML' });
+          return;
+        }
+        await broadcastMessage(bot, userSessions.broadcastContent);
+        userSessions.broadcastPending = false;
+        userSessions.broadcastContent = { text: null, photo: null };
+        await sendUserMessage(bot, chatId, '📢 Рассылка начата!', { parse_mode: 'HTML' });
+      }
+
+      if (data === 'cancel_broadcast') {
+        if (userId.toString() !== process.env.ADMIN_ID) {
+          await sendUserMessage(bot, chatId, '⚠️ Только админ может отменить рассылку.', { parse_mode: 'HTML' });
+          return;
+        }
+        userSessions.broadcastPending = false;
+        userSessions.broadcastContent = { text: null, photo: null };
+        await sendUserMessage(bot, chatId, '❌ Рассылка отменена.', { parse_mode: 'HTML' });
+      }
+
       await bot.answerCallbackQuery(callbackQuery.id);
     } catch (error) {
       console.error('Ошибка обработки callback:', error);
-      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
+      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при обработке действия.');
       await sendAdminMessage(bot, `‼️ Ошибка обработки callback: ${error.message}`);
     }
   });
@@ -138,20 +160,78 @@ function setupCallbacks(bot, userSessions) {
 
 function setupMessageHandler(bot, userSessions, openai) {
   bot.on('message', async (msg) => {
-    if (!msg.text || msg.text.startsWith('/')) return;
-
     const chatId = msg.chat.id;
     const userId = msg.from.id;
-    const text = msg.text.trim();
-    const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
+    const text = msg.text?.trim();
+    const photo = msg.photo;
 
     try {
-      // Проверка, ожидает ли админ текст для рассылки
+      // Проверка, ожидает ли админ контент для рассылки
       if (userSessions.broadcastPending && userId.toString() === process.env.ADMIN_ID) {
-        userSessions.broadcastPending = false;
-        await broadcastMessage(bot, text); // Отправка введённого текста
+        if (!text && !photo) {
+          await sendUserMessage(
+            bot,
+            chatId,
+            '⚠️ Пожалуйста, отправьте текст, картинку или оба.',
+            { parse_mode: 'HTML' }
+          );
+          return;
+        }
+
+        // Сохраняем текст, если есть
+        if (text) {
+          userSessions.broadcastContent.text = text;
+        }
+
+        // Сохраняем картинку, если есть (берём фото с максимальным качеством)
+        if (photo) {
+          const photoId = photo[photo.length - 1].file_id;
+          const file = await bot.getFile(photoId);
+          userSessions.broadcastContent.photo = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+        }
+
+        // Показываем предпросмотр
+        const previewMessage = userSessions.broadcastContent.text || '📷 Картинка без текста';
+        if (userSessions.broadcastContent.photo) {
+          await bot.sendPhoto(
+            chatId,
+            userSessions.broadcastContent.photo,
+            {
+              caption: userSessions.broadcastContent.text || undefined,
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: '✅ Подтвердить', callback_data: 'confirm_broadcast' },
+                    { text: '❌ Отменить', callback_data: 'cancel_broadcast' }
+                  ]
+                ]
+              }
+            }
+          );
+        } else {
+          await sendUserMessage(
+            bot,
+            chatId,
+            `📢 Предпросмотр рассылки:\n\n${previewMessage}\n\nПодтвердить отправку?`,
+            {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: '✅ Подтвердить', callback_data: 'confirm_broadcast' },
+                    { text: '❌ Отменить', callback_data: 'cancel_broadcast' }
+                  ]
+                ]
+              }
+            }
+          );
+        }
         return;
       }
+
+      // Пропускаем команды
+      if (text && text.startsWith('/')) return;
 
       // Обновляем время последней активности
       await User.update(
@@ -166,6 +246,7 @@ function setupMessageHandler(bot, userSessions, openai) {
       if (await handleActiveDialogs(bot, chatId, userId, text, userSessions, openai)) return;
 
       // Основная обработка сообщений по режимам
+      const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
       await handleRegularMessage(bot, chatId, userId, text, userMode, openai);
 
     } catch (error) {

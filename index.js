@@ -9,11 +9,13 @@ import { setupBot } from './botSetup.js';
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+
 const userSessions = {
   wordGames: new Map(),
   activeDialogs: new Map(),
   conversationModes: new Map(),
-  broadcastPending: false // Добавлено для рассылки
+  broadcastPending: false,
+  broadcastContent: { text: null, photo: null } // Для хранения текста и URL картинки
 };
 
 async function initializeDatabase() {
