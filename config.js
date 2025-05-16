@@ -18,13 +18,16 @@ const requiredEnvVars = [
     }
   });
   
-  // Экспорт конфигурации
-  export const CONFIG = {
-    DAILY_FACT_TIME: { hour: 17, minute: 30, tz: 'Europe/Moscow' },
-    WORD_GAME_TIME: { hour: 18, minute: 30, tz: 'Europe/Moscow' },
-    CLEANUP_TIME: '0 12 * * 0', // Каждое воскресенье в 12:00
-    WORD_GAME_TIMEOUT: 300000, // 5 минут
-    MAX_DIALOG_MESSAGES: 8,
-    GPT_MODEL: 'gpt-4',
-    OPENAI_MAX_TOKENS: 500
-  };
+  // Новая конфигурация
+export const CONFIG = {
+  DAILY_FACT_TIME: { hour: 17, minute: 30, tz: 'Europe/Moscow' },
+  WORD_GAME_TIMES: [  
+    { hour: 18, minute: 30, tz: 'Europe/Moscow' },
+    { hour: 20, minute: 0, tz: 'Europe/Moscow' }
+  ],
+  CLEANUP_TIME: '0 12 * * 0',
+  WORD_GAME_TIMEOUT: 300000,
+  MAX_DIALOG_MESSAGES: 5,
+  GPT_MODEL: 'gpt-3.5-turbo',
+  OPENAI_MAX_TOKENS: 500
+};

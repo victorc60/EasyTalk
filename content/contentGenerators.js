@@ -41,49 +41,53 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  const prompt = `Generate an interesting English language fact with Russian translation that hasn't been used recently. Include:
+  const PROMPT = `Generate an interesting English language fact with Russian translation that hasn't been used recently. Include:
   - The fact in English
   - Translation in Russian
   - Brief explanation (1 sentence)
   Format:
   🇬🇧 [fact]
   🇷🇺 [translation]
-  💡 [explanation]`;
+  💡 [explanation]`; // Ваш промпт
+  const MAX_ATTEMPTS = 5;
+  const DEFAULT_FACTS = [
   
-  let attempts = 0;
-  const maxAttempts = 5;
-  let fact = null;
+    `🇬🇧 English has over 1 million words, absorbing terms like  "zombie" (West African,(god/spirit, meaning corpses resurrected by witch doctors), and "ketchup" (Chinese "kê-tsiap", meaning fish sauce)\n🇷🇺 В английском >1 млн слов: "tycoon" (яп.), "zombie" (африк.), "кетчуп" (кит. "kê-tsiap")\n💡 Слова-заимствования — как языковые "трофеи" колониальной истории`,
+    `🇬🇧 The word "alphabet" comes from the first two letters of the Greek alphabet: alpha and beta\n🇷🇺 Слово "алфавит" происходит от первых двух букв греческого алфавита: альфа и бета\n💡 Это показывает влияние греческого языка на английский.`,
+    `🇬🇧 "Pronunciation" is the most mispronounced English word\n🇷🇺 Слово "pronunciation" (произношение) чаще всего произносят неправильно\n💡 Путают с "pronounciation" (ошибка даже у носителей!)`,
+    `🇬🇧 The oldest English word that is still in use is "town"\n🇷🇺 Самое старое английское слово, которое до сих пор используется, - "town" (город)\n💡 Его происхождение восходит к древнеанглийскому "tun".`,
+    `🇬🇧 Some English words have silent letters that were once pronounced (e.g., "knight" - [naɪt])\n🇷🇺 В некоторых английских словах есть непроизносимые буквы, которые когда-то произносились (например, "knight" - [найт])\n💡 Это связано с историческими изменениями в произношении.`,
+    `🇬🇧 The first English dictionary was written by Robert Cawdrey in 1604\n🇷🇺 Первый английский словарь был написан Робертом Кодри в 1604 году\n💡 Он назывался "A Table Alphabeticall of hard usual English words".`
+];
+  
+   
+  
+    
+  
+    
+  ];
+  
 
-  while (attempts < maxAttempts) {
-    fact = await generateEnglishContent(prompt);
-    
-    // Если не удалось сгенерировать факт, возвращаем дефолтный
-    if (!fact) {
-      const defaultFact = `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
-      return defaultFact;
-    }
-    
-    // Проверяем, не использовался ли этот факт ранее
-    const factKey = fact.substring(0, 100); // Берем начало для идентификации
-    if (!usedFactsCache.has(factKey)) {
-      usedFactsCache.add(factKey);
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      const fact = await generateEnglishContent(
+        PROMPT + (attempt > 0 ? "\n\nAvoid repeating facts." : "")
+      );
       
-      // Ограничиваем размер кэша (например, храним 30 последних фактов)
-      if (usedFactsCache.size > 30) {
-        const oldest = usedFactsCache.values().next().value;
-        usedFactsCache.delete(oldest);
+      if (!fact) continue;
+
+      const factKey = hashString(fact.substring(0, 50));
+      if (!usedFactsCache.has(factKey)) {
+        usedFactsCache.set(factKey, true);
+        return fact;
       }
-      
-      return fact;
+    } catch (error) {
+      console.warn(`Attempt ${attempt + 1} failed:`, error);
     }
-    
-    attempts++;
   }
-  
-  // Если после нескольких попыток все равно получаем повтор, возвращаем дефолтный
-  console.warn(`Не удалось сгенерировать уникальный факт после ${maxAttempts} попыток`);
-  const defaultFact = `🇬🇧 "Goodbye" comes from "God be with ye"\n🇷🇺 "Goodbye" происходит от "God be with ye"\n💡 Старое английское выражение, сократившееся со временем`;
-  return defaultFact;
+
+  console.warn(`Failed after ${MAX_ATTEMPTS} attempts`);
+  return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
 }
 
 export async function wordOfTheDay() {
@@ -98,11 +102,11 @@ export async function wordOfTheDay() {
   const result = await generateEnglishContent(prompt, 'json');
   
   return result || {
-    word: "serendipity",
-    translation: "счастливая случайность",
-    example: "Finding this cafe was pure serendipity.",
-    fact: "Comes from Persian fairy tale 'The Three Princes of Serendip'",
-    mistakes: "Often confused with 'luck' - but implies unexpected discovery"
+    word: "awkward",
+    translation: "неловкий",
+    example: "There was an awkward silence when no one knew what to say.",
+    fact: "Originally meant 'in the wrong direction' in Old Norse. Now describes social discomfort or clumsy situations.",
+    mistakes: "Dont confuse with 'embarrassed' — 'awkward' is about the situation, not the persons feelings."
   };
 }
 
