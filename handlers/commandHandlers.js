@@ -166,7 +166,7 @@ export async function showProgress(bot, msg) {
 export async function broadcast(bot, msg, userSessions) {
   try {
     const userId = msg.from.id.toString();
-    if (userId !== process.env.ADMIN_ID) {
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
       await sendUserMessage(
         bot,
         msg.chat.id,
