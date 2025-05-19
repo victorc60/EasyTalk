@@ -7,6 +7,7 @@ import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast } from './handlers/commandHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
+import axios from 'axios'; // Для проверки URL картинки
 
 // Константы для режимов бота
 const BOT_MODES = {
@@ -61,7 +62,8 @@ async function setupBotCommands(bot) {
       { command: 'mode', description: 'Выбор режима общения' },
       { command: 'mode_free_talk', description: 'Свободное общение на английском' },
       { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
-      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
+      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' },
+      { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' }
     ];
     await bot.setMyCommands(commands, { scope: { type: 'default' }, language_code: 'ru' });
     console.log('✅ Команды бота успешно установлены:', JSON.stringify(commands));
@@ -81,6 +83,16 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/mode$/, (msg) => showModeSelection(bot, msg.chat.id));
   bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
   bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions));
+  bot.onText(/\/cancel_broadcast/, async (msg) => {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Эта команда доступна только администратору.', { parse_mode: 'HTML' });
+      return;
+    }
+    userSessions.broadcastPending = false;
+    userSessions.broadcastContent = { text: null, photo: null };
+    await sendUserMessage(bot, msg.chat.id, '❌ Рассылка отменена.', { parse_mode: 'HTML' });
+  });
 }
 
 function setupCallbacks(bot, userSessions) {
@@ -136,6 +148,18 @@ function setupCallbacks(bot, userSessions) {
   });
 }
 
+// Функция для проверки, является ли URL действительным изображением
+async function isValidImageUrl(url) {
+  try {
+    const response = await axios.head(url, { timeout: 5000 });
+    const contentType = response.headers['content-type'];
+    return contentType?.startsWith('image/');
+  } catch (error) {
+    console.error('Ошибка проверки URL картинки:', error.message);
+    return false;
+  }
+}
+
 function setupMessageHandler(bot, userSessions, openai) {
   bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
@@ -159,38 +183,73 @@ function setupMessageHandler(bot, userSessions, openai) {
           return;
         }
 
+        // Сохраняем текст из text или caption
         if (text) {
           userSessions.broadcastContent.text = text;
         } else if (caption) {
           userSessions.broadcastContent.text = caption;
         }
 
+        // Сохраняем картинку, если есть
         if (photo) {
           const photoId = photo[photo.length - 1].file_id;
-          const file = await bot.getFile(photoId);
-          userSessions.broadcastContent.photo = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+          try {
+            const file = await bot.getFile(photoId);
+            const photoUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+            // Проверяем, является ли URL действительным изображением
+            if (await isValidImageUrl(photoUrl)) {
+              userSessions.broadcastContent.photo = photoUrl;
+            } else {
+              throw new Error('Некорректный формат изображения');
+            }
+          } catch (error) {
+            console.error('Ошибка получения файла картинки:', error);
+            userSessions.broadcastPending = false;
+            userSessions.broadcastContent = { text: null, photo: null };
+            await sendUserMessage(
+              bot,
+              chatId,
+              '⚠️ Ошибка: некорректное изображение. Попробуйте другую картинку или отмените рассылку (/cancel_broadcast).',
+              { parse_mode: 'HTML' }
+            );
+            return;
+          }
         }
 
+        // Показываем предпросмотр
         const previewMessage = userSessions.broadcastContent.text || '📷 Картинка без текста';
         console.log('Предпросмотр рассылки:', userSessions.broadcastContent);
 
         if (userSessions.broadcastContent.photo) {
-          await bot.sendPhoto(
-            chatId,
-            userSessions.broadcastContent.photo,
-            {
-              caption: userSessions.broadcastContent.text || undefined,
-              parse_mode: 'HTML',
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    { text: '✅ Подтвердить', callback_data: 'confirm_broadcast' },
-                    { text: '❌ Отменить', callback_data: 'cancel_broadcast' }
+          try {
+            await bot.sendPhoto(
+              chatId,
+              userSessions.broadcastContent.photo,
+              {
+                caption: userSessions.broadcastContent.text || undefined,
+                parse_mode: 'HTML',
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      { text: '✅ Подтвердить', callback_data: 'confirm_broadcast' },
+                      { text: '❌ Отменить', callback_data: 'cancel_broadcast' }
+                    ]
                   ]
-                ]
+                }
               }
-            }
-          );
+            );
+          } catch (error) {
+            console.error('Ошибка отправки предпросмотра:', error);
+            userSessions.broadcastPending = false;
+            userSessions.broadcastContent = { text: null, photo: null };
+            await sendUserMessage(
+              bot,
+              chatId,
+              '⚠️ Ошибка предпросмотра изображения. Попробуйте другую картинку или отмените рассылку (/cancel_broadcast).',
+              { parse_mode: 'HTML' }
+            );
+            return;
+          }
         } else {
           await sendUserMessage(
             bot,
@@ -236,7 +295,6 @@ function setupMessageHandler(bot, userSessions, openai) {
         const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
         await handleRegularMessage(bot, chatId, userId, text, userMode, openai);
       } else {
-        // Уведомляем пользователя, если отправлено нетекстовое сообщение
         await sendUserMessage(
           bot,
           chatId,
@@ -247,11 +305,15 @@ function setupMessageHandler(bot, userSessions, openai) {
 
     } catch (error) {
       console.error('Ошибка обработки сообщения:', error);
-      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.');
+      userSessions.broadcastPending = false; // Сбрасываем состояние при любой ошибке
+      userSessions.broadcastContent = { text: null, photo: null };
+      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка. Пожалуйста, попробуйте позже или отмените рассылку (/cancel_broadcast).');
       await sendAdminMessage(bot, `‼️ Ошибка обработки сообщения: ${error.message}`);
     }
   });
 }
+
+// ... (остальные функции без изменений: handleWordGame, handleActiveDialogs, handleRegularMessage, showModeSelection, getModeName, getModeDescription)
 
 async function handleWordGame(bot, chatId, userId, text, userSessions) {
   if (!userSessions.wordGames.has(userId)) {
