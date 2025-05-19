@@ -51,13 +51,7 @@ export async function dailyFact() {
   💡 [explanation]`; // Ваш промпт
   const MAX_ATTEMPTS = 5;
   const DEFAULT_FACTS = [
-  
-    `🇬🇧 English has over 1 million words, absorbing terms like  "zombie" (West African,(god/spirit, meaning corpses resurrected by witch doctors), and "ketchup" (Chinese "kê-tsiap", meaning fish sauce)\n🇷🇺 В английском >1 млн слов: "tycoon" (яп.), "zombie" (африк.), "кетчуп" (кит. "kê-tsiap")\n💡 Слова-заимствования — как языковые "трофеи" колониальной истории`,
-    `🇬🇧 The word "alphabet" comes from the first two letters of the Greek alphabet: alpha and beta\n🇷🇺 Слово "алфавит" происходит от первых двух букв греческого алфавита: альфа и бета\n💡 Это показывает влияние греческого языка на английский.`,
-    `🇬🇧 "Pronunciation" is the most mispronounced English word\n🇷🇺 Слово "pronunciation" (произношение) чаще всего произносят неправильно\n💡 Путают с "pronounciation" (ошибка даже у носителей!)`,
-    `🇬🇧 The oldest English word that is still in use is "town"\n🇷🇺 Самое старое английское слово, которое до сих пор используется, - "town" (город)\n💡 Его происхождение восходит к древнеанглийскому "tun".`,
-    `🇬🇧 Some English words have silent letters that were once pronounced (e.g., "knight" - [naɪt])\n🇷🇺 В некоторых английских словах есть непроизносимые буквы, которые когда-то произносились (например, "knight" - [найт])\n💡 Это связано с историческими изменениями в произношении.`,
-    `🇬🇧 The first English dictionary was written by Robert Cawdrey in 1604\n🇷🇺 Первый английский словарь был написан Робертом Кодри в 1604 году\n💡 Он назывался "A Table Alphabeticall of hard usual English words".`
+    `🇬🇧 English has over 1 million words, absorbing terms like  "zombie" (West African,(god/spirit, meaning corpses resurrected by witch doctors), and "ketchup" (Chinese "kê-tsiap", meaning fish sauce)\n🇷🇺 В английском >1 млн слов: "tycoon" (яп.), "zombie" (африк.), "кетчуп" (кит. "kê-tsiap")\n💡 Слова-заимствования — как языковые "трофеи" колониальной истории`
 ];
   
    
@@ -90,8 +84,12 @@ export async function dailyFact() {
   return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
 }
 
+// Добавляем в начало файла
+const usedWordsCache = new Set();
+const MAX_CACHE_SIZE = 100; // Храним 100 последних слов
+
 export async function wordOfTheDay() {
-  const prompt = `Generate a B1-level English word with:
+  const prompt = `Generate a unique B1-level English word that hasn't been used recently with:
   - The word
   - Russian translation
   - Example sentence
@@ -99,15 +97,69 @@ export async function wordOfTheDay() {
   - Common mistakes with this word
   Return as JSON: {word, translation, example, fact, mistakes}`;
   
-  const result = await generateEnglishContent(prompt, 'json');
+  let attempts = 0;
+  const maxAttempts = 5;
+  let result = null;
+
+  while (attempts < maxAttempts) {
+    result = await generateEnglishContent(prompt, 'json');
+    
+    // Если не удалось сгенерировать слово, используем дефолтное
+    if (!result || !result.word) {
+      return getDefaultWord();
+    }
+    
+    // Проверяем, не использовалось ли это слово ранее
+    const wordLower = result.word.toLowerCase();
+    if (!usedWordsCache.has(wordLower)) {
+      usedWordsCache.add(wordLower);
+      
+      // Ограничиваем размер кэша
+      if (usedWordsCache.size > MAX_CACHE_SIZE) {
+        const oldest = usedWordsCache.values().next().value;
+        usedWordsCache.delete(oldest);
+      }
+      
+      return result;
+    }
+    
+    attempts++;
+  }
   
-  return result || {
-    word: "awkward",
-    translation: "неловкий",
-    example: "There was an awkward silence when no one knew what to say.",
-    fact: "Originally meant 'in the wrong direction' in Old Norse. Now describes social discomfort or clumsy situations.",
-    mistakes: "Dont confuse with 'embarrassed' — 'awkward' is about the situation, not the persons feelings."
-  };
+  // Если после нескольких попыток всё равно получаем повтор
+  console.warn(`Не удалось сгенерировать уникальное слово после ${maxAttempts} попыток`);
+  return getDefaultWord();
+}
+
+function getDefaultWord() {
+  const defaultWords = [
+  
+    {
+      word: "ephemeral",
+      translation: "недолговечный",
+      example: "The beauty of cherry blossoms is ephemeral.",
+      fact: "From Greek 'ephemeros' meaning 'lasting only one day'",
+      mistakes: "Don't confuse with 'eternal' - they're opposites"
+    },
+    {
+      word: "quintessential",
+      translation: "наиболее типичный",
+      example: "He's the quintessential English gentleman.",
+      fact: "Comes from 'quintessence' - the fifth element in ancient philosophy",
+      mistakes: "Often misspelled as 'quintessential' (missing the 'e')"
+    }
+  ];
+  
+  // Ищем дефолтное слово, которое ещё не использовалось
+  for (const word of defaultWords) {
+    if (!usedWordsCache.has(word.word.toLowerCase())) {
+      usedWordsCache.add(word.word.toLowerCase());
+      return word;
+    }
+  }
+  
+  // Если все дефолтные слова уже использовались, возвращаем первое
+  return defaultWords[0];
 }
 
 export async function randomCharacter() {
