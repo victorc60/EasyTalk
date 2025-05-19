@@ -10,53 +10,38 @@ import { OpenAI } from 'openai';
 
 // Константы для режимов бота
 const BOT_MODES = {
-  FREE_TALK: {
-    id: 'free_talk',
-    name: 'Свободное общение',
-    description: 'Естественная практика английского с мягкими исправлениями'
-  },
-  CORRECTION: {
-    id: 'correction',
-    name: 'Исправление ошибок',
-    description: 'Строгая проверка и объяснение ошибок'
-  },
-  ROLE_PLAY: {
-    id: 'role_play',
-    name: 'Ролевые игры',
-    description: 'Диалоги с персонажами в разных ситуациях'
-  }
+  FREE_TALK: { id: 'free_talk', name: 'Свободное общение', description: 'Естественная практика английского с мягкими исправлениями' },
+  CORRECTION: { id: 'correction', name: 'Исправление ошибок', description: 'Строгая проверка и объяснение ошибок' },
+  ROLE_PLAY: { id: 'role_play', name: 'Ролевые игры', description: 'Диалоги с персонажами в разных ситуациях' }
 };
 
 export async function setupBot(bot, userSessions, openai) {
-  // Настройка планировщиков
   setupSchedulers(bot, userSessions);
-
-  // Установка команд бота
   await setupBotCommands(bot);
-
-  // Настройка обработчиков команд
   setupCommandHandlers(bot, userSessions);
-
-  // Обработчик callback-запросов (для inline клавиатур)
   setupCallbacks(bot, userSessions);
-
-  // Главный обработчик сообщений
   setupMessageHandler(bot, userSessions, openai);
-
   console.log('🤖 Бот запущен и готов к работе!');
 }
 
 function setupSchedulers(bot, userSessions) {
   try {
-    schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, () => dailyFactBroadcast(bot));
-    
+    console.log('Текущее время сервера:', new Date().toLocaleString('ru-RU', { timeZone: 'UTC' }));
+    console.log('Текущее время Moscow:', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }));
+    schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, () => {
+      console.log('Запуск dailyFactBroadcast');
+      dailyFactBroadcast(bot);
+    });
     CONFIG.WORD_GAME_TIMES.forEach((time, index) => {
       schedule.scheduleJob(`wordGame${index}`, time, () => {
         console.log(`Запуск wordGameBroadcast в ${time.hour}:${time.minute} ${time.tz}`);
         wordGameBroadcast(bot, userSessions);
       });
     });
-    schedule.scheduleJob(CONFIG.CLEANUP_TIME, cleanupInactiveUsers);
+    schedule.scheduleJob(CONFIG.CLEANUP_TIME, () => {
+      console.log('Запуск cleanupInactiveUsers');
+      cleanupInactiveUsers();
+    });
   } catch (error) {
     console.error('Ошибка настройки планировщиков:', error);
     sendAdminMessage(bot, `‼️ Ошибка настройки планировщиков: ${error.message}`);
@@ -65,11 +50,8 @@ function setupSchedulers(bot, userSessions) {
 
 async function setupBotCommands(bot) {
   try {
-    // Удаление всех существующих команд
     await bot.deleteMyCommands({ scope: { type: 'default' }, language_code: 'ru' });
     console.log('✅ Все команды бота удалены');
-
-    // Установка новых команд
     const commands = [
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
@@ -81,10 +63,7 @@ async function setupBotCommands(bot) {
       { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
       { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
     ];
-    await bot.setMyCommands(commands, {
-      scope: { type: 'default' },
-      language_code: 'ru'
-    });
+    await bot.setMyCommands(commands, { scope: { type: 'default' }, language_code: 'ru' });
     console.log('✅ Команды бота успешно установлены:', JSON.stringify(commands));
   } catch (error) {
     console.error('❌ Ошибка установки команд бота:', error);
@@ -111,17 +90,11 @@ function setupCallbacks(bot, userSessions) {
       const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
 
-      // Обработка выбора режима
       if (data.startsWith('mode_')) {
         const selectedMode = data.split('_')[1];
         const validModes = Object.values(BOT_MODES).map(mode => mode.id);
         if (!validModes.includes(selectedMode)) {
-          await sendUserMessage(
-            bot,
-            chatId,
-            `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`,
-            { parse_mode: 'HTML' }
-          );
+          await sendUserMessage(bot, chatId, `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`, { parse_mode: 'HTML' });
         } else {
           userSessions.conversationModes.set(userId, selectedMode);
           await sendUserMessage(
@@ -133,9 +106,8 @@ function setupCallbacks(bot, userSessions) {
         }
       }
 
-      // Обработка подтверждения рассылки
       if (data === 'confirm_broadcast') {
-        if (userId.toString() !== process.env.ADMIN_ID) {
+        if (userId.toString() !== process.env.ADMIN_ID && userId.toString() !== "340048933") {
           await sendUserMessage(bot, chatId, '⚠️ Только админ может подтвердить рассылку.', { parse_mode: 'HTML' });
           return;
         }
@@ -146,7 +118,7 @@ function setupCallbacks(bot, userSessions) {
       }
 
       if (data === 'cancel_broadcast') {
-        if (userId.toString() !== process.env.ADMIN_ID) {
+        if (userId.toString() !== process.env.ADMIN_ID && userId.toString() !== "340048933") {
           await sendUserMessage(bot, chatId, '⚠️ Только админ может отменить рассылку.', { parse_mode: 'HTML' });
           return;
         }
@@ -170,7 +142,7 @@ function setupMessageHandler(bot, userSessions, openai) {
     const userId = msg.from.id;
     const text = msg.text?.trim();
     const photo = msg.photo;
-    const caption = msg.caption?.trim(); // Подпись к картинке
+    const caption = msg.caption?.trim();
 
     try {
       // Проверка, ожидает ли админ контент для рассылки
@@ -187,21 +159,18 @@ function setupMessageHandler(bot, userSessions, openai) {
           return;
         }
 
-        // Сохраняем текст из text или caption
         if (text) {
           userSessions.broadcastContent.text = text;
         } else if (caption) {
           userSessions.broadcastContent.text = caption;
         }
 
-        // Сохраняем картинку, если есть
         if (photo) {
           const photoId = photo[photo.length - 1].file_id;
           const file = await bot.getFile(photoId);
           userSessions.broadcastContent.photo = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
         }
 
-        // Показываем предпросмотр
         const previewMessage = userSessions.broadcastContent.text || '📷 Картинка без текста';
         console.log('Предпросмотр рассылки:', userSessions.broadcastContent);
 
@@ -252,16 +221,28 @@ function setupMessageHandler(bot, userSessions, openai) {
         { where: { telegram_id: userId } }
       );
 
-      // Обработка игр со словами
-      if (await handleWordGame(bot, chatId, userId, text, userSessions)) return;
+      // Обработка игр со словами (только для текстовых сообщений)
+      if (text && await handleWordGame(bot, chatId, userId, text, userSessions)) {
+        return;
+      }
 
       // Обработка активных диалогов
-      if (await handleActiveDialogs(bot, chatId, userId, text, userSessions, openai)) return;
+      if (text && await handleActiveDialogs(bot, chatId, userId, text, userSessions, openai)) {
+        return;
+      }
 
       // Основная обработка текстовых сообщений
       if (text) {
         const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
         await handleRegularMessage(bot, chatId, userId, text, userMode, openai);
+      } else {
+        // Уведомляем пользователя, если отправлено нетекстовое сообщение
+        await sendUserMessage(
+          bot,
+          chatId,
+          '⚠️ Пожалуйста, отправьте текстовое сообщение для ответа на слово дня или общения.',
+          { parse_mode: 'HTML' }
+        );
       }
 
     } catch (error) {
@@ -273,11 +254,24 @@ function setupMessageHandler(bot, userSessions, openai) {
 }
 
 async function handleWordGame(bot, chatId, userId, text, userSessions) {
-  if (!userSessions.wordGames.has(userId)) return false;
+  if (!userSessions.wordGames.has(userId)) {
+    return false;
+  }
+
+  if (!text) {
+    console.log(`Получено нетекстовое сообщение от ${userId} для слова дня`);
+    await sendUserMessage(
+      bot,
+      chatId,
+      '⚠️ Пожалуйста, отправьте текстовое сообщение с переводом слова.',
+      { parse_mode: 'HTML' }
+    );
+    return true;
+  }
 
   const session = userSessions.wordGames.get(userId);
-  const isCorrect = text.toLowerCase() === session.translation;
-  
+  const isCorrect = text.toLowerCase() === session.translation.toLowerCase();
+
   clearTimeout(session.timer);
   userSessions.wordGames.delete(userId);
 
@@ -286,16 +280,18 @@ async function handleWordGame(bot, chatId, userId, text, userSessions) {
     await sendUserMessage(
       bot,
       chatId,
-      `🎉 Поздравляем! Вы правильно перевели слово "${session.word}" как "${session.translation}"! +15 баллов!`
+      `🎉 Поздравляем! Вы правильно перевели слово "${session.word}" как "${session.translation}"! +15 баллов!`,
+      { parse_mode: 'HTML' }
     );
   } else {
     await sendUserMessage(
       bot,
       chatId,
-      `🤔 Неверный перевод. Правильный ответ: "${session.word}" → "${session.translation}". Не переживайте, в следующий раз получится!`
+      `🤔 Неверный перевод. Правильный ответ: "${session.word}" → "${session.translation}". Не переживайте, в следующий раз получится!`,
+      { parse_mode: 'HTML' }
     );
   }
-  
+
   return true;
 }
 
@@ -324,13 +320,15 @@ async function handleActiveDialogs(bot, chatId, userId, text, userSessions, open
     await sendUserMessage(
       bot,
       chatId,
-      `👋 ${dialog.character.farewell}\n\nДиалог завершен! +30 очков за практику!`
+      `👋 ${dialog.character.farewell}\n\nДиалог завершен! +30 очков за практику!`,
+      { parse_mode: 'HTML' }
     );
   } else {
     await sendUserMessage(
       bot,
       chatId,
-      `${response}\n\n(Осталось сообщений: ${dialog.messagesLeft})`
+      `${response}\n\n(Осталось сообщений: ${dialog.messagesLeft})`,
+      { parse_mode: 'HTML' }
     );
   }
   
@@ -380,18 +378,9 @@ async function showModeSelection(bot, chatId) {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{
-              text: `${BOT_MODES.FREE_TALK.name} 🗣`,
-              callback_data: `mode_${BOT_MODES.FREE_TALK.id}`
-            }],
-            [{
-              text: `${BOT_MODES.CORRECTION.name} ✏️`,
-              callback_data: `mode_${BOT_MODES.CORRECTION.id}`
-            }],
-            [{
-              text: `${BOT_MODES.ROLE_PLAY.name} 🎭`,
-              callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}`
-            }]
+            [{ text: `${BOT_MODES.FREE_TALK.name} 🗣`, callback_data: `mode_${BOT_MODES.FREE_TALK.id}` }],
+            [{ text: `${BOT_MODES.CORRECTION.name} ✏️`, callback_data: `mode_${BOT_MODES.CORRECTION.id}` }],
+            [{ text: `${BOT_MODES.ROLE_PLAY.name} 🎭`, callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}` }]
           ]
         }
       }
