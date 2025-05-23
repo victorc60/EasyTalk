@@ -1,9 +1,15 @@
 // content/contentGenerators.js
 import { OpenAI } from 'openai';
 import { CONFIG } from '../config.js';
+import crypto from 'crypto';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const usedFactsCache = new Set();
+const CACHE_LIMIT = 100;
+function hashString(str) {
+  if (!str) return ''; // Защита от пустых строк
+  return crypto.createHash('md5').update(str).digest('hex').substring(0, 16); // MD5, обрезанный до 16 символов
+}
 
 async function generateEnglishContent(prompt, format = 'text') {
   try {
@@ -41,46 +47,62 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  const PROMPT = `Generate an interesting English language fact with Russian translation that hasn't been used recently. Include:
-  - The fact in English
-  - Translation in Russian
-  - Brief explanation (1 sentence)
-  Format:
+  const PROMPT = `Generate an interesting, unique English language fact with Russian translation that hasn't been used recently. Include:
+  - The fact in English (1-2 sentences, engaging for teenagers)
+  - Translation in Russian (accurate and concise)
+  - Brief explanation (1 sentence, simple)
+  Format exactly as:
   🇬🇧 [fact]
   🇷🇺 [translation]
-  💡 [explanation]`; // Ваш промпт
+  💡 [explanation]
+  Ensure the fact is new, fun, and related to English language or culture. Avoid repeating facts from previous responses.`;
+  
   const MAX_ATTEMPTS = 5;
   const DEFAULT_FACTS = [
-    `🇬🇧 English has over 1 million words, absorbing terms like  "zombie" (West African,(god/spirit, meaning corpses resurrected by witch doctors), and "ketchup" (Chinese "kê-tsiap", meaning fish sauce)\n🇷🇺 В английском >1 млн слов: "tycoon" (яп.), "zombie" (африк.), "кетчуп" (кит. "kê-tsiap")\n💡 Слова-заимствования — как языковые "трофеи" колониальной истории`
-];
-  
-   
-  
-    
-  
-    
-
-  
+    `🇬🇧 The word "quiz" was invented in 1781 by a Dublin theater owner who made a bet he could create a new word overnight.\n🇷🇺 Слово "quiz" придумал в 1781 году владелец театра в Дублине, поспорив, что создаст новое слово за ночь.\n💡 It became popular as a term for tests and games!`,
+    `🇬🇧 English has "contronyms" like "dust," which can mean both to add dust (to a cake) and to remove dust (from furniture).\n🇷🇺 В английском есть "контронимы", например, "dust" — посыпать пылью (на торт) или убирать пыль (с мебели).\n💡 These words confuse learners due to opposite meanings!`,
+    `🇬🇧 The longest English word is "pneumonoultramicroscopicsilicovolcanoconiosis," a 45-letter term for a lung disease.\n🇷🇺 Самое длинное английское слово — "pneumonoultramicroscopicsilicovolcanoconiosis", 45 букв, означает болезнь лёгких.\n💡 It was created to be super long and is rarely used!`,
+    `🇬🇧 English has over 1 million words, absorbing terms like "zombie" (West African) and "ketchup" (Chinese "kê-tsiap").\n🇷🇺 В английском >1 млн слов: "zombie" (африк.), "кетчуп" (кит. "kê-tsiap").\n💡 Borrowed words reflect English's global history!`
+  ];
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
       const fact = await generateEnglishContent(
-        PROMPT + (attempt > 0 ? "\n\nAvoid repeating facts." : "")
+        PROMPT + (attempt > 0 ? "\n\nAvoid repeating any previous facts." : "")
       );
-      
-      if (!fact) continue;
 
+      // Проверяем, что факт не пустой и соответствует формату
+      if (!fact || fact.trim() === '' || !fact.includes('🇬🇧') || !fact.includes('🇷🇺') || !fact.includes('💡')) {
+        console.warn(`Attempt ${attempt + 1}: Invalid fact format:`, fact);
+        continue;
+      }
+
+      // Хэшируем первые 50 символов для уникальности
       const factKey = hashString(fact.substring(0, 50));
+      if (!factKey) {
+        console.warn(`Attempt ${attempt + 1}: Failed to generate fact key for:`, fact.substring(0, 50));
+        continue;
+      }
+
       if (!usedFactsCache.has(factKey)) {
-        usedFactsCache.set(factKey, true);
+        // Ограничиваем размер кэша
+        if (usedFactsCache.size >= CACHE_LIMIT) {
+          const oldestKey = usedFactsCache.values().next().value;
+          usedFactsCache.delete(oldestKey);
+          console.log('Removed oldest fact key from cache:', oldestKey);
+        }
+        usedFactsCache.add(factKey); // Используем add вместо set
+        console.log(`New fact generated: ${fact}`);
         return fact;
+      } else {
+        console.warn(`Attempt ${attempt + 1}: Fact already used (key: ${factKey})`);
       }
     } catch (error) {
-      console.warn(`Attempt ${attempt + 1} failed:`, error);
+      console.warn(`Attempt ${attempt + 1} failed:`, error.message);
     }
   }
 
-  console.warn(`Failed after ${MAX_ATTEMPTS} attempts`);
+  console.warn(`Failed to generate new fact after ${MAX_ATTEMPTS} attempts, returning default fact`);
   return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
 }
 
