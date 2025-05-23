@@ -4,6 +4,7 @@ import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, randomCharacter, conversationTopic } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import User from '../models/User.js';
+import axios from 'axios';
 
 export async function dailyFactBroadcast(bot) {
   try {
@@ -53,7 +54,7 @@ export async function wordGameBroadcast(bot, userSessions) {
               sendUserMessage(
                 bot,
                 userId,
-                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\nПример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes}`
+                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\n Пример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes} \n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`
               );
               userSessions.wordGames.delete(userId);
             }
@@ -100,18 +101,63 @@ export async function startRolePlay(bot, chatId, userSessions, character = null)
     { parse_mode: 'HTML' }
   );
 }
+// Функция проверки, является ли URL действительным изображением
+async function isValidImageUrl(url) {
+  try {
+    const response = await axios.head(url, { timeout: 5000 });
+    const contentType = response.headers['content-type'];
+    return contentType?.startsWith('image/') && ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'].includes(contentType);
+  } catch (error) {
+    console.error('Ошибка проверки URL картинки:', error.message);
+    return false;
+  }
+}
+// Функция проверки размера файла по URL
+async function getFileSize(url) {
+  try {
+    const response = await axios.head(url, { timeout: 5000 });
+    return parseInt(response.headers['content-length'] || 0);
+  } catch (error) {
+    console.error('Ошибка получения размера файла:', error.message);
+    return 0;
+  }
+}
+
 export async function broadcastMessage(bot, content) {
   try {
     const users = await User.findAll({ where: { is_active: true } });
     let successCount = 0;
     let errorCount = 0;
 
+    // Проверяем валидность фото, если оно есть
+    let isPhotoValid = true;
+    if (content.photo) {
+      // Проверяем, является ли content.photo File ID (Telegram File ID обычно начинается с AgAC или содержит много символов)
+      const isFileId = /^[A-Za-z0-9_-]{20,}$/.test(content.photo);
+      if (!isFileId) {
+        // Проверяем, является ли URL валидным изображением
+        isPhotoValid = await isValidImageUrl(content.photo);
+        if (!isPhotoValid) {
+          await sendAdminMessage(bot, `⚠️ Рассылка не выполнена: некорректный формат фото (${content.photo}). Поддерживаются JPEG, PNG, GIF, BMP, WEBP до 10 МБ.`);
+          console.error(`Некорректный формат фото: ${content.photo}`);
+          return;
+        }
+        // Проверяем размер файла
+        const fileSize = await getFileSize(content.photo);
+        if (fileSize > 10 * 1024 * 1024) { // 10 МБ
+          await sendAdminMessage(bot, `⚠️ Рассылка не выполнена: размер фото (${fileSize / 1024 / 1024} МБ) превышает 10 МБ.`);
+          console.error(`Слишком большой файл: ${fileSize} байт`);
+          return;
+        }
+      }
+    }
+
     for (const user of users) {
       try {
-        if (content.photo) {
+        if (content.photo && isPhotoValid) {
           await bot.sendPhoto(
             user.telegram_id,
-            content.photo,
+            content.photo, // Может быть File ID или URL
             {
               caption: content.text || undefined,
               parse_mode: 'HTML'
@@ -127,10 +173,10 @@ export async function broadcastMessage(bot, content) {
         }
         successCount++;
       } catch (error) {
-        console.error(`Ошибка отправки сообщения пользователю ${user.telegram_id}:`, error);
+        console.error(`Ошибка отправки сообщения пользователю ${user.telegram_id}:`, error.message);
         errorCount++;
       }
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100)); // Задержка 100 мс для избежания лимитов
     }
 
     const summary = `📢 Рассылка завершена:\n✅ Успешно отправлено: ${successCount} пользователям\n❌ Ошибок: ${errorCount}`;

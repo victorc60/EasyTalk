@@ -8,6 +8,7 @@ import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, s
 import User from './models/User.js';
 import { OpenAI } from 'openai';
 import axios from 'axios'; // Для проверки URL картинки
+import sharp from 'sharp';
 
 // Константы для режимов бота
 const BOT_MODES = {
@@ -190,26 +191,27 @@ function setupMessageHandler(bot, userSessions, openai) {
           userSessions.broadcastContent.text = caption;
         }
 
-        // Сохраняем картинку, если есть
         if (photo) {
           const photoId = photo[photo.length - 1].file_id;
           try {
             const file = await bot.getFile(photoId);
             const photoUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
-            // Проверяем, является ли URL действительным изображением
-            if (await isValidImageUrl(photoUrl)) {
-              userSessions.broadcastContent.photo = photoUrl;
-            } else {
-              throw new Error('Некорректный формат изображения');
-            }
+            
+            // Загружаем изображение и конвертируем в JPEG
+            const response = await axios.get(photoUrl, { responseType: 'arraybuffer' });
+            const convertedImage = await sharp(response.data)
+              .jpeg({ quality: 80 })
+              .toBuffer();
+            
+            // Отправляем конвертированное изображение в Telegram и получаем новый File ID
+            const sentPhoto = await bot.sendPhoto(chatId, convertedImage, { caption: 'Конвертированное изображение' });
+            userSessions.broadcastContent.photo = sentPhoto.photo[sentPhoto.photo.length - 1].file_id;
           } catch (error) {
-            console.error('Ошибка получения файла картинки:', error);
-            userSessions.broadcastPending = false;
-            userSessions.broadcastContent = { text: null, photo: null };
+            console.error('Ошибка конвертации изображения:', error);
             await sendUserMessage(
               bot,
               chatId,
-              '⚠️ Ошибка: некорректное изображение. Попробуйте другую картинку или отмените рассылку (/cancel_broadcast).',
+              '⚠️ Ошибка: некорректное изображение. Попробуйте JPEG, PNG, GIF, BMP, WEBP до 10 МБ.',
               { parse_mode: 'HTML' }
             );
             return;
