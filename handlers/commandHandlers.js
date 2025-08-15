@@ -2,6 +2,7 @@
 import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
+import { awardPoints } from '../services/userServices.js';
 
 export async function start(bot, msg) {
   try {
@@ -193,5 +194,79 @@ export async function broadcast(bot, msg, userSessions) {
       { parse_mode: 'HTML' }
     );
     await sendAdminMessage(bot, `‼️ Ошибка команды /broadcast: ${error.message}`);
+  }
+}
+
+export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
+  try {
+    const data = callbackQuery.data;
+    const userId = callbackQuery.from.id;
+    
+    // Parse callback data: word_game_${userId}_${index}
+    const parts = data.split('_');
+    if (parts.length !== 4 || parts[0] !== 'word' || parts[1] !== 'game') {
+      return;
+    }
+    
+    const targetUserId = parseInt(parts[2]);
+    const selectedIndex = parseInt(parts[3]);
+    
+    // Check if this callback is for the current user
+    if (targetUserId !== userId) {
+      return;
+    }
+    
+    // Check if user has an active word game
+    const gameSession = userSessions.wordGames.get(userId);
+    if (!gameSession) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⏰ Время игры истекло!',
+        show_alert: true
+      });
+      return;
+    }
+    
+    // Clear the timer since user answered
+    clearTimeout(gameSession.timer);
+    
+    // Check if answer is correct
+    const isCorrect = selectedIndex === gameSession.correctIndex;
+    const selectedAnswer = gameSession.options[selectedIndex];
+    const correctAnswer = gameSession.translation;
+    
+    // Award points
+    const points = isCorrect ? 10 : 0;
+    if (isCorrect) {
+      await awardPoints(userId, points);
+    }
+    
+    // Send result message
+    let resultMessage = isCorrect 
+      ? `✅ <b>Правильно!</b> +${points} очков\n\n`
+      : `❌ <b>Неправильно!</b>\n\n`;
+    
+    resultMessage += `🎯 <b>${gameSession.word}</b> → <b>${correctAnswer}</b>\n\n`;
+    resultMessage += `📝 Пример: ${gameSession.example}\n`;
+    resultMessage += `💡 ${gameSession.fact}\n`;
+    resultMessage += `⚠️ Частые ошибки: ${gameSession.mistakes}\n\n`;
+    resultMessage += `<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`;
+    
+    await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+    
+    // Answer the callback query
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: isCorrect ? '✅ Правильно!' : '❌ Неправильно!',
+      show_alert: false
+    });
+    
+    // Remove game session
+    userSessions.wordGames.delete(userId);
+    
+  } catch (error) {
+    console.error('Ошибка при обработке callback word game:', error);
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: '⚠️ Произошла ошибка',
+      show_alert: true
+    });
   }
 }

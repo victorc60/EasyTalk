@@ -46,22 +46,39 @@ export async function wordGameBroadcast(bot, userSessions) {
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
+        // Создаем inline keyboard с вариантами ответов
+        const keyboard = {
+          inline_keyboard: wordData.options.map((option, index) => [{
+            text: `${index + 1}. ${option}`,
+            callback_data: `word_game_${userId}_${index}`
+          }])
+        };
+
         userSessions.wordGames.set(userId, {
           word: wordData.word,
           translation: wordData.translation.toLowerCase(),
+          options: wordData.options,
+          correctIndex: wordData.options.indexOf(wordData.translation),
+          example: wordData.example,
+          fact: wordData.fact,
+          mistakes: wordData.mistakes,
           timer: setTimeout(() => {
             if (userSessions.wordGames.has(userId)) {
               sendUserMessage(
                 bot,
                 userId,
-                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\n Пример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes} \n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`
+                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes} \n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
+                { parse_mode: 'HTML' }
               );
               userSessions.wordGames.delete(userId);
             }
           }, CONFIG.WORD_GAME_TIMEOUT)
         });
 
-        return `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nНапишите перевод этого слова! Следующее сообщение будет считаться вашим ответом.`;
+        return {
+          text: `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nВыберите правильный перевод:`,
+          reply_markup: keyboard
+        };
       }
     );
 

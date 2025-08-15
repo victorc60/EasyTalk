@@ -4,7 +4,7 @@ import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback } from './handlers/commandHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
 import axios from 'axios'; // Для проверки URL картинки
@@ -102,6 +102,12 @@ function setupCallbacks(bot, userSessions) {
       const chatId = callbackQuery.message.chat.id;
       const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
+
+      // Handle word game callbacks
+      if (data.startsWith('word_game_')) {
+        await handleWordGameCallback(bot, callbackQuery, userSessions);
+        return;
+      }
 
       if (data.startsWith('mode_')) {
         const selectedMode = data.split('_')[1];

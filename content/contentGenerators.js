@@ -111,13 +111,26 @@ const usedWordsCache = new Set();
 const MAX_CACHE_SIZE = 100; // Храним 100 последних слов
 
 export async function wordOfTheDay() {
-  const prompt = `Generate a unique B1-level English word that hasn't been used recently with:
-  - The word
-  - Russian translation
-  - Example sentence
+  const prompt = `Generate a unique B1-level English word with multiple choice options:
+  - The correct word and its Russian translation
+  - 3 incorrect but plausible Russian translations
+  - Example sentence using the correct word
   - Interesting fact about the word
   - Common mistakes with this word
-  Return as JSON: {word, translation, example, fact, mistakes}`;
+  Return as JSON: {
+    "word": "correct_english_word",
+    "translation": "correct_russian_translation", 
+    "options": [
+      "correct_russian_translation",
+      "incorrect_option_1",
+      "incorrect_option_2", 
+      "incorrect_option_3"
+    ],
+    "example": "example_sentence",
+    "fact": "interesting_fact",
+    "mistakes": "common_mistakes"
+  }
+  Make sure the incorrect options are plausible but clearly wrong.`;
   
   let attempts = 0;
   const maxAttempts = 5;
@@ -127,8 +140,8 @@ export async function wordOfTheDay() {
     result = await generateEnglishContent(prompt, 'json');
     
     // Если не удалось сгенерировать слово, используем дефолтное
-    if (!result || !result.word) {
-      return getDefaultWord();
+    if (!result || !result.word || !result.options || result.options.length !== 4) {
+      return getDefaultWordWithOptions();
     }
     
     // Проверяем, не использовалось ли это слово ранее
@@ -142,6 +155,10 @@ export async function wordOfTheDay() {
         usedWordsCache.delete(oldest);
       }
       
+      // Перемешиваем варианты ответов
+      const shuffledOptions = shuffleArray([...result.options]);
+      result.options = shuffledOptions;
+      
       return result;
     }
     
@@ -150,15 +167,30 @@ export async function wordOfTheDay() {
   
   // Если после нескольких попыток всё равно получаем повтор
   console.warn(`Не удалось сгенерировать уникальное слово после ${maxAttempts} попыток`);
-  return getDefaultWord();
+  return getDefaultWordWithOptions();
 }
 
-function getDefaultWord() {
+// Функция для перемешивания массива
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function getDefaultWordWithOptions() {
   const defaultWords = [
-  
     {
       word: "ephemeral",
       translation: "недолговечный",
+      options: [
+        "недолговечный",
+        "вечный",
+        "красивый", 
+        "временный"
+      ],
       example: "The beauty of cherry blossoms is ephemeral.",
       fact: "From Greek 'ephemeros' meaning 'lasting only one day'",
       mistakes: "Don't confuse with 'eternal' - they're opposites"
@@ -166,9 +198,41 @@ function getDefaultWord() {
     {
       word: "quintessential",
       translation: "наиболее типичный",
+      options: [
+        "наиболее типичный",
+        "важный",
+        "красивый",
+        "редкий"
+      ],
       example: "He's the quintessential English gentleman.",
       fact: "Comes from 'quintessence' - the fifth element in ancient philosophy",
       mistakes: "Often misspelled as 'quintessential' (missing the 'e')"
+    },
+    {
+      word: "serendipity",
+      translation: "счастливая случайность",
+      options: [
+        "счастливая случайность",
+        "удача",
+        "везение",
+        "случай"
+      ],
+      example: "Finding this book was pure serendipity.",
+      fact: "Coined by Horace Walpole in 1754, inspired by Persian fairy tale",
+      mistakes: "Often confused with 'luck' - serendipity implies discovery"
+    },
+    {
+      word: "ubiquitous",
+      translation: "вездесущий",
+      options: [
+        "вездесущий",
+        "важный",
+        "популярный",
+        "известный"
+      ],
+      example: "Smartphones have become ubiquitous in modern life.",
+      fact: "From Latin 'ubique' meaning 'everywhere'",
+      mistakes: "Don't confuse with 'popular' - ubiquitous means everywhere present"
     }
   ];
   
@@ -176,12 +240,16 @@ function getDefaultWord() {
   for (const word of defaultWords) {
     if (!usedWordsCache.has(word.word.toLowerCase())) {
       usedWordsCache.add(word.word.toLowerCase());
-      return word;
+      // Перемешиваем варианты ответов
+      const shuffledOptions = shuffleArray([...word.options]);
+      return { ...word, options: shuffledOptions };
     }
   }
   
-  // Если все дефолтные слова уже использовались, возвращаем первое
-  return defaultWords[0];
+  // Если все дефолтные слова уже использовались, возвращаем первое с перемешанными вариантами
+  const firstWord = defaultWords[0];
+  const shuffledOptions = shuffleArray([...firstWord.options]);
+  return { ...firstWord, options: shuffledOptions };
 }
 
 export async function randomCharacter() {

@@ -37,7 +37,16 @@ export async function sendToAllUsers(bot, messageGenerator, errorHandler) {
           continue;
         }
 
-        await sendUserMessage(bot, user.telegram_id, content);
+        // Handle both string messages and object messages with inline keyboards
+        if (typeof content === 'string') {
+          await sendUserMessage(bot, user.telegram_id, content);
+        } else if (content.text && content.reply_markup) {
+          await sendUserMessage(bot, user.telegram_id, content.text, { reply_markup: content.reply_markup });
+        } else {
+          console.error(`Некорректный формат контента для пользователя ${user.telegram_id}:`, content);
+          results.fails++;
+          continue;
+        }
         await user.update({ last_activity: new Date() });
         results.success++;
         console.log(`Сообщение успешно отправлено пользователю ${user.telegram_id}`);
