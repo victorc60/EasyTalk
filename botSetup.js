@@ -4,18 +4,13 @@ import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection } from './handlers/commandHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
 import axios from 'axios'; // Для проверки URL картинки
 import sharp from 'sharp';
 
-// Константы для режимов бота
-const BOT_MODES = {
-  FREE_TALK: { id: 'free_talk', name: 'Свободное общение', description: 'Естественная практика английского с мягкими исправлениями' },
-  CORRECTION: { id: 'correction', name: 'Исправление ошибок', description: 'Строгая проверка и объяснение ошибок' },
-  ROLE_PLAY: { id: 'role_play', name: 'Ролевые игры', description: 'Диалоги с персонажами в разных ситуациях' }
-};
+// Bot modes are now defined in commandHandlers.js
 
 export async function setupBot(bot, userSessions, openai) {
   setupSchedulers(bot, userSessions);
@@ -111,15 +106,25 @@ function setupCallbacks(bot, userSessions) {
 
       if (data.startsWith('mode_')) {
         const selectedMode = data.split('_')[1];
-        const validModes = Object.values(BOT_MODES).map(mode => mode.id);
+        const validModes = ['free_talk', 'correction', 'role_play'];
         if (!validModes.includes(selectedMode)) {
           await sendUserMessage(bot, chatId, `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`, { parse_mode: 'HTML' });
         } else {
           userSessions.conversationModes.set(userId, selectedMode);
+          const modeNames = {
+            'free_talk': 'Свободное общение',
+            'correction': 'Исправление ошибок', 
+            'role_play': 'Ролевые игры'
+          };
+          const modeDescriptions = {
+            'free_talk': 'Естественная практика английского с мягкими исправлениями',
+            'correction': 'Строгая проверка и объяснение ошибок',
+            'role_play': 'Диалоги с персонажами в разных ситуациях'
+          };
           await sendUserMessage(
             bot,
             chatId,
-            `✅ Режим изменен на: <b>${getModeName(selectedMode)}</b>\n\n${getModeDescription(selectedMode)}`,
+            `✅ Режим изменен на: <b>${modeNames[selectedMode]}</b>\n\n${modeDescriptions[selectedMode]}`,
             { parse_mode: 'HTML' }
           );
         }
@@ -410,12 +415,12 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
   
   let systemPrompt = '';
   switch (userMode) {
-    case BOT_MODES.CORRECTION.id:
+    case 'correction':
       systemPrompt = `You're an English corrector. Identify and correct any errors in the student's message. 
       Provide the corrected version first, then briefly explain the mistakes in Russian. 
       Keep explanations simple and clear.`;
       break;
-    case BOT_MODES.ROLE_PLAY.id:
+    case 'role_play':
       await startRolePlay(bot, chatId, userSessions);
       return;
     default: // FREE_TALK
@@ -438,34 +443,4 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai)
   await awardPoints(userId, 1);
 }
 
-async function showModeSelection(bot, chatId) {
-  try {
-    await sendUserMessage(
-      bot,
-      chatId,
-      '🔘 <b>Выберите режим общения:</b>\n\nКаждый режим предлагает разный подход к практике английского языка.\nИспользуйте /mode_free_talk, /mode_correction, /mode_role_play для быстрого выбора.',
-      {
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: `${BOT_MODES.FREE_TALK.name} 🗣`, callback_data: `mode_${BOT_MODES.FREE_TALK.id}` }],
-            [{ text: `${BOT_MODES.CORRECTION.name} ✏️`, callback_data: `mode_${BOT_MODES.CORRECTION.id}` }],
-            [{ text: `${BOT_MODES.ROLE_PLAY.name} 🎭`, callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}` }]
-          ]
-        }
-      }
-    );
-  } catch (error) {
-    console.error('Ошибка показа выбора режима:', error);
-    await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
-    await sendAdminMessage(bot, `‼️ Ошибка показа выбора режима: ${error.message}`);
-  }
-}
-
-function getModeName(modeId) {
-  return Object.values(BOT_MODES).find(mode => mode.id === modeId)?.name || 'Неизвестный режим';
-}
-
-function getModeDescription(modeId) {
-  return Object.values(BOT_MODES).find(mode => mode.id === modeId)?.description || '';
-}
+// These functions are now defined in commandHandlers.js

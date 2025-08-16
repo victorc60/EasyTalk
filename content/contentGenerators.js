@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const usedFactsCache = new Set();
-const CACHE_LIMIT = 100;
+const CACHE_LIMIT = 200; // Increased to store more facts and reduce repetition
 function hashString(str) {
   if (!str) return ''; // Защита от пустых строк
   return crypto.createHash('md5').update(str).digest('hex').substring(0, 16); // MD5, обрезанный до 16 символов
@@ -47,29 +47,55 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  const PROMPT = `Generate an interesting, unique English language fact with Russian translation that hasn't been used recently. Include:
-  - The fact in English (1-2 sentences, engaging for teenagers)
-  - Translation in Russian (accurate and concise)
-  - Brief explanation (1 sentence, simple)
+  // Array of fascinating topics to choose from
+  const TOPICS = [
+    'science', 'space', 'animals', 'history', 'technology', 'human_body', 
+    'ocean', 'weather', 'food', 'art', 'music', 'sports', 'geography', 
+    'psychology', 'medicine', 'engineering', 'nature', 'culture', 'mathematics',
+    'architecture', 'transportation', 'communication', 'energy', 'environment'
+  ];
+  
+  // Select a random topic
+  const selectedTopic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+  
+  const PROMPT = `Generate a mind-blowing, fascinating fact about ${selectedTopic} that will make people say "Wow, that's incredible!" The fact should be:
+  - Completely true and scientifically accurate
+  - Surprising and counterintuitive
+  - Engaging for teenagers and adults
+  - Something that makes people want to share it
+  - Not commonly known
+  
+  Include:
+  - The fact in English (1-2 sentences, make it exciting)
+  - Translation in Russian (accurate and natural)
+  - Brief explanation of why it's fascinating (1 sentence)
+  
   Format exactly as:
   🇬🇧 [fact]
   🇷🇺 [translation]
   💡 [explanation]
-  Ensure the fact is new, fun, and related to English language or culture. Avoid repeating facts from previous responses.`;
+  
+  Make it truly amazing and unforgettable!`;
   
   const MAX_ATTEMPTS = 5;
   const DEFAULT_FACTS = [
-    `🇬🇧 The word "quiz" was invented in 1781 by a Dublin theater owner who made a bet he could create a new word overnight.\n🇷🇺 Слово "quiz" придумал в 1781 году владелец театра в Дублине, поспорив, что создаст новое слово за ночь.\n💡 It became popular as a term for tests and games!`,
-    `🇬🇧 English has "contronyms" like "dust," which can mean both to add dust (to a cake) and to remove dust (from furniture).\n🇷🇺 В английском есть "контронимы", например, "dust" — посыпать пылью (на торт) или убирать пыль (с мебели).\n💡 These words confuse learners due to opposite meanings!`,
-    `🇬🇧 The longest English word is "pneumonoultramicroscopicsilicovolcanoconiosis," a 45-letter term for a lung disease.\n🇷🇺 Самое длинное английское слово — "pneumonoultramicroscopicsilicovolcanoconiosis", 45 букв, означает болезнь лёгких.\n💡 It was created to be super long and is rarely used!`,
-    `🇬🇧 English has over 1 million words, absorbing terms like "zombie" (West African) and "ketchup" (Chinese "kê-tsiap").\n🇷🇺 В английском >1 млн слов: "zombie" (африк.), "кетчуп" (кит. "kê-tsiap").\n💡 Borrowed words reflect English's global history!`
+    `🇬🇧 Honey never spoils! Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still perfectly edible.\n🇷🇺 Мёд никогда не портится! Археологи нашли горшки с мёдом в древнеегипетских гробницах возрастом более 3000 лет, и он всё ещё съедобен.\n💡 Honey's low moisture content and acidic pH create an environment where bacteria cannot survive!`,
+    `🇬🇧 A day on Venus is longer than its year! Venus takes 243 Earth days to rotate on its axis, but only 225 Earth days to orbit the Sun.\n🇷🇺 День на Венере длиннее её года! Венере нужно 243 земных дня, чтобы обернуться вокруг оси, но только 225 дней для обращения вокруг Солнца.\n💡 This means if you lived on Venus, you'd celebrate your birthday before you'd see the next sunrise!`,
+    `🇬🇧 Octopuses have three hearts, nine brains, and blue blood! Two hearts pump blood to the gills, while the third pumps it to the rest of the body.\n🇷🇺 У осьминогов три сердца, девять мозгов и синяя кровь! Два сердца качают кровь к жабрам, а третье — к остальному телу.\n💡 Their blood is blue because it contains copper instead of iron like ours!`,
+    `🇬🇧 Bananas are berries, but strawberries aren't! In botanical terms, bananas qualify as berries while strawberries are actually "aggregate fruits."\n🇷🇺 Бананы — это ягоды, а клубника — нет! По ботаническим терминам бананы считаются ягодами, а клубника — "сложными плодами".\n💡 The definition of a berry is a fruit with seeds inside, which bananas have!`,
+    `🇬🇧 Your brain uses 20% of your body's energy but only weighs 2% of your body weight! It's the most energy-hungry organ in your body.\n🇷🇺 Мозг использует 20% энергии тела, но весит только 2% от веса тела! Это самый энергозатратный орган в организме.\n💡 That's why you feel tired after intense thinking — your brain is literally burning calories!`,
+    `🇬🇧 Lightning strikes the Earth about 100 times every second! That's over 8 million lightning strikes per day.\n🇷🇺 Молния ударяет в Землю примерно 100 раз каждую секунду! Это более 8 миллионов ударов молний в день.\n💡 Lightning is hotter than the surface of the Sun, reaching temperatures of 30,000°C!`,
+    `🇬🇧 There are more possible games of chess than there are atoms in the observable universe! The number is approximately 10^120.\n🇷🇺 Возможных партий в шахматы больше, чем атомов в наблюдаемой вселенной! Это число примерно 10^120.\n💡 This is why no computer can ever calculate all possible chess moves!`,
+    `🇬🇧 A group of flamingos is called a "flamboyance"! These pink birds are so social that they form groups of up to 10,000 birds.\n🇷🇺 Группа фламинго называется "фламандство"! Эти розовые птицы настолько общительны, что образуют группы до 10 000 особей.\n💡 The word "flamboyance" perfectly captures their showy, colorful nature!`,
+    `🇬🇧 The Great Wall of China is not visible from space with the naked eye! This is a common myth, but astronauts confirm it's not true.\n🇷🇺 Великую Китайскую стену нельзя увидеть из космоса невооружённым глазом! Это распространённый миф, но астронавты подтверждают, что это неправда.\n💡 The wall is only about 30 feet wide, which is too narrow to see from space!`,
+    `🇬🇧 Your body contains enough iron to make a 3-inch nail! Iron is essential for carrying oxygen in your blood.\n🇷🇺 В вашем теле достаточно железа, чтобы сделать 3-дюймовый гвоздь! Железо необходимо для переноса кислорода в крови.\n💡 That's why iron deficiency can make you feel tired and weak!`
   ];
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
-      const fact = await generateEnglishContent(
-        PROMPT + (attempt > 0 ? "\n\nAvoid repeating any previous facts." : "")
-      );
+      // Add topic variety to the prompt to avoid repetition
+      const topicPrompt = attempt > 0 ? `\n\nTry a different topic from this list: ${TOPICS.join(', ')}. Avoid repeating any previous facts.` : '';
+      const fact = await generateEnglishContent(PROMPT + topicPrompt);
 
       // Проверяем, что факт не пустой и соответствует формату
       if (!fact || fact.trim() === '' || !fact.includes('🇬🇧') || !fact.includes('🇷🇺') || !fact.includes('💡')) {
@@ -77,25 +103,31 @@ export async function dailyFact() {
         continue;
       }
 
-      // Хэшируем первые 50 символов для уникальности
-      const factKey = hashString(fact.substring(0, 50));
-      if (!factKey) {
-        console.warn(`Attempt ${attempt + 1}: Failed to generate fact key for:`, fact.substring(0, 50));
+      // Enhanced duplicate detection - check both the beginning and key phrases
+      const factKey = hashString(fact.substring(0, 100)); // Increased to 100 characters for better uniqueness
+      const factKey2 = hashString(fact.toLowerCase().replace(/[^a-zа-я]/g, '').substring(0, 50)); // Remove punctuation and spaces
+      
+      if (!factKey || !factKey2) {
+        console.warn(`Attempt ${attempt + 1}: Failed to generate fact keys for:`, fact.substring(0, 50));
         continue;
       }
 
-      if (!usedFactsCache.has(factKey)) {
+      // Check if this fact or a very similar one has been used
+      const isDuplicate = usedFactsCache.has(factKey) || usedFactsCache.has(factKey2);
+      
+      if (!isDuplicate) {
         // Ограничиваем размер кэша
         if (usedFactsCache.size >= CACHE_LIMIT) {
           const oldestKey = usedFactsCache.values().next().value;
           usedFactsCache.delete(oldestKey);
           console.log('Removed oldest fact key from cache:', oldestKey);
         }
-        usedFactsCache.add(factKey); // Используем add вместо set
-        console.log(`New fact generated: ${fact}`);
+        usedFactsCache.add(factKey);
+        usedFactsCache.add(factKey2);
+        console.log(`New fascinating fact generated about ${selectedTopic}: ${fact.substring(0, 100)}...`);
         return fact;
       } else {
-        console.warn(`Attempt ${attempt + 1}: Fact already used (key: ${factKey})`);
+        console.warn(`Attempt ${attempt + 1}: Fact already used (keys: ${factKey}, ${factKey2})`);
       }
     } catch (error) {
       console.warn(`Attempt ${attempt + 1} failed:`, error.message);
@@ -103,7 +135,23 @@ export async function dailyFact() {
   }
 
   console.warn(`Failed to generate new fact after ${MAX_ATTEMPTS} attempts, returning default fact`);
-  return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
+  // Return a random default fact that hasn't been used recently
+  const availableDefaultFacts = DEFAULT_FACTS.filter(fact => {
+    const factKey = hashString(fact.substring(0, 100));
+    return !usedFactsCache.has(factKey);
+  });
+  
+  if (availableDefaultFacts.length > 0) {
+    const selectedFact = availableDefaultFacts[Math.floor(Math.random() * availableDefaultFacts.length)];
+    const factKey = hashString(selectedFact.substring(0, 100));
+    usedFactsCache.add(factKey);
+    return selectedFact;
+  } else {
+    // If all default facts have been used, clear some cache and return a random one
+    const oldestKey = usedFactsCache.values().next().value;
+    if (oldestKey) usedFactsCache.delete(oldestKey);
+    return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
+  }
 }
 
 // Добавляем в начало файла

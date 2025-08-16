@@ -109,6 +109,13 @@ export async function conversationTopic(bot, msg) {
   }
 }
 
+// Bot modes configuration
+const BOT_MODES = {
+  FREE_TALK: { id: 'free_talk', name: 'Свободное общение', description: 'Естественная практика английского с мягкими исправлениями' },
+  CORRECTION: { id: 'correction', name: 'Исправление ошибок', description: 'Строгая проверка и объяснение ошибок' },
+  ROLE_PLAY: { id: 'role_play', name: 'Ролевые игры', description: 'Диалоги с персонажами в разных ситуациях' }
+};
+
 export async function setMode(bot, msg, userSessions, mode) {
   const validModes = ['free_talk', 'role_play', 'correction'];
   
@@ -131,9 +138,41 @@ export async function setMode(bot, msg, userSessions, mode) {
   await sendUserMessage(
     bot,
     msg.chat.id,
-    `✅ Режим установлен: <b>${mode}</b>`,
+    `✅ Режим изменен на: <b>${getModeName(mode)}</b>\n\n${getModeDescription(mode)}`,
     { parse_mode: 'HTML' }
   );
+}
+
+export async function showModeSelection(bot, chatId) {
+  try {
+    await sendUserMessage(
+      bot,
+      chatId,
+      '🔘 <b>Выберите режим общения:</b>\n\nКаждый режим предлагает разный подход к практике английского языка.\nИспользуйте /mode_free_talk, /mode_correction, /mode_role_play для быстрого выбора.',
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `${BOT_MODES.FREE_TALK.name} 🗣`, callback_data: `mode_${BOT_MODES.FREE_TALK.id}` }],
+            [{ text: `${BOT_MODES.CORRECTION.name} ✏️`, callback_data: `mode_${BOT_MODES.CORRECTION.id}` }],
+            [{ text: `${BOT_MODES.ROLE_PLAY.name} 🎭`, callback_data: `mode_${BOT_MODES.ROLE_PLAY.id}` }]
+          ]
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Ошибка показа выбора режима:', error);
+    await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при выборе режима.');
+    await sendAdminMessage(bot, `‼️ Ошибка показа выбора режима: ${error.message}`);
+  }
+}
+
+function getModeName(modeId) {
+  return Object.values(BOT_MODES).find(mode => mode.id === modeId)?.name || 'Неизвестный режим';
+}
+
+function getModeDescription(modeId) {
+  return Object.values(BOT_MODES).find(mode => mode.id === modeId)?.description || '';
 }
 
 export async function showProgress(bot, msg) {
