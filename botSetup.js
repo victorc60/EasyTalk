@@ -47,7 +47,8 @@ function setupSchedulers(bot, userSessions) {
 
 async function setupBotCommands(bot) {
   try {
-    await bot.deleteMyCommands({ scope: { type: 'default' }, language_code: 'ru' });
+    // Clear existing default-scope commands for all languages
+    await bot.deleteMyCommands({ scope: { type: 'default' } });
     console.log('✅ Все команды бота удалены');
     const commands = [
       { command: 'start', description: 'Главное меню' },
@@ -61,7 +62,8 @@ async function setupBotCommands(bot) {
       { command: 'mode_role_play', description: 'Ролевые игры с персонажами' },
       { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' }
     ];
-    await bot.setMyCommands(commands, { scope: { type: 'default' }, language_code: 'ru' });
+    // Set default-scope commands for all languages (omit language_code)
+    await bot.setMyCommands(commands, { scope: { type: 'default' } });
     console.log('✅ Команды бота успешно установлены:', JSON.stringify(commands));
   } catch (error) {
     console.error('❌ Ошибка установки команд бота:', error);
@@ -105,7 +107,8 @@ function setupCallbacks(bot, userSessions) {
       }
 
       if (data.startsWith('mode_')) {
-        const selectedMode = data.split('_')[1];
+        // Extract full mode id after the prefix (handles values with underscores like "free_talk")
+        const selectedMode = data.slice('mode_'.length);
         const validModes = ['free_talk', 'correction', 'role_play'];
         if (!validModes.includes(selectedMode)) {
           await sendUserMessage(bot, chatId, `⚠️ Неверный режим. Доступные: ${validModes.join(', ')}`, { parse_mode: 'HTML' });
@@ -305,7 +308,7 @@ function setupMessageHandler(bot, userSessions, openai) {
 
       // Основная обработка текстовых сообщений
       if (text) {
-        const userMode = userSessions.conversationModes.get(userId) || BOT_MODES.FREE_TALK.id;
+        const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
         await handleRegularMessage(bot, chatId, userId, text, userMode, openai);
       } else {
         await sendUserMessage(
