@@ -2,6 +2,8 @@
 import { OpenAI } from 'openai';
 import { CONFIG } from '../config.js';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const usedFactsCache = new Set();
@@ -156,7 +158,44 @@ export async function dailyFact() {
 
 // Добавляем в начало файла
 const usedWordsCache = new Set();
-const MAX_CACHE_SIZE = 100; // Храним 100 последних слов
+const MAX_CACHE_SIZE = 365; // Храним 365 последних слов (около года)
+const WORD_HISTORY_FILE = path.resolve(process.cwd(), 'data/word_history.json');
+
+function loadUsedWordsFromDisk() {
+  try {
+    if (fs.existsSync(WORD_HISTORY_FILE)) {
+      const raw = fs.readFileSync(WORD_HISTORY_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        for (const word of parsed) {
+          if (typeof word === 'string' && word.trim()) {
+            usedWordsCache.add(word.trim().toLowerCase());
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Не удалось загрузить историю слов:', error.message);
+  }
+}
+
+function saveUsedWordsToDisk() {
+  try {
+    const dir = path.dirname(WORD_HISTORY_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    // Сохраняем не более MAX_CACHE_SIZE последних слов
+    const wordsArray = Array.from(usedWordsCache);
+    const trimmed = wordsArray.slice(Math.max(0, wordsArray.length - MAX_CACHE_SIZE));
+    fs.writeFileSync(WORD_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Не удалось сохранить историю слов:', error.message);
+  }
+}
+
+// Инициализируем кэш слов из файла при загрузке модуля
+loadUsedWordsFromDisk();
 
 export async function wordOfTheDay() {
   const prompt = `Generate a unique B1-level English word with multiple choice options:
@@ -193,7 +232,7 @@ export async function wordOfTheDay() {
     }
     
     // Проверяем, не использовалось ли это слово ранее
-    const wordLower = result.word.toLowerCase();
+    const wordLower = result.word.trim().toLowerCase();
     if (!usedWordsCache.has(wordLower)) {
       usedWordsCache.add(wordLower);
       
@@ -202,6 +241,8 @@ export async function wordOfTheDay() {
         const oldest = usedWordsCache.values().next().value;
         usedWordsCache.delete(oldest);
       }
+      // Сохраняем обновлённую историю на диск
+      saveUsedWordsToDisk();
       
       // Перемешиваем варианты ответов
       const shuffledOptions = shuffleArray([...result.options]);
@@ -286,8 +327,15 @@ function getDefaultWordWithOptions() {
   
   // Ищем дефолтное слово, которое ещё не использовалось
   for (const word of defaultWords) {
-    if (!usedWordsCache.has(word.word.toLowerCase())) {
-      usedWordsCache.add(word.word.toLowerCase());
+    const key = word.word.trim().toLowerCase();
+    if (!usedWordsCache.has(key)) {
+      usedWordsCache.add(key);
+      // Ограничиваем размер кэша и сохраняем
+      if (usedWordsCache.size > MAX_CACHE_SIZE) {
+        const oldest = usedWordsCache.values().next().value;
+        usedWordsCache.delete(oldest);
+      }
+      saveUsedWordsToDisk();
       // Перемешиваем варианты ответов
       const shuffledOptions = shuffleArray([...word.options]);
       return { ...word, options: shuffledOptions };
@@ -296,6 +344,13 @@ function getDefaultWordWithOptions() {
   
   // Если все дефолтные слова уже использовались, возвращаем первое с перемешанными вариантами
   const firstWord = defaultWords[0];
+  const key = firstWord.word.trim().toLowerCase();
+  usedWordsCache.add(key);
+  if (usedWordsCache.size > MAX_CACHE_SIZE) {
+    const oldest = usedWordsCache.values().next().value;
+    usedWordsCache.delete(oldest);
+  }
+  saveUsedWordsToDisk();
   const shuffledOptions = shuffleArray([...firstWord.options]);
   return { ...firstWord, options: shuffledOptions };
 }
