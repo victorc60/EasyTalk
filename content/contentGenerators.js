@@ -355,6 +355,50 @@ function getDefaultWordWithOptions() {
   return { ...firstWord, options: shuffledOptions };
 }
 
+// ---------------------- Daily Horoscope ----------------------
+export async function dailyHoroscope() {
+  const SIGNS = [
+    'Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+    'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'
+  ];
+
+  const PROMPT = `Create a daily horoscope for all zodiac signs.
+Use very simple English (A2–B1 level). Be friendly, positive, and practical.
+Give 1 short sentence for each sign. No mystic predictions, only gentle advice.
+Format exactly with one sign per line like:
+Aries: short advice
+Taurus: short advice
+...
+Pisces: short advice`;
+
+  try {
+    const text = await generateEnglishContent(PROMPT, 'text');
+    if (text && SIGNS.every(s => text.includes(s + ':'))) {
+      return `🔮 Daily Horoscope\n\n${text.trim()}`;
+    }
+  } catch (error) {
+    console.error('Ошибка генерации гороскопа:', error.message);
+  }
+
+  // Fallback easy-English horoscope
+  const fallback = [
+    'Aries: Take one small step. Be brave, but kind.',
+    'Taurus: Finish one task. Enjoy a calm moment.',
+    'Gemini: Ask a good question. Share your ideas.',
+    'Cancer: Call someone you love. Keep your heart open.',
+    'Leo: Smile first. Your warm energy helps others.',
+    'Virgo: Make a simple plan. Keep it clear and light.',
+    'Libra: Listen carefully. Balance work and rest.',
+    'Scorpio: Trust yourself. Use your strong focus.',
+    'Sagittarius: Try something new. Learn with joy.',
+    'Capricorn: Take your time. Small progress is still progress.',
+    'Aquarius: Be creative. Your idea can help a friend.',
+    'Pisces: Breathe deeply. Be gentle with yourself.'
+  ].join('\n');
+
+  return `🔮 Daily Horoscope\n\n${fallback}`;
+}
+
 export async function randomCharacter() {
   const types = ["famous actor", "historical figure", "book character", "scientist"];
   const type = types[Math.floor(Math.random() * types.length)];

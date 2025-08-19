@@ -2,7 +2,7 @@
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
+import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection } from './handlers/commandHandlers.js';
 import User from './models/User.js';
@@ -34,6 +34,11 @@ function setupSchedulers(bot, userSessions) {
         console.log(`Запуск wordGameBroadcast в ${time.hour}:${time.minute} ${time.tz}`);
         wordGameBroadcast(bot, userSessions);
       });
+    });
+    // Ежедневный гороскоп в 08:30 по Москве
+    schedule.scheduleJob({ hour: 8, minute: 30, tz: 'Europe/Moscow' }, () => {
+      console.log('Запуск dailyHoroscopeBroadcast в 08:30 Europe/Moscow');
+      dailyHoroscopeBroadcast(bot);
     });
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, () => {
       console.log('Запуск cleanupInactiveUsers');

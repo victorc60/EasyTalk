@@ -1,7 +1,7 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, randomCharacter, conversationTopic } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -90,6 +90,31 @@ export async function wordGameBroadcast(bot, userSessions) {
   } catch (error) {
     console.error('Ошибка в wordGameBroadcast:', error.message);
     await sendAdminMessage(bot, `‼️ Ошибка рассылки слова дня: ${error.message}`);
+  }
+}
+
+export async function dailyHoroscopeBroadcast(bot) {
+  try {
+    console.log('Запуск рассылки ежедневного гороскопа...');
+    const horoscope = await dailyHoroscope();
+    if (!horoscope) {
+      await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать гороскоп');
+      return;
+    }
+    const { success, fails } = await sendToAllUsers(
+      bot,
+      async () => horoscope,
+      (error, user) => {
+        console.error(`Ошибка для пользователя ${user.telegram_id}: ${error.message}`);
+        if (error.response?.statusCode === 403) {
+          user.update({ isActive: false });
+        }
+      }
+    );
+    await sendAdminMessage(bot, `📊 Гороскоп отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`);
+  } catch (error) {
+    console.error('Ошибка в dailyHoroscopeBroadcast:', error);
+    await sendAdminMessage(bot, `‼️ Ошибка рассылки гороскопа: ${error.message}`);
   }
 }
 
