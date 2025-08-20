@@ -172,7 +172,10 @@ function loadUsedWordsFromDisk() {
             usedWordsCache.add(word.trim().toLowerCase());
           }
         }
+        console.log(`📚 Загружено ${usedWordsCache.size} слов из истории`);
       }
+    } else {
+      console.log('📚 Файл истории слов не найден, создаём новый');
     }
   } catch (error) {
     console.error('Не удалось загрузить историю слов:', error.message);
@@ -189,6 +192,7 @@ function saveUsedWordsToDisk() {
     const wordsArray = Array.from(usedWordsCache);
     const trimmed = wordsArray.slice(Math.max(0, wordsArray.length - MAX_CACHE_SIZE));
     fs.writeFileSync(WORD_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+    console.log(`💾 Сохранено ${trimmed.length} слов в историю`);
   } catch (error) {
     console.error('Не удалось сохранить историю слов:', error.message);
   }
@@ -196,6 +200,14 @@ function saveUsedWordsToDisk() {
 
 // Инициализируем кэш слов из файла при загрузке модуля
 loadUsedWordsFromDisk();
+
+// Функция для ручного добавления слова в использованные (для исправления повторов)
+export function addWordToUsedHistory(word) {
+  const wordLower = word.trim().toLowerCase();
+  usedWordsCache.add(wordLower);
+  saveUsedWordsToDisk();
+  console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
+}
 
 export async function wordOfTheDay() {
   const prompt = `Generate a unique B1-level English word with multiple choice options:
@@ -233,6 +245,8 @@ export async function wordOfTheDay() {
     
     // Проверяем, не использовалось ли это слово ранее
     const wordLower = result.word.trim().toLowerCase();
+    console.log(`🔍 Проверяем слово: "${result.word}" (${wordLower})`);
+    console.log(`📊 Размер кэша использованных слов: ${usedWordsCache.size}`);
     if (!usedWordsCache.has(wordLower)) {
       usedWordsCache.add(wordLower);
       
@@ -243,12 +257,15 @@ export async function wordOfTheDay() {
       }
       // Сохраняем обновлённую историю на диск
       saveUsedWordsToDisk();
+      console.log(`✅ Новое слово "${result.word}" добавлено в историю`);
       
       // Перемешиваем варианты ответов
       const shuffledOptions = shuffleArray([...result.options]);
       result.options = shuffledOptions;
       
       return result;
+    } else {
+      console.log(`⚠️ Слово "${result.word}" уже использовалось ранее`);
     }
     
     attempts++;
@@ -328,6 +345,7 @@ function getDefaultWordWithOptions() {
   // Ищем дефолтное слово, которое ещё не использовалось
   for (const word of defaultWords) {
     const key = word.word.trim().toLowerCase();
+    console.log(`🔍 Проверяем дефолтное слово: "${word.word}" (${key})`);
     if (!usedWordsCache.has(key)) {
       usedWordsCache.add(key);
       // Ограничиваем размер кэша и сохраняем
@@ -336,15 +354,19 @@ function getDefaultWordWithOptions() {
         usedWordsCache.delete(oldest);
       }
       saveUsedWordsToDisk();
+      console.log(`✅ Дефолтное слово "${word.word}" добавлено в историю`);
       // Перемешиваем варианты ответов
       const shuffledOptions = shuffleArray([...word.options]);
       return { ...word, options: shuffledOptions };
+    } else {
+      console.log(`⚠️ Дефолтное слово "${word.word}" уже использовалось ранее`);
     }
   }
   
   // Если все дефолтные слова уже использовались, возвращаем первое с перемешанными вариантами
   const firstWord = defaultWords[0];
   const key = firstWord.word.trim().toLowerCase();
+  console.log(`⚠️ Все дефолтные слова использованы, возвращаем "${firstWord.word}"`);
   usedWordsCache.add(key);
   if (usedWordsCache.size > MAX_CACHE_SIZE) {
     const oldest = usedWordsCache.values().next().value;
