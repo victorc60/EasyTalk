@@ -309,3 +309,59 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     });
   }
 }
+
+export async function testHoroscope(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '⚠️ Эта команда доступна только администратору.',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '🔮 Генерирую тестовый гороскоп...',
+      { parse_mode: 'HTML' }
+    );
+
+    const { dailyHoroscope } = await import('../content/contentGenerators.js');
+    const horoscope = await dailyHoroscope();
+    
+    if (horoscope) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        horoscope,
+        { parse_mode: 'HTML' }
+      );
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '✅ Тестовый гороскоп успешно сгенерирован!',
+        { parse_mode: 'HTML' }
+      );
+    } else {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '❌ Не удалось сгенерировать гороскоп',
+        { parse_mode: 'HTML' }
+      );
+    }
+  } catch (error) {
+    console.error('Ошибка в тестовом гороскопе:', error);
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '⚠️ Произошла ошибка при генерации гороскопа.',
+      { parse_mode: 'HTML' }
+    );
+    await sendAdminMessage(bot, `‼️ Ошибка в команде /test_horoscope: ${error.message}`);
+  }
+}
