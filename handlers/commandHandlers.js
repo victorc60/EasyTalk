@@ -365,3 +365,50 @@ export async function testHoroscope(bot, msg) {
     await sendAdminMessage(bot, `‼️ Ошибка в команде /test_horoscope: ${error.message}`);
   }
 }
+
+export async function addWordToHistory(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '⚠️ Эта команда доступна только администратору.',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    const text = msg.text?.trim();
+    const word = text?.replace('/add_word', '').trim();
+    
+    if (!word) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '📝 Использование: /add_word <слово>\n\nПример: /add_word whisper',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    const { addWordToUsedHistory } = await import('../content/contentGenerators.js');
+    addWordToUsedHistory(word);
+    
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      `✅ Слово "${word}" добавлено в историю использованных слов.\n\nТеперь оно не будет повторяться в играх со словами.`,
+      { parse_mode: 'HTML' }
+    );
+  } catch (error) {
+    console.error('Ошибка при добавлении слова:', error);
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '⚠️ Произошла ошибка при добавлении слова.',
+      { parse_mode: 'HTML' }
+    );
+    await sendAdminMessage(bot, `‼️ Ошибка в команде /add_word: ${error.message}`);
+  }
+}

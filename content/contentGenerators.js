@@ -216,6 +216,10 @@ export async function wordOfTheDay() {
   - Example sentence using the correct word
   - Interesting fact about the word
   - Common mistakes with this word
+  
+  IMPORTANT: Choose a word that is NOT commonly used in language learning apps.
+  Avoid words like: whisper, ephemeral, quintessential, serendipity, ubiquitous, eloquent, resilient, authentic, profound, mysterious, brilliant, courageous, delicate, elegant, fascinating, generous, harmonious, inspiring, joyful, knowledgeable, luminous, magnificent, nurturing, optimistic, passionate, radiant, serene, tranquil, uplifting, vibrant, wonderful, exquisite, graceful, majestic, peaceful.
+  
   Return as JSON: {
     "word": "correct_english_word",
     "translation": "correct_russian_translation", 
