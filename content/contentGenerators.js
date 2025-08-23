@@ -152,7 +152,7 @@ export async function dailyFact() {
     // If all default facts have been used, clear some cache and return a random one
     const oldestKey = usedFactsCache.values().next().value;
     if (oldestKey) usedFactsCache.delete(oldestKey);
-    return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
+  return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
   }
 }
 
@@ -384,41 +384,106 @@ export async function dailyHoroscope() {
     'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'
   ];
 
-  const PROMPT = `Create a daily horoscope for all zodiac signs.
+  // Emoji for each sign
+  const SIGN_EMOJI = {
+    Aries: '🐏', Taurus: '🐂', Gemini: '👯', Cancer: '🦀', Leo: '🦁', Virgo: '🌾',
+    Libra: '⚖️', Scorpio: '🦂', Sagittarius: '🏹', Capricorn: '🐐', Aquarius: '🏺', Pisces: '🐟'
+  };
+
+  // Recent-horoscope cache to avoid repetition
+  const HORO_HISTORY_FILE = path.resolve(process.cwd(), 'data/horoscope_history.json');
+  const usedHoroscopes = new Set();
+  const HORO_CACHE_LIMIT = 60; // store last ~2 months
+
+  const loadHoro = () => {
+    try {
+      if (fs.existsSync(HORO_HISTORY_FILE)) {
+        const arr = JSON.parse(fs.readFileSync(HORO_HISTORY_FILE, 'utf8'));
+        if (Array.isArray(arr)) arr.forEach(h => typeof h === 'string' && usedHoroscopes.add(h));
+      }
+    } catch (e) { console.warn('Не удалось загрузить историю гороскопов:', e.message); }
+  };
+  const saveHoro = () => {
+    try {
+      const dir = path.dirname(HORO_HISTORY_FILE);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      const items = Array.from(usedHoroscopes);
+      const trimmed = items.slice(Math.max(0, items.length - HORO_CACHE_LIMIT));
+      fs.writeFileSync(HORO_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+    } catch (e) { console.warn('Не удалось сохранить историю гороскопов:', e.message); }
+  };
+  loadHoro();
+
+  const buildHeader = () => `🔮 Daily Horoscope \u2728\n<em>Simple advice for your day</em>\n\n`;
+  const decorate = (lines) => lines.map(line => {
+    const [sign, rest] = line.split(':');
+    const cleanSign = sign.trim();
+    const advice = (rest || '').trim();
+    const emoji = SIGN_EMOJI[cleanSign] || '✨';
+    return `${emoji} <b>${cleanSign}</b>: ${advice}`;
+  });
+
+  const normalize = (text) => text.toLowerCase().replace(/\s+/g, ' ').trim();
+  const hashText = (text) => crypto.createHash('md5').update(normalize(text)).digest('hex');
+
+  const PROMPT_BASE = `Create a daily horoscope for all 12 zodiac signs.
 Use very simple English (A2–B1 level). Be friendly, positive, and practical.
-Give 1 short sentence for each sign. No mystic predictions, only gentle advice.
-Format exactly with one sign per line like:
+Give ONE short sentence per sign (8–14 words). No mystic predictions, no future telling; only gentle, useful advice.
+Avoid repeating common phrases like "try your best", "have a good day", "stay positive".
+Make each sign a bit different in topic (work, study, health, friends, feelings, rest).
+Format exactly one sign per line like:
 Aries: short advice
 Taurus: short advice
 ...
 Pisces: short advice`;
 
-  try {
-    const text = await generateEnglishContent(PROMPT, 'text');
-    if (text && SIGNS.every(s => text.includes(s + ':'))) {
-      return `🔮 Daily Horoscope\n\n${text.trim()}`;
+  const MAX_TRIES = 4;
+  for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
+    const EXTRA = attempt === 0 ? '' : `\nMake it clearly different from the previous one. Use new verbs and nouns.`;
+    try {
+      const raw = await generateEnglishContent(PROMPT_BASE + EXTRA, 'text');
+      if (!raw) continue;
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const hasAll = SIGNS.every(s => lines.some(l => l.startsWith(s + ':')));
+      if (!hasAll) continue;
+      const ordered = SIGNS.map(s => lines.find(l => l.startsWith(s + ':')));
+      const decorated = decorate(ordered);
+      const body = decorated.join('\n');
+      const message = buildHeader() + body;
+      const key = hashText(body);
+      if (usedHoroscopes.has(key)) {
+        console.log('⚠️ Сгенерирован повторяющийся гороскоп, пробуем снова...');
+        continue;
+      }
+      usedHoroscopes.add(key);
+      if (usedHoroscopes.size > HORO_CACHE_LIMIT) {
+        const first = usedHoroscopes.values().next().value;
+        usedHoroscopes.delete(first);
+      }
+      saveHoro();
+      return message;
+    } catch (e) {
+      console.warn('Попытка генерации гороскопа не удалась:', e.message);
     }
-  } catch (error) {
-    console.error('Ошибка генерации гороскопа:', error.message);
   }
 
-  // Fallback easy-English horoscope
-  const fallback = [
-    'Aries: Take one small step. Be brave, but kind.',
-    'Taurus: Finish one task. Enjoy a calm moment.',
-    'Gemini: Ask a good question. Share your ideas.',
-    'Cancer: Call someone you love. Keep your heart open.',
-    'Leo: Smile first. Your warm energy helps others.',
+  // Fallback easy-English horoscope with emojis
+  const fallbackLines = [
+    'Aries: Take one small step today. Be brave and kind.',
+    'Taurus: Finish one task. Enjoy a calm moment and tea.',
+    'Gemini: Ask a good question. Share one smart idea.',
+    'Cancer: Call a close friend. Care for your heart.',
+    'Leo: Give a warm smile. Your energy helps others.',
     'Virgo: Make a simple plan. Keep it clear and light.',
-    'Libra: Listen carefully. Balance work and rest.',
-    'Scorpio: Trust yourself. Use your strong focus.',
+    'Libra: Find balance. Work a bit, then rest a bit.',
+    'Scorpio: Trust your focus. Do one thing very well.',
     'Sagittarius: Try something new. Learn with joy.',
-    'Capricorn: Take your time. Small progress is still progress.',
-    'Aquarius: Be creative. Your idea can help a friend.',
-    'Pisces: Breathe deeply. Be gentle with yourself.'
-  ].join('\n');
-
-  return `🔮 Daily Horoscope\n\n${fallback}`;
+    'Capricorn: Take your time. Small steps are okay.',
+    'Aquarius: Be creative. Share your fresh idea.',
+    'Pisces: Breathe slowly. Be gentle with yourself.'
+  ];
+  const decoratedFallback = decorate(fallbackLines).join('\n');
+  return buildHeader() + decoratedFallback;
 }
 
 export async function randomCharacter() {
