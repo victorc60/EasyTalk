@@ -5,6 +5,7 @@ import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessa
 import { awardPoints } from '../services/userServices.js';
 import { recordWordGameParticipation } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
+import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 
 export async function start(bot, msg) {
   try {
@@ -323,7 +324,7 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
   }
 }
 
-export async function wordGameStats(bot, msg) {
+export async function wordGameStats(bot, msg, userSessions = null) {
   try {
     const userId = msg.from.id.toString();
     if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
@@ -335,10 +336,43 @@ export async function wordGameStats(bot, msg) {
       return;
     }
     
-    await notifyDailyWordGameStats(bot);
+    console.log('Starting word game stats command...');
+    await sendUserMessage(bot, msg.chat.id, '🔄 Получение статистики...');
+    
+    // Try simple version first (doesn't require database)
+    if (userSessions) {
+      await notifySimpleWordGameStats(bot, userSessions);
+    } else {
+      // Fallback to database version
+      await notifyDailyWordGameStats(bot);
+    }
   } catch (error) {
     console.error('Ошибка при получении статистики игры:', error);
-    await sendUserMessage(bot, msg.chat.id, '❌ Ошибка получения статистики');
+    console.error('Full error:', error);
+    await sendUserMessage(bot, msg.chat.id, `❌ Ошибка получения статистики: ${error.message}`);
+  }
+}
+
+export async function testAdmin(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '❌ У вас нет прав для выполнения этой команды.'
+      );
+      return;
+    }
+    
+    console.log('Testing admin message functionality...');
+    await sendUserMessage(bot, msg.chat.id, '🧪 Тестирование сообщений администратору...');
+    
+    await testAdminMessage(bot);
+    await sendUserMessage(bot, msg.chat.id, '✅ Тестовое сообщение отправлено');
+  } catch (error) {
+    console.error('Ошибка при тестировании админ сообщений:', error);
+    await sendUserMessage(bot, msg.chat.id, `❌ Ошибка тестирования: ${error.message}`);
   }
 }
 

@@ -1,7 +1,7 @@
 // utils/botUtils.js
-export async function sendAdminMessage(bot, message) {
+export async function sendAdminMessage(bot, message, options = {}) {
     try {
-      await bot.sendMessage(process.env.ADMIN_ID, message);
+      await bot.sendMessage(process.env.ADMIN_ID, message, options);
       console.log('Сообщение отправлено админу:', message);
     } catch (error) {
       console.error('Ошибка отправки сообщения админу:', error.message);

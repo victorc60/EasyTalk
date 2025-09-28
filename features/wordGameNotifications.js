@@ -17,6 +17,12 @@ export async function notifyDailyWordGameStats(bot, date = null) {
       return;
     }
     
+    // Handle case when no participants
+    if (stats.totalParticipants === 0) {
+      await sendAdminMessage(bot, `📊 <b>Статистика ежедневной игры со словами</b>\n📅 Дата: ${stats.date}\n\n⚠️ Сегодня никто не участвовал в игре со словами.`, { parse_mode: 'HTML' });
+      return;
+    }
+    
     const leaderboard = await getDailyWordGameLeaderboard(date, 5);
     
     // Формируем сообщение со статистикой
@@ -27,28 +33,35 @@ export async function notifyDailyWordGameStats(bot, date = null) {
     message += `• Всего получили игру: ${stats.totalParticipants}\n`;
     message += `• Ответили: ${stats.answeredCount}\n`;
     message += `• Не ответили: ${stats.unansweredCount}\n`;
-    message += `• Процент участия: ${Math.round((stats.answeredCount / stats.totalParticipants) * 100)}%\n\n`;
+    
+    // Safe division for participation percentage
+    const participationRate = stats.totalParticipants > 0 
+      ? Math.round((stats.answeredCount / stats.totalParticipants) * 100) 
+      : 0;
+    message += `• Процент участия: ${participationRate}%\n\n`;
     
     message += `🎯 <b>Результаты:</b>\n`;
     message += `• Правильных ответов: ${stats.correctCount}\n`;
     message += `• Точность: ${stats.accuracy}%\n`;
     message += `• Всего очков заработано: ${stats.totalPoints}\n\n`;
     
-    if (leaderboard.length > 0) {
+    if (leaderboard && leaderboard.length > 0) {
       message += `🏆 <b>Топ-${leaderboard.length} участников:</b>\n`;
       leaderboard.forEach((participant, index) => {
-        const user = participant.User;
-        const username = user.username ? `@${user.username}` : (user.first_name || `ID:${user.telegram_id}`);
-        message += `${index + 1}. ${username} - ${participant.points_earned} очков\n`;
+        if (participant.User) {
+          const user = participant.User;
+          const username = user.username ? `@${user.username}` : (user.first_name || `ID:${user.telegram_id}`);
+          message += `${index + 1}. ${username} - ${participant.points_earned} очков\n`;
+        }
       });
     }
     
-    await sendAdminMessage(bot, message);
+    await sendAdminMessage(bot, message, { parse_mode: 'HTML' });
     console.log('Статистика ежедневной игры отправлена администратору');
     
   } catch (error) {
     console.error('Ошибка отправки статистики игры:', error.message);
-    await sendAdminMessage(bot, `‼️ Ошибка получения статистики игры: ${error.message}`);
+    await sendAdminMessage(bot, `‼️ Ошибка получения статистики игры: ${error.message}`, { parse_mode: 'HTML' });
   }
 }
 

@@ -41,6 +41,7 @@ export async function recordWordGameParticipation(userId, word, answered, correc
 export async function getDailyWordGameStats(date = null) {
   try {
     const targetDate = date || new Date().toISOString().split('T')[0];
+    console.log(`Getting stats for date: ${targetDate}`);
     
     const stats = await WordGameParticipation.findAll({
       where: {
@@ -49,16 +50,18 @@ export async function getDailyWordGameStats(date = null) {
       include: [{
         model: User,
         attributes: ['telegram_id', 'username', 'first_name'],
-        required: true
+        required: false // Changed to false to include records even if user doesn't exist
       }]
     });
+    
+    console.log(`Found ${stats.length} participation records`);
     
     const totalParticipants = stats.length;
     const answeredCount = stats.filter(s => s.answered).length;
     const correctCount = stats.filter(s => s.correct).length;
-    const totalPoints = stats.reduce((sum, s) => sum + s.points_earned, 0);
+    const totalPoints = stats.reduce((sum, s) => sum + (s.points_earned || 0), 0);
     
-    return {
+    const result = {
       date: targetDate,
       totalParticipants,
       answeredCount,
@@ -68,8 +71,12 @@ export async function getDailyWordGameStats(date = null) {
       totalPoints,
       participants: stats
     };
+    
+    console.log('Stats result:', result);
+    return result;
   } catch (error) {
     console.error('Ошибка получения статистики игры:', error.message);
+    console.error('Full error:', error);
     return null;
   }
 }

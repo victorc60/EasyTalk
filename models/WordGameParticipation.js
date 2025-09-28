@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../database/database.js';
+import User from './User.js';
 
 // Определение модели для отслеживания участия в ежедневной игре со словами
 const WordGameParticipation = sequelize.define('WordGameParticipation', {
@@ -56,6 +57,13 @@ const WordGameParticipation = sequelize.define('WordGameParticipation', {
       fields: ['answered']
     }
   ]
+});
+
+// Define associations
+WordGameParticipation.belongsTo(User, {
+  foreignKey: 'user_id',
+  targetKey: 'telegram_id',
+  as: 'User'
 });
 
 export default WordGameParticipation;
