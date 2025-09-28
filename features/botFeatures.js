@@ -3,6 +3,8 @@ import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
+import { recordWordGameParticipation } from '../services/wordGameServices.js';
+import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
 
@@ -54,6 +56,7 @@ export async function wordGameBroadcast(bot, userSessions) {
           }])
         };
 
+        const startTime = Date.now();
         userSessions.wordGames.set(userId, {
           word: wordData.word,
           translation: wordData.translation.toLowerCase(),
@@ -62,8 +65,19 @@ export async function wordGameBroadcast(bot, userSessions) {
           example: wordData.example,
           fact: wordData.fact,
           mistakes: wordData.mistakes,
-          timer: setTimeout(() => {
+          startTime: startTime,
+          timer: setTimeout(async () => {
             if (userSessions.wordGames.has(userId)) {
+              // Record that user didn't answer
+              await recordWordGameParticipation(
+                userId, 
+                wordData.word, 
+                false, // didn't answer
+                false, 
+                0, 
+                null
+              );
+              
               sendUserMessage(
                 bot,
                 userId,
@@ -87,6 +101,9 @@ export async function wordGameBroadcast(bot, userSessions) {
       bot,
       `📊 Слово дня отправлено\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
     );
+    
+    // Schedule notification about participation stats after game timeout
+    scheduleWordGameStatsNotification(bot, 6); // 6 minutes after game starts (5 min timeout + 1 min buffer)
   } catch (error) {
     console.error('Ошибка в wordGameBroadcast:', error.message);
     await sendAdminMessage(bot, `‼️ Ошибка рассылки слова дня: ${error.message}`);

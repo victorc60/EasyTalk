@@ -3,6 +3,8 @@ import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
+import { recordWordGameParticipation } from '../services/wordGameServices.js';
+import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 
 export async function start(bot, msg) {
   try {
@@ -279,6 +281,17 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       await awardPoints(userId, points);
     }
     
+    // Record participation in database
+    const responseTime = Date.now() - gameSession.startTime;
+    await recordWordGameParticipation(
+      userId, 
+      gameSession.word, 
+      true, // answered
+      isCorrect, 
+      points, 
+      responseTime
+    );
+    
     // Send result message
     let resultMessage = isCorrect 
       ? `✅ <b>Правильно!</b> +${points} очков\n\n`
@@ -307,6 +320,25 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       text: '⚠️ Произошла ошибка',
       show_alert: true
     });
+  }
+}
+
+export async function wordGameStats(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '❌ У вас нет прав для выполнения этой команды.'
+      );
+      return;
+    }
+    
+    await notifyDailyWordGameStats(bot);
+  } catch (error) {
+    console.error('Ошибка при получении статистики игры:', error);
+    await sendUserMessage(bot, msg.chat.id, '❌ Ошибка получения статистики');
   }
 }
 

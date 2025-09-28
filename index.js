@@ -5,6 +5,7 @@ import { OpenAI } from 'openai';
 import sequelize from './database/database.js';
 import { sendAdminMessage } from './utils/botUtils.js';
 import { setupBot } from './botSetup.js';
+import './models/WordGameParticipation.js'; // Import to initialize the model
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

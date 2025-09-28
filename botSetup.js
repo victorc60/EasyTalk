@@ -4,7 +4,7 @@ import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection, testHoroscope, addWordToHistory } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats } from './handlers/commandHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
 import axios from 'axios'; // Для проверки URL картинки
@@ -87,6 +87,7 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
   bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions));
   bot.onText(/\/test_horoscope/, (msg) => testHoroscope(bot, msg));
+  bot.onText(/\/word_stats/, (msg) => wordGameStats(bot, msg));
   bot.onText(/\/add_word/, (msg) => addWordToHistory(bot, msg));
   bot.onText(/\/cancel_broadcast/, async (msg) => {
     const userId = msg.from.id.toString();
