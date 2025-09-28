@@ -109,7 +109,8 @@ export async function dailyHoroscopeBroadcast(bot) {
         if (error.response?.statusCode === 403) {
           user.update({ isActive: false });
         }
-      },{ parse_mode: 'HTML' }
+      },
+      { parse_mode: 'HTML' }
     );
     await sendAdminMessage(bot, `📊 Гороскоп отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`);
   } catch (error) {

@@ -4,7 +4,7 @@ import sequelize from '../database/database.js';
 import { Op } from 'sequelize';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 
-export async function sendToAllUsers(bot, messageGenerator, errorHandler) {
+export async function sendToAllUsers(bot, messageGenerator, errorHandler, options = {}) {
   try {
     const users = await User.findAll({ 
       attributes: ['telegram_id']
@@ -39,9 +39,10 @@ export async function sendToAllUsers(bot, messageGenerator, errorHandler) {
 
         // Handle both string messages and object messages with inline keyboards
         if (typeof content === 'string') {
-          await sendUserMessage(bot, user.telegram_id, content);
+          await sendUserMessage(bot, user.telegram_id, content, options);
         } else if (content.text && content.reply_markup) {
-          await sendUserMessage(bot, user.telegram_id, content.text, { reply_markup: content.reply_markup });
+          const messageOptions = { ...options, reply_markup: content.reply_markup };
+          await sendUserMessage(bot, user.telegram_id, content.text, messageOptions);
         } else {
           console.error(`Некорректный формат контента для пользователя ${user.telegram_id}:`, content);
           results.fails++;
