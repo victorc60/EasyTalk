@@ -49,6 +49,7 @@ export async function getDailyWordGameStats(date = null) {
       },
       include: [{
         model: User,
+        as: 'User',
         attributes: ['telegram_id', 'username', 'first_name'],
         required: false // Changed to false to include records even if user doesn't exist
       }]
@@ -139,6 +140,7 @@ export async function getDailyWordGameLeaderboard(date = null, limit = 10) {
       },
       include: [{
         model: User,
+        as: 'User',
         attributes: ['telegram_id', 'username', 'first_name'],
         required: true
       }],
