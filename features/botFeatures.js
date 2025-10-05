@@ -57,6 +57,14 @@ export async function wordGameBroadcast(bot, userSessions) {
         };
 
         const startTime = Date.now();
+        
+        // Calculate time until end of day (midnight Moscow time)
+        const now = new Date();
+        const moscowTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Moscow"}));
+        const endOfDay = new Date(moscowTime);
+        endOfDay.setHours(23, 59, 59, 999); // End of day
+        const timeUntilEndOfDay = endOfDay.getTime() - moscowTime.getTime();
+        
         userSessions.wordGames.set(userId, {
           word: wordData.word,
           translation: wordData.translation.toLowerCase(),
@@ -66,7 +74,7 @@ export async function wordGameBroadcast(bot, userSessions) {
           fact: wordData.fact,
           mistakes: wordData.mistakes,
           startTime: startTime,
-          timer: setTimeout(async () => {
+          timer: CONFIG.WORD_GAME_TIMEOUT ? setTimeout(async () => {
             if (userSessions.wordGames.has(userId)) {
               // Record that user didn't answer
               await recordWordGameParticipation(
@@ -86,7 +94,27 @@ export async function wordGameBroadcast(bot, userSessions) {
               );
               userSessions.wordGames.delete(userId);
             }
-          }, CONFIG.WORD_GAME_TIMEOUT)
+          }, CONFIG.WORD_GAME_TIMEOUT) : setTimeout(async () => {
+            if (userSessions.wordGames.has(userId)) {
+              // Record that user didn't answer by end of day
+              await recordWordGameParticipation(
+                userId, 
+                wordData.word, 
+                false, // didn't answer
+                false, 
+                0, 
+                null
+              );
+              
+              sendUserMessage(
+                bot,
+                userId,
+                `🌙 День закончился! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes} \n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
+                { parse_mode: 'HTML' }
+              );
+              userSessions.wordGames.delete(userId);
+            }
+          }, timeUntilEndOfDay)
         });
 
         return {
@@ -102,8 +130,7 @@ export async function wordGameBroadcast(bot, userSessions) {
       `📊 Слово дня отправлено\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
     );
     
-    // Schedule notification about participation stats after game timeout
-    scheduleWordGameStatsNotification(bot, 6); // 6 minutes after game starts (5 min timeout + 1 min buffer)
+    // Note: Statistics will be sent automatically at 00:05 Moscow time
   } catch (error) {
     console.error('Ошибка в wordGameBroadcast:', error.message);
     await sendAdminMessage(bot, `‼️ Ошибка рассылки слова дня: ${error.message}`);

@@ -3,6 +3,7 @@ import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
+import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin } from './handlers/commandHandlers.js';
 import User from './models/User.js';
@@ -40,6 +41,16 @@ function setupSchedulers(bot, userSessions) {
       console.log('Запуск dailyHoroscopeBroadcast в 08:30 Europe/Moscow');
       dailyHoroscopeBroadcast(bot);
     });
+    
+    // Статистика ежедневной игры со словами в 00:05 по Москве
+    schedule.scheduleJob(CONFIG.WORD_GAME_STATS_TIME, () => {
+      console.log('Запуск обработки завершения дня и статистики в 00:05 Europe/Moscow');
+      // First handle any remaining active games
+      handleEndOfDayWordGames(bot, userSessions);
+      // Then send statistics
+      notifyDailyWordGameStats(bot);
+    });
+    
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, () => {
       console.log('Запуск cleanupInactiveUsers');
       cleanupInactiveUsers();

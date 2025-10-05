@@ -1,6 +1,6 @@
 // features/wordGameNotifications.js
-import { sendAdminMessage } from '../utils/botUtils.js';
-import { getDailyWordGameStats, getDailyWordGameLeaderboard } from '../services/wordGameServices.js';
+import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
+import { getDailyWordGameStats, getDailyWordGameLeaderboard, recordWordGameParticipation } from '../services/wordGameServices.js';
 
 /**
  * Отправляет уведомление администратору о статистике участия в ежедневной игре со словами
@@ -62,6 +62,53 @@ export async function notifyDailyWordGameStats(bot, date = null) {
   } catch (error) {
     console.error('Ошибка отправки статистики игры:', error.message);
     await sendAdminMessage(bot, `‼️ Ошибка получения статистики игры: ${error.message}`, { parse_mode: 'HTML' });
+  }
+}
+
+/**
+ * Обрабатывает завершение дня для активных игр со словами
+ * @param {Object} bot - Экземпляр Telegram бота
+ * @param {Object} userSessions - Сессии пользователей
+ */
+export async function handleEndOfDayWordGames(bot, userSessions) {
+  try {
+    console.log('Обработка завершения дня для активных игр со словами...');
+    
+    const activeGames = Array.from(userSessions.wordGames.entries());
+    console.log(`Найдено ${activeGames.length} активных игр для завершения`);
+    
+    for (const [userId, gameSession] of activeGames) {
+      // Record that user didn't answer by end of day
+      await recordWordGameParticipation(
+        userId, 
+        gameSession.word, 
+        false, // didn't answer
+        false, 
+        0, 
+        null
+      );
+      
+      // Clear the timer
+      if (gameSession.timer) {
+        clearTimeout(gameSession.timer);
+      }
+      
+      // Send end of day message
+      await sendUserMessage(
+        bot,
+        userId,
+        `🌙 День закончился! Правильный перевод:\n${gameSession.word} → ${gameSession.translation}\n\n📝 Пример: ${gameSession.example}\n💡 ${gameSession.fact}\n⚠️ Частые ошибки: ${gameSession.mistakes} \n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
+        { parse_mode: 'HTML' }
+      );
+      
+      // Remove from active games
+      userSessions.wordGames.delete(userId);
+    }
+    
+    console.log(`Завершено ${activeGames.length} активных игр`);
+    
+  } catch (error) {
+    console.error('Ошибка при завершении дня для игр:', error.message);
   }
 }
 
