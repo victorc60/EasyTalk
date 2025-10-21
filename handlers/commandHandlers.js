@@ -44,6 +44,7 @@ export async function start(bot, msg) {
 📚 Интересные факты в 17:30
 💬 /topic - тема для обсуждения
 🎭 /roleplay - ролевая игра
+📚🎧 /story - voice storytelling with audio
 
 📊 /progress - твой прогресс
 🏆 /leaders - таблица лидеров

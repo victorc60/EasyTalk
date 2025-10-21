@@ -6,6 +6,7 @@ import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage,
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin } from './handlers/commandHandlers.js';
+import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
 import axios from 'axios'; // Для проверки URL картинки
@@ -14,6 +15,10 @@ import sharp from 'sharp';
 // Bot modes are now defined in commandHandlers.js
 
 export async function setupBot(bot, userSessions, openai) {
+  // Initialize story handlers
+  const storyHandlers = new StoryHandlers(openai);
+  userSessions.storyHandlers = storyHandlers;
+  
   setupSchedulers(bot, userSessions);
   await setupBotCommands(bot);
   setupCommandHandlers(bot, userSessions);
@@ -54,6 +59,11 @@ function setupSchedulers(bot, userSessions) {
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, () => {
       console.log('Запуск cleanupInactiveUsers');
       cleanupInactiveUsers();
+      // Clean up old audio files and inactive story sessions
+      if (userSessions.storyHandlers) {
+        userSessions.storyHandlers.storyService.cleanupOldFiles();
+        userSessions.storyHandlers.cleanupInactiveSessions();
+      }
     });
   } catch (error) {
     console.error('Ошибка настройки планировщиков:', error);
@@ -70,6 +80,7 @@ async function setupBotCommands(bot) {
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
       { command: 'topic', description: 'Тема для обсуждения' },
+      { command: 'story', description: 'Voice storytelling with audio' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
       { command: 'mode', description: 'Выбор режима общения' },
@@ -101,6 +112,7 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/word_stats/, (msg) => wordGameStats(bot, msg, userSessions));
   bot.onText(/\/test_admin/, (msg) => testAdmin(bot, msg));
   bot.onText(/\/add_word/, (msg) => addWordToHistory(bot, msg));
+  bot.onText(/\/story/, (msg) => userSessions.storyHandlers.handleStoryCommand(bot, msg, userSessions));
   bot.onText(/\/cancel_broadcast/, async (msg) => {
     const userId = msg.from.id.toString();
     if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
@@ -123,6 +135,12 @@ function setupCallbacks(bot, userSessions) {
       // Handle word game callbacks
       if (data.startsWith('word_game_')) {
         await handleWordGameCallback(bot, callbackQuery, userSessions);
+        return;
+      }
+
+      // Handle story callbacks
+      if (data.startsWith('story_')) {
+        await userSessions.storyHandlers.handleStoryCallback(bot, callbackQuery, userSessions);
         return;
       }
 
