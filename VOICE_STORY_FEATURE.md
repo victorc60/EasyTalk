@@ -8,7 +8,7 @@ The Voice Storytelling feature allows users to generate humorous short stories u
 ### 📚 Story Generation
 - **AI-Powered Stories**: Uses ChatGPT (GPT-4) to generate humorous and engaging short stories
 - **Multiple Topics**: Choose from predefined topics or let the AI surprise you
-- **Customizable Length**: Short (1-2 min), Medium (2-3 min), or Long (3-5 min) stories
+- **Customizable Length**: Short (4-5 sentences) or Medium (5-8 sentences) stories
 - **English Learning Focus**: Stories are designed to be suitable for English learners
 
 ### 🎧 Audio Conversion
