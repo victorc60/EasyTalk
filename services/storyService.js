@@ -25,8 +25,9 @@ export class StoryService {
   async generateStory(topic = null, length = 'short') {
     try {
       const lengthInstructions = {
-        'short': 'Make the story exactly 4-5 sentences. Keep it very concise and punchy.',
-        'medium': 'Make the story exactly 5-8 sentences. Slightly longer but still concise.'
+        'short': 'Keep the story under 200 words, perfect for a quick audio story.',
+        'medium': 'Keep the story under 400 words, good for a longer audio experience.',
+        'long': 'Keep the story under 600 words, for an extended audio story.'
       };
 
       const storyPrompt = `Create a humorous and entertaining short story in English. 
@@ -41,9 +42,8 @@ Requirements:
 - Make it memorable and entertaining
 - Avoid offensive content
 - Focus on everyday situations with a humorous twist
-- Count your sentences carefully to match the requested length
 
-Format the story as a single paragraph with engaging storytelling.`;
+Format the story with clear paragraphs and engaging storytelling.`;
 
       const response = await this.openai.chat.completions.create({
         model: "gpt-4",
@@ -190,8 +190,9 @@ Format the story as a single paragraph with engaging storytelling.`;
   // Get story length options
   getStoryLengths() {
     return [
-      { id: 'short', label: 'Short (4-5 sentences)', description: 'Perfect for a quick laugh' },
-      { id: 'medium', label: 'Medium (5-8 sentences)', description: 'Slightly longer story' }
+      { id: 'short', label: 'Short (1-2 minutes)', description: 'Perfect for a quick laugh' },
+      { id: 'medium', label: 'Medium (2-3 minutes)', description: 'Good for a longer story' },
+      { id: 'long', label: 'Long (3-5 minutes)', description: 'Extended storytelling experience' }
     ];
   }
 }

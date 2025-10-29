@@ -73,8 +73,9 @@ export class StoryHandlers {
           { text: '📏 Story Length:', callback_data: 'story_length_info' }
         ],
         [
-          { text: '⚡ Short (4-5 sentences)', callback_data: 'story_length_short' },
-          { text: '📖 Medium (5-8 sentences)', callback_data: 'story_length_medium' }
+          { text: '⚡ Short (1-2 min)', callback_data: 'story_length_short' },
+          { text: '📖 Medium (2-3 min)', callback_data: 'story_length_medium' },
+          { text: '📚 Long (3-5 min)', callback_data: 'story_length_long' }
         ]
       ]
     };
@@ -84,8 +85,9 @@ export class StoryHandlers {
 🎯 Choose a topic for your humorous story, or let me surprise you!
 
 📏 Choose the length of your story:
-• <b>Short</b>: Quick laugh (4-5 sentences)
-• <b>Medium</b>: Slightly longer story (5-8 sentences)
+• <b>Short</b>: Quick laugh (1-2 minutes)
+• <b>Medium</b>: Good story (2-3 minutes) 
+• <b>Long</b>: Extended experience (3-5 minutes)
 
 ✨ I'll create a funny story and convert it to audio for you to listen to!`;
 
@@ -143,8 +145,9 @@ export class StoryHandlers {
     this.userSessions.get(userId).length = length;
 
     const lengthNames = {
-      'short': 'Short (4-5 sentences)',
-      'medium': 'Medium (5-8 sentences)'
+      'short': 'Short (1-2 minutes)',
+      'medium': 'Medium (2-3 minutes)',
+      'long': 'Long (3-5 minutes)'
     };
 
     const session = this.userSessions.get(userId);
@@ -168,15 +171,20 @@ export class StoryHandlers {
   async showLengthInfo(bot, chatId) {
     const message = `📏 <b>Story Length Guide:</b>
 
-⚡ <b>Short (4-5 sentences)</b>
+⚡ <b>Short (1-2 minutes)</b>
 • Perfect for a quick laugh
-• Very concise and punchy
+• Under 200 words
 • Great for busy moments
 
-📖 <b>Medium (5-8 sentences)</b>
-• Slightly longer story
-• More development while staying concise
+📖 <b>Medium (2-3 minutes)</b>
+• Good story development
+• Under 400 words
 • Balanced experience
+
+📚 <b>Long (3-5 minutes)</b>
+• Extended storytelling
+• Under 600 words
+• Full narrative experience
 
 Choose your preferred length!`;
 
