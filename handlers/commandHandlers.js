@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 
@@ -260,7 +260,29 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     }
     
     // Check if user has an active word game
-    const gameSession = userSessions.wordGames.get(userId);
+    let gameSession = userSessions.wordGames.get(userId);
+    if (!gameSession) {
+      const savedWord = await getSavedDailyWordData();
+      if (savedWord) {
+        const normalizedTranslation = savedWord.translation?.toLowerCase?.() || '';
+        gameSession = {
+          word: savedWord.word,
+          translation: savedWord.translation,
+          normalizedTranslation,
+          options: savedWord.options || [],
+          correctIndex: savedWord.correctIndex ?? savedWord.options?.findIndex(
+            option => option?.toLowerCase?.() === normalizedTranslation
+          ) ?? 0,
+          example: savedWord.example,
+          fact: savedWord.fact,
+          mistakes: savedWord.mistakes,
+          startTime: null,
+          timer: null
+        };
+        userSessions.wordGames.set(userId, gameSession);
+      }
+    }
+    
     if (!gameSession) {
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: '⏰ Время игры истекло!',
@@ -273,7 +295,14 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     clearTimeout(gameSession.timer);
     
     // Check if answer is correct
-    const isCorrect = selectedIndex === gameSession.correctIndex;
+    const resolvedCorrectIndex = Math.max(
+      0,
+      Math.min(
+        typeof gameSession.correctIndex === 'number' ? gameSession.correctIndex : 0,
+        (gameSession.options?.length || 1) - 1
+      )
+    );
+    const isCorrect = selectedIndex === resolvedCorrectIndex;
     const selectedAnswer = gameSession.options[selectedIndex];
     const correctAnswer = gameSession.translation;
     
@@ -284,7 +313,7 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     }
     
     // Record participation in database
-    const responseTime = Date.now() - gameSession.startTime;
+    const responseTime = gameSession.startTime ? Date.now() - gameSession.startTime : null;
     await recordWordGameParticipation(
       userId, 
       gameSession.word, 

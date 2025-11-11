@@ -3,7 +3,7 @@ import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, saveDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -45,12 +45,36 @@ export async function dailyFactBroadcast(bot) {
 export async function wordGameBroadcast(bot, userSessions) {
   try {
     const wordData = await wordOfTheDay();
+    const saved = await saveDailyWordData(wordData);
+    if (!saved) {
+      console.warn('⚠️ Не удалось сохранить слово дня в базе');
+    }
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
+        const normalizedTranslation = wordData.translation.toLowerCase();
+        const userWordData = {
+          word: wordData.word,
+          translation: wordData.translation,
+          normalizedTranslation,
+          options: [...wordData.options],
+          example: wordData.example,
+          fact: wordData.fact,
+          mistakes: wordData.mistakes
+        };
+
+        let correctIndex = Number.isInteger(wordData.correctIndex)
+          ? wordData.correctIndex
+          : userWordData.options.findIndex(
+              option => option.toLowerCase() === normalizedTranslation
+            );
+        if (correctIndex === -1) {
+          correctIndex = Math.max(userWordData.options.indexOf(wordData.translation), 0);
+        }
+
         // Создаем inline keyboard с вариантами ответов
         const keyboard = {
-          inline_keyboard: wordData.options.map((option, index) => [{
+          inline_keyboard: userWordData.options.map((option, index) => [{
             text: `${index + 1}. ${option}`,
             callback_data: `word_game_${userId}_${index}`
           }])
@@ -66,13 +90,8 @@ export async function wordGameBroadcast(bot, userSessions) {
         const timeUntilEndOfDay = endOfDay.getTime() - moscowTime.getTime();
         
         userSessions.wordGames.set(userId, {
-          word: wordData.word,
-          translation: wordData.translation.toLowerCase(),
-          options: wordData.options,
-          correctIndex: wordData.options.indexOf(wordData.translation),
-          example: wordData.example,
-          fact: wordData.fact,
-          mistakes: wordData.mistakes,
+          ...userWordData,
+          correctIndex,
           startTime: startTime,
           timer: CONFIG.WORD_GAME_TIMEOUT ? setTimeout(async () => {
             if (userSessions.wordGames.has(userId)) {

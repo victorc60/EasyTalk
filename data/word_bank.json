@@ -1,0 +1,2802 @@
+[
+  {
+    "word": "ability",
+    "translation": "способность",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "skills"
+  },
+  {
+    "word": "aboard",
+    "translation": "на борту",
+    "level": "B1",
+    "partOfSpeech": "adverb",
+    "topic": "travel"
+  },
+  {
+    "word": "absent",
+    "translation": "отсутствующий",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "work"
+  },
+  {
+    "word": "absorb",
+    "translation": "впитывать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "science"
+  },
+  {
+    "word": "academic",
+    "translation": "академический",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "education"
+  },
+  {
+    "word": "access",
+    "translation": "доступ",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "technology"
+  },
+  {
+    "word": "accident",
+    "translation": "несчастный случай",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "accurate",
+    "translation": "точный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "science"
+  },
+  {
+    "word": "achieve",
+    "translation": "достигать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "goals"
+  },
+  {
+    "word": "acknowledge",
+    "translation": "признавать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "acquire",
+    "translation": "приобретать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "business"
+  },
+  {
+    "word": "adapt",
+    "translation": "адаптироваться",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "change"
+  },
+  {
+    "word": "adjust",
+    "translation": "регулировать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "technology"
+  },
+  {
+    "word": "admire",
+    "translation": "восхищаться",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "admit",
+    "translation": "признавать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "adopt",
+    "translation": "усыновлять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "family"
+  },
+  {
+    "word": "advance",
+    "translation": "прогресс",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "advantage",
+    "translation": "преимущество",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "advertise",
+    "translation": "рекламировать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "business"
+  },
+  {
+    "word": "afford",
+    "translation": "позволять себе",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "money"
+  },
+  {
+    "word": "agency",
+    "translation": "агентство",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "business"
+  },
+  {
+    "word": "agenda",
+    "translation": "повестка дня",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "aid",
+    "translation": "помощь",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "aim",
+    "translation": "цель",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "goals"
+  },
+  {
+    "word": "aircraft",
+    "translation": "самолёт",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "transport"
+  },
+  {
+    "word": "alarm",
+    "translation": "тревога",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "alive",
+    "translation": "живой",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "health"
+  },
+  {
+    "word": "allow",
+    "translation": "позволять",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "rules"
+  },
+  {
+    "word": "alter",
+    "translation": "изменять",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "change"
+  },
+  {
+    "word": "amazing",
+    "translation": "поразительный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "ambitious",
+    "translation": "амбициозный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "goals"
+  },
+  {
+    "word": "amount",
+    "translation": "количество",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "math"
+  },
+  {
+    "word": "analyse",
+    "translation": "анализировать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "science"
+  },
+  {
+    "word": "ancient",
+    "translation": "древний",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "history"
+  },
+  {
+    "word": "anxiety",
+    "translation": "тревога",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "background",
+    "translation": "фон",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "media"
+  },
+  {
+    "word": "bacteria",
+    "translation": "бактерии",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "balance",
+    "translation": "баланс",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "math"
+  },
+  {
+    "word": "ban",
+    "translation": "запрещать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "law"
+  },
+  {
+    "word": "barely",
+    "translation": "едва",
+    "level": "B2",
+    "partOfSpeech": "adverb",
+    "topic": "intensity"
+  },
+  {
+    "word": "bargain",
+    "translation": "выгодная сделка",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "shopping"
+  },
+  {
+    "word": "barrier",
+    "translation": "преграда",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "basement",
+    "translation": "подвал",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "home"
+  },
+  {
+    "word": "behave",
+    "translation": "вести себя",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "behavior"
+  },
+  {
+    "word": "belief",
+    "translation": "убеждение",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "beliefs"
+  },
+  {
+    "word": "belong",
+    "translation": "принадлежать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "possession"
+  },
+  {
+    "word": "benefit",
+    "translation": "польза",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "health"
+  },
+  {
+    "word": "bid",
+    "translation": "предложение цены",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "business"
+  },
+  {
+    "word": "biology",
+    "translation": "биология",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "blame",
+    "translation": "винить",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "blend",
+    "translation": "смешивать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "cooking"
+  },
+  {
+    "word": "border",
+    "translation": "граница",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "geography"
+  },
+  {
+    "word": "borrow",
+    "translation": "занимать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "money"
+  },
+  {
+    "word": "bother",
+    "translation": "беспокоить",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "brand",
+    "translation": "бренд",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "business"
+  },
+  {
+    "word": "brave",
+    "translation": "смелый",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "character"
+  },
+  {
+    "word": "breathe",
+    "translation": "дышать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "health"
+  },
+  {
+    "word": "brief",
+    "translation": "краткий",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "communication"
+  },
+  {
+    "word": "budget",
+    "translation": "бюджет",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "money"
+  },
+  {
+    "word": "burden",
+    "translation": "бремя",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "calculate",
+    "translation": "вычислять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "math"
+  },
+  {
+    "word": "calendar",
+    "translation": "календарь",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "time"
+  },
+  {
+    "word": "campaign",
+    "translation": "кампания",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "candidate",
+    "translation": "кандидат",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "politics"
+  },
+  {
+    "word": "capacity",
+    "translation": "ёмкость",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "capital",
+    "translation": "столица",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "geography"
+  },
+  {
+    "word": "capture",
+    "translation": "захватывать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "events"
+  },
+  {
+    "word": "career",
+    "translation": "карьера",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "careful",
+    "translation": "осторожный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "safety"
+  },
+  {
+    "word": "cargo",
+    "translation": "груз",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "transport"
+  },
+  {
+    "word": "cautious",
+    "translation": "осторожный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "safety"
+  },
+  {
+    "word": "celebrate",
+    "translation": "праздновать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "culture"
+  },
+  {
+    "word": "ceremony",
+    "translation": "церемония",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "culture"
+  },
+  {
+    "word": "challenge",
+    "translation": "вызов",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "goals"
+  },
+  {
+    "word": "chamber",
+    "translation": "камера",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "architecture"
+  },
+  {
+    "word": "charity",
+    "translation": "благотворительность",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "chase",
+    "translation": "преследовать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "movement"
+  },
+  {
+    "word": "cheat",
+    "translation": "обманывать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "ethics"
+  },
+  {
+    "word": "chef",
+    "translation": "шеф-повар",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "jobs"
+  },
+  {
+    "word": "chemical",
+    "translation": "химический",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "science"
+  },
+  {
+    "word": "childhood",
+    "translation": "детство",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "life"
+  },
+  {
+    "word": "civil",
+    "translation": "гражданский",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "law"
+  },
+  {
+    "word": "claim",
+    "translation": "требовать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "law"
+  },
+  {
+    "word": "clarify",
+    "translation": "прояснять",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "classic",
+    "translation": "классический",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "culture"
+  },
+  {
+    "word": "climate",
+    "translation": "климат",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "clinic",
+    "translation": "клиника",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "health"
+  },
+  {
+    "word": "clue",
+    "translation": "подсказка",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "mystery"
+  },
+  {
+    "word": "coach",
+    "translation": "тренер",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "sports"
+  },
+  {
+    "word": "coastal",
+    "translation": "прибрежный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "nature"
+  },
+  {
+    "word": "collapse",
+    "translation": "рушиться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "events"
+  },
+  {
+    "word": "colleague",
+    "translation": "коллега",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "combine",
+    "translation": "объединять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "process"
+  },
+  {
+    "word": "comfort",
+    "translation": "комфорт",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "command",
+    "translation": "команда",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "military"
+  },
+  {
+    "word": "damage",
+    "translation": "повреждение",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "dairy",
+    "translation": "молочный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "food"
+  },
+  {
+    "word": "debate",
+    "translation": "дискуссия",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "communication"
+  },
+  {
+    "word": "decade",
+    "translation": "десятилетие",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "time"
+  },
+  {
+    "word": "declare",
+    "translation": "объявлять",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "law"
+  },
+  {
+    "word": "decrease",
+    "translation": "уменьшаться",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "math"
+  },
+  {
+    "word": "defeat",
+    "translation": "поражение",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "sports"
+  },
+  {
+    "word": "defend",
+    "translation": "защищать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "law"
+  },
+  {
+    "word": "define",
+    "translation": "определять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "education"
+  },
+  {
+    "word": "delay",
+    "translation": "задерживать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "travel"
+  },
+  {
+    "word": "deliver",
+    "translation": "доставлять",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "services"
+  },
+  {
+    "word": "demand",
+    "translation": "спрос",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "economy"
+  },
+  {
+    "word": "deny",
+    "translation": "отрицать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "depend",
+    "translation": "зависеть",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "logic"
+  },
+  {
+    "word": "deposit",
+    "translation": "вклад",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "finance"
+  },
+  {
+    "word": "describe",
+    "translation": "описывать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "deserve",
+    "translation": "заслуживать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "desire",
+    "translation": "желание",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "destroy",
+    "translation": "разрушать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "events"
+  },
+  {
+    "word": "detail",
+    "translation": "подробность",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "communication"
+  },
+  {
+    "word": "eager",
+    "translation": "стремящийся",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "early",
+    "translation": "ранний",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "time"
+  },
+  {
+    "word": "earn",
+    "translation": "зарабатывать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "work"
+  },
+  {
+    "word": "earthquake",
+    "translation": "землетрясение",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "ease",
+    "translation": "облегчать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "educate",
+    "translation": "обучать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "education"
+  },
+  {
+    "word": "efficient",
+    "translation": "эффективный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "work"
+  },
+  {
+    "word": "effort",
+    "translation": "усилие",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "goals"
+  },
+  {
+    "word": "either",
+    "translation": "либо",
+    "level": "A2",
+    "partOfSpeech": "determiner",
+    "topic": "grammar"
+  },
+  {
+    "word": "elderly",
+    "translation": "пожилой",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "people"
+  },
+  {
+    "word": "elect",
+    "translation": "избирать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "politics"
+  },
+  {
+    "word": "elegant",
+    "translation": "элегантный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "style"
+  },
+  {
+    "word": "element",
+    "translation": "элемент",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "elevator",
+    "translation": "лифт",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "city"
+  },
+  {
+    "word": "embrace",
+    "translation": "обнимать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "emergency",
+    "translation": "чрезвычайная ситуация",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "emotion",
+    "translation": "эмоция",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "emphasis",
+    "translation": "акцент",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "language"
+  },
+  {
+    "word": "employ",
+    "translation": "нанимать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "work"
+  },
+  {
+    "word": "enable",
+    "translation": "позволять",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "technology"
+  },
+  {
+    "word": "facility",
+    "translation": "объект",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "infrastructure"
+  },
+  {
+    "word": "factor",
+    "translation": "фактор",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "analysis"
+  },
+  {
+    "word": "fade",
+    "translation": "увядать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "nature"
+  },
+  {
+    "word": "fail",
+    "translation": "терпеть неудачу",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "goals"
+  },
+  {
+    "word": "fair",
+    "translation": "ярмарка",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "culture"
+  },
+  {
+    "word": "faith",
+    "translation": "вера",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "beliefs"
+  },
+  {
+    "word": "familiar",
+    "translation": "знакомый",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "fancy",
+    "translation": "необычный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "style"
+  },
+  {
+    "word": "fashion",
+    "translation": "мода",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "culture"
+  },
+  {
+    "word": "federal",
+    "translation": "федеральный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "government"
+  },
+  {
+    "word": "feedback",
+    "translation": "обратная связь",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "communication"
+  },
+  {
+    "word": "fence",
+    "translation": "забор",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "home"
+  },
+  {
+    "word": "ferry",
+    "translation": "паром",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "transport"
+  },
+  {
+    "word": "festival",
+    "translation": "фестиваль",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "culture"
+  },
+  {
+    "word": "fever",
+    "translation": "жар",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "health"
+  },
+  {
+    "word": "gain",
+    "translation": "получать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "business"
+  },
+  {
+    "word": "gamble",
+    "translation": "играть на деньги",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "leisure"
+  },
+  {
+    "word": "gap",
+    "translation": "разрыв",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "analysis"
+  },
+  {
+    "word": "garage",
+    "translation": "гараж",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "home"
+  },
+  {
+    "word": "garbage",
+    "translation": "мусор",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "environment"
+  },
+  {
+    "word": "gather",
+    "translation": "собирать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "social"
+  },
+  {
+    "word": "gaze",
+    "translation": "взирать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "gear",
+    "translation": "оборудование",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "technology"
+  },
+  {
+    "word": "generation",
+    "translation": "поколение",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "generous",
+    "translation": "щедрый",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "character"
+  },
+  {
+    "word": "gentle",
+    "translation": "нежный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "genuine",
+    "translation": "подлинный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "evaluation"
+  },
+  {
+    "word": "gesture",
+    "translation": "жест",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "communication"
+  },
+  {
+    "word": "giant",
+    "translation": "гигантский",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "description"
+  },
+  {
+    "word": "global",
+    "translation": "глобальный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "world"
+  },
+  {
+    "word": "habitat",
+    "translation": "среда обитания",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "handle",
+    "translation": "справляться",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "work"
+  },
+  {
+    "word": "handy",
+    "translation": "удобный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "daily"
+  },
+  {
+    "word": "harvest",
+    "translation": "урожай",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "agriculture"
+  },
+  {
+    "word": "hazard",
+    "translation": "опасность",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "headline",
+    "translation": "заголовок",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "media"
+  },
+  {
+    "word": "heal",
+    "translation": "исцелять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "health"
+  },
+  {
+    "word": "height",
+    "translation": "высота",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "measurement"
+  },
+  {
+    "word": "helmet",
+    "translation": "шлем",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "hesitate",
+    "translation": "колебаться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "highlight",
+    "translation": "подчёркивать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "hire",
+    "translation": "нанимать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "work"
+  },
+  {
+    "word": "hobby",
+    "translation": "хобби",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "leisure"
+  },
+  {
+    "word": "honest",
+    "translation": "честный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "character"
+  },
+  {
+    "word": "horizon",
+    "translation": "горизонт",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "identify",
+    "translation": "опознавать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "analysis"
+  },
+  {
+    "word": "ignore",
+    "translation": "игнорировать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "illegal",
+    "translation": "незаконный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "law"
+  },
+  {
+    "word": "illustrate",
+    "translation": "иллюстрировать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "education"
+  },
+  {
+    "word": "imagine",
+    "translation": "представлять",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "creativity"
+  },
+  {
+    "word": "imitate",
+    "translation": "подражать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "learning"
+  },
+  {
+    "word": "impact",
+    "translation": "влияние",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "analysis"
+  },
+  {
+    "word": "impatient",
+    "translation": "нетерпеливый",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "implement",
+    "translation": "внедрять",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "work"
+  },
+  {
+    "word": "imply",
+    "translation": "подразумевать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "impose",
+    "translation": "навязывать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "law"
+  },
+  {
+    "word": "improve",
+    "translation": "улучшать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "goals"
+  },
+  {
+    "word": "income",
+    "translation": "доход",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "finance"
+  },
+  {
+    "word": "increase",
+    "translation": "увеличивать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "math"
+  },
+  {
+    "word": "independent",
+    "translation": "независимый",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "character"
+  },
+  {
+    "word": "jealous",
+    "translation": "ревнивый",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "journalist",
+    "translation": "журналист",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "jobs"
+  },
+  {
+    "word": "journey",
+    "translation": "путешествие",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "travel"
+  },
+  {
+    "word": "judge",
+    "translation": "судья",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "law"
+  },
+  {
+    "word": "justice",
+    "translation": "правосудие",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "law"
+  },
+  {
+    "word": "justify",
+    "translation": "оправдывать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "keen",
+    "translation": "увлечённый",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "kettle",
+    "translation": "чайник",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "home"
+  },
+  {
+    "word": "keyboard",
+    "translation": "клавиатура",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "technology"
+  },
+  {
+    "word": "kidnap",
+    "translation": "похищать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "crime"
+  },
+  {
+    "word": "kingdom",
+    "translation": "королевство",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "history"
+  },
+  {
+    "word": "kneel",
+    "translation": "становиться на колени",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "actions"
+  },
+  {
+    "word": "label",
+    "translation": "этикетка",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "shopping"
+  },
+  {
+    "word": "labor",
+    "translation": "труд",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "lack",
+    "translation": "нехватка",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "needs"
+  },
+  {
+    "word": "landscape",
+    "translation": "пейзаж",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "laptop",
+    "translation": "ноутбук",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "technology"
+  },
+  {
+    "word": "large",
+    "translation": "большой",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "description"
+  },
+  {
+    "word": "launch",
+    "translation": "запускать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "business"
+  },
+  {
+    "word": "laundry",
+    "translation": "прачечная",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "home"
+  },
+  {
+    "word": "lawyer",
+    "translation": "юрист",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "jobs"
+  },
+  {
+    "word": "leadership",
+    "translation": "лидерство",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "lean",
+    "translation": "опираться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "movement"
+  },
+  {
+    "word": "lecture",
+    "translation": "лекция",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "education"
+  },
+  {
+    "word": "leisure",
+    "translation": "досуг",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "leisure"
+  },
+  {
+    "word": "lend",
+    "translation": "одалживать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "money"
+  },
+  {
+    "word": "length",
+    "translation": "длина",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "measurement"
+  },
+  {
+    "word": "maintain",
+    "translation": "поддерживать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "process"
+  },
+  {
+    "word": "major",
+    "translation": "основной",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "importance"
+  },
+  {
+    "word": "management",
+    "translation": "управление",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "business"
+  },
+  {
+    "word": "manufacture",
+    "translation": "производить",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "industry"
+  },
+  {
+    "word": "margin",
+    "translation": "предел",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "finance"
+  },
+  {
+    "word": "marriage",
+    "translation": "брак",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "family"
+  },
+  {
+    "word": "massive",
+    "translation": "огромный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "description"
+  },
+  {
+    "word": "mature",
+    "translation": "зрелый",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "people"
+  },
+  {
+    "word": "measure",
+    "translation": "измерять",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "math"
+  },
+  {
+    "word": "mechanic",
+    "translation": "механик",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "jobs"
+  },
+  {
+    "word": "medicine",
+    "translation": "лекарство",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "health"
+  },
+  {
+    "word": "membership",
+    "translation": "членство",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "memory",
+    "translation": "память",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "mind"
+  },
+  {
+    "word": "mention",
+    "translation": "упоминать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "ministry",
+    "translation": "министерство",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "government"
+  },
+  {
+    "word": "narrow",
+    "translation": "узкий",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "description"
+  },
+  {
+    "word": "nation",
+    "translation": "нация",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "native",
+    "translation": "родной",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "identity"
+  },
+  {
+    "word": "navigate",
+    "translation": "ориентироваться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "travel"
+  },
+  {
+    "word": "nearby",
+    "translation": "поблизости",
+    "level": "A2",
+    "partOfSpeech": "adverb",
+    "topic": "space"
+  },
+  {
+    "word": "necessary",
+    "translation": "необходимый",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "needs"
+  },
+  {
+    "word": "negotiate",
+    "translation": "вести переговоры",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "business"
+  },
+  {
+    "word": "neighborhood",
+    "translation": "район",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "city"
+  },
+  {
+    "word": "neither",
+    "translation": "ни тот ни другой",
+    "level": "B1",
+    "partOfSpeech": "determiner",
+    "topic": "grammar"
+  },
+  {
+    "word": "nervous",
+    "translation": "нервный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "network",
+    "translation": "сеть",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "technology"
+  },
+  {
+    "word": "nominate",
+    "translation": "выдвигать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "politics"
+  },
+  {
+    "word": "obey",
+    "translation": "подчиняться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "rules"
+  },
+  {
+    "word": "objective",
+    "translation": "цель",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "planning"
+  },
+  {
+    "word": "observe",
+    "translation": "наблюдать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "science"
+  },
+  {
+    "word": "obtain",
+    "translation": "получать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "business"
+  },
+  {
+    "word": "obvious",
+    "translation": "очевидный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "logic"
+  },
+  {
+    "word": "occupation",
+    "translation": "профессия",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "jobs"
+  },
+  {
+    "word": "occur",
+    "translation": "происходить",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "events"
+  },
+  {
+    "word": "offend",
+    "translation": "оскорблять",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "offer",
+    "translation": "предлагать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "official",
+    "translation": "официальный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "government"
+  },
+  {
+    "word": "operate",
+    "translation": "управлять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "technology"
+  },
+  {
+    "word": "opportunity",
+    "translation": "возможность",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "goals"
+  },
+  {
+    "word": "package",
+    "translation": "посылка",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "services"
+  },
+  {
+    "word": "pale",
+    "translation": "бледный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "appearance"
+  },
+  {
+    "word": "participate",
+    "translation": "участвовать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "society"
+  },
+  {
+    "word": "particular",
+    "translation": "конкретный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "communication"
+  },
+  {
+    "word": "passion",
+    "translation": "страсть",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "patience",
+    "translation": "терпение",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "character"
+  },
+  {
+    "word": "pattern",
+    "translation": "узор",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "art"
+  },
+  {
+    "word": "pause",
+    "translation": "пауза",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "time"
+  },
+  {
+    "word": "peak",
+    "translation": "пик",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "penalty",
+    "translation": "штраф",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "law"
+  },
+  {
+    "word": "perceive",
+    "translation": "воспринимать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "mind"
+  },
+  {
+    "word": "perform",
+    "translation": "выступать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "art"
+  },
+  {
+    "word": "permanent",
+    "translation": "постоянный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "time"
+  },
+  {
+    "word": "permit",
+    "translation": "разрешать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "rules"
+  },
+  {
+    "word": "persist",
+    "translation": "упорствовать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "character"
+  },
+  {
+    "word": "persuade",
+    "translation": "убеждать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "phase",
+    "translation": "этап",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "process"
+  },
+  {
+    "word": "phenomenon",
+    "translation": "явление",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "philosophy",
+    "translation": "философия",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "education"
+  },
+  {
+    "word": "physician",
+    "translation": "врач",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "jobs"
+  },
+  {
+    "word": "pile",
+    "translation": "куча",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "objects"
+  },
+  {
+    "word": "pilot",
+    "translation": "пилот",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "jobs"
+  },
+  {
+    "word": "pioneer",
+    "translation": "пионер",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "history"
+  },
+  {
+    "word": "pitch",
+    "translation": "подача",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "sports"
+  },
+  {
+    "word": "planet",
+    "translation": "планета",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "qualify",
+    "translation": "квалифицироваться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "education"
+  },
+  {
+    "word": "quantity",
+    "translation": "количество",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "math"
+  },
+  {
+    "word": "quarter",
+    "translation": "четверть",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "math"
+  },
+  {
+    "word": "queen",
+    "translation": "королева",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "history"
+  },
+  {
+    "word": "quote",
+    "translation": "цитировать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "communication"
+  },
+  {
+    "word": "race",
+    "translation": "гонка",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "sports"
+  },
+  {
+    "word": "radical",
+    "translation": "радикальный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "politics"
+  },
+  {
+    "word": "rail",
+    "translation": "железная дорога",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "transport"
+  },
+  {
+    "word": "raise",
+    "translation": "поднимать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "movement"
+  },
+  {
+    "word": "random",
+    "translation": "случайный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "math"
+  },
+  {
+    "word": "range",
+    "translation": "диапазон",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "math"
+  },
+  {
+    "word": "rank",
+    "translation": "ранг",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "rapid",
+    "translation": "быстрый",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "speed"
+  },
+  {
+    "word": "rare",
+    "translation": "редкий",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "frequency"
+  },
+  {
+    "word": "rate",
+    "translation": "показатель",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "economy"
+  },
+  {
+    "word": "react",
+    "translation": "реагировать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "science"
+  },
+  {
+    "word": "realize",
+    "translation": "понимать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "thinking"
+  },
+  {
+    "word": "recall",
+    "translation": "вспоминать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "memory"
+  },
+  {
+    "word": "recent",
+    "translation": "недавний",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "time"
+  },
+  {
+    "word": "recipe",
+    "translation": "рецепт",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "cooking"
+  },
+  {
+    "word": "recognize",
+    "translation": "распознавать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "mind"
+  },
+  {
+    "word": "recover",
+    "translation": "восстанавливаться",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "health"
+  },
+  {
+    "word": "reduce",
+    "translation": "уменьшать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "math"
+  },
+  {
+    "word": "sacrifice",
+    "translation": "жертва",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "sail",
+    "translation": "плыть",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "travel"
+  },
+  {
+    "word": "salary",
+    "translation": "зарплата",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "satisfy",
+    "translation": "удовлетворять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "scale",
+    "translation": "шкала",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "scan",
+    "translation": "сканировать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "technology"
+  },
+  {
+    "word": "scarce",
+    "translation": "дефицитный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "economy"
+  },
+  {
+    "word": "schedule",
+    "translation": "расписание",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "time"
+  },
+  {
+    "word": "scholar",
+    "translation": "учёный",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "education"
+  },
+  {
+    "word": "scope",
+    "translation": "масштаб",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "analysis"
+  },
+  {
+    "word": "scratch",
+    "translation": "царапать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "actions"
+  },
+  {
+    "word": "scream",
+    "translation": "кричать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "screen",
+    "translation": "экран",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "technology"
+  },
+  {
+    "word": "sculpt",
+    "translation": "ваять",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "art"
+  },
+  {
+    "word": "seal",
+    "translation": "печать",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "documents"
+  },
+  {
+    "word": "search",
+    "translation": "искать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "actions"
+  },
+  {
+    "word": "season",
+    "translation": "сезон",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "time"
+  },
+  {
+    "word": "secure",
+    "translation": "защищать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "safety"
+  },
+  {
+    "word": "seed",
+    "translation": "семя",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "seek",
+    "translation": "искать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "goals"
+  },
+  {
+    "word": "seize",
+    "translation": "захватывать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "law"
+  },
+  {
+    "word": "seldom",
+    "translation": "редко",
+    "level": "B2",
+    "partOfSpeech": "adverb",
+    "topic": "frequency"
+  },
+  {
+    "word": "select",
+    "translation": "выбирать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "decisions"
+  },
+  {
+    "word": "senior",
+    "translation": "старший",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "people"
+  },
+  {
+    "word": "sensation",
+    "translation": "ощущение",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "sensitive",
+    "translation": "чувствительный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "sequence",
+    "translation": "последовательность",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "math"
+  },
+  {
+    "word": "servant",
+    "translation": "слуга",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "history"
+  },
+  {
+    "word": "settle",
+    "translation": "урегулировать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "society"
+  },
+  {
+    "word": "severe",
+    "translation": "суровый",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "weather"
+  },
+  {
+    "word": "tackle",
+    "translation": "решать проблему",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "work"
+  },
+  {
+    "word": "talent",
+    "translation": "талант",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "skills"
+  },
+  {
+    "word": "target",
+    "translation": "цель",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "goals"
+  },
+  {
+    "word": "task",
+    "translation": "задача",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "tax",
+    "translation": "налог",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "finance"
+  },
+  {
+    "word": "teach",
+    "translation": "учить",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "education"
+  },
+  {
+    "word": "temporary",
+    "translation": "временный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "time"
+  },
+  {
+    "word": "tend",
+    "translation": "иметь склонность",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "habits"
+  },
+  {
+    "word": "tension",
+    "translation": "напряжение",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "feelings"
+  },
+  {
+    "word": "theory",
+    "translation": "теория",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "education"
+  },
+  {
+    "word": "therapy",
+    "translation": "терапия",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "health"
+  },
+  {
+    "word": "thorough",
+    "translation": "тщательный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "work"
+  },
+  {
+    "word": "threat",
+    "translation": "угроза",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "safety"
+  },
+  {
+    "word": "thrive",
+    "translation": "процветать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "business"
+  },
+  {
+    "word": "tide",
+    "translation": "прилив",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "tight",
+    "translation": "тугой",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "description"
+  },
+  {
+    "word": "timber",
+    "translation": "лесоматериал",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "construction"
+  },
+  {
+    "word": "tiny",
+    "translation": "крошечный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "description"
+  },
+  {
+    "word": "tissue",
+    "translation": "ткань",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "biology"
+  },
+  {
+    "word": "tolerate",
+    "translation": "терпеть",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "feelings"
+  },
+  {
+    "word": "topic",
+    "translation": "тема",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "communication"
+  },
+  {
+    "word": "tourism",
+    "translation": "туризм",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "travel"
+  },
+  {
+    "word": "ultimate",
+    "translation": "окончательный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "time"
+  },
+  {
+    "word": "unable",
+    "translation": "неспособный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "skills"
+  },
+  {
+    "word": "uncertain",
+    "translation": "неуверенный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "feelings"
+  },
+  {
+    "word": "undergo",
+    "translation": "проходить",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "process"
+  },
+  {
+    "word": "unemployment",
+    "translation": "безработица",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "economy"
+  },
+  {
+    "word": "unique",
+    "translation": "уникальный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "description"
+  },
+  {
+    "word": "unite",
+    "translation": "объединять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "society"
+  },
+  {
+    "word": "urgent",
+    "translation": "срочный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "time"
+  },
+  {
+    "word": "vacant",
+    "translation": "свободный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "work"
+  },
+  {
+    "word": "vague",
+    "translation": "расплывчатый",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "communication"
+  },
+  {
+    "word": "valid",
+    "translation": "действительный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "law"
+  },
+  {
+    "word": "value",
+    "translation": "ценность",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "philosophy"
+  },
+  {
+    "word": "vanish",
+    "translation": "исчезать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "events"
+  },
+  {
+    "word": "variety",
+    "translation": "разнообразие",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "culture"
+  },
+  {
+    "word": "vast",
+    "translation": "обширный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "nature"
+  },
+  {
+    "word": "vehicle",
+    "translation": "транспортное средство",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "transport"
+  },
+  {
+    "word": "wage",
+    "translation": "заработок",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "work"
+  },
+  {
+    "word": "wander",
+    "translation": "бродить",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "travel"
+  },
+  {
+    "word": "warn",
+    "translation": "предупреждать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "safety"
+  },
+  {
+    "word": "waste",
+    "translation": "тратить впустую",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "environment"
+  },
+  {
+    "word": "wealth",
+    "translation": "богатство",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "finance"
+  },
+  {
+    "word": "weapon",
+    "translation": "оружие",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "security"
+  },
+  {
+    "word": "weather",
+    "translation": "погода",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "nature"
+  },
+  {
+    "word": "weave",
+    "translation": "ткать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "art"
+  },
+  {
+    "word": "welfare",
+    "translation": "благосостояние",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "wheel",
+    "translation": "колесо",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "transport"
+  },
+  {
+    "word": "witness",
+    "translation": "свидетель",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "law"
+  },
+  {
+    "word": "workforce",
+    "translation": "рабочая сила",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "business"
+  },
+  {
+    "word": "x-ray",
+    "translation": "рентген",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "health"
+  },
+  {
+    "word": "xylophone",
+    "translation": "ксилофон",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "music"
+  },
+  {
+    "word": "xenophobia",
+    "translation": "ксенофобия",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "yacht",
+    "translation": "яхта",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "travel"
+  },
+  {
+    "word": "yard",
+    "translation": "двор",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "home"
+  },
+  {
+    "word": "yawn",
+    "translation": "зевать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "health"
+  },
+  {
+    "word": "youth",
+    "translation": "молодёжь",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "society"
+  },
+  {
+    "word": "zero",
+    "translation": "ноль",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "math"
+  },
+  {
+    "word": "zone",
+    "translation": "зона",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "geography"
+  },
+  {
+    "word": "zoology",
+    "translation": "зоология",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "science"
+  },
+  {
+    "word": "zoom",
+    "translation": "увеличивать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "technology"
+  }
+]

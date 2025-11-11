@@ -1,5 +1,6 @@
 // services/wordGameServices.js
 import WordGameParticipation from '../models/WordGameParticipation.js';
+import DailyWordGame from '../models/DailyWordGame.js';
 import User from '../models/User.js';
 import { Op } from 'sequelize';
 
@@ -152,5 +153,63 @@ export async function getDailyWordGameLeaderboard(date = null, limit = 10) {
   } catch (error) {
     console.error('Ошибка получения топа участников:', error.message);
     return [];
+  }
+}
+
+export async function saveDailyWordData(wordData, date = null) {
+  try {
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const payload = {
+      game_date: targetDate,
+      word: wordData.word,
+      translation: wordData.translation || '',
+      options: wordData.options,
+      correct_index: Number.isInteger(wordData.correctIndex) ? wordData.correctIndex : 0,
+      example: wordData.example,
+      fact: wordData.fact,
+      mistakes: wordData.mistakes
+    };
+    await DailyWordGame.upsert(payload);
+    console.log(`💾 Слово дня сохранено для ${targetDate}: ${wordData.word}`);
+    return true;
+  } catch (error) {
+    console.error('Ошибка сохранения слова дня:', error.message);
+    return false;
+  }
+}
+
+export async function getSavedDailyWordData(date = null) {
+  try {
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const record = await DailyWordGame.findOne({
+      where: { game_date: targetDate }
+    });
+    if (!record) {
+      return null;
+    }
+    const options = Array.isArray(record.options) ? record.options : [];
+    const translation = record.translation || '';
+    const lowerTranslation = translation.toLowerCase();
+    let correctIndex = typeof record.correct_index === 'number' ? record.correct_index : -1;
+    if (correctIndex < 0 || correctIndex >= options.length) {
+      correctIndex = options.findIndex(
+        option => option?.toLowerCase?.() === lowerTranslation
+      );
+      if (correctIndex === -1) {
+        correctIndex = 0;
+      }
+    }
+    return {
+      word: record.word,
+      translation,
+      options,
+      correctIndex,
+      example: record.example,
+      fact: record.fact,
+      mistakes: record.mistakes
+    };
+  } catch (error) {
+    console.error('Ошибка получения слова дня из базы:', error.message);
+    return null;
   }
 }

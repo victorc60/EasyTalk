@@ -160,6 +160,9 @@ export async function dailyFact() {
 const usedWordsCache = new Set();
 const MAX_CACHE_SIZE = 365; // Храним 365 последних слов (около года)
 const WORD_HISTORY_FILE = path.resolve(process.cwd(), 'data/word_history.json');
+const WORD_BANK_FILE = path.resolve(process.cwd(), 'data/word_bank.json');
+let curatedWordBank = [];
+let availableCuratedWords = [];
 
 function loadUsedWordsFromDisk() {
   try {
@@ -198,86 +201,77 @@ function saveUsedWordsToDisk() {
   }
 }
 
+function loadCuratedWordBank() {
+  try {
+    if (!fs.existsSync(WORD_BANK_FILE)) {
+      console.warn('📘 Файл словаря не найден, продолжим с резервными словами');
+      curatedWordBank = [];
+      return curatedWordBank;
+    }
+    const raw = fs.readFileSync(WORD_BANK_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('формат словаря должен быть массивом');
+    }
+    curatedWordBank = parsed
+      .filter(entry => entry?.word && entry?.translation)
+      .map(entry => ({
+        word: entry.word.trim(),
+        translation: entry.translation.trim(),
+        level: entry.level || 'B1',
+        partOfSpeech: entry.partOfSpeech || 'noun',
+        topic: entry.topic || 'general'
+      }));
+    console.log(`📘 Загружено ${curatedWordBank.length} слов из словаря`);
+  } catch (error) {
+    console.error('Не удалось загрузить словарь слов:', error.message);
+    curatedWordBank = [];
+  }
+  return curatedWordBank;
+}
+
+function getCuratedWordBank() {
+  if (!curatedWordBank.length) {
+    return loadCuratedWordBank();
+  }
+  return curatedWordBank;
+}
+
 // Инициализируем кэш слов из файла при загрузке модуля
 loadUsedWordsFromDisk();
+loadCuratedWordBank();
+rebuildCuratedWordPool();
 
 // Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {
   const wordLower = word.trim().toLowerCase();
   usedWordsCache.add(wordLower);
+  removeWordFromCuratedPool(wordLower);
   saveUsedWordsToDisk();
   console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
 }
 
 export async function wordOfTheDay() {
-  const prompt = `Generate a unique B1-level English word with multiple choice options:
-  - The correct word and its Russian translation
-  - 3 incorrect but plausible Russian translations
-  - Example sentence using the correct word
-  - Interesting fact about the word
-  - Common mistakes with this word
+  const wordEntry = pickCuratedWord();
   
-  IMPORTANT: Choose a word that is NOT commonly used in language learning apps.
-  Avoid words like: whisper, ephemeral, quintessential, serendipity, ubiquitous, eloquent, resilient, authentic, profound, mysterious, brilliant, courageous, delicate, elegant, fascinating, generous, harmonious, inspiring, joyful, knowledgeable, luminous, magnificent, nurturing, optimistic, passionate, radiant, serene, tranquil, uplifting, vibrant, wonderful, exquisite, graceful, majestic, peaceful.
-  
-  Return as JSON: {
-    "word": "correct_english_word",
-    "translation": "correct_russian_translation", 
-    "options": [
-      "correct_russian_translation",
-      "incorrect_option_1",
-      "incorrect_option_2", 
-      "incorrect_option_3"
-    ],
-    "example": "example_sentence",
-    "fact": "interesting_fact",
-    "mistakes": "common_mistakes"
+  if (!wordEntry) {
+    console.warn('⚠️ Словарь не доступен, используем резервное слово');
+    return getDefaultWordWithOptions();
   }
-  Make sure the incorrect options are plausible but clearly wrong.`;
-  
-  let attempts = 0;
-  const maxAttempts = 5;
-  let result = null;
 
-  while (attempts < maxAttempts) {
-    result = await generateEnglishContent(prompt, 'json');
-    
-    // Если не удалось сгенерировать слово, используем дефолтное
-    if (!result || !result.word || !result.options || result.options.length !== 4) {
-      return getDefaultWordWithOptions();
-    }
-    
-    // Проверяем, не использовалось ли это слово ранее
-    const wordLower = result.word.trim().toLowerCase();
-    console.log(`🔍 Проверяем слово: "${result.word}" (${wordLower})`);
-    console.log(`📊 Размер кэша использованных слов: ${usedWordsCache.size}`);
-    if (!usedWordsCache.has(wordLower)) {
-      usedWordsCache.add(wordLower);
-      
-      // Ограничиваем размер кэша
-      if (usedWordsCache.size > MAX_CACHE_SIZE) {
-        const oldest = usedWordsCache.values().next().value;
-        usedWordsCache.delete(oldest);
-      }
-      // Сохраняем обновлённую историю на диск
-      saveUsedWordsToDisk();
-      console.log(`✅ Новое слово "${result.word}" добавлено в историю`);
-      
-      // Перемешиваем варианты ответов
-      const shuffledOptions = shuffleArray([...result.options]);
-      result.options = shuffledOptions;
-      
-      return result;
-    } else {
-      console.log(`⚠️ Слово "${result.word}" уже использовалось ранее`);
-    }
-    
-    attempts++;
-  }
-  
-  // Если после нескольких попыток всё равно получаем повтор
-  console.warn(`Не удалось сгенерировать уникальное слово после ${maxAttempts} попыток`);
-  return getDefaultWordWithOptions();
+  const { options, correctIndex } = buildAnswerOptions(wordEntry);
+
+  return {
+    word: wordEntry.word,
+    translation: wordEntry.translation,
+    level: wordEntry.level,
+    topic: wordEntry.topic,
+    options,
+    correctIndex,
+    example: buildExampleSentence(wordEntry),
+    fact: buildFactLine(wordEntry),
+    mistakes: buildMistakeLine(wordEntry)
+  };
 }
 
 // Функция для перемешивания массива
@@ -288,6 +282,36 @@ function shuffleArray(array) {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+function rebuildCuratedWordPool() {
+  if (!curatedWordBank.length) {
+    loadCuratedWordBank();
+  }
+  if (!curatedWordBank.length) {
+    availableCuratedWords = [];
+    return;
+  }
+
+  const unused = [];
+  for (const entry of curatedWordBank) {
+    const normalized = entry.word.trim().toLowerCase();
+    if (!usedWordsCache.has(normalized)) {
+      unused.push(entry);
+    }
+  }
+
+  const poolSource = unused.length ? unused : curatedWordBank;
+  availableCuratedWords = shuffleArray([...poolSource]);
+}
+
+function removeWordFromCuratedPool(wordLower) {
+  if (!availableCuratedWords.length) {
+    return;
+  }
+  availableCuratedWords = availableCuratedWords.filter(
+    (entry) => entry.word.trim().toLowerCase() !== wordLower
+  );
 }
 
 function getDefaultWordWithOptions() {
@@ -361,7 +385,10 @@ function getDefaultWordWithOptions() {
       console.log(`✅ Дефолтное слово "${word.word}" добавлено в историю`);
       // Перемешиваем варианты ответов
       const shuffledOptions = shuffleArray([...word.options]);
-      return { ...word, options: shuffledOptions };
+      const correctIndex = shuffledOptions.findIndex(
+        option => option.toLowerCase() === word.translation.toLowerCase()
+      );
+      return { ...word, options: shuffledOptions, correctIndex: correctIndex >= 0 ? correctIndex : 0 };
     } else {
       console.log(`⚠️ Дефолтное слово "${word.word}" уже использовалось ранее`);
     }
@@ -378,7 +405,108 @@ function getDefaultWordWithOptions() {
   }
   saveUsedWordsToDisk();
   const shuffledOptions = shuffleArray([...firstWord.options]);
-  return { ...firstWord, options: shuffledOptions };
+  const correctIndex = shuffledOptions.findIndex(
+    option => option.toLowerCase() === firstWord.translation.toLowerCase()
+  );
+  return { ...firstWord, options: shuffledOptions, correctIndex: correctIndex >= 0 ? correctIndex : 0 };
+}
+
+function pickCuratedWord() {
+  if (!availableCuratedWords.length) {
+    rebuildCuratedWordPool();
+  }
+
+  const entry = availableCuratedWords.pop();
+  if (!entry) {
+    return null;
+  }
+
+  const normalizedWord = entry.word.trim().toLowerCase();
+  usedWordsCache.add(normalizedWord);
+  if (usedWordsCache.size > MAX_CACHE_SIZE) {
+    const oldest = usedWordsCache.values().next().value;
+    usedWordsCache.delete(oldest);
+  }
+  saveUsedWordsToDisk();
+
+  return entry;
+}
+
+function buildAnswerOptions(entry) {
+  const bank = getCuratedWordBank();
+  const correct = entry.translation.trim();
+  const lowerCorrect = correct.toLowerCase();
+  const distractors = [];
+  const seen = new Set([lowerCorrect]);
+  const pool = shuffleArray(
+    bank
+      .filter(item => item.translation && item.word !== entry.word)
+      .map(item => item.translation.trim())
+  );
+
+  for (const option of pool) {
+    const key = option.toLowerCase();
+    if (seen.has(key)) continue;
+    distractors.push(option);
+    seen.add(key);
+    if (distractors.length === 3) break;
+  }
+
+  const fallbackTranslations = ['радость', 'море', 'карта', 'дружба', 'память', 'снег'];
+  for (const fallback of fallbackTranslations) {
+    if (distractors.length === 3) break;
+    const key = fallback.toLowerCase();
+    if (seen.has(key)) continue;
+    distractors.push(fallback);
+    seen.add(key);
+  }
+
+  const uniqueOptions = [correct, ...distractors].slice(0, 4);
+  while (uniqueOptions.length < 4) {
+    const filler = fallbackTranslations[Math.floor(Math.random() * fallbackTranslations.length)];
+    const key = filler.toLowerCase();
+    if (uniqueOptions.some(option => option.toLowerCase() === key)) continue;
+    uniqueOptions.push(filler);
+  }
+
+  const shuffled = shuffleArray(uniqueOptions);
+  let correctIndex = shuffled.findIndex(option => option.toLowerCase() === lowerCorrect);
+  if (correctIndex === -1) {
+    shuffled[0] = correct;
+    correctIndex = 0;
+  }
+
+  return { options: shuffled, correctIndex };
+}
+
+function buildExampleSentence(entry) {
+  const topic = (entry.topic || 'daily life').toLowerCase();
+  const partOfSpeech = (entry.partOfSpeech || 'noun').toLowerCase();
+  const word = entry.word;
+
+  switch (partOfSpeech) {
+    case 'verb':
+      return `I try to ${word} whenever I deal with ${topic} tasks.`;
+    case 'adjective':
+      return `The word "${word}" helps describe ${topic} situations.`;
+    case 'adverb':
+      return `She spoke ${word} about the ${topic} plan.`;
+    case 'determiner':
+      return `Choose ${word} when the ${topic} choice is unclear.`;
+    default:
+      return `This ${word} often matters when people talk about ${topic}.`;
+  }
+}
+
+function buildFactLine(entry) {
+  const level = entry.level || 'B1';
+  const topic = entry.topic || 'daily life';
+  return `"${entry.word}" is a ${level} ${entry.partOfSpeech || 'word'} you can use when discussing ${topic}.`;
+}
+
+function buildMistakeLine(entry) {
+  const partOfSpeech = entry.partOfSpeech || 'word';
+  return `Don't confuse "${entry.word}" with other ${partOfSpeech}s — it means "${entry.translation}".`;
 }
 
 // ---------------------- Daily Horoscope ----------------------
