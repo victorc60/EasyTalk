@@ -7,6 +7,9 @@ import { sendAdminMessage } from './utils/botUtils.js';
 import { setupBot } from './botSetup.js';
 import './models/WordGameParticipation.js'; // Import to initialize the model
 import './models/DailyWordGame.js';
+import './models/Poll.js';
+import './models/PollDelivery.js';
+import './models/PollResponse.js';
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -16,6 +19,7 @@ const userSessions = {
   wordGames: new Map(),
   activeDialogs: new Map(),
   conversationModes: new Map(),
+  pollDrafts: new Map(),
   broadcastPending: false,
   broadcastContent: { text: null, photo: null } // Для хранения текста и URL картинки
 };

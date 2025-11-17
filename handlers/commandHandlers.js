@@ -6,6 +6,7 @@ import { awardPoints } from '../services/userServices.js';
 import { recordWordGameParticipation, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
+import { getPollStats, getLatestPoll } from '../services/pollServices.js';
 
 export async function start(bot, msg) {
   try {
@@ -506,5 +507,102 @@ export async function addWordToHistory(bot, msg) {
       { parse_mode: 'HTML' }
     );
     await sendAdminMessage(bot, `‼️ Ошибка в команде /add_word: ${error.message}`);
+  }
+}
+
+export async function startPollCreation(bot, msg, userSessions) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '⚠️ Эта команда доступна только администратору.',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    userSessions.pollDrafts.set(userId, { status: 'awaiting_input' });
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      '✏️ Отправьте текст опроса:\n1-я строка — вопрос\nСледующие строки — варианты ответа (минимум 2, максимум 10)\n\nПример:\nКак вам новый формат?\nОтлично\nНормально\nНе очень',
+      { parse_mode: 'HTML' }
+    );
+  } catch (error) {
+    console.error('Ошибка запуска создания опроса:', error);
+    await sendUserMessage(bot, msg.chat.id, '⚠️ Не удалось запустить создание опроса.');
+    await sendAdminMessage(bot, `‼️ Ошибка команды /poll: ${error.message}`);
+  }
+}
+
+export async function showPollResults(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '⚠️ Эта команда доступна только администратору.',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    const args = msg.text?.split(' ') || [];
+    const requestedId = args.length > 1 ? parseInt(args[1], 10) : null;
+    const latestPoll = requestedId ? null : await getLatestPoll();
+    const targetPollId = requestedId || latestPoll?.id;
+
+    if (!targetPollId) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        'ℹ️ Нет опросов для отображения.',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    const stats = await getPollStats(targetPollId);
+    if (!stats) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        `⚠️ Опрос с id ${targetPollId} не найден.`,
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    const { poll, deliveriesCount, responsesCount, optionCounts } = stats;
+    const lines = poll.options.map((option, idx) => {
+      const count = optionCounts[idx] || 0;
+      const percent = deliveriesCount > 0 ? Math.round((count / deliveriesCount) * 100) : 0;
+      return `${idx + 1}. ${option} — ${count} (${percent}%)`;
+    });
+
+    const notAnswered = Math.max(deliveriesCount - responsesCount, 0);
+    const summary = [
+      `<b>Опрос #${poll.id}</b>`,
+      poll.question,
+      '',
+      lines.join('\n'),
+      '',
+      `Ответили: ${responsesCount} из ${deliveriesCount}`,
+      notAnswered > 0 ? `Не ответили: ${notAnswered}` : ''
+    ].filter(Boolean).join('\n');
+
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      summary,
+      { parse_mode: 'HTML' }
+    );
+  } catch (error) {
+    console.error('Ошибка показа результатов опроса:', error);
+    await sendUserMessage(bot, msg.chat.id, '⚠️ Не удалось загрузить результаты опроса.');
+    await sendAdminMessage(bot, `‼️ Ошибка команды /poll_results: ${error.message}`);
   }
 }

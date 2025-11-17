@@ -5,12 +5,13 @@ import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults } from './handlers/commandHandlers.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
 import axios from 'axios'; // Для проверки URL картинки
 import sharp from 'sharp';
+import { createPoll, sendPollToAllUsers, savePollAnswer } from './services/pollServices.js';
 
 // Bot modes are now defined in commandHandlers.js
 
@@ -23,6 +24,7 @@ export async function setupBot(bot, userSessions, openai) {
   await setupBotCommands(bot);
   setupCommandHandlers(bot, userSessions);
   setupCallbacks(bot, userSessions);
+  setupPollAnswerHandler(bot);
   setupMessageHandler(bot, userSessions, openai);
   console.log('🤖 Бот запущен и готов к работе!');
 }
@@ -87,7 +89,9 @@ async function setupBotCommands(bot) {
       { command: 'mode_free_talk', description: 'Свободное общение на английском' },
       { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
       { command: 'mode_role_play', description: 'Ролевые игры с персонажами' },
-      { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' }
+      { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' },
+      { command: 'poll', description: 'Создать опрос (админ)' },
+      { command: 'poll_results', description: 'Результаты опроса (админ)' }
     ];
     // Set default-scope commands for all languages (omit language_code)
     await bot.setMyCommands(commands, { scope: { type: 'default' } });
@@ -112,6 +116,8 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/word_stats/, (msg) => wordGameStats(bot, msg, userSessions));
   bot.onText(/\/test_admin/, (msg) => testAdmin(bot, msg));
   bot.onText(/\/add_word/, (msg) => addWordToHistory(bot, msg));
+  bot.onText(/\/poll_results(?:\s+\d+)?/, (msg) => showPollResults(bot, msg));
+  bot.onText(/\/poll$/, (msg) => startPollCreation(bot, msg, userSessions));
   bot.onText(/\/story/, (msg) => userSessions.storyHandlers.handleStoryCommand(bot, msg, userSessions));
   bot.onText(/\/cancel_broadcast/, async (msg) => {
     const userId = msg.from.id.toString();
@@ -192,11 +198,65 @@ function setupCallbacks(bot, userSessions) {
         await sendUserMessage(bot, chatId, '❌ Рассылка отменена.', { parse_mode: 'HTML' });
       }
 
+      if (data === 'confirm_poll') {
+        const userIdStr = userId.toString();
+        if (userIdStr !== process.env.ADMIN_ID && userIdStr !== "340048933") {
+          await sendUserMessage(bot, chatId, '⚠️ Только админ может запускать опрос.', { parse_mode: 'HTML' });
+          return;
+        }
+
+        const draft = userSessions.pollDrafts.get(userIdStr);
+        if (!draft) {
+          await sendUserMessage(bot, chatId, '⚠️ Черновик опроса не найден. Отправьте /poll заново.', { parse_mode: 'HTML' });
+          return;
+        }
+
+        await bot.answerCallbackQuery(callbackQuery.id);
+
+        const poll = await createPoll(draft.question, draft.options);
+        const { success, fails } = await sendPollToAllUsers(bot, poll);
+
+        userSessions.pollDrafts.delete(userIdStr);
+        await sendUserMessage(
+          bot,
+          chatId,
+          `🗳 Опрос запущен!\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`,
+          { parse_mode: 'HTML' }
+        );
+        return;
+      }
+
+      if (data === 'cancel_poll_creation') {
+        const userIdStr = userId.toString();
+        if (userIdStr !== process.env.ADMIN_ID && userIdStr !== "340048933") {
+          await sendUserMessage(bot, chatId, '⚠️ Только админ может отменить опрос.', { parse_mode: 'HTML' });
+          return;
+        }
+        userSessions.pollDrafts.delete(userIdStr);
+        await sendUserMessage(bot, chatId, '❌ Черновик опроса очищен.', { parse_mode: 'HTML' });
+        await bot.answerCallbackQuery(callbackQuery.id);
+        return;
+      }
+
       await bot.answerCallbackQuery(callbackQuery.id);
     } catch (error) {
       console.error('Ошибка обработки callback:', error);
       await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при обработке действия.');
       await sendAdminMessage(bot, `‼️ Ошибка обработки callback: ${error.message}`);
+    }
+  });
+}
+
+function setupPollAnswerHandler(bot) {
+  bot.on('poll_answer', async (pollAnswer) => {
+    try {
+      const result = await savePollAnswer(pollAnswer);
+      if (!result?.handled) {
+        console.log('Получен ответ на неизвестный опрос:', result?.reason);
+      }
+    } catch (error) {
+      console.error('Ошибка обработки ответа опроса:', error);
+      await sendAdminMessage(bot, `‼️ Ошибка обработки ответа опроса: ${error.message}`);
     }
   });
 }
@@ -322,6 +382,56 @@ function setupMessageHandler(bot, userSessions, openai) {
             }
           );
         }
+        return;
+      }
+
+      // Обработка черновика опроса от админа
+      const userIdStr = userId.toString();
+      if (text && userSessions.pollDrafts?.has(userIdStr) && (userIdStr === process.env.ADMIN_ID || userIdStr === "340048933")) {
+        const parts = text.split('\n').map(line => line.trim()).filter(Boolean);
+
+        if (parts.length < 3) {
+          await sendUserMessage(
+            bot,
+            chatId,
+            '⚠️ Нужно минимум 1 вопрос + 2 варианта. Отправьте заново.',
+            { parse_mode: 'HTML' }
+          );
+          return;
+        }
+
+        const question = parts[0];
+        const options = parts.slice(1);
+
+        if (options.length > 10) {
+          await sendUserMessage(
+            bot,
+            chatId,
+            '⚠️ Слишком много вариантов. Максимум 10.',
+            { parse_mode: 'HTML' }
+          );
+          return;
+        }
+
+        userSessions.pollDrafts.set(userIdStr, { question, options });
+
+        const optionsList = options.map((opt, idx) => `${idx + 1}. ${opt}`).join('\n');
+        await sendUserMessage(
+          bot,
+          chatId,
+          `🗳 <b>Предпросмотр опроса</b>\n${question}\n\n${optionsList}\n\nЗапустить рассылку?`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: '✅ Запустить', callback_data: 'confirm_poll' },
+                  { text: '❌ Отменить', callback_data: 'cancel_poll_creation' }
+                ]
+              ]
+            }
+          }
+        );
         return;
       }
 
