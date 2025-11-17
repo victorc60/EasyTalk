@@ -1,0 +1,22 @@
+[
+  { "idiom": "a blessing in disguise", "translation": "нет худа без добра", "meaning": "что-то плохое, что оборачивается хорошим", "example": "Losing that job was a blessing in disguise; it pushed me to start my own business.", "hint": "скрытая удача" },
+  { "idiom": "beat around the bush", "translation": "ходить вокруг да около", "meaning": "говорить намеками, избегать сути", "example": "Stop beating around the bush and tell me what you really think.", "hint": "избегать сути" },
+  { "idiom": "under the weather", "translation": "плохо себя чувствовать", "meaning": "быть нездоровым или уставшим", "example": "I think I'll skip the party; I'm feeling under the weather.", "hint": "о здоровье" },
+  { "idiom": "hit the nail on the head", "translation": "попасть в точку", "meaning": "точно описать ситуацию или проблему", "example": "You hit the nail on the head with that analysis.", "hint": "точность" },
+  { "idiom": "let the cat out of the bag", "translation": "выболтать секрет", "meaning": "раскрыть тайну", "example": "He let the cat out of the bag about the surprise party.", "hint": "секрет" },
+  { "idiom": "kill two birds with one stone", "translation": "убить двух зайцев одним ударом", "meaning": "решить две задачи разом", "example": "Running errands on my way to work kills two birds with one stone.", "hint": "двойная польза" },
+  { "idiom": "once in a blue moon", "translation": "раз в сто лет", "meaning": "очень редко", "example": "We only see each other once in a blue moon.", "hint": "редко" },
+  { "idiom": "spill the beans", "translation": "разболтать секрет", "meaning": "раскрыть секрет", "example": "Who spilled the beans about our plan?", "hint": "секрет" },
+  { "idiom": "pull someone's leg", "translation": "подшучивать", "meaning": "разыгрывать кого-то", "example": "Relax, I'm just pulling your leg.", "hint": "шутка" },
+  { "idiom": "break a leg", "translation": "ни пуха ни пера", "meaning": "пожелание удачи", "example": "Break a leg on your audition!", "hint": "пожелание" },
+  { "idiom": "burn the midnight oil", "translation": "работать допоздна", "meaning": "учиться или работать до глубокой ночи", "example": "She burned the midnight oil to meet the deadline.", "hint": "поздняя работа" },
+  { "idiom": "get cold feet", "translation": "струсить", "meaning": "внезапно испугаться и передумать", "example": "He got cold feet before the wedding.", "hint": "страх" },
+  { "idiom": "bite the bullet", "translation": "принять трудное решение", "meaning": "сделать что-то неприятное, но необходимое", "example": "I decided to bite the bullet and pay the fine.", "hint": "решимость" },
+  { "idiom": "the ball is in your court", "translation": "твой ход", "meaning": "теперь решение за тобой", "example": "I've done all I can; the ball is in your court.", "hint": "решение за тобой" },
+  { "idiom": "hit the sack", "translation": "лечь спать", "meaning": "пойти спать", "example": "I'm exhausted; time to hit the sack.", "hint": "сон" },
+  { "idiom": "cut corners", "translation": "делать кое-как", "meaning": "делать быстро и некачественно, чтобы сэкономить усилия", "example": "Don't cut corners on this project; quality matters.", "hint": "экономить усилия" },
+  { "idiom": "on the same page", "translation": "на одной волне", "meaning": "иметь единое понимание", "example": "Let's make sure we're on the same page before we start.", "hint": "единство" },
+  { "idiom": "a dime a dozen", "translation": "дешёвка, пруд пруди", "meaning": "очень распространённое и недорогое", "example": "Cheap souvenirs are a dime a dozen here.", "hint": "повсеместно" },
+  { "idiom": "call it a day", "translation": "заканчивать на сегодня", "meaning": "закончить работу на сегодня", "example": "It's late; let's call it a day.", "hint": "стоп работа" },
+  { "idiom": "face the music", "translation": "расплачиваться за поступки", "meaning": "принять последствия", "example": "He finally faced the music for his mistakes.", "hint": "последствия" }
+]

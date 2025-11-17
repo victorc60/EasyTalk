@@ -2,10 +2,10 @@
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
+import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults } from './handlers/commandHandlers.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -43,6 +43,14 @@ function setupSchedulers(bot, userSessions) {
         wordGameBroadcast(bot, userSessions);
       });
     });
+    // Идиома дня в 13:00 по Москве
+    schedule.scheduleJob(
+      { hour: CONFIG.IDIOM_GAME_TIME.hour, minute: CONFIG.IDIOM_GAME_TIME.minute, tz: CONFIG.IDIOM_GAME_TIME.tz },
+      () => {
+        console.log('Запуск idiomGameBroadcast в 13:00 Europe/Moscow');
+        idiomGameBroadcast(bot, userSessions);
+      }
+    );
     // Ежедневный гороскоп в 08:30 по Москве
     schedule.scheduleJob({ hour: 8, minute: 30, tz: 'Europe/Moscow' }, () => {
       console.log('Запуск dailyHoroscopeBroadcast в 08:30 Europe/Moscow');
@@ -141,6 +149,12 @@ function setupCallbacks(bot, userSessions) {
       // Handle word game callbacks
       if (data.startsWith('word_game_')) {
         await handleWordGameCallback(bot, callbackQuery, userSessions);
+        return;
+      }
+
+      // Handle idiom game callbacks
+      if (data.startsWith('idiom_game_')) {
+        await handleIdiomGameCallback(bot, callbackQuery, userSessions);
         return;
       }
 

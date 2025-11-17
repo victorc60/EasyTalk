@@ -17,6 +17,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const userSessions = {
   wordGames: new Map(),
+  idiomGames: new Map(),
   activeDialogs: new Map(),
   conversationModes: new Map(),
   pollDrafts: new Map(),

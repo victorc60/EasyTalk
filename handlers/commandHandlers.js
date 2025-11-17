@@ -355,6 +355,78 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
   }
 }
 
+export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) {
+  try {
+    const data = callbackQuery.data;
+    const userId = callbackQuery.from.id;
+
+    const parts = data.split('_');
+    if (parts.length !== 4 || parts[0] !== 'idiom' || parts[1] !== 'game') {
+      return;
+    }
+
+    const targetUserId = parseInt(parts[2], 10);
+    const selectedIndex = parseInt(parts[3], 10);
+
+    if (targetUserId !== userId) return;
+
+    const gameSession = userSessions.idiomGames.get(userId);
+    if (!gameSession) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⏰ Время игры истекло!',
+        show_alert: true
+      });
+      return;
+    }
+
+    const resolvedCorrectIndex = Math.max(
+      0,
+      Math.min(
+        typeof gameSession.correctIndex === 'number' ? gameSession.correctIndex : 0,
+        (gameSession.options?.length || 1) - 1
+      )
+    );
+
+    const isCorrect = selectedIndex === resolvedCorrectIndex;
+    const points = isCorrect ? 8 : 0;
+    if (isCorrect) {
+      await awardPoints(userId, points);
+    }
+
+    const selectedAnswer = gameSession.options[selectedIndex];
+    const correctAnswer = gameSession.translation;
+
+    let resultMessage = isCorrect
+      ? `✅ <b>Верно!</b> +${points} очков\n\n`
+      : `❌ <b>Неправильно.</b>\n\n`;
+
+    resultMessage += `🗣 <b>${gameSession.idiom}</b>\n`;
+    resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
+    resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
+    if (gameSession.hint) {
+      resultMessage += `💡 Подсказка: ${gameSession.hint}\n`;
+    }
+    if (gameSession.example) {
+      resultMessage += `📝 Пример: ${gameSession.example}`;
+    }
+
+    await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
+      show_alert: false
+    });
+
+    userSessions.idiomGames.delete(userId);
+  } catch (error) {
+    console.error('Ошибка при обработке callback idiom game:', error);
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: '⚠️ Произошла ошибка',
+      show_alert: true
+    });
+  }
+}
+
 export async function wordGameStats(bot, msg, userSessions = null) {
   try {
     const userId = msg.from.id.toString();

@@ -163,6 +163,16 @@ const WORD_HISTORY_FILE = path.resolve(process.cwd(), 'data/word_history.json');
 const WORD_BANK_FILE = path.resolve(process.cwd(), 'data/word_bank.json');
 let curatedWordBank = [];
 let availableCuratedWords = [];
+const usedIdiomsCache = new Set();
+const IDIOM_HISTORY_FILE = path.resolve(process.cwd(), 'data/idiom_history.json');
+const IDIOM_BANK_FILE = path.resolve(process.cwd(), 'data/idiom_bank.json');
+let curatedIdiomBank = [];
+let availableCuratedIdioms = [];
+const usedIdiomsCache = new Set();
+const IDIOM_HISTORY_FILE = path.resolve(process.cwd(), 'data/idiom_history.json');
+const IDIOM_BANK_FILE = path.resolve(process.cwd(), 'data/idiom_bank.json');
+let curatedIdiomBank = [];
+let availableCuratedIdioms = [];
 
 function loadUsedWordsFromDisk() {
   try {
@@ -201,6 +211,42 @@ function saveUsedWordsToDisk() {
   }
 }
 
+function loadUsedIdiomsFromDisk() {
+  try {
+    if (fs.existsSync(IDIOM_HISTORY_FILE)) {
+      const raw = fs.readFileSync(IDIOM_HISTORY_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        for (const idiom of parsed) {
+          if (typeof idiom === 'string' && idiom.trim()) {
+            usedIdiomsCache.add(idiom.trim().toLowerCase());
+          }
+        }
+        console.log(`📒 Загружено ${usedIdiomsCache.size} идиом из истории`);
+      }
+    } else {
+      console.log('📒 Файл истории идиом не найден, создаём новый');
+    }
+  } catch (error) {
+    console.error('Не удалось загрузить историю идиом:', error.message);
+  }
+}
+
+function saveUsedIdiomsToDisk() {
+  try {
+    const dir = path.dirname(IDIOM_HISTORY_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const idiomsArray = Array.from(usedIdiomsCache);
+    const trimmed = idiomsArray.slice(Math.max(0, idiomsArray.length - MAX_CACHE_SIZE));
+    fs.writeFileSync(IDIOM_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+    console.log(`💾 Сохранено ${trimmed.length} идиом в историю`);
+  } catch (error) {
+    console.error('Не удалось сохранить историю идиом:', error.message);
+  }
+}
+
 function loadCuratedWordBank() {
   try {
     if (!fs.existsSync(WORD_BANK_FILE)) {
@@ -230,6 +276,42 @@ function loadCuratedWordBank() {
   return curatedWordBank;
 }
 
+function loadCuratedIdiomBank() {
+  try {
+    if (!fs.existsSync(IDIOM_BANK_FILE)) {
+      console.warn('📘 Файл идиом не найден, продолжим с резервными идиомами');
+      curatedIdiomBank = [];
+      return curatedIdiomBank;
+    }
+    const raw = fs.readFileSync(IDIOM_BANK_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('формат идиом должен быть массивом');
+    }
+    curatedIdiomBank = parsed
+      .filter(entry => entry?.idiom && entry?.translation)
+      .map(entry => ({
+        idiom: entry.idiom.trim(),
+        translation: entry.translation.trim(),
+        meaning: entry.meaning || entry.translation.trim(),
+        example: entry.example || '',
+        hint: entry.hint || ''
+      }));
+    console.log(`📘 Загружено ${curatedIdiomBank.length} идиом из словаря`);
+  } catch (error) {
+    console.error('Не удалось загрузить идиомы:', error.message);
+    curatedIdiomBank = [];
+  }
+  return curatedIdiomBank;
+}
+
+function getCuratedIdiomBank() {
+  if (!curatedIdiomBank.length) {
+    return loadCuratedIdiomBank();
+  }
+  return curatedIdiomBank;
+}
+
 function getCuratedWordBank() {
   if (!curatedWordBank.length) {
     return loadCuratedWordBank();
@@ -241,6 +323,9 @@ function getCuratedWordBank() {
 loadUsedWordsFromDisk();
 loadCuratedWordBank();
 rebuildCuratedWordPool();
+loadUsedIdiomsFromDisk();
+loadCuratedIdiomBank();
+rebuildCuratedIdiomPool();
 
 // Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {
@@ -303,6 +388,27 @@ function rebuildCuratedWordPool() {
 
   const poolSource = unused.length ? unused : curatedWordBank;
   availableCuratedWords = shuffleArray([...poolSource]);
+}
+
+function rebuildCuratedIdiomPool() {
+  if (!curatedIdiomBank.length) {
+    loadCuratedIdiomBank();
+  }
+  if (!curatedIdiomBank.length) {
+    availableCuratedIdioms = [];
+    return;
+  }
+
+  const unused = [];
+  for (const entry of curatedIdiomBank) {
+    const normalized = entry.idiom.trim().toLowerCase();
+    if (!usedIdiomsCache.has(normalized)) {
+      unused.push(entry);
+    }
+  }
+
+  const poolSource = unused.length ? unused : curatedIdiomBank;
+  availableCuratedIdioms = shuffleArray([...poolSource]);
 }
 
 function removeWordFromCuratedPool(wordLower) {
@@ -432,6 +538,25 @@ function pickCuratedWord() {
   return entry;
 }
 
+function pickCuratedIdiom() {
+  if (!availableCuratedIdioms.length) {
+    rebuildCuratedIdiomPool();
+  }
+
+  const entry = availableCuratedIdioms.pop();
+  if (!entry) return null;
+
+  const normalized = entry.idiom.trim().toLowerCase();
+  usedIdiomsCache.add(normalized);
+  if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
+    const oldest = usedIdiomsCache.values().next().value;
+    usedIdiomsCache.delete(oldest);
+  }
+  saveUsedIdiomsToDisk();
+
+  return entry;
+}
+
 function buildAnswerOptions(entry) {
   const bank = getCuratedWordBank();
   const correct = entry.translation.trim();
@@ -507,6 +632,126 @@ function buildFactLine(entry) {
 function buildMistakeLine(entry) {
   const partOfSpeech = entry.partOfSpeech || 'word';
   return `Don't confuse "${entry.word}" with other ${partOfSpeech}s — it means "${entry.translation}".`;
+}
+
+export async function idiomOfTheDay() {
+  const idiomEntry = pickCuratedIdiom();
+
+  if (!idiomEntry) {
+    console.warn('⚠️ Список идиом пуст, используем резервную идиому');
+    return getDefaultIdiomWithOptions();
+  }
+
+  const { options, correctIndex } = buildIdiomOptions(idiomEntry);
+
+  return {
+    idiom: idiomEntry.idiom,
+    translation: idiomEntry.translation,
+    meaning: idiomEntry.meaning || idiomEntry.translation,
+    example: idiomEntry.example,
+    hint: idiomEntry.hint,
+    options,
+    correctIndex
+  };
+}
+
+function buildIdiomOptions(entry) {
+  const bank = getCuratedIdiomBank();
+  const correct = entry.translation.trim();
+  const lowerCorrect = correct.toLowerCase();
+  const distractors = [];
+  const seen = new Set([lowerCorrect]);
+  const pool = shuffleArray(
+    bank
+      .filter(item => item.translation && item.idiom !== entry.idiom)
+      .map(item => item.translation.trim())
+  );
+
+  for (const option of pool) {
+    const key = option.toLowerCase();
+    if (seen.has(key)) continue;
+    distractors.push(option);
+    seen.add(key);
+    if (distractors.length === 3) break;
+  }
+
+  const fallbackTranslations = ['держать язык за зубами', 'выйти из себя', 'долго и счастливо', 'сквозь пальцы', 'не в своей тарелке'];
+  for (const fallback of fallbackTranslations) {
+    if (distractors.length === 3) break;
+    const key = fallback.toLowerCase();
+    if (seen.has(key)) continue;
+    distractors.push(fallback);
+    seen.add(key);
+  }
+
+  const uniqueOptions = [correct, ...distractors].slice(0, 4);
+  while (uniqueOptions.length < 4) {
+    const filler = fallbackTranslations[Math.floor(Math.random() * fallbackTranslations.length)];
+    const key = filler.toLowerCase();
+    if (uniqueOptions.some(option => option.toLowerCase() === key)) continue;
+    uniqueOptions.push(filler);
+  }
+
+  const shuffled = shuffleArray(uniqueOptions);
+  let correctIndex = shuffled.findIndex(option => option.toLowerCase() === lowerCorrect);
+  if (correctIndex === -1) {
+    shuffled[0] = correct;
+    correctIndex = 0;
+  }
+
+  return { options: shuffled, correctIndex };
+}
+
+function getDefaultIdiomWithOptions() {
+  const defaultIdioms = [
+    {
+      idiom: 'a piece of cake',
+      translation: 'очень легко',
+      meaning: 'что-то очень простое',
+      example: 'The test was a piece of cake for her.',
+      hint: 'Сладость для простоты'
+    },
+    {
+      idiom: 'break the ice',
+      translation: 'растопить лёд',
+      meaning: 'снять напряжение, начать разговор',
+      example: 'He told a joke to break the ice.',
+      hint: 'Начало общения'
+    },
+    {
+      idiom: 'cost an arm and a leg',
+      translation: 'стоить целое состояние',
+      meaning: 'быть очень дорогим',
+      example: 'That car cost him an arm and a leg.',
+      hint: 'Про деньги'
+    },
+    {
+      idiom: 'hit the books',
+      translation: 'удариться в учёбу',
+      meaning: 'усиленно готовиться к учёбе',
+      example: 'I need to hit the books tonight.',
+      hint: 'Про учёбу'
+    }
+  ];
+
+  for (const idiom of defaultIdioms) {
+    const key = idiom.idiom.trim().toLowerCase();
+    if (!usedIdiomsCache.has(key)) {
+      usedIdiomsCache.add(key);
+      if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
+        const oldest = usedIdiomsCache.values().next().value;
+        usedIdiomsCache.delete(oldest);
+      }
+      saveUsedIdiomsToDisk();
+      const { options, correctIndex } = buildIdiomOptions(idiom);
+      return { ...idiom, options, correctIndex };
+    }
+  }
+
+  // Если всё использовано, возвращаем первую
+  const first = defaultIdioms[0];
+  const { options, correctIndex } = buildIdiomOptions(first);
+  return { ...first, options, correctIndex };
 }
 
 // ---------------------- Daily Horoscope ----------------------

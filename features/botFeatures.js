@@ -1,7 +1,7 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { recordWordGameParticipation, saveDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
@@ -153,6 +153,60 @@ export async function wordGameBroadcast(bot, userSessions) {
   } catch (error) {
     console.error('Ошибка в wordGameBroadcast:', error.message);
     await sendAdminMessage(bot, `‼️ Ошибка рассылки слова дня: ${error.message}`);
+  }
+}
+
+export async function idiomGameBroadcast(bot, userSessions) {
+  try {
+    const idiomData = await idiomOfTheDay();
+    if (!idiomData) {
+      console.warn('⚠️ Не удалось получить идиому дня');
+      await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать идиому дня');
+      return;
+    }
+
+    const { success, fails } = await sendToAllUsers(
+      bot,
+      async (userId) => {
+        const keyboard = {
+          inline_keyboard: idiomData.options.map((option, index) => [{
+            text: `${index + 1}. ${option}`,
+            callback_data: `idiom_game_${userId}_${index}`
+          }])
+        };
+
+        userSessions.idiomGames.set(userId, {
+          idiom: idiomData.idiom,
+          translation: idiomData.translation,
+          meaning: idiomData.meaning,
+          example: idiomData.example,
+          hint: idiomData.hint,
+          options: idiomData.options,
+          correctIndex: idiomData.correctIndex,
+          startTime: Date.now()
+        });
+
+        return {
+          text: `🧩 <b>Idiom of the Day</b>\n${idiomData.idiom}\n\n📝 Пример: ${idiomData.example || '—'}\n💡 Hint: ${idiomData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          reply_markup: keyboard
+        };
+      },
+      (error, user) => {
+        console.error(`Ошибка отправки идиомы пользователю ${user.telegram_id}:`, error.message);
+        if (error.response?.statusCode === 403) {
+          user.update({ isActive: false });
+        }
+      },
+      { parse_mode: 'HTML' }
+    );
+
+    await sendAdminMessage(
+      bot,
+      `📊 Идиома дня отправлена\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Нет зарегистрированных пользователей' : ''}`
+    );
+  } catch (error) {
+    console.error('Ошибка в idiomGameBroadcast:', error.message);
+    await sendAdminMessage(bot, `‼️ Ошибка рассылки идиомы: ${error.message}`);
   }
 }
 
