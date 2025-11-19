@@ -74,10 +74,16 @@ export async function handleEndOfDayWordGames(bot, userSessions) {
   try {
     console.log('Обработка завершения дня для активных игр со словами...');
     
-    const activeGames = Array.from(userSessions.wordGames.entries());
+    const activeGames = [];
+    for (const [userId, gameMap] of userSessions.wordGames.entries()) {
+      for (const [gameId, gameSession] of gameMap.entries()) {
+        activeGames.push({ userId, gameId, gameSession });
+      }
+    }
+
     console.log(`Найдено ${activeGames.length} активных игр для завершения`);
     
-    for (const [userId, gameSession] of activeGames) {
+    for (const { userId, gameId, gameSession } of activeGames) {
       // Record that user didn't answer by end of day
       await recordWordGameParticipation(
         userId, 
@@ -101,8 +107,13 @@ export async function handleEndOfDayWordGames(bot, userSessions) {
         { parse_mode: 'HTML' }
       );
       
-      // Remove from active games
-      userSessions.wordGames.delete(userId);
+      const map = userSessions.wordGames.get(userId);
+      if (map) {
+        map.delete(gameId);
+        if (map.size === 0) {
+          userSessions.wordGames.delete(userId);
+        }
+      }
     }
     
     console.log(`Завершено ${activeGames.length} активных игр`);

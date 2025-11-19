@@ -9,8 +9,12 @@ const DailyWordGame = sequelize.define('DailyWordGame', {
   },
   game_date: {
     type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  slot: {
+    type: DataTypes.STRING,
     allowNull: false,
-    unique: true
+    defaultValue: 'default'
   },
   word: {
     type: DataTypes.STRING,
@@ -45,7 +49,13 @@ const DailyWordGame = sequelize.define('DailyWordGame', {
   tableName: 'daily_word_game',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  updatedAt: 'updated_at',
+  indexes: [
+    {
+      unique: true,
+      fields: ['game_date', 'slot']
+    }
+  ]
 });
 
 export default DailyWordGame;

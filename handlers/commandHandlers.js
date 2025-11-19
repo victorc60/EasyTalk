@@ -246,14 +246,15 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     const data = callbackQuery.data;
     const userId = callbackQuery.from.id;
     
-    // Parse callback data: word_game_${userId}_${index}
+    // Parse callback data: word_game_${userId}_${gameId}_${index}
     const parts = data.split('_');
-    if (parts.length !== 4 || parts[0] !== 'word' || parts[1] !== 'game') {
+    if (parts.length !== 5 || parts[0] !== 'word' || parts[1] !== 'game') {
       return;
     }
     
     const targetUserId = parseInt(parts[2]);
-    const selectedIndex = parseInt(parts[3]);
+    const gameId = parts[3];
+    const selectedIndex = parseInt(parts[4]);
     
     // Check if this callback is for the current user
     if (targetUserId !== userId) {
@@ -261,12 +262,14 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     }
     
     // Check if user has an active word game
-    let gameSession = userSessions.wordGames.get(userId);
+    const userGameMap = userSessions.wordGames.get(userId);
+    let gameSession = userGameMap?.get(gameId);
     if (!gameSession) {
-      const savedWord = await getSavedDailyWordData();
+      const savedWord = await getSavedDailyWordData(null, 'default', gameId);
       if (savedWord) {
         const normalizedTranslation = savedWord.translation?.toLowerCase?.() || '';
         gameSession = {
+          id: savedWord.id?.toString?.() || gameId,
           word: savedWord.word,
           translation: savedWord.translation,
           normalizedTranslation,
@@ -278,9 +281,14 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
           fact: savedWord.fact,
           mistakes: savedWord.mistakes,
           startTime: null,
-          timer: null
+          timer: null,
+          slot: savedWord.slot || 'default'
         };
-        userSessions.wordGames.set(userId, gameSession);
+        if (!userGameMap) {
+          userSessions.wordGames.set(userId, new Map([[gameSession.id, gameSession]]));
+        } else {
+          userGameMap.set(gameSession.id, gameSession);
+        }
       }
     }
     
@@ -293,7 +301,9 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     }
     
     // Clear the timer since user answered
-    clearTimeout(gameSession.timer);
+    if (gameSession.timer) {
+      clearTimeout(gameSession.timer);
+    }
     
     // Check if answer is correct
     const resolvedCorrectIndex = Math.max(
@@ -344,7 +354,13 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     });
     
     // Remove game session
-    userSessions.wordGames.delete(userId);
+    const activeMap = userSessions.wordGames.get(userId);
+    if (activeMap) {
+      activeMap.delete(gameId);
+      if (activeMap.size === 0) {
+        userSessions.wordGames.delete(userId);
+      }
+    }
     
   } catch (error) {
     console.error('Ошибка при обработке callback word game:', error);

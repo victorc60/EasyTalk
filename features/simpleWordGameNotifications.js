@@ -11,7 +11,8 @@ export async function notifySimpleWordGameStats(bot, userSessions) {
     console.log('Getting simple word game stats...');
     
     // Get stats from active sessions instead of database
-    const activeGames = userSessions.wordGames.size;
+    const activeGames = Array.from(userSessions.wordGames.values())
+      .reduce((sum, gameMap) => sum + (gameMap?.size || 0), 0);
     let answeredCount = 0;
     let correctCount = 0;
     
@@ -24,7 +25,7 @@ export async function notifySimpleWordGameStats(bot, userSessions) {
     
     message += `🎮 <b>Текущее состояние:</b>\n`;
     message += `• Активных игр: ${activeGames}\n`;
-    message += `• Пользователей в системе: ${userSessions.wordGames.size}\n\n`;
+    message += `• Пользователей с активными играми: ${userSessions.wordGames.size}\n\n`;
     
     message += `ℹ️ <i>Полная статистика будет доступна после завершения игры</i>`;
     

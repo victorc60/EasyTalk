@@ -3,7 +3,7 @@ import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, idiomOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, saveDailyWordData } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -42,114 +42,124 @@ export async function dailyFactBroadcast(bot) {
   }
 }
 
-export async function wordGameBroadcast(bot, userSessions) {
+export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
   try {
-    const wordData = await wordOfTheDay();
-    const saved = await saveDailyWordData(wordData);
-    if (!saved) {
-      console.warn('⚠️ Не удалось сохранить слово дня в базе');
+    let wordRecord = await getSavedDailyWordData(null, slot);
+    if (!wordRecord) {
+      const generatedWord = await wordOfTheDay();
+      const savedRecord = await saveDailyWordData(generatedWord, slot);
+      if (!savedRecord) {
+        console.warn('⚠️ Не удалось сохранить слово дня в базе');
+        return;
+      }
+      wordRecord = savedRecord;
+    } else {
+      console.log(`🔁 Используем сохранённое слово дня (${slot}): ${wordRecord.word}`);
     }
+
+    const broadcastWord = {
+      id: wordRecord.id,
+      word: wordRecord.word,
+      translation: wordRecord.translation,
+      options: Array.isArray(wordRecord.options) ? [...wordRecord.options] : [],
+      example: wordRecord.example,
+      fact: wordRecord.fact,
+      mistakes: wordRecord.mistakes,
+      correctIndex: typeof wordRecord.correctIndex === 'number'
+        ? wordRecord.correctIndex
+        : wordRecord.correct_index,
+      slot
+    };
+
+    if (!broadcastWord.options.length) {
+      console.error('❌ У слова дня отсутствуют варианты ответа');
+      return;
+    }
+
+    const normalizedTranslation = broadcastWord.translation.toLowerCase();
+    if (!Number.isInteger(broadcastWord.correctIndex) || broadcastWord.correctIndex < 0) {
+      broadcastWord.correctIndex = broadcastWord.options.findIndex(
+        option => option?.toLowerCase?.() === normalizedTranslation
+      );
+      if (broadcastWord.correctIndex === -1) {
+        broadcastWord.correctIndex = Math.max(
+          broadcastWord.options.indexOf(broadcastWord.translation),
+          0
+        );
+      }
+    }
+
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        const normalizedTranslation = wordData.translation.toLowerCase();
-        const userWordData = {
-          word: wordData.word,
-          translation: wordData.translation,
-          normalizedTranslation,
-          options: [...wordData.options],
-          example: wordData.example,
-          fact: wordData.fact,
-          mistakes: wordData.mistakes
-        };
-
-        let correctIndex = Number.isInteger(wordData.correctIndex)
-          ? wordData.correctIndex
-          : userWordData.options.findIndex(
-              option => option.toLowerCase() === normalizedTranslation
-            );
-        if (correctIndex === -1) {
-          correctIndex = Math.max(userWordData.options.indexOf(wordData.translation), 0);
-        }
-
-        // Создаем inline keyboard с вариантами ответов
         const keyboard = {
-          inline_keyboard: userWordData.options.map((option, index) => [{
+          inline_keyboard: broadcastWord.options.map((option, index) => [{
             text: `${index + 1}. ${option}`,
-            callback_data: `word_game_${userId}_${index}`
+            callback_data: `word_game_${userId}_${broadcastWord.id}_${index}`
           }])
         };
 
         const startTime = Date.now();
-        
-        // Calculate time until end of day (midnight Moscow time)
         const now = new Date();
-        const moscowTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Moscow"}));
+        const moscowTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
         const endOfDay = new Date(moscowTime);
-        endOfDay.setHours(23, 59, 59, 999); // End of day
+        endOfDay.setHours(23, 59, 59, 999);
         const timeUntilEndOfDay = endOfDay.getTime() - moscowTime.getTime();
-        
-        userSessions.wordGames.set(userId, {
-          ...userWordData,
-          correctIndex,
-          startTime: startTime,
-          timer: CONFIG.WORD_GAME_TIMEOUT ? setTimeout(async () => {
-            if (userSessions.wordGames.has(userId)) {
-              // Record that user didn't answer
-              await recordWordGameParticipation(
-                userId, 
-                wordData.word, 
-                false, // didn't answer
-                false, 
-                0, 
-                null
-              );
-              
-              sendUserMessage(
-                bot,
-                userId,
-                `⏰ Время вышло! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes} \n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
-                { parse_mode: 'HTML' }
-              );
-              userSessions.wordGames.delete(userId);
-            }
-          }, CONFIG.WORD_GAME_TIMEOUT) : setTimeout(async () => {
-            if (userSessions.wordGames.has(userId)) {
-              // Record that user didn't answer by end of day
-              await recordWordGameParticipation(
-                userId, 
-                wordData.word, 
-                false, // didn't answer
-                false, 
-                0, 
-                null
-              );
-              
-              sendUserMessage(
-                bot,
-                userId,
-                `🌙 День закончился! Правильный перевод:\n${wordData.word} → ${wordData.translation}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n⚠️ Частые ошибки: ${wordData.mistakes} \n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
-                { parse_mode: 'HTML' }
-              );
-              userSessions.wordGames.delete(userId);
-            }
-          }, timeUntilEndOfDay)
+        const timeoutDuration = CONFIG.WORD_GAME_TIMEOUT ?? timeUntilEndOfDay;
+        const timeoutMessagePrefix = CONFIG.WORD_GAME_TIMEOUT ? '⏰ Время вышло!' : '🌙 День закончился!';
+
+        let userGameMap = userSessions.wordGames.get(userId);
+        if (!userGameMap) {
+          userGameMap = new Map();
+          userSessions.wordGames.set(userId, userGameMap);
+        }
+
+        const timer = setTimeout(async () => {
+          const activeMap = userSessions.wordGames.get(userId);
+          const session = activeMap?.get(broadcastWord.id.toString());
+          if (!session) return;
+
+          await recordWordGameParticipation(
+            userId,
+            session.word,
+            false,
+            false,
+            0,
+            null
+          );
+
+          await sendUserMessage(
+            bot,
+            userId,
+            `${timeoutMessagePrefix} Правильный перевод:\n${session.word} → ${session.translation}\n\n📝 Пример: ${session.example}\n💡 ${session.fact}\n⚠️ Частые ошибки: ${session.mistakes}\n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
+            { parse_mode: 'HTML' }
+          );
+
+          activeMap.delete(broadcastWord.id.toString());
+          if (activeMap.size === 0) {
+            userSessions.wordGames.delete(userId);
+          }
+        }, timeoutDuration);
+
+        userGameMap.set(broadcastWord.id.toString(), {
+          ...broadcastWord,
+          normalizedTranslation,
+          startTime,
+          timer
         });
 
         return {
-          text: `🎯 Слово дня: ${wordData.word}\n\n📝 Пример: ${wordData.example}\n💡 ${wordData.fact}\n\nВыберите правильный перевод:`,
+          text: `🎯 Слово дня: ${broadcastWord.word}\n\n📝 Пример: ${broadcastWord.example}\n💡 ${broadcastWord.fact}\n\nВыберите правильный перевод:`,
           reply_markup: keyboard
         };
       }
     );
 
-    console.log(`Слово дня отправлено. Успешно: ${success}, Ошибок: ${fails}`);
+    console.log(`Слово дня (${slot}) отправлено. Успешно: ${success}, Ошибок: ${fails}`);
     await sendAdminMessage(
       bot,
-      `📊 Слово дня отправлено\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
+      `📊 Слово дня (${slot}) отправлено\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}`
     );
-    
-    // Note: Statistics will be sent automatically at 00:05 Moscow time
   } catch (error) {
     console.error('Ошибка в wordGameBroadcast:', error.message);
     await sendAdminMessage(bot, `‼️ Ошибка рассылки слова дня: ${error.message}`);

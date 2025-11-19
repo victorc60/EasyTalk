@@ -40,7 +40,8 @@ function setupSchedulers(bot, userSessions) {
     CONFIG.WORD_GAME_TIMES.forEach((time, index) => {
       schedule.scheduleJob(`wordGame${index}`, time, () => {
         console.log(`Запуск wordGameBroadcast в ${time.hour}:${time.minute} ${time.tz}`);
-        wordGameBroadcast(bot, userSessions);
+        const slotId = time.slot || `slot_${index}_${time.hour ?? '0'}_${time.minute ?? '0'}`;
+        wordGameBroadcast(bot, userSessions, slotId);
       });
     });
     // Идиома дня в 13:00 по Москве
@@ -494,7 +495,8 @@ function setupMessageHandler(bot, userSessions, openai) {
 // ... (остальные функции без изменений: handleWordGame, handleActiveDialogs, handleRegularMessage, showModeSelection, getModeName, getModeDescription)
 
 async function handleWordGame(bot, chatId, userId, text, userSessions) {
-  if (!userSessions.wordGames.has(userId)) {
+  const userGameMap = userSessions.wordGames.get(userId);
+  if (!userGameMap || userGameMap.size === 0) {
     return false;
   }
 
@@ -509,11 +511,16 @@ async function handleWordGame(bot, chatId, userId, text, userSessions) {
     return true;
   }
 
-  const session = userSessions.wordGames.get(userId);
+  const [gameId, session] = Array.from(userGameMap.entries()).pop();
   const isCorrect = text.toLowerCase() === session.translation.toLowerCase();
 
-  clearTimeout(session.timer);
-  userSessions.wordGames.delete(userId);
+  if (session.timer) {
+    clearTimeout(session.timer);
+  }
+  userGameMap.delete(gameId);
+  if (userGameMap.size === 0) {
+    userSessions.wordGames.delete(userId);
+  }
 
   if (isCorrect) {
     await awardPoints(userId, 15);

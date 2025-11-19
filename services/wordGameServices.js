@@ -156,11 +156,12 @@ export async function getDailyWordGameLeaderboard(date = null, limit = 10) {
   }
 }
 
-export async function saveDailyWordData(wordData, date = null) {
+export async function saveDailyWordData(wordData, slot = 'default', date = null) {
   try {
     const targetDate = date || new Date().toISOString().split('T')[0];
-    const payload = {
+    const defaults = {
       game_date: targetDate,
+      slot,
       word: wordData.word,
       translation: wordData.translation || '',
       options: wordData.options,
@@ -169,24 +170,40 @@ export async function saveDailyWordData(wordData, date = null) {
       fact: wordData.fact,
       mistakes: wordData.mistakes
     };
-    await DailyWordGame.upsert(payload);
-    console.log(`💾 Слово дня сохранено для ${targetDate}: ${wordData.word}`);
-    return true;
+
+    const [record, created] = await DailyWordGame.findOrCreate({
+      where: { game_date: targetDate, slot },
+      defaults
+    });
+
+    if (!created) {
+      await record.update(defaults);
+    }
+
+    console.log(`💾 Слово дня сохранено: ${wordData.word} (${targetDate}, ${slot})`);
+    return record.get({ plain: true });
   } catch (error) {
     console.error('Ошибка сохранения слова дня:', error.message);
-    return false;
+    return null;
   }
 }
 
-export async function getSavedDailyWordData(date = null) {
+export async function getSavedDailyWordData(date = null, slot = 'default', id = null) {
   try {
-    const targetDate = date || new Date().toISOString().split('T')[0];
-    const record = await DailyWordGame.findOne({
-      where: { game_date: targetDate }
-    });
+    let record = null;
+    if (id) {
+      record = await DailyWordGame.findByPk(id);
+    } else {
+      const targetDate = date || new Date().toISOString().split('T')[0];
+      record = await DailyWordGame.findOne({
+        where: { game_date: targetDate, slot }
+      });
+    }
+
     if (!record) {
       return null;
     }
+
     const options = Array.isArray(record.options) ? record.options : [];
     const translation = record.translation || '';
     const lowerTranslation = translation.toLowerCase();
@@ -199,7 +216,11 @@ export async function getSavedDailyWordData(date = null) {
         correctIndex = 0;
       }
     }
+
     return {
+      id: record.id,
+      slot: record.slot,
+      game_date: record.game_date,
       word: record.word,
       translation,
       options,
