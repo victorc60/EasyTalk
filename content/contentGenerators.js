@@ -1,6 +1,7 @@
 // content/contentGenerators.js
 import { OpenAI } from 'openai';
 import { CONFIG } from '../config.js';
+import axios from 'axios';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -163,11 +164,6 @@ const WORD_HISTORY_FILE = path.resolve(process.cwd(), 'data/word_history.json');
 const WORD_BANK_FILE = path.resolve(process.cwd(), 'data/word_bank.json');
 let curatedWordBank = [];
 let availableCuratedWords = [];
-const usedIdiomsCache = new Set();
-const IDIOM_HISTORY_FILE = path.resolve(process.cwd(), 'data/idiom_history.json');
-const IDIOM_BANK_FILE = path.resolve(process.cwd(), 'data/idiom_bank.json');
-let curatedIdiomBank = [];
-let availableCuratedIdioms = [];
 const usedIdiomsCache = new Set();
 const IDIOM_HISTORY_FILE = path.resolve(process.cwd(), 'data/idiom_history.json');
 const IDIOM_BANK_FILE = path.resolve(process.cwd(), 'data/idiom_bank.json');
@@ -761,197 +757,76 @@ export async function dailyHoroscope() {
     'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'
   ];
 
-  // Emoji for each sign
   const SIGN_EMOJI = {
     aries: '🐏', taurus: '🐂', gemini: '👯', cancer: '🦀', leo: '🦁', virgo: '🌾',
     libra: '⚖️', scorpio: '🦂', sagittarius: '🏹', capricorn: '🐐', aquarius: '🏺', pisces: '🐟'
   };
 
-  // API configuration
-  const API_KEY = 'BTMjhid8pG7Wbykp2b8GRabYOrF46WxU1gQq9hge';
-  const API_BASE_URL = 'https://horoscope-app-api.vercel.app/api/v1';
-
-  // Recent-horoscope cache to avoid repetition
   const HORO_HISTORY_FILE = path.resolve(process.cwd(), 'data/horoscope_history.json');
-  const usedHoroscopes = new Set();
-  const HORO_CACHE_LIMIT = 60; // store last ~2 months
+  const HORO_CACHE_FILE = path.resolve(process.cwd(), 'data/horoscope_cache.json');
+  const HORO_CACHE_LIMIT = 60;
+  const API_BASE_URL = 'https://aztro.sameerkumar.website';
 
-  const loadHoro = () => {
+  const usedHoroscopes = new Set();
+
+  const loadHistory = () => {
     try {
       if (fs.existsSync(HORO_HISTORY_FILE)) {
         const arr = JSON.parse(fs.readFileSync(HORO_HISTORY_FILE, 'utf8'));
         if (Array.isArray(arr)) arr.forEach(h => typeof h === 'string' && usedHoroscopes.add(h));
       }
-    } catch (e) { console.warn('Не удалось загрузить историю гороскопов:', e.message); }
+    } catch (error) {
+      console.warn('Не удалось загрузить историю гороскопов:', error.message);
+    }
   };
-  
-  const saveHoro = () => {
+
+  const saveHistory = () => {
     try {
       const dir = path.dirname(HORO_HISTORY_FILE);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       const items = Array.from(usedHoroscopes);
       const trimmed = items.slice(Math.max(0, items.length - HORO_CACHE_LIMIT));
       fs.writeFileSync(HORO_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    } catch (e) { console.warn('Не удалось сохранить историю гороскопов:', e.message); }
+    } catch (error) {
+      console.warn('Не удалось сохранить историю гороскопов:', error.message);
+    }
   };
-  
-  loadHoro();
 
-  const buildHeader = () => `🔮 Daily Horoscope \u2728\n<em>Your cosmic guidance for today</em>\n\n`;
-  
-  const decorate = (sign, prediction) => {
-    const emoji = SIGN_EMOJI[sign.toLowerCase()] || '✨';
-    const signName = sign.charAt(0).toUpperCase() + sign.slice(1);
-    return `${emoji} <b>${signName}</b>: ${prediction}`;
+  const loadCache = () => {
+    try {
+      if (!fs.existsSync(HORO_CACHE_FILE)) return null;
+      const parsed = JSON.parse(fs.readFileSync(HORO_CACHE_FILE, 'utf8'));
+      return parsed || null;
+    } catch (error) {
+      console.warn('Не удалось загрузить кеш гороскопа:', error.message);
+      return null;
+    }
   };
+
+  const saveCache = (payload) => {
+    try {
+      const dir = path.dirname(HORO_CACHE_FILE);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(HORO_CACHE_FILE, JSON.stringify(payload, null, 2), 'utf8');
+    } catch (error) {
+      console.warn('Не удалось сохранить кеш гороскопа:', error.message);
+    }
+  };
+
+  loadHistory();
+
+  const getTodayKey = () => {
+    const now = new Date();
+    const moscowDate = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+    return moscowDate.toISOString().split('T')[0];
+  };
+
+  const buildHeader = () => `🔮 Daily Horoscope ✨\n<em>Your cosmic guidance for today</em>\n\n`;
 
   const normalize = (text) => text.toLowerCase().replace(/\s+/g, ' ').trim();
   const hashText = (text) => crypto.createHash('md5').update(normalize(text)).digest('hex');
 
-  try {
-    console.log('🔮 Starting horoscope generation...');
-    
-    // Since the API seems to have issues, let's use a smart fallback system
-    // that generates unique, sign-specific horoscopes
-    const horoscopes = SIGNS.map((sign) => {
-      console.log(`🔮 Generating horoscope for ${sign}...`);
-      
-      // Create unique horoscopes for each sign based on their characteristics
-      const signHoroscopes = {
-        aries: [
-          'Your fiery energy leads you to new adventures today.',
-          'Take bold action on something you\'ve been thinking about.',
-          'Your natural leadership shines in group activities.',
-          'Channel your enthusiasm into a creative project.'
-        ],
-        taurus: [
-          'Your steady approach brings stability to any situation.',
-          'Enjoy the simple pleasures and comforts around you.',
-          'Your patience helps you achieve long-term goals.',
-          'Focus on building something lasting and meaningful.'
-        ],
-        gemini: [
-          'Your curiosity leads to interesting conversations today.',
-          'Share your ideas and connect with new people.',
-          'Your adaptable nature helps you solve problems.',
-          'Learn something new that excites your mind.'
-        ],
-        cancer: [
-          'Your intuition guides you to make good decisions.',
-          'Nurture your relationships and show care to others.',
-          'Your emotional intelligence helps you understand people.',
-          'Create a cozy, comfortable space for yourself.'
-        ],
-        leo: [
-          'Your natural charisma draws positive attention.',
-          'Express yourself creatively and share your talents.',
-          'Your generosity brings joy to those around you.',
-          'Take center stage in something you\'re passionate about.'
-        ],
-        virgo: [
-          'Your attention to detail helps you excel at tasks.',
-          'Organize something that brings you peace of mind.',
-          'Your practical wisdom helps others solve problems.',
-          'Focus on self-improvement and personal growth.'
-        ],
-        libra: [
-          'Your sense of balance helps you find harmony.',
-          'Make fair decisions that benefit everyone involved.',
-          'Your diplomatic nature resolves conflicts gracefully.',
-          'Surround yourself with beauty and positive energy.'
-        ],
-        scorpio: [
-          'Your deep insight reveals hidden truths today.',
-          'Transform a challenging situation into opportunity.',
-          'Your determination helps you overcome obstacles.',
-          'Trust your instincts in important decisions.'
-        ],
-        sagittarius: [
-          'Your optimism opens doors to new possibilities.',
-          'Explore something that expands your horizons.',
-          'Your honesty and directness earn respect.',
-          'Share your wisdom and inspire others.'
-        ],
-        capricorn: [
-          'Your disciplined approach brings steady progress.',
-          'Build something that will last and have value.',
-          'Your ambition drives you toward your goals.',
-          'Take responsibility and lead by example.'
-        ],
-        aquarius: [
-          'Your innovative thinking solves unique problems.',
-          'Connect with like-minded people who share your vision.',
-          'Your humanitarian spirit makes a positive impact.',
-          'Think outside the box and embrace change.'
-        ],
-        pisces: [
-          'Your compassion helps heal emotional wounds.',
-          'Trust your dreams and creative inspiration.',
-          'Your empathy connects you deeply with others.',
-          'Find peace in quiet moments of reflection.'
-        ]
-      };
-      
-      // Select a random horoscope for this sign
-      const signPredictions = signHoroscopes[sign] || ['Today is a wonderful day for you!'];
-      const randomIndex = Math.floor(Math.random() * signPredictions.length);
-      const prediction = signPredictions[randomIndex];
-      
-      return {
-        sign: sign,
-        prediction: prediction
-      };
-    });
-    
-    // Build the message
-    const decoratedHoroscopes = horoscopes.map(h => decorate(h.sign, h.prediction));
-    const body = decoratedHoroscopes.join('\n');
-    const message = buildHeader() + body;
-    
-    // Check for duplicates
-    const key = hashText(body);
-    if (usedHoroscopes.has(key)) {
-      console.log('⚠️ Получен повторяющийся гороскоп, используем fallback...');
-      // Use fallback if duplicate detected
-      const fallbackLines = [
-        'Aries: Take one small step today. Be brave and kind.',
-        'Taurus: Finish one task. Enjoy a calm moment and tea.',
-        'Gemini: Ask a good question. Share one smart idea.',
-        'Cancer: Call a close friend. Care for your heart.',
-        'Leo: Give a warm smile. Your energy helps others.',
-        'Virgo: Make a simple plan. Keep it clear and light.',
-        'Libra: Find balance. Work a bit, then rest a bit.',
-        'Scorpio: Trust your focus. Do one thing very well.',
-        'Sagittarius: Try something new. Learn with joy.',
-        'Capricorn: Take your time. Small steps are okay.',
-        'Aquarius: Be creative. Share your fresh idea.',
-        'Pisces: Breathe slowly. Be gentle with yourself.'
-      ];
-      const decoratedFallback = fallbackLines.map(line => {
-        const [sign, rest] = line.split(':');
-        const cleanSign = sign.trim().toLowerCase();
-        const advice = (rest || '').trim();
-        const emoji = SIGN_EMOJI[cleanSign] || '✨';
-        return `${emoji} <b>${sign}</b>: ${advice}`;
-      }).join('\n');
-      return buildHeader() + decoratedFallback;
-    }
-    
-    // Save to history
-    usedHoroscopes.add(key);
-    if (usedHoroscopes.size > HORO_CACHE_LIMIT) {
-      const first = usedHoroscopes.values().next().value;
-      usedHoroscopes.delete(first);
-    }
-    saveHoro();
-    
-    console.log('✅ Гороскоп успешно получен из API');
-    return message;
-    
-  } catch (error) {
-    console.error('Ошибка получения гороскопа из API:', error.message);
-    
-    // Fallback easy-English horoscope with emojis
+  const buildFallback = () => {
     const fallbackLines = [
       'Aries: Take one small step today. Be brave and kind.',
       'Taurus: Finish one task. Enjoy a calm moment and tea.',
@@ -974,6 +849,57 @@ export async function dailyHoroscope() {
       return `${emoji} <b>${sign}</b>: ${advice}`;
     }).join('\n');
     return buildHeader() + decoratedFallback;
+  };
+
+  const todayKey = getTodayKey();
+  const cached = loadCache();
+  if (cached?.date === todayKey && cached?.message) {
+    console.log('🔮 Используем кеш гороскопа за сегодня');
+    return cached.message;
+  }
+
+  try {
+    console.log('🔮 Загружаем гороскопы из внешнего API');
+    const responses = await Promise.all(
+      SIGNS.map(async (sign) => {
+        const { data } = await axios.post(`${API_BASE_URL}/?sign=${sign}&day=today`);
+        return { sign, data };
+      })
+    );
+
+    const decoratedHoroscopes = responses.map(({ sign, data }) => {
+      const emoji = SIGN_EMOJI[sign] || '✨';
+      const signName = sign.charAt(0).toUpperCase() + sign.slice(1);
+      const extras = [
+        data?.mood ? `Mood: ${data.mood}` : null,
+        data?.color ? `Color: ${data.color}` : null,
+        data?.lucky_number ? `Lucky #: ${data.lucky_number}` : null,
+        data?.compatibility ? `Best match: ${data.compatibility}` : null
+      ].filter(Boolean).join(' • ');
+
+      const details = extras ? `\n   <i>${extras}</i>` : '';
+      return `${emoji} <b>${signName}</b>: ${data?.description || 'Today favors thoughtful actions.'}${details}`;
+    });
+
+    const message = buildHeader() + decoratedHoroscopes.join('\n\n');
+    const key = hashText(message);
+    if (usedHoroscopes.has(key)) {
+      console.log('⚠️ Получен повторяющийся гороскоп, возвращаем fallback');
+      return buildFallback();
+    }
+
+    usedHoroscopes.add(key);
+    if (usedHoroscopes.size > HORO_CACHE_LIMIT) {
+      const first = usedHoroscopes.values().next().value;
+      usedHoroscopes.delete(first);
+    }
+    saveHistory();
+    saveCache({ date: todayKey, message });
+
+    return message;
+  } catch (error) {
+    console.error('Ошибка получения гороскопа из API:', error.message);
+    return buildFallback();
   }
 }
 
