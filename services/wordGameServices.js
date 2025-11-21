@@ -4,49 +4,92 @@ import DailyWordGame from '../models/DailyWordGame.js';
 import User from '../models/User.js';
 import { Op } from 'sequelize';
 
+export const GAME_TYPES = {
+  WORD: 'word',
+  IDIOM: 'idiom'
+};
+
+const resolveDate = (date = null) => date || new Date().toISOString().split('T')[0];
+
 /**
- * Записывает участие пользователя в ежедневной игре со словами
- * @param {number} userId - ID пользователя в Telegram
- * @param {string} word - Слово дня
- * @param {boolean} answered - Ответил ли пользователь
- * @param {boolean} correct - Правильный ли ответ
- * @param {number} pointsEarned - Заработанные очки
- * @param {number} responseTime - Время ответа в миллисекундах
+ * Универсальная запись участия пользователя в играх
+ * @param {Object} params
+ * @param {number} params.userId - ID пользователя в Telegram
+ * @param {string} params.word - Основное слово/идиома
+ * @param {boolean} params.answered - Ответил ли пользователь
+ * @param {boolean} params.correct - Правильный ли ответ
+ * @param {number} params.pointsEarned - Заработанные очки
+ * @param {number} params.responseTime - Время ответа в миллисекундах
+ * @param {string} params.gameType - Тип игры (word, idiom)
  */
-export async function recordWordGameParticipation(userId, word, answered, correct, pointsEarned = 0, responseTime = null) {
+export async function recordGameParticipation({
+  userId,
+  word,
+  answered,
+  correct,
+  pointsEarned = 0,
+  responseTime = null,
+  gameType = GAME_TYPES.WORD
+}) {
   try {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    
+    const today = resolveDate();
     await WordGameParticipation.upsert({
       user_id: userId,
+      game_type: gameType,
       game_date: today,
-      word: word,
-      answered: answered,
-      correct: correct,
+      word,
+      answered,
+      correct,
       points_earned: pointsEarned,
       response_time: responseTime
     });
-    
-    console.log(`Записано участие пользователя ${userId} в игре со словом "${word}": ответил=${answered}, правильно=${correct}`);
+    console.log(
+      `Записано участие пользователя ${userId} в игре "${gameType}" для "${word}": ответил=${answered}, правильно=${correct}`
+    );
     return true;
   } catch (error) {
-    console.error('Ошибка записи участия в игре:', error.message);
+    console.error(`Ошибка записи участия (${gameType}):`, error.message);
     return false;
   }
+}
+
+export function recordWordGameParticipation(userId, word, answered, correct, pointsEarned = 0, responseTime = null) {
+  return recordGameParticipation({
+    userId,
+    word,
+    answered,
+    correct,
+    pointsEarned,
+    responseTime,
+    gameType: GAME_TYPES.WORD
+  });
+}
+
+export function recordIdiomGameParticipation(userId, idiom, answered, correct, pointsEarned = 0, responseTime = null) {
+  return recordGameParticipation({
+    userId,
+    word: idiom,
+    answered,
+    correct,
+    pointsEarned,
+    responseTime,
+    gameType: GAME_TYPES.IDIOM
+  });
 }
 
 /**
  * Получает статистику участия в ежедневной игре за определенную дату
  * @param {string} date - Дата в формате YYYY-MM-DD (по умолчанию сегодня)
  */
-export async function getDailyWordGameStats(date = null) {
+async function getDailyGameStats(gameType, date = null) {
   try {
-    const targetDate = date || new Date().toISOString().split('T')[0];
-    console.log(`Getting stats for date: ${targetDate}`);
-    
+    const targetDate = resolveDate(date);
+    console.log(`Getting stats for ${gameType} game on ${targetDate}`);
+
     const stats = await WordGameParticipation.findAll({
       where: {
-        game_date: targetDate
+        game_date: targetDate,
+        game_type: gameType
       },
       include: [{
         model: User,
@@ -57,13 +100,14 @@ export async function getDailyWordGameStats(date = null) {
     });
     
     console.log(`Found ${stats.length} participation records`);
-    
+
     const totalParticipants = stats.length;
     const answeredCount = stats.filter(s => s.answered).length;
     const correctCount = stats.filter(s => s.correct).length;
     const totalPoints = stats.reduce((sum, s) => sum + (s.points_earned || 0), 0);
-    
+
     const result = {
+      gameType,
       date: targetDate,
       totalParticipants,
       answeredCount,
@@ -77,10 +121,18 @@ export async function getDailyWordGameStats(date = null) {
     console.log('Stats result:', result);
     return result;
   } catch (error) {
-    console.error('Ошибка получения статистики игры:', error.message);
+    console.error(`Ошибка получения статистики игры (${gameType}):`, error.message);
     console.error('Full error:', error);
     return null;
   }
+}
+
+export function getDailyWordGameStats(date = null) {
+  return getDailyGameStats(GAME_TYPES.WORD, date);
+}
+
+export function getDailyIdiomGameStats(date = null) {
+  return getDailyGameStats(GAME_TYPES.IDIOM, date);
 }
 
 /**
@@ -96,6 +148,7 @@ export async function getUserWordGameStats(userId, days = 7) {
     const stats = await WordGameParticipation.findAll({
       where: {
         user_id: userId,
+        game_type: GAME_TYPES.WORD,
         game_date: {
           [Op.gte]: startDate.toISOString().split('T')[0]
         }
@@ -132,11 +185,12 @@ export async function getUserWordGameStats(userId, days = 7) {
  */
 export async function getDailyWordGameLeaderboard(date = null, limit = 10) {
   try {
-    const targetDate = date || new Date().toISOString().split('T')[0];
+    const targetDate = resolveDate(date);
     
     const leaderboard = await WordGameParticipation.findAll({
       where: {
         game_date: targetDate,
+        game_type: GAME_TYPES.WORD,
         answered: true
       },
       include: [{

@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, getSavedDailyWordData } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, recordIdiomGameParticipation, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
@@ -408,6 +408,16 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     if (isCorrect) {
       await awardPoints(userId, points);
     }
+
+    const responseTime = gameSession.startTime ? Date.now() - gameSession.startTime : null;
+    await recordIdiomGameParticipation(
+      userId,
+      gameSession.idiom,
+      true,
+      isCorrect,
+      points,
+      responseTime
+    );
 
     const selectedAnswer = gameSession.options[selectedIndex];
     const correctAnswer = gameSession.translation;

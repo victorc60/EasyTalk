@@ -9,6 +9,11 @@ const WordGameParticipation = sequelize.define('WordGameParticipation', {
     primaryKey: true,
     autoIncrement: true
   },
+  game_type: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    defaultValue: 'word'
+  },
   user_id: {
     type: DataTypes.BIGINT,
     allowNull: false,
@@ -47,11 +52,14 @@ const WordGameParticipation = sequelize.define('WordGameParticipation', {
   tableName: 'word_game_participation',
   indexes: [
     {
-      fields: ['user_id', 'game_date'],
+      fields: ['user_id', 'game_date', 'game_type'],
       unique: true
     },
     {
-      fields: ['game_date']
+      fields: ['game_date', 'game_type']
+    },
+    {
+      fields: ['game_type']
     },
     {
       fields: ['answered']
