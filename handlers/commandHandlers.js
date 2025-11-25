@@ -74,6 +74,23 @@ export async function start(bot, msg) {
   }
 }
 
+export async function gameBoss(bot, msg) {
+  const url = process.env.BOSS_GRAMMAR_WEBAPP_URL;
+  if (!url) {
+    await sendUserMessage(bot, msg.chat.id, '⚠️ Веб-версия Boss Grammar не настроена. Установите BOSS_GRAMMAR_WEBAPP_URL.');
+    return;
+  }
+
+  const text = '🎮 Boss Grammar — нажми кнопку, чтобы открыть мини-игру в WebApp.';
+  await sendUserMessage(bot, msg.chat.id, text, {
+    reply_markup: {
+      keyboard: [[{ text: '🎮 Boss Grammar', web_app: { url } }]],
+      resize_keyboard: true,
+      one_time_keyboard: false,
+    },
+  });
+}
+
 export async function leaderboard(bot, msg) {
   try {
     await showLeaderboard(bot, msg.chat.id, msg.from.id);

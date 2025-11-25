@@ -92,6 +92,7 @@ async function setupBotCommands(bot) {
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
       { command: 'topic', description: 'Тема для обсуждения' },
       { command: 'story', description: 'Voice storytelling with audio' },
+      { command: 'game_boss', description: 'Запуск Boss Grammar (WebApp)' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
       { command: 'mode', description: 'Выбор режима общения' },
@@ -114,6 +115,7 @@ async function setupBotCommands(bot) {
 
 function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/start/, (msg) => start(bot, msg));
+  bot.onText(/\/game_boss/, (msg) => gameBoss(bot, msg));
   bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
   bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
