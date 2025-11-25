@@ -64,7 +64,8 @@ export async function handleEndOfDayWordGames(bot, userSessions) {
         false, // didn't answer
         false, 
         0, 
-        null
+        null,
+        gameSession.slot || 'default'
       );
       
       // Clear the timer

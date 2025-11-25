@@ -22,6 +22,11 @@ const WordGameParticipation = sequelize.define('WordGameParticipation', {
       key: 'telegram_id'
     }
   },
+  slot: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'default'
+  },
   game_date: {
     type: DataTypes.DATEONLY,
     allowNull: false,
@@ -52,7 +57,7 @@ const WordGameParticipation = sequelize.define('WordGameParticipation', {
   tableName: 'word_game_participation',
   indexes: [
     {
-      fields: ['user_id', 'game_date', 'game_type'],
+      fields: ['user_id', 'game_date', 'game_type', 'slot'],
       unique: true
     },
     {

@@ -125,7 +125,8 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
             false,
             false,
             0,
-            null
+            null,
+            session.slot || 'default'
           );
 
           await sendUserMessage(

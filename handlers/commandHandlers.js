@@ -331,7 +331,8 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       true, // answered
       isCorrect, 
       points, 
-      responseTime
+      responseTime,
+      gameSession.slot || 'default'
     );
     
     // Send result message
