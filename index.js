@@ -5,6 +5,7 @@ import { OpenAI } from 'openai';
 import sequelize from './database/database.js';
 import { sendAdminMessage } from './utils/botUtils.js';
 import { setupBot } from './botSetup.js';
+import { startBossGrammarWebhook } from './services/bossGrammarWebhook.js';
 import './models/WordGameParticipation.js'; // Import to initialize the model
 import './models/DailyWordGame.js';
 import './models/Poll.js';
@@ -59,6 +60,7 @@ process.on('unhandledRejection', (error) => {
   try {
     await initializeDatabase();
     await setupBot(bot, userSessions, openai);
+    startBossGrammarWebhook(bot);
     await sendAdminMessage(bot, `🟢 Бот запущен\n⏰ Время сервера: ${new Date().toLocaleString()}`);
   } catch (error) {
     console.error('Ошибка запуска:', error);

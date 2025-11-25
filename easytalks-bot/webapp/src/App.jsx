@@ -1,0 +1,181 @@
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import './App.css';
+import { BossSelect } from './components/BossSelect.jsx';
+import { Battle } from './components/Battle.jsx';
+import { Result } from './components/Result.jsx';
+import { ReviewSession } from './components/ReviewSession.jsx';
+import { BOSSES } from './data/mocks.js';
+import { answerTask, finishSession, nextTask, startSession, verify as verifyApi, fetchDailyReview, fetchAdminMetrics } from './services/api.js';
+import { AdminPanel } from './components/AdminPanel.jsx';
+
+const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN;
+const adminEnabled = Boolean(ADMIN_TOKEN);
+
+const readInitData = () => {
+  const fromTelegram = window.Telegram?.WebApp?.initData;
+  const mock = import.meta.env.VITE_MOCK_INIT_DATA;
+
+  if (fromTelegram && fromTelegram.length > 0) return fromTelegram;
+  if (mock) return mock;
+  return '';
+};
+
+function App() {
+  const [authStatus, setAuthStatus] = useState('pending');
+  const [user, setUser] = useState(null);
+  const [screen, setScreen] = useState('boss-select');
+  const [activeBoss, setActiveBoss] = useState(BOSSES[0]);
+  const [result, setResult] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [reviewCards, setReviewCards] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const initData = useMemo(readInitData, []);
+
+  useEffect(() => {
+    const telegramApp = window.Telegram?.WebApp;
+
+    if (telegramApp) {
+      telegramApp.ready();
+      telegramApp.expand();
+    } else {
+      console.warn('Telegram WebApp SDK not detected');
+    }
+  }, []);
+
+  useEffect(() => {
+    const auth = async () => {
+      if (!initData) {
+        setAuthStatus('no-init-data');
+        return;
+      }
+
+      try {
+        const payload = await verifyApi(initData);
+        setUser(payload.user ?? null);
+        setAuthStatus('ok');
+      } catch (err) {
+        console.error(err);
+        setAuthStatus('error');
+      }
+    };
+
+    auth();
+  }, [initData]);
+
+  const startBattle = async (boss) => {
+    const selectedBoss = boss || BOSSES[0];
+    setActiveBoss(selectedBoss);
+    setLoading(true);
+    try {
+      const payload = await startSession(selectedBoss.id);
+      setSessionId(payload.sessionId);
+      setScreen('battle');
+    } catch (err) {
+      console.error(err);
+      alert('Не удалось создать бой');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFinish = useCallback(
+    async (battleResult) => {
+      if (sessionId) {
+        try {
+          const finish = await finishSession(sessionId);
+          if (finish?.errors?.length) {
+            battleResult.history = battleResult.history?.length ? battleResult.history : finish.errors.map((e) => ({
+              isCorrect: false,
+              taskId: e.taskId,
+              selected: e.userAnswer,
+              task: { answer: e.correct, explanation: e.ruleHint },
+            }));
+          }
+        } catch (err) {
+          console.warn('Finish session failed', err);
+        }
+      }
+      setResult(battleResult);
+      setScreen('result');
+    },
+    [sessionId],
+  );
+
+  const loadNextTask = useCallback((id) => nextTask(id), []);
+  const sendAnswer = useCallback((id, payload) => answerTask(id, payload), []);
+
+  const loadReview = async () => {
+    try {
+      const res = await fetchDailyReview();
+      setReviewCards(res.cards || []);
+      setScreen('review');
+    } catch (err) {
+      console.error(err);
+      alert('Не удалось загрузить повторение');
+    }
+  };
+
+  const loadMetrics = async () => {
+    if (!adminEnabled) {
+      alert('Admin панель отключена (нет токена).');
+      return;
+    }
+    try {
+      const res = await fetchAdminMetrics(ADMIN_TOKEN);
+      setMetrics(res.summary || null);
+      setScreen('admin');
+    } catch (err) {
+      console.error(err);
+      alert('Не удалось загрузить метрики');
+    }
+  };
+
+  return (
+    <main className="app">
+      <header className="app-header">
+        <div>
+          <h1>Boss Grammar</h1>
+          <p className="note">Мини-игра грамматики для Telegram.</p>
+        </div>
+        <div className="auth-pill">
+          <span className="dot" data-status={authStatus} />
+          {authStatus === 'ok' ? `@${user?.username || user?.first_name || 'user'}` : `auth: ${authStatus}`}
+        </div>
+      </header>
+
+      {screen === 'boss-select' && <BossSelect onStart={startBattle} loading={loading} />}
+
+      {screen === 'battle' && sessionId && (
+        <Battle
+          boss={activeBoss}
+          sessionId={sessionId}
+          loadNextTask={loadNextTask}
+          sendAnswer={sendAnswer}
+          onFinish={handleFinish}
+        />
+      )}
+
+      {screen === 'result' && result && (
+        <Result
+          result={result}
+          onRetry={() => startBattle(activeBoss)}
+          onBack={() => setScreen('boss-select')}
+          onPractice={loadReview}
+          onAdmin={adminEnabled ? loadMetrics : undefined}
+          adminEnabled={adminEnabled}
+        />
+      )}
+
+      {screen === 'review' && (
+        <ReviewSession cards={reviewCards} onExit={() => setScreen('result')} />
+      )}
+
+      {screen === 'admin' && (
+        <AdminPanel metrics={metrics} onBack={() => setScreen('boss-select')} />
+      )}
+    </main>
+  );
+}
+
+export default App;

@@ -50,9 +50,23 @@ export async function start(bot, msg) {
 📊 /progress - твой прогресс
 🏆 /leaders - таблица лидеров
 
-Выбирай что тебе интересно и практикуй английский!`;
+Выбирай что тебе интересно и практикуй английский!
 
-    await sendUserMessage(bot, msg.chat.id, welcomeMessage, { parse_mode: 'HTML' });
+🎮 <b>Boss Grammar</b> — запускай мини-игру через кнопку ниже (WebApp).`;
+
+    const webAppUrl = process.env.BOSS_GRAMMAR_WEBAPP_URL;
+    const replyMarkup = webAppUrl
+      ? {
+          parse_mode: 'HTML',
+          reply_markup: {
+            keyboard: [[{ text: '🎮 Boss Grammar', web_app: { url: webAppUrl } }]],
+            resize_keyboard: true,
+            one_time_keyboard: false,
+          },
+        }
+      : { parse_mode: 'HTML' };
+
+    await sendUserMessage(bot, msg.chat.id, welcomeMessage, replyMarkup);
   } catch (error) {
     console.error('Ошибка при обработке команды /start:', error);
     await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при регистрации. Попробуйте еще раз.');
