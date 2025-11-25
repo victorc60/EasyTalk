@@ -813,6 +813,13 @@ export async function dailyHoroscope() {
     }
   };
 
+  const pruneHistory = () => {
+    while (usedHoroscopes.size > HORO_CACHE_LIMIT) {
+      const oldest = usedHoroscopes.values().next().value;
+      usedHoroscopes.delete(oldest);
+    }
+  };
+
   loadHistory();
 
   const getTodayKey = () => {
@@ -826,32 +833,55 @@ export async function dailyHoroscope() {
   const normalize = (text) => text.toLowerCase().replace(/\s+/g, ' ').trim();
   const hashText = (text) => crypto.createHash('md5').update(normalize(text)).digest('hex');
 
-  const buildFallback = () => {
-    const fallbackLines = [
-      'Aries: Take one small step today. Be brave and kind.',
-      'Taurus: Finish one task. Enjoy a calm moment and tea.',
-      'Gemini: Ask a good question. Share one smart idea.',
-      'Cancer: Call a close friend. Care for your heart.',
-      'Leo: Give a warm smile. Your energy helps others.',
-      'Virgo: Make a simple plan. Keep it clear and light.',
-      'Libra: Find balance. Work a bit, then rest a bit.',
-      'Scorpio: Trust your focus. Do one thing very well.',
-      'Sagittarius: Try something new. Learn with joy.',
-      'Capricorn: Take your time. Small steps are okay.',
-      'Aquarius: Be creative. Share your fresh idea.',
-      'Pisces: Breathe slowly. Be gentle with yourself.'
+  const buildFallback = (seedValue = getTodayKey()) => {
+    const seed = parseInt(crypto.createHash('md5').update(String(seedValue)).digest('hex').slice(0, 8), 16);
+    const moods = [
+      'Steady day ahead. Keep your pace steady and choose clarity.',
+      'Energy builds slowly; patience keeps things smooth.',
+      'Small wins appear when you tidy up loose ends.',
+      'Your focus is sharper after a calm start.',
+      'Balance effort with short breaks for a clear mind.',
+      'Curiosity opens a useful door today.'
     ];
-    const decoratedFallback = fallbackLines.map(line => {
-      const [sign, rest] = line.split(':');
-      const cleanSign = sign.trim().toLowerCase();
-      const advice = (rest || '').trim();
-      const emoji = SIGN_EMOJI[cleanSign] || '✨';
-      return `${emoji} <b>${sign}</b>: ${advice}`;
-    }).join('\n');
+    const focuses = [
+      'Reconnect with one close person and share your plan',
+      'Finish the task you delayed and celebrate the checkmark',
+      'Ask one good question that moves work forward',
+      'Organize the next two steps instead of the next ten',
+      'Move for ten minutes to refresh your thoughts',
+      'Learn one new thing and use it in conversation'
+    ];
+    const nudges = [
+      'Evening is best for reflection.',
+      'Morning favors planning; afternoon favors action.',
+      'A short walk will clear any tension.',
+      'Say yes to a small offer of help.',
+      'Mute distractions for 30 minutes and you finish faster.',
+      'Humor will smooth an awkward moment.'
+    ];
+    const pick = (arr, offset) => arr[(seed + offset) % arr.length];
+
+    const decoratedFallback = SIGNS.map((sign, index) => {
+      const signName = sign.charAt(0).toUpperCase() + sign.slice(1);
+      const advice = `${pick(moods, index)} ${pick(focuses, index + 4)} ${pick(nudges, index + 8)}`.replace(/\s+/g, ' ');
+      const emoji = SIGN_EMOJI[sign] || '✨';
+      return `${emoji} <b>${signName}</b>: ${advice}`;
+    }).join('\n\n');
+
     return buildHeader() + decoratedFallback;
   };
 
   const todayKey = getTodayKey();
+
+  const persistMessage = (message, source = 'api') => {
+    const key = hashText(message);
+    usedHoroscopes.add(key);
+    pruneHistory();
+    saveHistory();
+    saveCache({ date: todayKey, message, source });
+    return message;
+  };
+
   const cached = loadCache();
   if (cached?.date === todayKey && cached?.message) {
     console.log('🔮 Используем кеш гороскопа за сегодня');
@@ -884,22 +914,14 @@ export async function dailyHoroscope() {
     const message = buildHeader() + decoratedHoroscopes.join('\n\n');
     const key = hashText(message);
     if (usedHoroscopes.has(key)) {
-      console.log('⚠️ Получен повторяющийся гороскоп, возвращаем fallback');
-      return buildFallback();
+      console.log('⚠️ Получен повторяющийся гороскоп от API, переходим к резервному варианту');
+      return persistMessage(buildFallback(todayKey), 'duplicate_fallback');
     }
 
-    usedHoroscopes.add(key);
-    if (usedHoroscopes.size > HORO_CACHE_LIMIT) {
-      const first = usedHoroscopes.values().next().value;
-      usedHoroscopes.delete(first);
-    }
-    saveHistory();
-    saveCache({ date: todayKey, message });
-
-    return message;
+    return persistMessage(message, 'api');
   } catch (error) {
     console.error('Ошибка получения гороскопа из API:', error.message);
-    return buildFallback();
+    return persistMessage(buildFallback(todayKey), 'api_error_fallback');
   }
 }
 
