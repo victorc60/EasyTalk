@@ -284,6 +284,7 @@ function loadCuratedIdiomBank() {
     if (!Array.isArray(parsed)) {
       throw new Error('формат идиом должен быть массивом');
     }
+    const seen = new Set();
     curatedIdiomBank = parsed
       .filter(entry => entry?.idiom && entry?.translation)
       .map(entry => ({
@@ -292,8 +293,14 @@ function loadCuratedIdiomBank() {
         meaning: entry.meaning || entry.translation.trim(),
         example: entry.example || '',
         hint: entry.hint || ''
-      }));
-    console.log(`📘 Загружено ${curatedIdiomBank.length} идиом из словаря`);
+      }))
+      .filter(entry => {
+        const key = entry.idiom.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    console.log(`📘 Загружено ${curatedIdiomBank.length} идиом из словаря (уникальные)`);
   } catch (error) {
     console.error('Не удалось загрузить идиомы:', error.message);
     curatedIdiomBank = [];
