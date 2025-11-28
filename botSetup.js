@@ -37,12 +37,40 @@ function setupSchedulers(bot, userSessions) {
       console.log('Запуск dailyFactBroadcast');
       dailyFactBroadcast(bot);
     });
+    const buildRule = (time) => {
+      const rule = new schedule.RecurrenceRule();
+      rule.tz = time.tz || 'Europe/Moscow';
+      rule.hour = time.hour;
+      rule.minute = time.minute;
+      rule.second = 0;
+      return rule;
+    };
+
+    const logNextRun = (job, label) => {
+      try {
+        const next = job.nextInvocation();
+        if (next) {
+          console.log(`⏰ Следующий запуск ${label}: ${next.toString()}`);
+        }
+      } catch (e) {
+        console.warn(`Не удалось получить следующий запуск для ${label}: ${e.message}`);
+      }
+    };
+
     CONFIG.WORD_GAME_TIMES.forEach((time, index) => {
-      schedule.scheduleJob(`wordGame${index}`, time, () => {
-        console.log(`Запуск wordGameBroadcast в ${time.hour}:${time.minute} ${time.tz}`);
-        const slotId = time.slot || `slot_${index}_${time.hour ?? '0'}_${time.minute ?? '0'}`;
-        wordGameBroadcast(bot, userSessions, slotId);
+      const slotId = time.slot || `slot_${index}_${time.hour ?? '0'}_${time.minute ?? '0'}`;
+      const rule = buildRule(time);
+      const job = schedule.scheduleJob(`wordGame${index}`, rule, async () => {
+        console.log(`Запуск wordGameBroadcast (${slotId}) в ${time.hour}:${time.minute} ${rule.tz}`);
+        await wordGameBroadcast(bot, userSessions, slotId);
       });
+
+      if (!job) {
+        console.error(`❌ Не удалось запланировать слово дня для слота ${slotId}`);
+        sendAdminMessage(bot, `‼️ Не удалось запланировать слово дня для ${slotId}`);
+      } else {
+        logNextRun(job, `слова дня (${slotId})`);
+      }
     });
     // Идиома дня в 13:00 по Москве
     schedule.scheduleJob(

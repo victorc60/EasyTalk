@@ -890,6 +890,10 @@ export async function dailyHoroscope() {
   };
 
   const cached = loadCache();
+  if (cached?.message) {
+    // Защитимся от повторов даже если не удалось загрузить историю
+    usedHoroscopes.add(hashText(cached.message));
+  }
   if (cached?.date === todayKey && cached?.message) {
     console.log('🔮 Используем кеш гороскопа за сегодня');
     return cached.message;
