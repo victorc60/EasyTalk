@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
 import { OpenAI } from 'openai';
 import sequelize from './database/database.js';
@@ -17,9 +18,17 @@ import './models/PollResponse.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const app = express();
+app.use(express.json());
 
+const botToken = process.env.TELEGRAM_BOT_TOKEN;
+if (!botToken) {
+  console.error('TELEGRAM_BOT_TOKEN is not set');
+  process.exit(1);
+}
+
+const bot = new TelegramBot(botToken, { polling: false });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const userSessions = {
   wordGames: new Map(),
@@ -30,6 +39,20 @@ const userSessions = {
   broadcastPending: false,
   broadcastContent: { text: null, photo: null } // Для хранения текста и URL картинки
 };
+
+const webhookPath = `/telegram/webhook/${botToken}`;
+const webhookBase = process.env.TELEGRAM_WEBHOOK_URL || process.env.WEBHOOK_DOMAIN;
+const webhookUrl = webhookBase ? `${webhookBase.replace(/\/$/, '')}${webhookPath}` : null;
+
+if (!webhookUrl) {
+  console.error('TELEGRAM_WEBHOOK_URL or WEBHOOK_DOMAIN is not configured');
+  process.exit(1);
+}
+
+app.post(webhookPath, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
 
 async function initializeDatabase() {
   try {
@@ -65,8 +88,19 @@ process.on('unhandledRejection', (error) => {
   try {
     await initializeDatabase();
     await setupBot(bot, userSessions, openai);
-    startBossGrammarWebhook(bot);
-    await sendAdminMessage(bot, `🟢 Бот запущен\n⏰ Время сервера: ${new Date().toLocaleString()}`);
+
+    await bot.setWebHook(webhookUrl, { drop_pending_updates: true });
+    console.log(`Webhook set to ${webhookUrl}`);
+
+    startBossGrammarWebhook(bot, app);
+
+    const port = Number(process.env.PORT || 3000);
+    app.get('/health', (req, res) => res.json({ ok: true }));
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+
+    await sendAdminMessage(bot, `🟢 Бот запущен (webhook)\n🔗 ${webhookUrl}\n⏰ Время сервера: ${new Date().toLocaleString()}`);
   } catch (error) {
     console.error('Ошибка запуска:', error);
     await sendAdminMessage(bot, `‼️ Ошибка запуска бота: ${error.message}`)

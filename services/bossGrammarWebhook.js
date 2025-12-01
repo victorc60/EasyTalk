@@ -8,9 +8,9 @@ const bossNames = {
   'article-golem': 'Article Golem',
 };
 
-export function startBossGrammarWebhook(bot) {
+export function startBossGrammarWebhook(bot, externalApp = null) {
   const apiBase = process.env.BOSS_GRAMMAR_API_BASE;
-  const port = Number(process.env.BOSS_GRAMMAR_PORT || 8787);
+  const port = Number(process.env.BOSS_GRAMMAR_PORT || process.env.PORT || 8787);
   const secret = process.env.BOSS_GRAMMAR_WEBHOOK_SECRET;
 
   if (!apiBase) {
@@ -18,8 +18,10 @@ export function startBossGrammarWebhook(bot) {
     return;
   }
 
-  const app = express();
-  app.use(express.json());
+  const app = externalApp || express();
+  if (!externalApp) {
+    app.use(express.json());
+  }
 
   app.post('/boss-grammar/webhook', async (req, res) => {
     try {
@@ -30,9 +32,8 @@ export function startBossGrammarWebhook(bot) {
       const { chatId, sessionId } = req.body || {};
       if (!chatId || !sessionId) {
         return res.status(400).json({ ok: false, error: 'chatId and sessionId required' });
-      }
+        }
 
-      // ensure session finished + fetch errors
       let errors = [];
       try {
         const finish = await axios.post(`${apiBase}/api/session/${sessionId}/finish`);
@@ -80,7 +81,9 @@ export function startBossGrammarWebhook(bot) {
 
   app.get('/boss-grammar/health', (req, res) => res.json({ ok: true }));
 
-  app.listen(port, () => {
-    console.log(`Boss Grammar webhook listening on :${port}`);
-  });
+  if (!externalApp) {
+    app.listen(port, () => {
+      console.log(`Boss Grammar webhook listening on :${port}`);
+    });
+  }
 }
