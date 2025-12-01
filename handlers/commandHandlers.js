@@ -59,10 +59,10 @@ export async function start(bot, msg) {
       ? {
           parse_mode: 'HTML',
           reply_markup: {
-            keyboard: [[{ text: '🎮 Boss Grammar', web_app: { url: webAppUrl } }]],
-            resize_keyboard: true,
-            one_time_keyboard: false,
-          },
+            inline_keyboard: [
+              [{ text: '🎮 Открыть Boss Grammar', web_app: { url: webAppUrl } }]
+            ]
+          }
         }
       : { parse_mode: 'HTML' };
 

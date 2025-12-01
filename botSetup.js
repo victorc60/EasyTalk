@@ -5,7 +5,7 @@ import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss } from './handlers/commandHandlers.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -121,6 +121,7 @@ async function setupBotCommands(bot) {
       { command: 'topic', description: 'Тема для обсуждения' },
       { command: 'story', description: 'Voice storytelling with audio' },
       { command: 'game_boss', description: 'Запуск Boss Grammar (WebApp)' },
+      { command: 'boss', description: 'Запуск Boss Grammar (WebApp)' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
       { command: 'mode', description: 'Выбор режима общения' },
@@ -144,6 +145,7 @@ async function setupBotCommands(bot) {
 function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/start/, (msg) => start(bot, msg));
   bot.onText(/\/game_boss/, (msg) => gameBoss(bot, msg));
+  bot.onText(/\/boss/, (msg) => gameBoss(bot, msg));
   bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
   bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
