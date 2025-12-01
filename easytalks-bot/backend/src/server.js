@@ -39,19 +39,24 @@ app.get('/health', (req, res) => {
 app.post('/api/auth/verify', (req, res) => {
   const { initData } = req.body || {};
   const botToken = process.env.BOT_TOKEN;
+  const allowGuest = process.env.ALLOW_GUEST_AUTH === 'true';
+
+  console.log('[BG] auth request', { hasInitData: Boolean(initData), allowGuest, hasBotToken: Boolean(botToken) });
+
+  // Гостевой режим: не требуем initData и bot token
+  if (allowGuest) {
+    return res.json({
+      ok: true,
+      user: { id: 'guest', first_name: 'Guest', username: 'guest' },
+      mode: 'guest',
+    });
+  }
 
   if (!botToken) {
     return res.status(500).json({ ok: false, error: 'BOT_TOKEN is not configured' });
   }
 
   if (!initData) {
-    if (process.env.ALLOW_GUEST_AUTH === 'true') {
-      console.warn('Auth fallback: ALLOW_GUEST_AUTH enabled, returning guest user');
-      return res.json({
-        ok: true,
-        user: { id: 'guest', first_name: 'Guest', username: 'guest' },
-      });
-    }
     return res.status(401).json({ ok: false, error: 'initData is required' });
   }
 
@@ -76,8 +81,10 @@ app.post('/api/session/start', (req, res) => {
   const { bossId } = req.body || {};
   try {
     const session = createSession({ bossId });
+    console.log('[BG] session start ok', { bossId, sessionId: session.sessionId });
     res.json({ ok: true, ...session });
   } catch (err) {
+    console.error('[BG] session start error', err?.message);
     res.status(400).json({ ok: false, error: err.message || 'Cannot create session' });
   }
 });
@@ -85,6 +92,7 @@ app.post('/api/session/start', (req, res) => {
 app.get('/api/session/:id/nextTask', (req, res) => {
   const { id } = req.params;
   const payload = nextTask(id);
+  console.log('[BG] nextTask', { sessionId: id, ok: !payload.error });
   if (payload.error) return res.status(400).json({ ok: false, error: payload.error });
   return res.json({ ok: true, ...payload });
 });
@@ -92,7 +100,9 @@ app.get('/api/session/:id/nextTask', (req, res) => {
 app.post('/api/session/:id/answer', (req, res) => {
   const { id } = req.params;
   const { taskId, answer } = req.body || {};
+  console.log('[BG] answer', { sessionId: id, taskId, answer });
   const result = submitAnswer(id, { taskId, answer });
+  if (result.error) console.warn('[BG] answer error', result.error);
   if (result.error) return res.status(400).json({ ok: false, error: result.error });
   return res.json({ ok: true, ...result });
 });
@@ -102,6 +112,7 @@ app.post('/api/session/:id/finish', (req, res) => {
   const session = finishSession(id);
   if (!session) return res.status(404).json({ ok: false, error: 'Session not found' });
 
+  console.log('[BG] finish', { sessionId: id });
   res.json({ ok: true, finishedAt: session.finished_at || session.finishedAt, errors: session.errors || [] });
 });
 
