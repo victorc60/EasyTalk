@@ -11,59 +11,54 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// КРИТИЧЕСКИ ВАЖНО: Обработка CORS должна быть ПЕРВОЙ
-// Обрабатываем OPTIONS запросы ДО всех других middleware
-app.use((req, res, next) => {
+// МАКСИМАЛЬНО ПРОСТАЯ И НАДЕЖНАЯ ОБРАБОТКА CORS
+// Обрабатываем ВСЕ запросы, включая OPTIONS, ДО всех других middleware
+
+// Функция для установки CORS заголовков
+const setCorsHeaders = (req, res) => {
   const origin = req.headers.origin;
   
-  // Устанавливаем CORS заголовки для ВСЕХ запросов (включая OPTIONS)
+  // Разрешаем все origins
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
     res.setHeader('Access-Control-Allow-Origin', '*');
   }
+  
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers');
   res.setHeader('Access-Control-Max-Age', '86400');
+  res.setHeader('Access-Control-Allow-Credentials', 'false');
+};
+
+// Обрабатываем OPTIONS запросы ПЕРВЫМИ - ДО всех других middleware
+app.use((req, res, next) => {
+  setCorsHeaders(req, res);
   
   // Если это OPTIONS запрос, сразу отвечаем
   if (req.method === 'OPTIONS') {
-    console.log(`[CORS] Preflight OPTIONS from: ${origin || 'no origin'} to ${req.path}`);
-    return res.status(204).send();
+    console.log(`[CORS] Preflight OPTIONS from: ${req.headers.origin || 'no origin'} to ${req.path}`);
+    return res.status(204).end();
   }
   
   next();
 });
 
-// УПРОЩЕННАЯ КОНФИГУРАЦИЯ CORS - разрешаем все origins
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Всегда разрешаем все origins
-    console.log(`[CORS] Allowing origin: ${origin || 'no origin (same-origin)'}`);
-    callback(null, true);
-  },
+// Применяем CORS middleware как дополнительную защиту
+app.use(cors({
+  origin: true, // Разрешаем все origins
   credentials: false,
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Request-Method',
-    'Access-Control-Request-Headers'
-  ],
-  exposedHeaders: ['Content-Length', 'Content-Type'],
-  maxAge: 86400,
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  maxAge: 86400
+}));
 
-// ВАЖНО: Применяем CORS middleware ПЕРВЫМ, до всех других middleware
-app.use(cors(corsOptions));
-
-// Явная обработка OPTIONS для всех путей (на случай если cors middleware не сработает)
-app.options('*', cors(corsOptions));
+// Явная обработка OPTIONS для всех путей (тройная защита)
+app.options('*', (req, res) => {
+  setCorsHeaders(req, res);
+  console.log(`[CORS] Explicit OPTIONS handler for: ${req.headers.origin || 'no origin'} to ${req.path}`);
+  res.status(204).end();
+});
 
 // Middleware для логирования запросов
 app.use((req, res, next) => {
