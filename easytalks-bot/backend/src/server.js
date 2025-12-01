@@ -11,8 +11,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// МАКСИМАЛЬНО ПРОСТАЯ И НАДЕЖНАЯ ОБРАБОТКА CORS
-// Обрабатываем ВСЕ запросы, включая OPTIONS, ДО всех других middleware
+// КРИТИЧЕСКИ ВАЖНО: Обработка OPTIONS должна быть САМОЙ ПЕРВОЙ
+// Express обрабатывает роуты в порядке их регистрации, поэтому app.options должен быть ПЕРВЫМ
 
 // Функция для установки CORS заголовков
 const setCorsHeaders = (req, res) => {
@@ -31,13 +31,20 @@ const setCorsHeaders = (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', 'false');
 };
 
-// Обрабатываем OPTIONS запросы ПЕРВЫМИ - ДО всех других middleware
+// ЯВНАЯ ОБРАБОТКА OPTIONS ДЛЯ ВСЕХ ПУТЕЙ - ДО ВСЕХ ДРУГИХ РОУТОВ
+app.options('*', (req, res) => {
+  setCorsHeaders(req, res);
+  console.log(`[CORS] OPTIONS handler for: ${req.headers.origin || 'no origin'} to ${req.path}`);
+  res.status(204).end();
+});
+
+// Обрабатываем OPTIONS запросы в middleware - ДО всех других middleware
 app.use((req, res, next) => {
   setCorsHeaders(req, res);
   
-  // Если это OPTIONS запрос, сразу отвечаем
+  // Если это OPTIONS запрос, сразу отвечаем (на случай если app.options не сработал)
   if (req.method === 'OPTIONS') {
-    console.log(`[CORS] Preflight OPTIONS from: ${req.headers.origin || 'no origin'} to ${req.path}`);
+    console.log(`[CORS] Middleware OPTIONS from: ${req.headers.origin || 'no origin'} to ${req.path}`);
     return res.status(204).end();
   }
   
@@ -52,13 +59,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   maxAge: 86400
 }));
-
-// Явная обработка OPTIONS для всех путей (тройная защита)
-app.options('*', (req, res) => {
-  setCorsHeaders(req, res);
-  console.log(`[CORS] Explicit OPTIONS handler for: ${req.headers.origin || 'no origin'} to ${req.path}`);
-  res.status(204).end();
-});
 
 // Middleware для логирования запросов
 app.use((req, res, next) => {
@@ -110,6 +110,28 @@ app.post('/api/auth/verify', (req, res) => {
     user: { id: 'guest', first_name: 'Guest', username: 'guest' },
     mode: 'guest',
   });
+});
+
+// Явная обработка OPTIONS для конкретных API путей (на случай если app.options('*') не сработает)
+app.options('/api/session/start', (req, res) => {
+  setCorsHeaders(req, res);
+  console.log(`[CORS] OPTIONS /api/session/start from: ${req.headers.origin || 'no origin'}`);
+  res.status(204).end();
+});
+
+app.options('/api/session/:id/nextTask', (req, res) => {
+  setCorsHeaders(req, res);
+  res.status(204).end();
+});
+
+app.options('/api/session/:id/answer', (req, res) => {
+  setCorsHeaders(req, res);
+  res.status(204).end();
+});
+
+app.options('/api/session/:id/finish', (req, res) => {
+  setCorsHeaders(req, res);
+  res.status(204).end();
 });
 
 app.post('/api/session/start', (req, res) => {
