@@ -25,8 +25,8 @@ const logApp = (step, payload = {}) => {
 };
 
 function App() {
-  const [authStatus, setAuthStatus] = useState('pending');
-  const [user, setUser] = useState(null);
+  const [authStatus, setAuthStatus] = useState('ok'); // форсим гостевой режим
+  const [user, setUser] = useState({ username: 'guest' });
   const [screen, setScreen] = useState('boss-select');
   const [activeBoss, setActiveBoss] = useState(BOSSES[0]);
   const [result, setResult] = useState(null);
@@ -34,6 +34,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [reviewCards, setReviewCards] = useState([]);
   const [metrics, setMetrics] = useState(null);
+  const [debugInfo, setDebugInfo] = useState('');
   const initData = useMemo(readInitData, []);
 
   useEffect(() => {
@@ -49,14 +50,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const auth = async () => {
-      // Полный гостевой режим: никакой внешней верификации
-      setUser({ username: 'guest' });
-      setAuthStatus('ok');
-      logApp('auth.guest-mode', { initData: Boolean(initData) });
-    };
-
-    auth();
+    setUser({ username: 'guest' });
+    setAuthStatus('ok');
+    const info = `guest-mode | initData=${Boolean(initData)} | api=${import.meta.env.VITE_API_BASE || 'n/a'}`;
+    setDebugInfo(info);
+    logApp('auth.guest-mode', { initData: Boolean(initData), api: import.meta.env.VITE_API_BASE });
   }, [initData]);
 
   const startBattle = async (boss) => {
@@ -71,8 +69,8 @@ function App() {
       setScreen('battle');
     } catch (err) {
       console.error(err);
-      logApp('battle.start.error', { message: err?.message });
-      alert('Не удалось создать бой');
+      logApp('battle.start.error', { message: err?.message, stack: err?.stack });
+      alert(`Не удалось создать бой: ${err?.message || 'unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -142,6 +140,11 @@ function App() {
           {authStatus === 'ok' ? `@${user?.username || user?.first_name || 'user'}` : `auth: ${authStatus}`}
         </div>
       </header>
+      {debugInfo && (
+        <div className="card" style={{ border: '1px dashed #94a3b8', fontSize: '0.85rem', color: '#475569' }}>
+          Debug: {debugInfo}
+        </div>
+      )}
 
       {screen === 'boss-select' && <BossSelect onStart={startBattle} loading={loading} />}
 
