@@ -1,5 +1,7 @@
 // index.js
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import TelegramBot from 'node-telegram-bot-api';
 import { OpenAI } from 'openai';
 import sequelize from './database/database.js';
@@ -11,6 +13,9 @@ import './models/DailyWordGame.js';
 import './models/Poll.js';
 import './models/PollDelivery.js';
 import './models/PollResponse.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
