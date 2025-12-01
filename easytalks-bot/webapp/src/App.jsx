@@ -50,24 +50,10 @@ function App() {
 
   useEffect(() => {
     const auth = async () => {
-      try {
-        // В гостевом режиме просто ставим гостя и пробуем верификацию при наличии initData
-        setUser({ username: 'guest' });
-        setAuthStatus('ok');
-        if (initData) {
-          const payload = await verifyApi(initData);
-          logApp('auth.ok', { user: payload?.user?.id || payload?.user?.username || 'unknown' });
-          setUser(payload.user ?? { username: 'guest' });
-        } else {
-          logApp('auth.guest-mode');
-        }
-      } catch (err) {
-        console.error(err);
-        logApp('auth.error', { message: err?.message });
-        // Даже при ошибке оставляем гостя
-        setUser({ username: 'guest' });
-        setAuthStatus('ok');
-      }
+      // Полный гостевой режим: никакой внешней верификации
+      setUser({ username: 'guest' });
+      setAuthStatus('ok');
+      logApp('auth.guest-mode', { initData: Boolean(initData) });
     };
 
     auth();

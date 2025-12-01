@@ -7,20 +7,8 @@ const log = (step, payload = {}) => {
 
 export async function verify(initData) {
   log('verify:init', { hasInitData: Boolean(initData), api: API_BASE });
-  // Если нет initData, сразу возвращаем гостя без запроса
-  if (!initData) {
-    return { ok: true, user: { id: 'guest', username: 'guest' }, mode: 'guest' };
-  }
-  const res = await fetch(`${API_BASE}/api/auth/verify`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Auth failed');
-  }
-  return res.json();
+  // Полный гостевой режим: никаких сетевых запросов, сразу возвращаем гостя
+  return { ok: true, user: { id: 'guest', username: 'guest' }, mode: 'guest' };
 }
 
 export async function startSession(bossId) {
