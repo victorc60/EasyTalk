@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 const calcResult = ({ boss, progress, attempts }) => {
   const answered = progress.answered || attempts.length;
@@ -29,55 +29,123 @@ export function Battle({ boss, sessionId, loadNextTask, sendAnswer, onFinish }) 
   });
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFinished, setIsFinished] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Используем ref для предотвращения повторных вызовов onFinish
+  const finishedRef = useRef(false);
+  const timerRef = useRef(null);
 
+  // Таймер с правильной очисткой
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => Math.max(prev - 1, 0));
+    if (isFinished) return;
+    
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        const next = Math.max(prev - 1, 0);
+        if (next === 0 && !finishedRef.current) {
+          finishedRef.current = true;
+          setIsFinished(true);
+        }
+        return next;
+      });
     }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isFinished]);
 
+  // Завершение игры при истечении времени
   useEffect(() => {
-    if (timeLeft === 0) {
-      onFinish(calcResult({ boss, progress, attempts }));
+    if (isFinished && !finishedRef.current) {
+      finishedRef.current = true;
+      const result = calcResult({ boss, progress, attempts });
+      onFinish(result);
     }
-  }, [timeLeft, progress, attempts, onFinish, boss]);
+  }, [isFinished, boss, progress, attempts, onFinish]);
 
+  // Загрузка первой задачи при монтировании
   useEffect(() => {
+    let cancelled = false;
+    
     const fetchTask = async () => {
+      if (cancelled || finishedRef.current) return;
+      
       setLoading(true);
       try {
+        console.log('[Battle] Loading initial task for session:', sessionId);
         const payload = await loadNextTask(sessionId);
+        
+        if (cancelled) return;
+        
         if (payload.done) {
+          finishedRef.current = true;
+          setIsFinished(true);
           onFinish(calcResult({ boss, progress: payload.progress || progress, attempts: payload.attempts || attempts }));
           return;
         }
+        
         setTask(payload.task);
         setProgress(payload.progress);
-        setAttempts(payload.attempts || attempts);
+        setAttempts(payload.attempts || []);
+      } catch (err) {
+        console.error('[Battle] Failed to load task:', err);
+        if (!cancelled) {
+          alert(`Ошибка загрузки задачи: ${err?.message || 'unknown error'}`);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
+    
     fetchTask();
-  }, [sessionId, loadNextTask, onFinish, boss]);
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId]); // Убираем лишние зависимости
 
-  const handleAnswer = async (option) => {
-    if (!task) return;
+  const handleAnswer = useCallback(async (option) => {
+    if (!task || isSubmitting || isFinished || finishedRef.current) {
+      console.log('[Battle] Answer blocked:', { hasTask: !!task, isSubmitting, isFinished });
+      return;
+    }
+    
+    setIsSubmitting(true);
     setLoading(true);
+    
     try {
+      console.log('[Battle] Submitting answer:', { taskId: task.id, answer: option });
       const result = await sendAnswer(sessionId, { taskId: task.id, answer: option });
+      
       setProgress(result.progress);
-      setAttempts(result.attempts || attempts);
+      setAttempts(result.attempts || []);
+      
       if (result.done) {
-        onFinish(calcResult({ boss, progress: result.progress, attempts: result.attempts || attempts }));
+        finishedRef.current = true;
+        setIsFinished(true);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        onFinish(calcResult({ boss, progress: result.progress, attempts: result.attempts || [] }));
       } else if (result.nextTask) {
         setTask(result.nextTask);
       }
+    } catch (err) {
+      console.error('[Battle] Failed to submit answer:', err);
+      alert(`Ошибка отправки ответа: ${err?.message || 'unknown error'}`);
     } finally {
+      setIsSubmitting(false);
       setLoading(false);
     }
-  };
+  }, [task, isSubmitting, isFinished, sessionId, sendAnswer, boss, onFinish]);
 
   const total = progress.total || 0;
 
@@ -100,20 +168,26 @@ export function Battle({ boss, sessionId, loadNextTask, sendAnswer, onFinish }) 
 
       {loading && <p>Загружаем задачу…</p>}
 
-      {!loading && task && (
+      {!loading && task && !isFinished && (
         <div className="task">
           <p className="prompt">{task.prompt}</p>
           <div className="options">
             {task.options.map((opt) => (
-              <button key={opt} className="option" onClick={() => handleAnswer(opt)}>
+              <button 
+                key={opt} 
+                className="option" 
+                onClick={() => handleAnswer(opt)} 
+                disabled={isSubmitting || isFinished}
+              >
                 {opt}
               </button>
             ))}
           </div>
+          {isSubmitting && <p className="note">Отправляем ответ...</p>}
         </div>
       )}
 
-      {!loading && !task && <p>Бой завершён, считаем результат…</p>}
+      {!loading && !task && !isFinished && <p>Бой завершён, считаем результат…</p>}
     </section>
   );
 }

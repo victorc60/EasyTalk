@@ -49,30 +49,65 @@ function App() {
     }
   }, []);
 
+  // Гарантируем, что authStatus всегда 'ok' - никакой аутентификации не требуется
   useEffect(() => {
-    setUser({ username: 'guest' });
-    setAuthStatus('ok');
-    const info = `guest-mode | initData=${Boolean(initData)} | api=${import.meta.env.VITE_API_BASE || 'n/a'}`;
+    setUser({ username: 'guest', first_name: 'Guest' });
+    setAuthStatus('ok'); // Всегда 'ok', независимо от initData
+    const info = `guest-mode (no auth required) | initData=${Boolean(initData)} | api=${import.meta.env.VITE_API_BASE || 'n/a'}`;
     setDebugInfo(info);
-    logApp('auth.guest-mode', { initData: Boolean(initData), api: import.meta.env.VITE_API_BASE });
+    logApp('auth.guest-mode', { 
+      initData: Boolean(initData), 
+      api: import.meta.env.VITE_API_BASE,
+      authStatus: 'ok (forced)'
+    });
   }, [initData]);
 
   const startBattle = async (boss) => {
     const selectedBoss = boss || BOSSES[0];
     setActiveBoss(selectedBoss);
     setLoading(true);
+    
+    logApp('battle.start.init', { 
+      bossId: selectedBoss.id, 
+      bossName: selectedBoss.name,
+      apiBase: import.meta.env.VITE_API_BASE,
+      timestamp: new Date().toISOString()
+    });
+    
     try {
-      logApp('battle.start', { boss: selectedBoss.id });
+      logApp('battle.start.request', { 
+        bossId: selectedBoss.id,
+        url: `${import.meta.env.VITE_API_BASE || 'http://localhost:4000'}/api/session/start`
+      });
+      
       const payload = await startSession(selectedBoss.id);
-      logApp('battle.start.ok', { sessionId: payload.sessionId });
+      
+      logApp('battle.start.success', { 
+        sessionId: payload.sessionId,
+        boss: payload.boss,
+        seed: payload.seed,
+        serverNow: payload.serverNow
+      });
+      
       setSessionId(payload.sessionId);
       setScreen('battle');
     } catch (err) {
-      console.error(err);
-      logApp('battle.start.error', { message: err?.message, stack: err?.stack });
+      const errorDetails = {
+        message: err?.message,
+        stack: err?.stack,
+        name: err?.name,
+        bossId: selectedBoss.id,
+        apiBase: import.meta.env.VITE_API_BASE,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.error('[BossApp] battle.start.failed', errorDetails);
+      logApp('battle.start.error', errorDetails);
+      
       alert(`Не удалось создать бой: ${err?.message || 'unknown error'}`);
     } finally {
       setLoading(false);
+      logApp('battle.start.complete', { loading: false });
     }
   };
 

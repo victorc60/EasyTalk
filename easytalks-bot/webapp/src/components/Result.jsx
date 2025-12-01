@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 export function Result({ result, onRetry, onBack, onPractice, onAdmin, adminEnabled }) {
   const [showReview, setShowReview] = useState(false);
 
-  const mistakes = (result.history || []).filter((h) => !h.isCorrect);
+  // Мемоизируем вычисление ошибок
+  const mistakes = useMemo(() => {
+    return (result.history || []).filter((h) => !h.isCorrect);
+  }, [result.history]);
 
   return (
     <section className="card">

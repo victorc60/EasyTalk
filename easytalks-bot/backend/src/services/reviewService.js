@@ -37,6 +37,7 @@ export function getSessionErrors(sessionId) {
 
 export function getDailyReview(limit = 10) {
   // Latest incorrect attempts, distinct tasks
+  // Использует индекс idx_attempts_correct_time для быстрого поиска
   const rows = db
     .prepare(
       `SELECT t.*

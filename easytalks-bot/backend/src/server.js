@@ -49,41 +49,139 @@ app.post('/api/auth/verify', (req, res) => {
 
 app.post('/api/session/start', (req, res) => {
   const { bossId } = req.body || {};
+  const requestId = Date.now();
+  
+  console.log(`[BG:${requestId}] session/start request`, { 
+    bossId, 
+    body: req.body,
+    headers: req.headers,
+    timestamp: new Date().toISOString()
+  });
+  
+  if (!bossId) {
+    console.error(`[BG:${requestId}] session/start error: bossId is missing`, { body: req.body });
+    return res.status(400).json({ ok: false, error: 'bossId is required' });
+  }
+  
   try {
+    console.log(`[BG:${requestId}] creating session for bossId:`, bossId);
     const session = createSession({ bossId });
-    console.log('[BG] session start ok', { bossId, sessionId: session.sessionId });
+    
+    console.log(`[BG:${requestId}] session created successfully`, { 
+      sessionId: session.sessionId,
+      boss: session.boss,
+      seed: session.seed,
+      serverNow: session.serverNow
+    });
+    
     res.json({ ok: true, ...session });
   } catch (err) {
-    console.error('[BG] session start error', err?.message);
+    console.error(`[BG:${requestId}] session/start error`, {
+      message: err?.message,
+      stack: err?.stack,
+      bossId,
+      errorName: err?.name
+    });
     res.status(400).json({ ok: false, error: err.message || 'Cannot create session' });
   }
 });
 
 app.get('/api/session/:id/nextTask', (req, res) => {
   const { id } = req.params;
-  const payload = nextTask(id);
-  console.log('[BG] nextTask', { sessionId: id, ok: !payload.error });
-  if (payload.error) return res.status(400).json({ ok: false, error: payload.error });
-  return res.json({ ok: true, ...payload });
+  const requestId = Date.now();
+  
+  console.log(`[BG:${requestId}] nextTask request`, { sessionId: id });
+  
+  try {
+    const payload = nextTask(id);
+    
+    if (payload.error) {
+      console.error(`[BG:${requestId}] nextTask error`, { sessionId: id, error: payload.error });
+      return res.status(400).json({ ok: false, error: payload.error });
+    }
+    
+    console.log(`[BG:${requestId}] nextTask success`, { 
+      sessionId: id, 
+      hasTask: !!payload.task,
+      done: payload.done 
+    });
+    
+    return res.json({ ok: true, ...payload });
+  } catch (err) {
+    console.error(`[BG:${requestId}] nextTask exception`, {
+      sessionId: id,
+      error: err.message,
+      stack: err.stack
+    });
+    return res.status(500).json({ ok: false, error: err.message || 'Internal server error' });
+  }
 });
 
 app.post('/api/session/:id/answer', (req, res) => {
   const { id } = req.params;
   const { taskId, answer } = req.body || {};
-  console.log('[BG] answer', { sessionId: id, taskId, answer });
-  const result = submitAnswer(id, { taskId, answer });
-  if (result.error) console.warn('[BG] answer error', result.error);
-  if (result.error) return res.status(400).json({ ok: false, error: result.error });
-  return res.json({ ok: true, ...result });
+  const requestId = Date.now();
+  
+  console.log(`[BG:${requestId}] answer request`, { sessionId: id, taskId, answer });
+  
+  if (!taskId || !answer) {
+    console.error(`[BG:${requestId}] answer validation error`, { sessionId: id, body: req.body });
+    return res.status(400).json({ ok: false, error: 'taskId and answer are required' });
+  }
+  
+  try {
+    const result = submitAnswer(id, { taskId, answer });
+    
+    if (result.error) {
+      console.warn(`[BG:${requestId}] answer error`, { sessionId: id, error: result.error });
+      return res.status(400).json({ ok: false, error: result.error });
+    }
+    
+    console.log(`[BG:${requestId}] answer success`, { 
+      sessionId: id, 
+      isCorrect: result.isCorrect,
+      done: result.done 
+    });
+    
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error(`[BG:${requestId}] answer exception`, {
+      sessionId: id,
+      error: err.message,
+      stack: err.stack
+    });
+    return res.status(500).json({ ok: false, error: err.message || 'Internal server error' });
+  }
 });
 
 app.post('/api/session/:id/finish', (req, res) => {
   const { id } = req.params;
-  const session = finishSession(id);
-  if (!session) return res.status(404).json({ ok: false, error: 'Session not found' });
+  const requestId = Date.now();
+  
+  console.log(`[BG:${requestId}] finish request`, { sessionId: id });
+  
+  try {
+    const session = finishSession(id);
+    
+    if (!session) {
+      console.warn(`[BG:${requestId}] finish not found`, { sessionId: id });
+      return res.status(404).json({ ok: false, error: 'Session not found' });
+    }
 
-  console.log('[BG] finish', { sessionId: id });
-  res.json({ ok: true, finishedAt: session.finished_at || session.finishedAt, errors: session.errors || [] });
+    console.log(`[BG:${requestId}] finish success`, { 
+      sessionId: id,
+      errorsCount: session.errors?.length || 0 
+    });
+    
+    res.json({ ok: true, finishedAt: session.finished_at || session.finishedAt, errors: session.errors || [] });
+  } catch (err) {
+    console.error(`[BG:${requestId}] finish exception`, {
+      sessionId: id,
+      error: err.message,
+      stack: err.stack
+    });
+    return res.status(500).json({ ok: false, error: err.message || 'Internal server error' });
+  }
 });
 
 app.get('/review/daily', (req, res) => {

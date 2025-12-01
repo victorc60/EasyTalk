@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 
 export function ReviewSession({ cards, onExit }) {
   const [index, setIndex] = useState(0);
@@ -6,23 +6,31 @@ export function ReviewSession({ cards, onExit }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [startAt] = useState(Date.now());
 
-  const card = cards[index];
+  const card = useMemo(() => cards[index], [cards, index]);
+  
+  const done = useMemo(() => index >= cards.length, [index, cards.length]);
+  const durationSec = useMemo(() => Math.round((Date.now() - startAt) / 1000), [startAt]);
+
+  // Сбрасываем feedback при смене карточки
+  useEffect(() => {
+    setFeedback(null);
+  }, [index]);
 
   useEffect(() => {
     setFeedback(null);
   }, [index]);
 
-  const handleAnswer = (option) => {
-    if (!card) return;
+  const handleAnswer = useCallback((option) => {
+    if (!card || feedback) return; // Предотвращаем повторные клики
     const isCorrect = option === card.answer;
     setFeedback({ isCorrect, option, correct: card.answer, hint: card.ruleHint });
     if (isCorrect) setCorrectCount((c) => c + 1);
-  };
+  }, [card, feedback]);
 
-  const next = () => setIndex((i) => i + 1);
-
-  const done = index >= cards.length;
-  const durationSec = Math.round((Date.now() - startAt) / 1000);
+  const next = useCallback(() => {
+    setIndex((i) => i + 1);
+    setFeedback(null);
+  }, []);
 
   return (
     <section className="card">

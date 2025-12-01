@@ -1,24 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { BOSSES } from '../data/mocks.js';
 
 export function BossSelect({ onStart, loading }) {
   const [selectedBoss, setSelectedBoss] = useState(BOSSES[0]);
+  
+  const handleStart = useCallback(() => {
+    if (!loading) {
+      onStart(selectedBoss);
+    }
+  }, [onStart, selectedBoss, loading]);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
     if (!tg?.MainButton) return;
 
-    const handleStart = () => onStart(selectedBoss);
-
-    tg.MainButton.setText('Начать бой');
+    tg.MainButton.setText(loading ? 'Создаём бой...' : 'Начать бой');
     tg.MainButton.show();
     tg.MainButton.onClick(handleStart);
+    tg.MainButton.enable();
 
     return () => {
       tg.MainButton.offClick(handleStart);
       tg.MainButton.hide();
     };
-  }, [onStart, selectedBoss]);
+  }, [handleStart, loading]);
 
   return (
     <section className="card">
@@ -36,7 +41,7 @@ export function BossSelect({ onStart, loading }) {
         ))}
       </div>
       <p className="note">Нажми «Начать бой» в Telegram MainButton или выбери босса и нажми кнопку выше.</p>
-      <button className="primary" onClick={() => onStart(selectedBoss)} disabled={loading}>
+      <button className="primary" onClick={handleStart} disabled={loading}>
         {loading ? 'Создаём бой...' : 'Начать бой'}
       </button>
     </section>
