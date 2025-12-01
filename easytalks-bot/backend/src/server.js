@@ -16,21 +16,98 @@ const FRONTEND_ORIGINS = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_O
   .filter(Boolean);
 const allowAllOrigins = FRONTEND_ORIGINS.length === 0;
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // same-origin / curl
-    if (allowAllOrigins || FRONTEND_ORIGINS.includes(origin)) return callback(null, true);
-    console.warn(`CORS blocked for origin: ${origin}`);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+// Функция для проверки разрешенных origins
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // same-origin / curl / server-to-server
+  if (allowAllOrigins) return true;
+  if (FRONTEND_ORIGINS.includes(origin)) return true;
+  
+  // Поддержка Vercel доменов (wildcard для *.vercel.app)
+  if (origin.includes('.vercel.app')) {
+    console.log(`[CORS] Allowing Vercel origin: ${origin}`);
+    return true;
+  }
+  
+  return false;
 };
 
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowed = isOriginAllowed(origin);
+    if (allowed) {
+      console.log(`[CORS] Allowing origin: ${origin || 'no origin (same-origin)'}`);
+      callback(null, true);
+    } else {
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: false, // Отключаем credentials для упрощения CORS
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers'
+  ],
+  exposedHeaders: ['Content-Length', 'Content-Type'],
+  maxAge: 86400, // 24 часа для preflight cache
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+// Применяем CORS middleware
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+
+// Явная обработка preflight запросов для всех маршрутов
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  console.log(`[CORS] Preflight request from: ${origin}`);
+  
+  if (isOriginAllowed(origin)) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
+    res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+    res.header('Access-Control-Max-Age', '86400');
+    res.sendStatus(204);
+  } else {
+    console.warn(`[CORS] Preflight blocked for origin: ${origin}`);
+    res.sendStatus(403);
+  }
+});
+
+// Middleware для логирования всех запросов
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log(`[Request] ${req.method} ${req.path}`, {
+    origin,
+    userAgent: req.headers['user-agent'],
+    contentType: req.headers['content-type']
+  });
+  next();
+});
+
 app.use(express.json());
+
+// Middleware для обработки ошибок CORS
+app.use((err, req, res, next) => {
+  if (err.message && err.message.includes('CORS')) {
+    const origin = req.headers.origin;
+    console.error(`[CORS Error] ${req.method} ${req.path}`, {
+      origin,
+      error: err.message
+    });
+    return res.status(403).json({
+      ok: false,
+      error: 'CORS policy violation',
+      message: `Origin ${origin} is not allowed`
+    });
+  }
+  next(err);
+});
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -200,9 +277,10 @@ app.get('/admin/metrics', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(
-    `Backend running on http://localhost:${PORT} (CORS: ${
-      allowAllOrigins ? 'all' : FRONTEND_ORIGINS.join(', ')
-    })`,
-  );
+  console.log(`[Server] Backend running on http://localhost:${PORT}`);
+  console.log(`[CORS] Configuration:`, {
+    allowAllOrigins,
+    allowedOrigins: allowAllOrigins ? 'ALL (wildcard)' : FRONTEND_ORIGINS,
+    vercelDomains: '*.vercel.app (auto-allowed)'
+  });
 });

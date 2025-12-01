@@ -6,23 +6,56 @@ const log = (step, payload = {}) => {
   console.info(`[BossApp] ${step}`, payload);
 };
 
-// Утилита для fetch с timeout
+// Утилита для fetch с timeout и правильными заголовками
 const fetchWithTimeout = async (url, options = {}, timeout = REQUEST_TIMEOUT) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   
+  // Убеждаемся, что заголовки установлены правильно
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  
+  const finalOptions = {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
+    signal: controller.signal,
+    mode: 'cors', // Явно указываем CORS режим
+    credentials: 'same-origin', // Отправляем credentials только для same-origin
+  };
+  
   try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
+    log('fetch:request', { url, method: finalOptions.method || 'GET' });
+    const response = await fetch(url, finalOptions);
     clearTimeout(timeoutId);
+    
+    log('fetch:response', { 
+      url, 
+      status: response.status, 
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+    
     return response;
   } catch (err) {
     clearTimeout(timeoutId);
+    
     if (err.name === 'AbortError') {
+      log('fetch:timeout', { url, timeout });
       throw new Error(`Request timeout after ${timeout}ms`);
     }
+    
+    // Обработка CORS ошибок
+    if (err.message && err.message.includes('CORS')) {
+      log('fetch:cors_error', { url, error: err.message });
+      throw new Error(`CORS error: Unable to connect to ${url}. Please check CORS settings on the server.`);
+    }
+    
+    log('fetch:error', { url, error: err.message, name: err.name });
     throw err;
   }
 };
