@@ -10,14 +10,26 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+const FRONTEND_ORIGINS = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const allowAllOrigins = FRONTEND_ORIGINS.length === 0;
 
-app.use(
-  cors({
-    origin: FRONTEND_ORIGIN,
-    credentials: true,
-  }),
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // same-origin / curl
+    if (allowAllOrigins || FRONTEND_ORIGINS.includes(origin)) return callback(null, true);
+    console.warn(`CORS blocked for origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 app.get('/health', (req, res) => {
@@ -30,6 +42,17 @@ app.post('/api/auth/verify', (req, res) => {
 
   if (!botToken) {
     return res.status(500).json({ ok: false, error: 'BOT_TOKEN is not configured' });
+  }
+
+  if (!initData) {
+    if (process.env.ALLOW_GUEST_AUTH === 'true') {
+      console.warn('Auth fallback: ALLOW_GUEST_AUTH enabled, returning guest user');
+      return res.json({
+        ok: true,
+        user: { id: 'guest', first_name: 'Guest', username: 'guest' },
+      });
+    }
+    return res.status(401).json({ ok: false, error: 'initData is required' });
   }
 
   const result = verifyInitData(initData, botToken);
@@ -98,5 +121,9 @@ app.get('/admin/metrics', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT} (CORS: ${FRONTEND_ORIGIN})`);
+  console.log(
+    `Backend running on http://localhost:${PORT} (CORS: ${
+      allowAllOrigins ? 'all' : FRONTEND_ORIGINS.join(', ')
+    })`,
+  );
 });
