@@ -20,6 +20,10 @@ const readInitData = () => {
   return '';
 };
 
+const logApp = (step, payload = {}) => {
+  console.info(`[BossApp] ${step}`, payload);
+};
+
 function App() {
   const [authStatus, setAuthStatus] = useState('pending');
   const [user, setUser] = useState(null);
@@ -38,6 +42,7 @@ function App() {
     if (telegramApp) {
       telegramApp.ready();
       telegramApp.expand();
+      logApp('telegram.ready', { initData: Boolean(telegramApp.initData) });
     } else {
       console.warn('Telegram WebApp SDK not detected');
     }
@@ -46,16 +51,19 @@ function App() {
   useEffect(() => {
     const auth = async () => {
       if (!initData) {
+        logApp('auth.no-init-data');
         setAuthStatus('no-init-data');
         return;
       }
 
       try {
         const payload = await verifyApi(initData);
+        logApp('auth.ok', { user: payload?.user?.id || payload?.user?.username || 'unknown' });
         setUser(payload.user ?? null);
         setAuthStatus('ok');
       } catch (err) {
         console.error(err);
+        logApp('auth.error', { message: err?.message });
         setAuthStatus('error');
       }
     };
@@ -68,11 +76,14 @@ function App() {
     setActiveBoss(selectedBoss);
     setLoading(true);
     try {
+      logApp('battle.start', { boss: selectedBoss.id });
       const payload = await startSession(selectedBoss.id);
+      logApp('battle.start.ok', { sessionId: payload.sessionId });
       setSessionId(payload.sessionId);
       setScreen('battle');
     } catch (err) {
       console.error(err);
+      logApp('battle.start.error', { message: err?.message });
       alert('Не удалось создать бой');
     } finally {
       setLoading(false);
