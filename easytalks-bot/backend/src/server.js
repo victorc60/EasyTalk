@@ -10,46 +10,39 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const FRONTEND_ORIGINS = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
-const allowAllOrigins = FRONTEND_ORIGINS.length === 0;
 
-// Функция для проверки разрешенных origins
-const isOriginAllowed = (origin) => {
-  if (!origin) return true; // same-origin / curl / server-to-server
-  if (allowAllOrigins) return true;
-  if (FRONTEND_ORIGINS.includes(origin)) return true;
+// КРИТИЧЕСКИ ВАЖНО: Обработка CORS должна быть ПЕРВОЙ
+// Обрабатываем OPTIONS запросы ДО всех других middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
   
-  // Поддержка Vercel доменов (wildcard для *.vercel.app и *.vercel.app)
-  if (origin.includes('vercel.app')) {
-    console.log(`[CORS] Allowing Vercel origin: ${origin}`);
-    return true;
+  // Устанавливаем CORS заголовки для ВСЕХ запросов (включая OPTIONS)
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  
+  // Если это OPTIONS запрос, сразу отвечаем
+  if (req.method === 'OPTIONS') {
+    console.log(`[CORS] Preflight OPTIONS from: ${origin || 'no origin'} to ${req.path}`);
+    return res.status(204).send();
   }
   
-  // Разрешаем все origins в development или если не указаны конкретные
-  if (process.env.NODE_ENV !== 'production' || allowAllOrigins) {
-    return true;
-  }
-  
-  return false;
-};
+  next();
+});
 
+// УПРОЩЕННАЯ КОНФИГУРАЦИЯ CORS - разрешаем все origins
 const corsOptions = {
   origin: (origin, callback) => {
-    // Временно разрешаем все origins для упрощения отладки
-    // В production можно ужесточить
-    const allowed = isOriginAllowed(origin);
-    if (allowed || true) { // Временно всегда разрешаем
-      console.log(`[CORS] Allowing origin: ${origin || 'no origin (same-origin)'}`);
-      callback(null, true);
-    } else {
-      console.warn(`[CORS] Blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Всегда разрешаем все origins
+    console.log(`[CORS] Allowing origin: ${origin || 'no origin (same-origin)'}`);
+    callback(null, true);
   },
-  credentials: false, // Отключаем credentials для упрощения CORS
+  credentials: false,
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: [
     'Content-Type',
@@ -61,59 +54,34 @@ const corsOptions = {
     'Access-Control-Request-Headers'
   ],
   exposedHeaders: ['Content-Length', 'Content-Type'],
-  maxAge: 86400, // 24 часа для preflight cache
+  maxAge: 86400,
   preflightContinue: false,
   optionsSuccessStatus: 204
 };
 
-// ВАЖНО: Обработка OPTIONS ДО всех других middleware
-// Всегда разрешаем preflight запросы для упрощения отладки
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  console.log(`[CORS] Preflight OPTIONS request from: ${origin || 'no origin'} to ${req.path}`);
-  
-  // Временно разрешаем все origins
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
-  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400');
-  
-  console.log(`[CORS] Preflight allowed for: ${origin || 'no origin'}`);
-  res.status(204).end();
-});
+// ВАЖНО: Применяем CORS middleware ПЕРВЫМ, до всех других middleware
+app.use(cors(corsOptions));
 
-// Middleware для установки CORS заголовков для всех ответов
-// ВАЖНО: Этот middleware должен быть ДО всех роутов
+// Явная обработка OPTIONS для всех путей (на случай если cors middleware не сработает)
+app.options('*', cors(corsOptions));
+
+// Middleware для логирования запросов
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  // Временно разрешаем все origins для упрощения отладки
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
-  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
-  
-  // Логирование запросов
+  // Логирование всех запросов
   if (req.method !== 'OPTIONS') {
     console.log(`[Request] ${req.method} ${req.path}`, {
       origin: origin || 'no origin',
       userAgent: req.headers['user-agent']?.substring(0, 50),
       contentType: req.headers['content-type']
     });
+  } else {
+    console.log(`[CORS] Preflight OPTIONS request from: ${origin || 'no origin'} to ${req.path}`);
   }
   
   next();
 });
-
-// Применяем CORS middleware (как fallback)
-app.use(cors(corsOptions));
 
 app.use(express.json());
 
