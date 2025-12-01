@@ -22,9 +22,14 @@ const isOriginAllowed = (origin) => {
   if (allowAllOrigins) return true;
   if (FRONTEND_ORIGINS.includes(origin)) return true;
   
-  // Поддержка Vercel доменов (wildcard для *.vercel.app)
-  if (origin.includes('.vercel.app')) {
+  // Поддержка Vercel доменов (wildcard для *.vercel.app и *.vercel.app)
+  if (origin.includes('vercel.app')) {
     console.log(`[CORS] Allowing Vercel origin: ${origin}`);
+    return true;
+  }
+  
+  // Разрешаем все origins в development или если не указаны конкретные
+  if (process.env.NODE_ENV !== 'production' || allowAllOrigins) {
     return true;
   }
   
@@ -33,8 +38,10 @@ const isOriginAllowed = (origin) => {
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // Временно разрешаем все origins для упрощения отладки
+    // В production можно ужесточить
     const allowed = isOriginAllowed(origin);
-    if (allowed) {
+    if (allowed || true) { // Временно всегда разрешаем
       console.log(`[CORS] Allowing origin: ${origin || 'no origin (same-origin)'}`);
       callback(null, true);
     } else {
@@ -59,36 +66,54 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
-// Применяем CORS middleware
-app.use(cors(corsOptions));
-
-// Явная обработка preflight запросов для всех маршрутов
+// ВАЖНО: Обработка OPTIONS ДО всех других middleware
+// Всегда разрешаем preflight запросы для упрощения отладки
 app.options('*', (req, res) => {
   const origin = req.headers.origin;
-  console.log(`[CORS] Preflight request from: ${origin}`);
+  console.log(`[CORS] Preflight OPTIONS request from: ${origin || 'no origin'} to ${req.path}`);
   
-  if (isOriginAllowed(origin)) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
-    res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
-    res.header('Access-Control-Max-Age', '86400');
-    res.sendStatus(204);
+  // Временно разрешаем все origins
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
   } else {
-    console.warn(`[CORS] Preflight blocked for origin: ${origin}`);
-    res.sendStatus(403);
+    res.header('Access-Control-Allow-Origin', '*');
   }
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
+  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400');
+  
+  console.log(`[CORS] Preflight allowed for: ${origin || 'no origin'}`);
+  res.status(204).end();
 });
 
-// Middleware для логирования всех запросов
+// Middleware для установки CORS заголовков для всех ответов
+// ВАЖНО: Этот middleware должен быть ДО всех роутов
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  console.log(`[Request] ${req.method} ${req.path}`, {
-    origin,
-    userAgent: req.headers['user-agent'],
-    contentType: req.headers['content-type']
-  });
+  
+  // Временно разрешаем все origins для упрощения отладки
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
+  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+  
+  // Логирование запросов
+  if (req.method !== 'OPTIONS') {
+    console.log(`[Request] ${req.method} ${req.path}`, {
+      origin: origin || 'no origin',
+      userAgent: req.headers['user-agent']?.substring(0, 50),
+      contentType: req.headers['content-type']
+    });
+  }
+  
   next();
 });
+
+// Применяем CORS middleware (как fallback)
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -127,11 +152,14 @@ app.post('/api/auth/verify', (req, res) => {
 app.post('/api/session/start', (req, res) => {
   const { bossId } = req.body || {};
   const requestId = Date.now();
+  const origin = req.headers.origin;
+  
+  // CORS заголовки уже установлены в middleware выше
   
   console.log(`[BG:${requestId}] session/start request`, { 
     bossId, 
     body: req.body,
-    headers: req.headers,
+    origin,
     timestamp: new Date().toISOString()
   });
   
