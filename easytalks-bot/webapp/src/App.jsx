@@ -5,7 +5,7 @@ import { Battle } from './components/Battle.jsx';
 import { Result } from './components/Result.jsx';
 import { ReviewSession } from './components/ReviewSession.jsx';
 import { BOSSES } from './data/mocks.js';
-import { answerTask, finishSession, nextTask, startSession, verify as verifyApi, fetchDailyReview, fetchAdminMetrics } from './services/api.js';
+import { answerTask, finishSession, nextTask, startSession, fetchDailyReview, fetchAdminMetrics } from './services/api.js';
 import { AdminPanel } from './components/AdminPanel.jsx';
 
 const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN;
@@ -25,8 +25,8 @@ const logApp = (step, payload = {}) => {
 };
 
 function App() {
-  const [authStatus, setAuthStatus] = useState('ok'); // форсим гостевой режим
-  const [user, setUser] = useState({ username: 'guest' });
+  // Никакой аутентификации не требуется - всегда гостевой режим
+  const [user, setUser] = useState({ username: 'guest', first_name: 'Guest' });
   const [screen, setScreen] = useState('boss-select');
   const [activeBoss, setActiveBoss] = useState(BOSSES[0]);
   const [result, setResult] = useState(null);
@@ -49,16 +49,15 @@ function App() {
     }
   }, []);
 
-  // Гарантируем, что authStatus всегда 'ok' - никакой аутентификации не требуется
+  // Инициализация: гарантируем, что user установлен и показываем debug info
   useEffect(() => {
     setUser({ username: 'guest', first_name: 'Guest' });
-    setAuthStatus('ok'); // Всегда 'ok', независимо от initData
     const info = `guest-mode (no auth required) | initData=${Boolean(initData)} | api=${import.meta.env.VITE_API_BASE || 'n/a'}`;
     setDebugInfo(info);
     logApp('auth.guest-mode', { 
       initData: Boolean(initData), 
       api: import.meta.env.VITE_API_BASE,
-      authStatus: 'ok (forced)'
+      mode: 'guest (no auth required)'
     });
   }, [initData]);
 
@@ -67,20 +66,30 @@ function App() {
     setActiveBoss(selectedBoss);
     setLoading(true);
     
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+    
     logApp('battle.start.init', { 
       bossId: selectedBoss.id, 
       bossName: selectedBoss.name,
-      apiBase: import.meta.env.VITE_API_BASE,
-      timestamp: new Date().toISOString()
+      apiBase,
+      timestamp: new Date().toISOString(),
+      user: user?.username || 'guest'
     });
     
     try {
+      const url = `${apiBase}/api/session/start`;
       logApp('battle.start.request', { 
         bossId: selectedBoss.id,
-        url: `${import.meta.env.VITE_API_BASE || 'http://localhost:4000'}/api/session/start`
+        url,
+        method: 'POST',
+        body: { bossId: selectedBoss.id }
       });
       
       const payload = await startSession(selectedBoss.id);
+      
+      if (!payload || !payload.sessionId) {
+        throw new Error('Invalid response from server: missing sessionId');
+      }
       
       logApp('battle.start.success', { 
         sessionId: payload.sessionId,
@@ -97,14 +106,29 @@ function App() {
         stack: err?.stack,
         name: err?.name,
         bossId: selectedBoss.id,
-        apiBase: import.meta.env.VITE_API_BASE,
-        timestamp: new Date().toISOString()
+        apiBase,
+        timestamp: new Date().toISOString(),
+        errorType: err?.name || 'UnknownError'
       };
       
       console.error('[BossApp] battle.start.failed', errorDetails);
       logApp('battle.start.error', errorDetails);
       
-      alert(`Не удалось создать бой: ${err?.message || 'unknown error'}`);
+      // Более информативное сообщение об ошибке
+      let errorMessage = 'Не удалось создать бой';
+      if (err?.message) {
+        if (err.message.includes('CORS')) {
+          errorMessage = 'Ошибка CORS: проверьте настройки сервера';
+        } else if (err.message.includes('timeout')) {
+          errorMessage = 'Превышено время ожидания ответа от сервера';
+        } else if (err.message.includes('Failed to fetch') || err.message.includes('network')) {
+          errorMessage = 'Ошибка сети: проверьте подключение к интернету и URL сервера';
+        } else {
+          errorMessage = `Ошибка: ${err.message}`;
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
       logApp('battle.start.complete', { loading: false });
@@ -171,8 +195,8 @@ function App() {
           <p className="note">Мини-игра грамматики для Telegram.</p>
         </div>
         <div className="auth-pill">
-          <span className="dot" data-status={authStatus} />
-          {authStatus === 'ok' ? `@${user?.username || user?.first_name || 'user'}` : `auth: ${authStatus}`}
+          <span className="dot" data-status="ok" />
+          @{user?.username || user?.first_name || 'guest'}
         </div>
       </header>
       {debugInfo && (
