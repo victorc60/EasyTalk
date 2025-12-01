@@ -7,6 +7,10 @@ const log = (step, payload = {}) => {
 
 export async function verify(initData) {
   log('verify:init', { hasInitData: Boolean(initData), api: API_BASE });
+  // Если нет initData, сразу возвращаем гостя без запроса
+  if (!initData) {
+    return { ok: true, user: { id: 'guest', username: 'guest' }, mode: 'guest' };
+  }
   const res = await fetch(`${API_BASE}/api/auth/verify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

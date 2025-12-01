@@ -38,43 +38,13 @@ app.get('/health', (req, res) => {
 
 app.post('/api/auth/verify', (req, res) => {
   const { initData } = req.body || {};
-  const botToken = process.env.BOT_TOKEN;
-  const allowGuest = process.env.ALLOW_GUEST_AUTH === 'true';
-
-  console.log('[BG] auth request', { hasInitData: Boolean(initData), allowGuest, hasBotToken: Boolean(botToken) });
-
-  // Гостевой режим: не требуем initData и bot token
-  if (allowGuest) {
-    return res.json({
-      ok: true,
-      user: { id: 'guest', first_name: 'Guest', username: 'guest' },
-      mode: 'guest',
-    });
-  }
-
-  if (!botToken) {
-    return res.status(500).json({ ok: false, error: 'BOT_TOKEN is not configured' });
-  }
-
-  if (!initData) {
-    return res.status(401).json({ ok: false, error: 'initData is required' });
-  }
-
-  const result = verifyInitData(initData, botToken);
-
-  if (!result.ok) {
-    return res.status(401).json({ ok: false, error: result.error });
-  }
-
-  const user = result.user
-    ? {
-        id: result.user.id,
-        first_name: result.user.first_name,
-        username: result.user.username,
-      }
-    : null;
-
-  res.json({ ok: true, user });
+  console.log('[BG] auth request (guest mode)', { hasInitData: Boolean(initData) });
+  // Полный гостевой режим: никаких проверок не делаем
+  res.json({
+    ok: true,
+    user: { id: 'guest', first_name: 'Guest', username: 'guest' },
+    mode: 'guest',
+  });
 });
 
 app.post('/api/session/start', (req, res) => {

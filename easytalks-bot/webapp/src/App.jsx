@@ -50,21 +50,23 @@ function App() {
 
   useEffect(() => {
     const auth = async () => {
-      if (!initData) {
-        logApp('auth.no-init-data');
-        setAuthStatus('no-init-data');
-        return;
-      }
-
       try {
-        const payload = await verifyApi(initData);
-        logApp('auth.ok', { user: payload?.user?.id || payload?.user?.username || 'unknown' });
-        setUser(payload.user ?? null);
+        // В гостевом режиме просто ставим гостя и пробуем верификацию при наличии initData
+        setUser({ username: 'guest' });
         setAuthStatus('ok');
+        if (initData) {
+          const payload = await verifyApi(initData);
+          logApp('auth.ok', { user: payload?.user?.id || payload?.user?.username || 'unknown' });
+          setUser(payload.user ?? { username: 'guest' });
+        } else {
+          logApp('auth.guest-mode');
+        }
       } catch (err) {
         console.error(err);
         logApp('auth.error', { message: err?.message });
-        setAuthStatus('error');
+        // Даже при ошибке оставляем гостя
+        setUser({ username: 'guest' });
+        setAuthStatus('ok');
       }
     };
 
