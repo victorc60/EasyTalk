@@ -169,6 +169,11 @@ const IDIOM_HISTORY_FILE = path.resolve(process.cwd(), 'data/idiom_history.json'
 const IDIOM_BANK_FILE = path.resolve(process.cwd(), 'data/idiom_bank.json');
 let curatedIdiomBank = [];
 let availableCuratedIdioms = [];
+const usedPhrasalVerbsCache = new Set();
+const PHRASAL_VERBS_HISTORY_FILE = path.resolve(process.cwd(), 'data/phrasal_verbs_history.json');
+const PHRASAL_VERBS_BANK_FILE = path.resolve(process.cwd(), 'data/phrasal_verbs_bank.json');
+let curatedPhrasalVerbsBank = [];
+let availableCuratedPhrasalVerbs = [];
 
 function loadUsedWordsFromDisk() {
   try {
@@ -243,6 +248,43 @@ function saveUsedIdiomsToDisk() {
   }
 }
 
+// Функции для работы с Phrasal Verbs
+function loadUsedPhrasalVerbsFromDisk() {
+  try {
+    if (fs.existsSync(PHRASAL_VERBS_HISTORY_FILE)) {
+      const raw = fs.readFileSync(PHRASAL_VERBS_HISTORY_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        for (const phrasalVerb of parsed) {
+          if (typeof phrasalVerb === 'string' && phrasalVerb.trim()) {
+            usedPhrasalVerbsCache.add(phrasalVerb.trim().toLowerCase());
+          }
+        }
+        console.log(`📒 Загружено ${usedPhrasalVerbsCache.size} phrasal verbs из истории`);
+      }
+    } else {
+      console.log('📒 Файл истории phrasal verbs не найден, создаём новый');
+    }
+  } catch (error) {
+    console.error('Не удалось загрузить историю phrasal verbs:', error.message);
+  }
+}
+
+function saveUsedPhrasalVerbsToDisk() {
+  try {
+    const dir = path.dirname(PHRASAL_VERBS_HISTORY_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const phrasalVerbsArray = Array.from(usedPhrasalVerbsCache);
+    const trimmed = phrasalVerbsArray.slice(Math.max(0, phrasalVerbsArray.length - MAX_CACHE_SIZE));
+    fs.writeFileSync(PHRASAL_VERBS_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+    console.log(`💾 Сохранено ${trimmed.length} phrasal verbs в историю`);
+  } catch (error) {
+    console.error('Не удалось сохранить историю phrasal verbs:', error.message);
+  }
+}
+
 function loadCuratedWordBank() {
   try {
     if (!fs.existsSync(WORD_BANK_FILE)) {
@@ -308,11 +350,54 @@ function loadCuratedIdiomBank() {
   return curatedIdiomBank;
 }
 
+function loadCuratedPhrasalVerbsBank() {
+  try {
+    if (!fs.existsSync(PHRASAL_VERBS_BANK_FILE)) {
+      console.warn('📘 Файл phrasal verbs не найден, продолжим с резервными');
+      curatedPhrasalVerbsBank = [];
+      return curatedPhrasalVerbsBank;
+    }
+    const raw = fs.readFileSync(PHRASAL_VERBS_BANK_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('формат phrasal verbs должен быть массивом');
+    }
+    const seen = new Set();
+    curatedPhrasalVerbsBank = parsed
+      .filter(entry => entry?.phrasalVerb && entry?.translation)
+      .map(entry => ({
+        phrasalVerb: entry.phrasalVerb.trim(),
+        translation: entry.translation.trim(),
+        meaning: entry.meaning || entry.translation.trim(),
+        example: entry.example || '',
+        hint: entry.hint || ''
+      }))
+      .filter(entry => {
+        const key = entry.phrasalVerb.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    console.log(`📘 Загружено ${curatedPhrasalVerbsBank.length} phrasal verbs из словаря (уникальные)`);
+  } catch (error) {
+    console.error('Не удалось загрузить phrasal verbs:', error.message);
+    curatedPhrasalVerbsBank = [];
+  }
+  return curatedPhrasalVerbsBank;
+}
+
 function getCuratedIdiomBank() {
   if (!curatedIdiomBank.length) {
     return loadCuratedIdiomBank();
   }
   return curatedIdiomBank;
+}
+
+function getCuratedPhrasalVerbsBank() {
+  if (!curatedPhrasalVerbsBank.length) {
+    return loadCuratedPhrasalVerbsBank();
+  }
+  return curatedPhrasalVerbsBank;
 }
 
 function getCuratedWordBank() {
@@ -329,6 +414,9 @@ rebuildCuratedWordPool();
 loadUsedIdiomsFromDisk();
 loadCuratedIdiomBank();
 rebuildCuratedIdiomPool();
+loadUsedPhrasalVerbsFromDisk();
+loadCuratedPhrasalVerbsBank();
+rebuildCuratedPhrasalVerbsPool();
 
 // Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {
@@ -412,6 +500,27 @@ function rebuildCuratedIdiomPool() {
 
   const poolSource = unused.length ? unused : curatedIdiomBank;
   availableCuratedIdioms = shuffleArray([...poolSource]);
+}
+
+function rebuildCuratedPhrasalVerbsPool() {
+  if (!curatedPhrasalVerbsBank.length) {
+    loadCuratedPhrasalVerbsBank();
+  }
+  if (!curatedPhrasalVerbsBank.length) {
+    availableCuratedPhrasalVerbs = [];
+    return;
+  }
+
+  const unused = [];
+  for (const entry of curatedPhrasalVerbsBank) {
+    const normalized = entry.phrasalVerb.trim().toLowerCase();
+    if (!usedPhrasalVerbsCache.has(normalized)) {
+      unused.push(entry);
+    }
+  }
+
+  const poolSource = unused.length ? unused : curatedPhrasalVerbsBank;
+  availableCuratedPhrasalVerbs = shuffleArray([...poolSource]);
 }
 
 function removeWordFromCuratedPool(wordLower) {
@@ -560,6 +669,25 @@ function pickCuratedIdiom() {
   return entry;
 }
 
+function pickCuratedPhrasalVerb() {
+  if (!availableCuratedPhrasalVerbs.length) {
+    rebuildCuratedPhrasalVerbsPool();
+  }
+
+  const entry = availableCuratedPhrasalVerbs.pop();
+  if (!entry) return null;
+
+  const normalized = entry.phrasalVerb.trim().toLowerCase();
+  usedPhrasalVerbsCache.add(normalized);
+  if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
+    const oldest = usedPhrasalVerbsCache.values().next().value;
+    usedPhrasalVerbsCache.delete(oldest);
+  }
+  saveUsedPhrasalVerbsToDisk();
+
+  return entry;
+}
+
 function buildAnswerOptions(entry) {
   const bank = getCuratedWordBank();
   const correct = entry.translation.trim();
@@ -656,6 +784,126 @@ export async function idiomOfTheDay() {
     options,
     correctIndex
   };
+}
+
+function buildPhrasalVerbOptions(entry) {
+  const bank = getCuratedPhrasalVerbsBank();
+  const correct = entry.translation.trim();
+  const lowerCorrect = correct.toLowerCase();
+  const distractors = [];
+  const seen = new Set([lowerCorrect]);
+  const pool = shuffleArray(
+    bank
+      .filter(item => item.translation && item.phrasalVerb !== entry.phrasalVerb)
+      .map(item => item.translation.trim())
+  );
+
+  for (const option of pool) {
+    const key = option.toLowerCase();
+    if (seen.has(key)) continue;
+    distractors.push(option);
+    seen.add(key);
+    if (distractors.length === 3) break;
+  }
+
+  const fallbackTranslations = ['вставать', 'выходить', 'возвращаться', 'продолжать', 'начинать'];
+  for (const fallback of fallbackTranslations) {
+    if (distractors.length === 3) break;
+    const key = fallback.toLowerCase();
+    if (seen.has(key)) continue;
+    distractors.push(fallback);
+    seen.add(key);
+  }
+
+  const uniqueOptions = [correct, ...distractors].slice(0, 4);
+  while (uniqueOptions.length < 4) {
+    const filler = fallbackTranslations[Math.floor(Math.random() * fallbackTranslations.length)];
+    const key = filler.toLowerCase();
+    if (uniqueOptions.some(option => option.toLowerCase() === key)) continue;
+    uniqueOptions.push(filler);
+  }
+
+  const shuffled = shuffleArray(uniqueOptions);
+  let correctIndex = shuffled.findIndex(option => option.toLowerCase() === lowerCorrect);
+  if (correctIndex === -1) {
+    shuffled[0] = correct;
+    correctIndex = 0;
+  }
+
+  return { options: shuffled, correctIndex };
+}
+
+export async function phrasalVerbOfTheDay() {
+  const phrasalVerbEntry = pickCuratedPhrasalVerb();
+
+  if (!phrasalVerbEntry) {
+    console.warn('⚠️ Список phrasal verbs пуст, используем резервный');
+    return getDefaultPhrasalVerbWithOptions();
+  }
+
+  const { options, correctIndex } = buildPhrasalVerbOptions(phrasalVerbEntry);
+
+  return {
+    phrasalVerb: phrasalVerbEntry.phrasalVerb,
+    translation: phrasalVerbEntry.translation,
+    meaning: phrasalVerbEntry.meaning || phrasalVerbEntry.translation,
+    example: phrasalVerbEntry.example,
+    hint: phrasalVerbEntry.hint,
+    options,
+    correctIndex
+  };
+}
+
+function getDefaultPhrasalVerbWithOptions() {
+  const defaultPhrasalVerbs = [
+    {
+      phrasalVerb: 'give up',
+      translation: 'сдаваться',
+      meaning: 'прекращать попытки или отказываться от чего-то',
+      example: "Don't give up on your dreams.",
+      hint: 'момент, когда опускаешь руки'
+    },
+    {
+      phrasalVerb: 'look forward to',
+      translation: 'ждать с нетерпением',
+      meaning: 'с нетерпением ожидать чего-то',
+      example: 'I look forward to seeing you tomorrow.',
+      hint: 'думать о будущем как о подарке'
+    },
+    {
+      phrasalVerb: 'put off',
+      translation: 'откладывать',
+      meaning: 'переносить на более позднее время',
+      example: "We had to put off the meeting until next week.",
+      hint: 'переставить дело на полку'
+    },
+    {
+      phrasalVerb: 'get along',
+      translation: 'ладить',
+      meaning: 'хорошо общаться с кем-то',
+      example: 'They get along very well.',
+      hint: 'быть на одной волне'
+    }
+  ];
+
+  for (const phrasalVerb of defaultPhrasalVerbs) {
+    const key = phrasalVerb.phrasalVerb.trim().toLowerCase();
+    if (!usedPhrasalVerbsCache.has(key)) {
+      usedPhrasalVerbsCache.add(key);
+      if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
+        const oldest = usedPhrasalVerbsCache.values().next().value;
+        usedPhrasalVerbsCache.delete(oldest);
+      }
+      saveUsedPhrasalVerbsToDisk();
+      const { options, correctIndex } = buildPhrasalVerbOptions(phrasalVerb);
+      return { ...phrasalVerb, options, correctIndex };
+    }
+  }
+
+  // Если всё использовано, возвращаем первую
+  const first = defaultPhrasalVerbs[0];
+  const { options, correctIndex } = buildPhrasalVerbOptions(first);
+  return { ...first, options, correctIndex };
 }
 
 function buildIdiomOptions(entry) {

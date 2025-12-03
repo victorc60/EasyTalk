@@ -6,7 +6,8 @@ import { Op } from 'sequelize';
 
 export const GAME_TYPES = {
   WORD: 'word',
-  IDIOM: 'idiom'
+  IDIOM: 'idiom',
+  PHRASAL_VERB: 'phrasal_verb'
 };
 
 const resolveDate = (date = null) => date || new Date().toISOString().split('T')[0];
@@ -94,6 +95,27 @@ export function recordIdiomGameParticipation(
     pointsEarned,
     responseTime,
     gameType: GAME_TYPES.IDIOM,
+    slot
+  });
+}
+
+export function recordPhrasalVerbGameParticipation(
+  userId,
+  phrasalVerb,
+  answered,
+  correct,
+  pointsEarned = 0,
+  responseTime = null,
+  slot = 'default'
+) {
+  return recordGameParticipation({
+    userId,
+    word: phrasalVerb,
+    answered,
+    correct,
+    pointsEarned,
+    responseTime,
+    gameType: GAME_TYPES.PHRASAL_VERB,
     slot
   });
 }

@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, recordIdiomGameParticipation, getSavedDailyWordData } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
@@ -409,19 +409,32 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     const userId = callbackQuery.from.id;
 
     const parts = data.split('_');
-    if (parts.length !== 4 || parts[0] !== 'idiom' || parts[1] !== 'game') {
+    if (parts.length !== 5 || parts[0] !== 'idiom' || parts[1] !== 'game') {
       return;
     }
 
     const targetUserId = parseInt(parts[2], 10);
-    const selectedIndex = parseInt(parts[3], 10);
+    const sessionId = parts[3];
+    const selectedIndex = parseInt(parts[4], 10);
 
     if (targetUserId !== userId) return;
 
     const gameSession = userSessions.idiomGames.get(userId);
-    if (!gameSession) {
+    if (!gameSession || gameSession.sessionId !== sessionId) {
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: '⏰ Время игры истекло!',
+        show_alert: true
+      });
+      return;
+    }
+
+    if (
+      !Number.isInteger(selectedIndex) ||
+      selectedIndex < 0 ||
+      selectedIndex >= (gameSession.options?.length || 0)
+    ) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⚠️ Неверный вариант',
         show_alert: true
       });
       return;
@@ -478,6 +491,105 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     userSessions.idiomGames.delete(userId);
   } catch (error) {
     console.error('Ошибка при обработке callback idiom game:', error);
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: '⚠️ Произошла ошибка',
+      show_alert: true
+    });
+  }
+}
+
+export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSessions) {
+  try {
+    const data = callbackQuery.data;
+    const userId = callbackQuery.from.id;
+
+    const parts = data.split('_');
+    if (parts.length !== 6 || parts[0] !== 'phrasal' || parts[1] !== 'verb' || parts[2] !== 'game') {
+      return;
+    }
+
+    const targetUserId = parseInt(parts[3], 10);
+    const sessionId = parts[4];
+    const selectedIndex = parseInt(parts[5], 10);
+
+    if (targetUserId !== userId) return;
+
+    if (!userSessions.phrasalVerbGames) {
+      userSessions.phrasalVerbGames = new Map();
+    }
+
+    const gameSession = userSessions.phrasalVerbGames.get(userId);
+    if (!gameSession || gameSession.sessionId !== sessionId) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⏰ Время игры истекло!',
+        show_alert: true
+      });
+      return;
+    }
+
+    if (
+      !Number.isInteger(selectedIndex) ||
+      selectedIndex < 0 ||
+      selectedIndex >= (gameSession.options?.length || 0)
+    ) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⚠️ Неверный вариант',
+        show_alert: true
+      });
+      return;
+    }
+
+    const resolvedCorrectIndex = Math.max(
+      0,
+      Math.min(
+        typeof gameSession.correctIndex === 'number' ? gameSession.correctIndex : 0,
+        (gameSession.options?.length || 1) - 1
+      )
+    );
+
+    const isCorrect = selectedIndex === resolvedCorrectIndex;
+    const points = isCorrect ? 8 : 0;
+    if (isCorrect) {
+      await awardPoints(userId, points);
+    }
+
+    const responseTime = gameSession.startTime ? Date.now() - gameSession.startTime : null;
+    await recordPhrasalVerbGameParticipation(
+      userId,
+      gameSession.phrasalVerb,
+      true,
+      isCorrect,
+      points,
+      responseTime
+    );
+
+    const selectedAnswer = gameSession.options[selectedIndex];
+    const correctAnswer = gameSession.translation;
+
+    let resultMessage = isCorrect
+      ? `✅ <b>Верно!</b> +${points} очков\n\n`
+      : `❌ <b>Неправильно.</b>\n\n`;
+
+    resultMessage += `🔤 <b>${gameSession.phrasalVerb}</b>\n`;
+    resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
+    resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
+    if (gameSession.hint) {
+      resultMessage += `💡 Подсказка: ${gameSession.hint}\n`;
+    }
+    if (gameSession.example) {
+      resultMessage += `📝 Пример: ${gameSession.example}`;
+    }
+
+    await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
+      show_alert: false
+    });
+
+    userSessions.phrasalVerbGames.delete(userId);
+  } catch (error) {
+    console.error('Ошибка при обработке callback phrasal verb game:', error);
     await bot.answerCallbackQuery(callbackQuery.id, {
       text: '⚠️ Произошла ошибка',
       show_alert: true

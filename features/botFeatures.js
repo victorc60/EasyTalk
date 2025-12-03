@@ -1,7 +1,7 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { recordWordGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
@@ -179,14 +179,16 @@ export async function idiomGameBroadcast(bot, userSessions) {
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
+        const sessionId = Math.random().toString(36).slice(2, 10);
         const keyboard = {
           inline_keyboard: idiomData.options.map((option, index) => [{
             text: `${index + 1}. ${option}`,
-            callback_data: `idiom_game_${userId}_${index}`
+            callback_data: `idiom_game_${userId}_${sessionId}_${index}`
           }])
         };
 
         userSessions.idiomGames.set(userId, {
+          sessionId,
           idiom: idiomData.idiom,
           translation: idiomData.translation,
           meaning: idiomData.meaning,
@@ -218,6 +220,66 @@ export async function idiomGameBroadcast(bot, userSessions) {
   } catch (error) {
     console.error('Ошибка в idiomGameBroadcast:', error.message);
     await sendAdminMessage(bot, `‼️ Ошибка рассылки идиомы: ${error.message}`);
+  }
+}
+
+export async function phrasalVerbGameBroadcast(bot, userSessions) {
+  try {
+    const phrasalVerbData = await phrasalVerbOfTheDay();
+    if (!phrasalVerbData) {
+      console.warn('⚠️ Не удалось получить phrasal verb дня');
+      await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать phrasal verb дня');
+      return;
+    }
+
+    const { success, fails } = await sendToAllUsers(
+      bot,
+      async (userId) => {
+        const sessionId = Math.random().toString(36).slice(2, 10);
+        const keyboard = {
+          inline_keyboard: phrasalVerbData.options.map((option, index) => [{
+            text: `${index + 1}. ${option}`,
+            callback_data: `phrasal_verb_game_${userId}_${sessionId}_${index}`
+          }])
+        };
+
+        if (!userSessions.phrasalVerbGames) {
+          userSessions.phrasalVerbGames = new Map();
+        }
+
+        userSessions.phrasalVerbGames.set(userId, {
+          sessionId,
+          phrasalVerb: phrasalVerbData.phrasalVerb,
+          translation: phrasalVerbData.translation,
+          meaning: phrasalVerbData.meaning,
+          example: phrasalVerbData.example,
+          hint: phrasalVerbData.hint,
+          options: phrasalVerbData.options,
+          correctIndex: phrasalVerbData.correctIndex,
+          startTime: Date.now()
+        });
+
+        return {
+          text: `🔤 <b>Phrasal Verb of the Day</b>\n${phrasalVerbData.phrasalVerb}\n\n📝 Пример: ${phrasalVerbData.example || '—'}\n💡 Hint: ${phrasalVerbData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          reply_markup: keyboard
+        };
+      },
+      (error, user) => {
+        console.error(`Ошибка отправки phrasal verb пользователю ${user.telegram_id}:`, error.message);
+        if (error.response?.statusCode === 403) {
+          user.update({ isActive: false });
+        }
+      },
+      { parse_mode: 'HTML' }
+    );
+
+    await sendAdminMessage(
+      bot,
+      `📊 Phrasal Verb дня отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Нет зарегистрированных пользователей' : ''}`
+    );
+  } catch (error) {
+    console.error('Ошибка в phrasalVerbGameBroadcast:', error.message);
+    await sendAdminMessage(bot, `‼️ Ошибка рассылки phrasal verb: ${error.message}`);
   }
 }
 

@@ -22,10 +22,10 @@ const requiredEnvVars = [
 export const CONFIG = {
   DAILY_FACT_TIME: { hour: 17, minute: 30, tz: 'Europe/Moscow' },
   WORD_GAME_TIMES: [  
-    { hour: 18, minute: 30, tz: 'Europe/Moscow' },
-    { hour: 20, minute: 0, tz: 'Europe/Moscow' }
+    { hour: 18, minute: 30, tz: 'Europe/Moscow' }
   ],
   IDIOM_GAME_TIME: { hour: 13, minute: 0, tz: 'Europe/Moscow' },
+  PHRASAL_VERB_GAME_TIME: { hour: 20, minute: 0, tz: 'Europe/Moscow' },
   WORD_GAME_STATS_TIME: { hour: 0, minute: 5, tz: 'Europe/Moscow' }, // Stats notification at 00:05
   CLEANUP_TIME: '0 12 * * 0',
   WORD_GAME_TIMEOUT: null, // Set to null to disable timeout (run until end of day)
