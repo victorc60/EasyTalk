@@ -1,6 +1,12 @@
 // features/wordGameNotifications.js
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
-import { getDailyWordGameStats, getDailyIdiomGameStats, getDailyWordGameLeaderboard, recordWordGameParticipation } from '../services/wordGameServices.js';
+import {
+  getDailyWordGameStats,
+  getDailyIdiomGameStats,
+  getDailyPhrasalVerbGameStats,
+  getDailyWordGameLeaderboard,
+  recordWordGameParticipation
+} from '../services/wordGameServices.js';
 
 /**
  * Отправляет уведомление администратору о статистике участия в ежедневной игре со словами
@@ -11,24 +17,32 @@ export async function notifyDailyWordGameStats(bot, date = null) {
   try {
     console.log('Получение статистики ежедневных игр (слово + идиома)...');
 
-    const [wordStats, idiomStats, leaderboard] = await Promise.all([
+    const [wordStats, idiomStats, phrasalStats, leaderboard] = await Promise.all([
       getDailyWordGameStats(date),
       getDailyIdiomGameStats(date),
+      getDailyPhrasalVerbGameStats(date),
       getDailyWordGameLeaderboard(date, 5)
     ]);
 
-    if (!wordStats && !idiomStats) {
+    if (!wordStats && !idiomStats && !phrasalStats) {
       await sendAdminMessage(bot, '⚠️ Не удалось получить статистику игр за сегодня');
       return;
     }
 
-    const reportDate = wordStats?.date || idiomStats?.date || date || new Date().toISOString().split('T')[0];
+    const reportDate =
+      wordStats?.date ||
+      idiomStats?.date ||
+      phrasalStats?.date ||
+      date ||
+      new Date().toISOString().split('T')[0];
     let message = `📊 <b>Отчет по ежедневным играм</b>\n`;
     message += `📅 Дата: ${reportDate}\n\n`;
 
     message += buildWordGameSection(wordStats, leaderboard);
     message += '\n';
     message += buildIdiomGameSection(idiomStats);
+    message += '\n';
+    message += buildPhrasalVerbSection(phrasalStats);
 
     await sendAdminMessage(bot, message.trim(), { parse_mode: 'HTML' });
     console.log('Комплексная статистика игр отправлена администратору');
@@ -145,27 +159,32 @@ function formatParticipantsList(participants = []) {
     .join('\n');
 }
 
-function buildWordGameSection(stats, leaderboard) {
+function buildGameSection({ title, prefix, stats, leaderboard = null }) {
   if (!stats) {
-    return '🔤 <b>Слово дня</b>\n⚠️ Не удалось получить статистику по слову дня.';
+    return `${prefix} <b>${title}</b>\n⚠️ Не удалось получить статистику.`;
   }
 
   if (stats.totalParticipants === 0) {
-    return `🔤 <b>Слово дня</b>\nℹ️ Сегодня игра не была завершена ни одним пользователем.`;
+    return `${prefix} <b>${title}</b>\nℹ️ Пока нет ответов.`;
   }
 
-  let section = '🔤 <b>Слово дня</b>\n';
-  section += `👥 Получили: ${stats.totalParticipants}\n`;
-  section += `✅ Ответили: ${stats.answeredCount}\n`;
-  section += `❌ Не ответили: ${stats.unansweredCount}\n`;
-  section += `🎯 Точность: ${stats.accuracy}%\n`;
-  section += `⭐️ Очки: ${stats.totalPoints}\n\n`;
+  const lines = [
+    `${prefix} <b>${title}</b>`,
+    `👥 Получили: ${stats.totalParticipants}`,
+    `✅ Ответили: ${stats.answeredCount}`,
+    `❌ Не ответили: ${stats.unansweredCount ?? stats.totalParticipants - stats.answeredCount}`,
+    stats.correctCount !== undefined ? `🎯 Правильных: ${stats.correctCount}` : null,
+    stats.accuracy !== undefined ? `🎯 Точность: ${stats.accuracy}%` : null,
+    `⭐️ Очки: ${stats.totalPoints}`,
+    ''
+  ].filter(Boolean);
 
-  if (leaderboard && leaderboard.length > 0) {
+  let section = lines.join('\n');
+
+  if (leaderboard?.length) {
     section += `🏆 <b>Топ-${leaderboard.length}:</b>\n`;
     leaderboard.forEach((participant, index) => {
-      const username = getParticipantName(participant);
-      section += `${index + 1}. ${username} - ${participant.points_earned} оч.\n`;
+      section += `${index + 1}. ${getParticipantName(participant)} - ${participant.points_earned} оч.\n`;
     });
     section += '\n';
   }
@@ -174,19 +193,14 @@ function buildWordGameSection(stats, leaderboard) {
   return section;
 }
 
+function buildWordGameSection(stats, leaderboard) {
+  return buildGameSection({ title: 'Слово дня', prefix: '🔤', stats, leaderboard });
+}
+
 function buildIdiomGameSection(stats) {
-  if (!stats) {
-    return '🧩 <b>Идиома дня</b>\n⚠️ Не удалось получить статистику по идиоме.';
-  }
+  return buildGameSection({ title: 'Идиома дня', prefix: '🧩', stats });
+}
 
-  if (stats.totalParticipants === 0) {
-    return `🧩 <b>Идиома дня</b>\nℹ️ Сегодня никто не ответил на игру с идиомой.`;
-  }
-
-  let section = '🧩 <b>Идиома дня</b>\n';
-  section += `✅ Ответили: ${stats.answeredCount}\n`;
-  section += `🎯 Правильных: ${stats.correctCount}\n`;
-  section += `⭐️ Очки: ${stats.totalPoints}\n\n`;
-  section += `👤 <b>Игроки:</b>\n${formatParticipantsList(stats.participants)}`;
-  return section;
+function buildPhrasalVerbSection(stats) {
+  return buildGameSection({ title: 'Phrasal Verb', prefix: '🔡', stats });
 }

@@ -179,6 +179,10 @@ export function getDailyIdiomGameStats(date = null, slot = null) {
   return getDailyGameStats(GAME_TYPES.IDIOM, date, slot);
 }
 
+export function getDailyPhrasalVerbGameStats(date = null, slot = null) {
+  return getDailyGameStats(GAME_TYPES.PHRASAL_VERB, date, slot);
+}
+
 /**
  * Получает статистику участия пользователя в играх за период
  * @param {number} userId - ID пользователя
