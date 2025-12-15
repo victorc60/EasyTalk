@@ -183,6 +183,24 @@ export function getDailyPhrasalVerbGameStats(date = null, slot = null) {
   return getDailyGameStats(GAME_TYPES.PHRASAL_VERB, date, slot);
 }
 
+export async function hasUserAnsweredWordGame(userId, slot = 'default', date = null) {
+  try {
+    const targetDate = resolveDate(date);
+    const participation = await WordGameParticipation.findOne({
+      where: {
+        user_id: userId,
+        game_type: GAME_TYPES.WORD,
+        game_date: targetDate,
+        slot
+      }
+    });
+    return participation?.answered === true;
+  } catch (error) {
+    console.error('Ошибка проверки статуса ответа в игре слов:', error.message);
+    return false;
+  }
+}
+
 /**
  * Получает статистику участия пользователя в играх за период
  * @param {number} userId - ID пользователя

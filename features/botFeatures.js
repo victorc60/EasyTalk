@@ -1,12 +1,14 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { recordWordGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
+
+let phrasalVerbRepeatWarningSent = false;
 
 export async function dailyFactBroadcast(bot) {
   try {
@@ -230,6 +232,17 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
       console.warn('⚠️ Не удалось получить phrasal verb дня');
       await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать phrasal verb дня');
       return;
+    }
+
+    const phrasalVerbUsage = getPhrasalVerbUsageStats();
+    if (phrasalVerbUsage?.nextWillRepeat && !phrasalVerbRepeatWarningSent) {
+      phrasalVerbRepeatWarningSent = true;
+      await sendAdminMessage(
+        bot,
+        `⚠️ Банк phrasal verbs исчерпан: ${phrasalVerbUsage.used}/${phrasalVerbUsage.total}. Следующая рассылка пойдёт с повтором.\nДобавь новые записи в data/phrasal_verbs_bank.json или очисти историю data/phrasal_verbs_history.json при необходимости.`
+      );
+    } else if (!phrasalVerbUsage?.nextWillRepeat) {
+      phrasalVerbRepeatWarningSent = false;
     }
 
     const { success, fails } = await sendToAllUsers(

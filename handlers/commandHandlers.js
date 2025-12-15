@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, getSavedDailyWordData } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, getSavedDailyWordData, hasUserAnsweredWordGame } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
@@ -291,7 +291,13 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     if (targetUserId !== userId) {
       return;
     }
-    
+    if (!Number.isInteger(selectedIndex)) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⚠️ Некорректный вариант ответа',
+        show_alert: true
+      });
+      return;
+    }
     // Check if user has an active word game
     const userGameMap = userSessions.wordGames.get(userId);
     let gameSession = userGameMap?.get(gameId);
@@ -330,11 +336,46 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       });
       return;
     }
+
+    if (
+      selectedIndex < 0 ||
+      selectedIndex >= (gameSession.options?.length || 0)
+    ) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⚠️ Неверный вариант ответа',
+        show_alert: true
+      });
+      return;
+    }
     
     // Clear the timer since user answered
     if (gameSession.timer) {
       clearTimeout(gameSession.timer);
     }
+
+    const slot = gameSession.slot || 'default';
+
+    if (gameSession.answered) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на это слово',
+        show_alert: true
+      });
+      const activeMap = userSessions.wordGames.get(userId);
+      activeMap?.delete(gameId);
+      return;
+    }
+
+    const alreadyAnswered = await hasUserAnsweredWordGame(userId, slot);
+    if (alreadyAnswered) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на это слово сегодня',
+        show_alert: true
+      });
+      const activeMap = userSessions.wordGames.get(userId);
+      activeMap?.delete(gameId);
+      return;
+    }
+    gameSession.answered = true;
     
     // Check if answer is correct
     const resolvedCorrectIndex = Math.max(

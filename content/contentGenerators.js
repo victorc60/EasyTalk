@@ -523,6 +523,29 @@ function rebuildCuratedPhrasalVerbsPool() {
   availableCuratedPhrasalVerbs = shuffleArray([...poolSource]);
 }
 
+export function getPhrasalVerbUsageStats() {
+  const bank = getCuratedPhrasalVerbsBank();
+  const total = bank.length;
+  let usedFromBank = 0;
+
+  for (const entry of bank) {
+    const key = entry.phrasalVerb.trim().toLowerCase();
+    if (usedPhrasalVerbsCache.has(key)) {
+      usedFromBank += 1;
+    }
+  }
+
+  const remaining = Math.max(total - usedFromBank, 0);
+
+  return {
+    total,
+    used: usedFromBank,
+    remaining,
+    nextWillRepeat: total > 0 && remaining === 0,
+    usageRate: total > 0 ? Math.round((usedFromBank / total) * 100) : 0
+  };
+}
+
 function removeWordFromCuratedPool(wordLower) {
   if (!availableCuratedWords.length) {
     return;
