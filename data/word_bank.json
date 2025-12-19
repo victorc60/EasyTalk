@@ -2798,5 +2798,355 @@
     "level": "B1",
     "partOfSpeech": "verb",
     "topic": "technology"
+  },
+  {
+    "word": "ornament",
+    "translation": "украшение",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "tinsel",
+    "translation": "мишура",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "garland",
+    "translation": "гирлянда",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "mistletoe",
+    "translation": "омела",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "wreath",
+    "translation": "венок",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "chimney",
+    "translation": "дымоход",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "fireplace",
+    "translation": "камин",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "snowflake",
+    "translation": "снежинка",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "snowman",
+    "translation": "снеговик",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "sleigh",
+    "translation": "сани",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "sled",
+    "translation": "санки",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "scarf",
+    "translation": "шарф",
+    "level": "A1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "mittens",
+    "translation": "варежки",
+    "level": "A1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "stocking",
+    "translation": "рождественский носок",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "icicle",
+    "translation": "сосулька",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "snowfall",
+    "translation": "снегопад",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "blizzard",
+    "translation": "метель",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "frost",
+    "translation": "мороз",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "cocoa",
+    "translation": "какао",
+    "level": "A1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "gingerbread",
+    "translation": "имбирный пряник",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "cinnamon",
+    "translation": "корица",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "candlelight",
+    "translation": "свет свечей",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "carol",
+    "translation": "рождественский гимн",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "choir",
+    "translation": "хор",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "bell",
+    "translation": "колокольчик",
+    "level": "A1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "reindeer",
+    "translation": "северный олень",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "elf",
+    "translation": "эльф",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "Santa Claus",
+    "translation": "Санта-Клаус",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "poinsettia",
+    "translation": "пуансеттия",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "holly",
+    "translation": "остролист",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "pinecone",
+    "translation": "сосновая шишка",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "snow globe",
+    "translation": "снеговой шар",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "snowball",
+    "translation": "снежок",
+    "level": "A1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "sledding",
+    "translation": "катание на санках",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "ski slope",
+    "translation": "горнолыжный склон",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "ice skating",
+    "translation": "катание на коньках",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "rink",
+    "translation": "каток",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "mulled wine",
+    "translation": "глинтвейн",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "sparkle",
+    "translation": "искриться",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "holiday"
+  },
+  {
+    "word": "festive",
+    "translation": "праздничный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "holiday"
+  },
+  {
+    "word": "wrapping paper",
+    "translation": "оберточная бумага",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "gift wrap",
+    "translation": "подарочная упаковка",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "ribbon",
+    "translation": "лента",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "bow",
+    "translation": "бант",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "sleigh bells",
+    "translation": "бубенцы",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "midnight",
+    "translation": "полночь",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "countdown",
+    "translation": "обратный отсчет",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "fireworks",
+    "translation": "фейерверки",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "resolution",
+    "translation": "новогоднее обещание",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
+  },
+  {
+    "word": "celebration",
+    "translation": "празднование",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "holiday"
   }
 ]
