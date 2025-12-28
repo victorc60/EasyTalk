@@ -212,6 +212,10 @@ const PHRASAL_VERBS_HISTORY_FILE = path.resolve(process.cwd(), 'data/phrasal_ver
 const PHRASAL_VERBS_BANK_FILE = path.resolve(process.cwd(), 'data/phrasal_verbs_bank.json');
 let curatedPhrasalVerbsBank = [];
 let availableCuratedPhrasalVerbs = [];
+const usedQuizCache = new Set();
+const QUIZ_HISTORY_FILE = path.resolve(process.cwd(), 'data/quiz_history.json');
+const QUIZ_BANK_FILE = path.resolve(process.cwd(), 'data/quiz_bank.json');
+let curatedQuizBank = [];
 const HOLIDAY_IDIOMS = [
   {
     idiom: 'snowed under',
@@ -452,6 +456,42 @@ function saveUsedPhrasalVerbsToDisk() {
   }
 }
 
+function loadUsedQuizFromDisk() {
+  try {
+    if (fs.existsSync(QUIZ_HISTORY_FILE)) {
+      const raw = fs.readFileSync(QUIZ_HISTORY_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        for (const entry of parsed) {
+          if (typeof entry === 'string' && entry.trim()) {
+            usedQuizCache.add(entry.trim().toLowerCase());
+          }
+        }
+        console.log(`📒 Загружено ${usedQuizCache.size} quiz вопросов из истории`);
+      }
+    } else {
+      console.log('📒 Файл истории квиза не найден, создаём новый');
+    }
+  } catch (error) {
+    console.error('Не удалось загрузить историю квиза:', error.message);
+  }
+}
+
+function saveUsedQuizToDisk() {
+  try {
+    const dir = path.dirname(QUIZ_HISTORY_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const quizArray = Array.from(usedQuizCache);
+    const trimmed = quizArray.slice(Math.max(0, quizArray.length - MAX_CACHE_SIZE));
+    fs.writeFileSync(QUIZ_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+    console.log(`💾 Сохранено ${trimmed.length} quiz вопросов в историю`);
+  } catch (error) {
+    console.error('Не удалось сохранить историю квиза:', error.message);
+  }
+}
+
 function loadCuratedWordBank() {
   try {
     if (!fs.existsSync(WORD_BANK_FILE)) {
@@ -555,6 +595,43 @@ function loadCuratedPhrasalVerbsBank() {
   return curatedPhrasalVerbsBank;
 }
 
+function loadCuratedQuizBank() {
+  try {
+    if (!fs.existsSync(QUIZ_BANK_FILE)) {
+      console.warn('📘 Файл вопросов квиза не найден, продолжим с резервными');
+      curatedQuizBank = [];
+      return curatedQuizBank;
+    }
+    const raw = fs.readFileSync(QUIZ_BANK_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('формат квиза должен быть массивом');
+    }
+    curatedQuizBank = parsed
+      .filter(entry => entry?.question && Array.isArray(entry?.options) && typeof entry?.correctIndex === 'number')
+      .map(entry => ({
+        question: entry.question.trim(),
+        options: entry.options.map(opt => (opt || '').toString().trim()).filter(Boolean),
+        correctIndex: Math.max(0, Math.min(entry.correctIndex, (entry.options?.length || 1) - 1)),
+        explanation: entry.explanation || '',
+        topic: entry.topic || 'general'
+      }))
+      .filter(entry => entry.options.length >= 2);
+    console.log(`📘 Загружено ${curatedQuizBank.length} вопросов квиза`);
+  } catch (error) {
+    console.error('Не удалось загрузить банк квиза:', error.message);
+    curatedQuizBank = [];
+  }
+  return curatedQuizBank;
+}
+
+function getCuratedQuizBank() {
+  if (!curatedQuizBank.length) {
+    return loadCuratedQuizBank();
+  }
+  return curatedQuizBank;
+}
+
 function getCuratedIdiomBank() {
   if (!curatedIdiomBank.length) {
     return loadCuratedIdiomBank();
@@ -586,6 +663,8 @@ rebuildCuratedIdiomPool();
 loadUsedPhrasalVerbsFromDisk();
 loadCuratedPhrasalVerbsBank();
 rebuildCuratedPhrasalVerbsPool();
+loadUsedQuizFromDisk();
+loadCuratedQuizBank();
 
 // Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {
@@ -1036,6 +1115,33 @@ function pickCuratedPhrasalVerb() {
   return entry;
 }
 
+function pickQuizQuestion() {
+  const bank = getCuratedQuizBank();
+  if (!bank.length) return null;
+
+  const unused = [];
+  for (const entry of bank) {
+    const key = entry.question.trim().toLowerCase();
+    if (!usedQuizCache.has(key)) {
+      unused.push(entry);
+    }
+  }
+
+  const poolSource = unused.length ? unused : bank;
+  const entry = shuffleArray([...poolSource]).pop();
+  if (!entry) return null;
+
+  const normalized = entry.question.trim().toLowerCase();
+  usedQuizCache.add(normalized);
+  if (usedQuizCache.size > MAX_CACHE_SIZE) {
+    const oldest = usedQuizCache.values().next().value;
+    usedQuizCache.delete(oldest);
+  }
+  saveUsedQuizToDisk();
+
+  return entry;
+}
+
 function buildAnswerOptions(entry) {
   const bank = getCuratedWordBank();
   const correct = entry.translation.trim();
@@ -1219,6 +1325,27 @@ export async function phrasalVerbOfTheDay() {
     hint: phrasalVerbEntry.hint,
     options,
     correctIndex
+  };
+}
+
+export async function quizOfTheDay() {
+  const quizEntry = pickQuizQuestion();
+  if (!quizEntry) {
+    console.warn('⚠️ Список вопросов квиза пуст');
+    return null;
+  }
+  const options = shuffleArray([...quizEntry.options]);
+  let correctIndex = options.findIndex(
+    option => option.toLowerCase() === quizEntry.options[quizEntry.correctIndex].toLowerCase()
+  );
+  if (correctIndex === -1) {
+    correctIndex = 0;
+  }
+  return {
+    question: quizEntry.question,
+    options,
+    correctIndex,
+    explanation: quizEntry.explanation || ''
   };
 }
 

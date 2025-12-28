@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, getSavedDailyWordData, hasUserAnsweredWordGame } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, getSavedDailyWordData, hasUserAnsweredWordGame } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
@@ -412,7 +412,7 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       ? `✅ <b>Правильно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно!</b>\n\n`;
     
-    resultMessage += `🎯 <b>${gameSession.word}</b> → <b>${correctAnswer}</b>\n\n`;
+    resultMessage += `❄️🎯 <b>${gameSession.word}</b> → <b>${correctAnswer}</b>\n\n`;
     resultMessage += `📝 Пример: ${gameSession.example}\n`;
     resultMessage += `💡 ${gameSession.fact}\n`;
     resultMessage += `⚠️ Частые ошибки: ${gameSession.mistakes}\n\n`;
@@ -512,7 +512,7 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `🗣 <b>${gameSession.idiom}</b>\n`;
+    resultMessage += `❄️🧩 <b>${gameSession.idiom}</b>\n`;
     resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
     resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
     if (gameSession.hint) {
@@ -611,7 +611,7 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `🔤 <b>${gameSession.phrasalVerb}</b>\n`;
+    resultMessage += `❄️🔡 <b>${gameSession.phrasalVerb}</b>\n`;
     resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
     resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
     if (gameSession.hint) {
@@ -631,6 +631,100 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
     userSessions.phrasalVerbGames.delete(userId);
   } catch (error) {
     console.error('Ошибка при обработке callback phrasal verb game:', error);
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: '⚠️ Произошла ошибка',
+      show_alert: true
+    });
+  }
+}
+
+export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
+  try {
+    const data = callbackQuery.data;
+    const userId = callbackQuery.from.id;
+
+    const parts = data.split('_');
+    if (parts.length !== 5 || parts[0] !== 'quiz' || parts[1] !== 'game') {
+      return;
+    }
+
+    const targetUserId = parseInt(parts[2], 10);
+    const sessionId = parts[3];
+    const selectedIndex = parseInt(parts[4], 10);
+
+    if (targetUserId !== userId) return;
+
+    if (!userSessions.quizGames) {
+      userSessions.quizGames = new Map();
+    }
+
+    const gameSession = userSessions.quizGames.get(userId);
+    if (!gameSession || gameSession.sessionId !== sessionId) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⏰ Время квиза истекло!',
+        show_alert: true
+      });
+      return;
+    }
+
+    if (
+      !Number.isInteger(selectedIndex) ||
+      selectedIndex < 0 ||
+      selectedIndex >= (gameSession.options?.length || 0)
+    ) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⚠️ Неверный вариант',
+        show_alert: true
+      });
+      return;
+    }
+
+    const resolvedCorrectIndex = Math.max(
+      0,
+      Math.min(
+        typeof gameSession.correctIndex === 'number' ? gameSession.correctIndex : 0,
+        (gameSession.options?.length || 1) - 1
+      )
+    );
+
+    const isCorrect = selectedIndex === resolvedCorrectIndex;
+    const points = isCorrect ? 5 : 0;
+    if (isCorrect) {
+      await awardPoints(userId, points);
+    }
+
+    const responseTime = gameSession.startTime ? Date.now() - gameSession.startTime : null;
+    await recordQuizGameParticipation(
+      userId,
+      gameSession.question,
+      true,
+      isCorrect,
+      points,
+      responseTime
+    );
+
+    const correctAnswer = gameSession.options[resolvedCorrectIndex];
+
+    let resultMessage = isCorrect
+      ? `✅ <b>Верно!</b> +${points} очков\n\n`
+      : `❌ <b>Неправильно.</b>\n\n`;
+
+    resultMessage += `❄️🧠 <b>${gameSession.question}</b>\n`;
+    resultMessage += `🎯 Правильный ответ: <b>${correctAnswer}</b>\n`;
+    if (gameSession.explanation) {
+      resultMessage += `ℹ️ ${gameSession.explanation}\n`;
+    }
+
+    await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
+      show_alert: false
+    });
+
+    userSessions.quizGames.delete(userId);
+  } catch (error) {
+    console.error('Ошибка при обработке callback quiz game:', error);
     await bot.answerCallbackQuery(callbackQuery.id, {
       text: '⚠️ Произошла ошибка',
       show_alert: true

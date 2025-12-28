@@ -7,7 +7,8 @@ import { Op } from 'sequelize';
 export const GAME_TYPES = {
   WORD: 'word',
   IDIOM: 'idiom',
-  PHRASAL_VERB: 'phrasal_verb'
+  PHRASAL_VERB: 'phrasal_verb',
+  QUIZ: 'quiz'
 };
 
 const resolveDate = (date = null) => date || new Date().toISOString().split('T')[0];
@@ -120,6 +121,27 @@ export function recordPhrasalVerbGameParticipation(
   });
 }
 
+export function recordQuizGameParticipation(
+  userId,
+  question,
+  answered,
+  correct,
+  pointsEarned = 0,
+  responseTime = null,
+  slot = 'default'
+) {
+  return recordGameParticipation({
+    userId,
+    word: question,
+    answered,
+    correct,
+    pointsEarned,
+    responseTime,
+    gameType: GAME_TYPES.QUIZ,
+    slot
+  });
+}
+
 /**
  * Получает статистику участия в ежедневной игре за определенную дату
  * @param {string} date - Дата в формате YYYY-MM-DD (по умолчанию сегодня)
@@ -181,6 +203,10 @@ export function getDailyIdiomGameStats(date = null, slot = null) {
 
 export function getDailyPhrasalVerbGameStats(date = null, slot = null) {
   return getDailyGameStats(GAME_TYPES.PHRASAL_VERB, date, slot);
+}
+
+export function getDailyQuizGameStats(date = null, slot = null) {
+  return getDailyGameStats(GAME_TYPES.QUIZ, date, slot);
 }
 
 export async function hasUserAnsweredWordGame(userId, slot = 'default', date = null) {

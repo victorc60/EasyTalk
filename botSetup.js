@@ -2,10 +2,10 @@
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
+import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss } from './handlers/commandHandlers.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -86,6 +86,14 @@ function setupSchedulers(bot, userSessions) {
       () => {
         console.log('Запуск phrasalVerbGameBroadcast в 20:00 Europe/Moscow');
         phrasalVerbGameBroadcast(bot, userSessions);
+      }
+    );
+    // Quiz дня в 19:00 по Москве
+    schedule.scheduleJob(
+      { hour: CONFIG.QUIZ_GAME_TIME.hour, minute: CONFIG.QUIZ_GAME_TIME.minute, tz: CONFIG.QUIZ_GAME_TIME.tz },
+      () => {
+        console.log('Запуск quizGameBroadcast');
+        quizGameBroadcast(bot, userSessions);
       }
     );
     // Ежедневный гороскоп в 08:30 по Москве
@@ -202,6 +210,12 @@ function setupCallbacks(bot, userSessions) {
       // Handle phrasal verb game callbacks
       if (data.startsWith('phrasal_verb_game_')) {
         await handlePhrasalVerbGameCallback(bot, callbackQuery, userSessions);
+        return;
+      }
+
+      // Handle quiz game callbacks
+      if (data.startsWith('quiz_game_')) {
+        await handleQuizGameCallback(bot, callbackQuery, userSessions);
         return;
       }
 

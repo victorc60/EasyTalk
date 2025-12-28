@@ -1,7 +1,7 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { recordWordGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
@@ -20,10 +20,11 @@ export async function dailyFactBroadcast(bot) {
       await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать ежедневный факт');
       return;
     }
+    const decoratedFact = `❄️🎄 ${fact}`;
 
     const { success, fails } = await sendToAllUsers(
       bot,
-      async () => fact,
+      async () => decoratedFact,
       (error, user) => {
         console.error(`Ошибка для пользователя ${user.telegram_id}: ${error.message}`);
         if (error.response?.statusCode === 403) {
@@ -134,7 +135,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
           await sendUserMessage(
             bot,
             userId,
-            `${timeoutMessagePrefix} Правильный перевод:\n${session.word} → ${session.translation}\n\n📝 Пример: ${session.example}\n💡 ${session.fact}\n⚠️ Частые ошибки: ${session.mistakes}\n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
+            `${timeoutMessagePrefix} Правильный перевод:\n❄️🎄 ${session.word} → ${session.translation}\n\n📝 Пример: ${session.example}\n💡 ${session.fact}\n⚠️ Частые ошибки: ${session.mistakes}\n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
             { parse_mode: 'HTML' }
           );
 
@@ -152,10 +153,12 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         });
 
         return {
-          text: `🎯 Слово дня: ${broadcastWord.word}\n\n📝 Пример: ${broadcastWord.example}\n💡 ${broadcastWord.fact}\n\nВыберите правильный перевод:`,
+          text: `❄️🎯 <b>Word of the Day</b>\n${broadcastWord.word}\n\n📝 Пример: ${broadcastWord.example}\n💡 ${broadcastWord.fact}\n\nВыберите правильный перевод:`,
           reply_markup: keyboard
         };
-      }
+      },
+      null,
+      { parse_mode: 'HTML' }
     );
 
     console.log(`Слово дня (${slot}) отправлено. Успешно: ${success}, Ошибок: ${fails}`);
@@ -202,7 +205,7 @@ export async function idiomGameBroadcast(bot, userSessions) {
         });
 
         return {
-          text: `🧩 <b>Idiom of the Day</b>\n${idiomData.idiom}\n\n📝 Пример: ${idiomData.example || '—'}\n💡 Hint: ${idiomData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          text: `❄️🧩 <b>Idiom of the Day</b>\n${idiomData.idiom}\n\n📝 Пример: ${idiomData.example || '—'}\n💡 Hint: ${idiomData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -273,7 +276,7 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
         });
 
         return {
-          text: `🔤 <b>Phrasal Verb of the Day</b>\n${phrasalVerbData.phrasalVerb}\n\n📝 Пример: ${phrasalVerbData.example || '—'}\n💡 Hint: ${phrasalVerbData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          text: `❄️🔤 <b>Phrasal Verb of the Day</b>\n${phrasalVerbData.phrasalVerb}\n\n📝 Пример: ${phrasalVerbData.example || '—'}\n💡 Hint: ${phrasalVerbData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -319,6 +322,62 @@ export async function dailyHoroscopeBroadcast(bot) {
   } catch (error) {
     console.error('Ошибка в dailyHoroscopeBroadcast:', error);
     await sendAdminMessage(bot, `‼️ Ошибка рассылки гороскопа: ${error.message}`);
+  }
+}
+
+export async function quizGameBroadcast(bot, userSessions) {
+  try {
+    const quizData = await quizOfTheDay();
+    if (!quizData) {
+      await sendAdminMessage(bot, '⚠️ Не удалось получить вопрос квиза');
+      return;
+    }
+
+    const { success, fails } = await sendToAllUsers(
+      bot,
+      async (userId) => {
+        const sessionId = Math.random().toString(36).slice(2, 10);
+        const keyboard = {
+          inline_keyboard: quizData.options.map((option, index) => [{
+            text: `${index + 1}. ${option}`,
+            callback_data: `quiz_game_${userId}_${sessionId}_${index}`
+          }])
+        };
+
+        if (!userSessions.quizGames) {
+          userSessions.quizGames = new Map();
+        }
+
+        userSessions.quizGames.set(userId, {
+          sessionId,
+          question: quizData.question,
+          options: quizData.options,
+          correctIndex: quizData.correctIndex,
+          explanation: quizData.explanation,
+          startTime: Date.now()
+        });
+
+        return {
+          text: `❄️🧠 <b>Quiz of the Day</b>\n${quizData.question}\n\nВыбери правильный ответ:`,
+          reply_markup: keyboard
+        };
+      },
+      (error, user) => {
+        console.error(`Ошибка отправки квиза пользователю ${user.telegram_id}:`, error.message);
+        if (error.response?.statusCode === 403) {
+          user.update({ isActive: false });
+        }
+      },
+      { parse_mode: 'HTML' }
+    );
+
+    await sendAdminMessage(
+      bot,
+      `📊 Quiz дня отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Нет зарегистрированных пользователей' : ''}`
+    );
+  } catch (error) {
+    console.error('Ошибка в quizGameBroadcast:', error.message);
+    await sendAdminMessage(bot, `‼️ Ошибка рассылки квиза: ${error.message}`);
   }
 }
 
