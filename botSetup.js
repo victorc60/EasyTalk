@@ -2,7 +2,7 @@
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, startRolePlay, broadcastMessage, dailyHoroscopeBroadcast } from './features/botFeatures.js';
+import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss } from './handlers/commandHandlers.js';
@@ -88,19 +88,14 @@ function setupSchedulers(bot, userSessions) {
         phrasalVerbGameBroadcast(bot, userSessions);
       }
     );
-    // Quiz дня в 19:00 по Москве
+    // Quiz дня утром (замена гороскопа)
     schedule.scheduleJob(
       { hour: CONFIG.QUIZ_GAME_TIME.hour, minute: CONFIG.QUIZ_GAME_TIME.minute, tz: CONFIG.QUIZ_GAME_TIME.tz },
       () => {
-        console.log('Запуск quizGameBroadcast');
+        console.log('Запуск quizGameBroadcast утром');
         quizGameBroadcast(bot, userSessions);
       }
     );
-    // Ежедневный гороскоп в 08:30 по Москве
-    schedule.scheduleJob({ hour: 8, minute: 30, tz: 'Europe/Moscow' }, () => {
-      console.log('Запуск dailyHoroscopeBroadcast в 08:30 Europe/Moscow');
-      dailyHoroscopeBroadcast(bot);
-    });
     
     // Статистика ежедневной игры со словами в 00:05 по Москве
     schedule.scheduleJob(CONFIG.WORD_GAME_STATS_TIME, () => {
