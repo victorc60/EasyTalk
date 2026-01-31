@@ -5,7 +5,7 @@ import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers } from './handlers/commandHandlers.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -166,6 +166,9 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions));
   bot.onText(/\/test_horoscope/, (msg) => testHoroscope(bot, msg));
   bot.onText(/\/word_stats/, (msg) => wordGameStats(bot, msg, userSessions));
+  bot.onText(/\/period_stats(?:\s+.+)?/, (msg) => periodStats(bot, msg));
+  bot.onText(/\/user_stats(?:\s+.+)?/, (msg) => userStats(bot, msg));
+  bot.onText(/\/top_users(?:\s+.+)?/, (msg) => topUsers(bot, msg));
   bot.onText(/\/test_admin/, (msg) => testAdmin(bot, msg));
   bot.onText(/\/add_word/, (msg) => addWordToHistory(bot, msg));
   bot.onText(/\/poll_results(?:\s+\d+)?/, (msg) => showPollResults(bot, msg));

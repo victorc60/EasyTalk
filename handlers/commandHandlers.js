@@ -3,7 +3,18 @@ import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, getSavedDailyWordData, hasUserAnsweredWordGame } from '../services/wordGameServices.js';
+import { 
+  recordWordGameParticipation, 
+  recordIdiomGameParticipation, 
+  recordPhrasalVerbGameParticipation, 
+  recordQuizGameParticipation, 
+  getSavedDailyWordData, 
+  hasUserAnsweredWordGame,
+  getPeriodStats,
+  getUserDetailedStats,
+  getTopActiveUsers,
+  comparePeriods
+} from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
@@ -981,5 +992,307 @@ export async function showPollResults(bot, msg) {
     console.error('Ошибка показа результатов опроса:', error);
     await sendUserMessage(bot, msg.chat.id, '⚠️ Не удалось загрузить результаты опроса.');
     await sendAdminMessage(bot, `‼️ Ошибка команды /poll_results: ${error.message}`);
+  }
+}
+
+/**
+ * Получает статистику за период
+ * Использование: /period_stats [days] или /period_stats [start_date] [end_date]
+ * Примеры: /period_stats 7, /period_stats 2024-01-01 2024-01-31
+ */
+export async function periodStats(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '❌ У вас нет прав для выполнения этой команды.'
+      );
+      return;
+    }
+
+    const text = msg.text?.trim() || '';
+    const parts = text.split(/\s+/).filter(Boolean);
+    
+    let startDate, endDate;
+    
+    if (parts.length >= 3) {
+      // Формат: /period_stats 2024-01-01 2024-01-31
+      startDate = parts[1];
+      endDate = parts[2];
+    } else if (parts.length >= 2) {
+      // Формат: /period_stats 7 (дней назад)
+      const days = parseInt(parts[1], 10);
+      if (isNaN(days) || days < 1) {
+        await sendUserMessage(
+          bot,
+          msg.chat.id,
+          '⚠️ Укажите количество дней (например: /period_stats 7) или даты (например: /period_stats 2024-01-01 2024-01-31)'
+        );
+        return;
+      }
+      const start = new Date();
+      start.setDate(start.getDate() - days);
+      startDate = start.toISOString().split('T')[0];
+      endDate = new Date().toISOString().split('T')[0];
+    } else {
+      // По умолчанию - последние 7 дней
+      const start = new Date();
+      start.setDate(start.getDate() - 7);
+      startDate = start.toISOString().split('T')[0];
+      endDate = new Date().toISOString().split('T')[0];
+    }
+
+    await sendUserMessage(bot, msg.chat.id, '🔄 Получение статистики за период...');
+    
+    const stats = await getPeriodStats(startDate, endDate);
+    
+    if (!stats) {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Не удалось получить статистику.');
+      return;
+    }
+
+    let message = `📊 <b>Статистика за период</b>\n`;
+    message += `📅 ${startDate} - ${endDate}\n\n`;
+    
+    message += `📈 <b>Общая статистика:</b>\n`;
+    message += `• Всего игр: ${stats.summary.totalGames}\n`;
+    message += `• Уникальных пользователей: ${stats.summary.uniqueUsers}\n`;
+    message += `• Ответили: ${stats.summary.totalAnswered}\n`;
+    message += `• Правильных ответов: ${stats.summary.totalCorrect}\n`;
+    message += `• Всего очков: ${stats.summary.totalPoints}\n\n`;
+
+    // Статистика по типам игр
+    message += `🎮 <b>По типам игр:</b>\n`;
+    const gameTypeNames = {
+      'word': '🔤 Слово дня',
+      'idiom': '🧩 Идиома дня',
+      'phrasal_verb': '🔡 Phrasal Verb',
+      'quiz': '❓ Квиз'
+    };
+    
+    Object.keys(stats.byGameType).forEach(type => {
+      const data = stats.byGameType[type];
+      const name = gameTypeNames[type] || type;
+      message += `\n${name}:\n`;
+      message += `  • Всего: ${data.total}\n`;
+      message += `  • Ответили: ${data.answered} (${data.participationRate}%)\n`;
+      message += `  • Правильно: ${data.correct} (${data.accuracy}%)\n`;
+      message += `  • Очки: ${data.totalPoints}\n`;
+      if (data.avgResponseTime > 0) {
+        message += `  • Среднее время ответа: ${Math.round(data.avgResponseTime / 1000)}с\n`;
+      }
+    });
+
+    // Топ пользователей
+    if (stats.byUser.length > 0) {
+      message += `\n🏆 <b>Топ-10 активных пользователей:</b>\n`;
+      stats.byUser.slice(0, 10).forEach((userData, index) => {
+        const userName = userData.user?.username 
+          ? `@${userData.user.username}` 
+          : userData.user?.first_name || `ID:${userData.user?.telegram_id || 'unknown'}`;
+        message += `${index + 1}. ${userName} - ${userData.totalPoints} очков (${userData.answered}/${userData.total})\n`;
+      });
+    }
+
+    // Разбиваем на части, если сообщение слишком длинное
+    const maxLength = 4000;
+    if (message.length > maxLength) {
+      const parts = [];
+      let currentPart = '';
+      const lines = message.split('\n');
+      
+      for (const line of lines) {
+        if (currentPart.length + line.length + 1 > maxLength) {
+          parts.push(currentPart);
+          currentPart = line + '\n';
+        } else {
+          currentPart += line + '\n';
+        }
+      }
+      if (currentPart) parts.push(currentPart);
+      
+      for (let i = 0; i < parts.length; i++) {
+        await sendUserMessage(
+          bot,
+          msg.chat.id,
+          parts[i] + (i < parts.length - 1 ? '\n<i>(продолжение...)</i>' : ''),
+          { parse_mode: 'HTML' }
+        );
+      }
+    } else {
+      await sendUserMessage(bot, msg.chat.id, message, { parse_mode: 'HTML' });
+    }
+  } catch (error) {
+    console.error('Ошибка получения статистики за период:', error);
+    await sendUserMessage(bot, msg.chat.id, `❌ Ошибка: ${error.message}`);
+  }
+}
+
+/**
+ * Получает детальную статистику пользователя
+ * Использование: /user_stats [user_id] [days]
+ * Примеры: /user_stats 123456789, /user_stats 123456789 30
+ */
+export async function userStats(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '❌ У вас нет прав для выполнения этой команды.'
+      );
+      return;
+    }
+
+    const text = msg.text?.trim() || '';
+    const parts = text.split(/\s+/).filter(Boolean);
+    
+    if (parts.length < 2) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '⚠️ Использование: /user_stats [user_id] [days]\nПример: /user_stats 123456789 30'
+      );
+      return;
+    }
+
+    const targetUserId = parseInt(parts[1], 10);
+    const days = parts.length >= 3 ? parseInt(parts[2], 10) : 30;
+    
+    if (isNaN(targetUserId)) {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Неверный ID пользователя.');
+      return;
+    }
+
+    if (isNaN(days) || days < 1) {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Количество дней должно быть положительным числом.');
+      return;
+    }
+
+    await sendUserMessage(bot, msg.chat.id, '🔄 Получение статистики пользователя...');
+    
+    const stats = await getUserDetailedStats(targetUserId, null, null, days);
+    
+    if (!stats || !stats.user) {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Пользователь не найден или нет данных за указанный период.');
+      return;
+    }
+
+    const userName = stats.user.username 
+      ? `@${stats.user.username}` 
+      : stats.user.first_name || `ID:${stats.user.telegram_id}`;
+
+    let message = `👤 <b>Статистика пользователя</b>\n`;
+    message += `Имя: ${userName}\n`;
+    message += `ID: ${stats.user.telegram_id}\n`;
+    message += `Период: последние ${days} дней (${stats.period.days} активных дней)\n\n`;
+    
+    message += `📊 <b>Общая статистика:</b>\n`;
+    message += `• Всего игр: ${stats.summary.totalGames}\n`;
+    message += `• Ответил: ${stats.summary.answeredGames} (${stats.summary.participationRate}%)\n`;
+    message += `• Правильно: ${stats.summary.correctGames} (${stats.summary.accuracy}%)\n`;
+    message += `• Пропустил: ${stats.summary.missedGames}\n`;
+    message += `• Всего очков: ${stats.summary.totalPoints}\n`;
+    if (stats.summary.avgResponseTime) {
+      message += `• Среднее время ответа: ${Math.round(stats.summary.avgResponseTime / 1000)}с\n`;
+    }
+    message += `\n`;
+
+    // По типам игр
+    if (Object.keys(stats.byGameType).length > 0) {
+      message += `🎮 <b>По типам игр:</b>\n`;
+      const gameTypeNames = {
+        'word': '🔤 Слово дня',
+        'idiom': '🧩 Идиома дня',
+        'phrasal_verb': '🔡 Phrasal Verb',
+        'quiz': '❓ Квиз'
+      };
+      
+      Object.keys(stats.byGameType).forEach(type => {
+        const data = stats.byGameType[type];
+        const name = gameTypeNames[type] || type;
+        message += `\n${name}:\n`;
+        message += `  • Игр: ${data.total}\n`;
+        message += `  • Ответил: ${data.answered} (${data.participationRate}%)\n`;
+        message += `  • Правильно: ${data.correct} (${data.accuracy}%)\n`;
+        message += `  • Очки: ${data.totalPoints}\n`;
+        if (data.avgResponseTime) {
+          message += `  • Среднее время: ${Math.round(data.avgResponseTime / 1000)}с\n`;
+        }
+      });
+    }
+
+    await sendUserMessage(bot, msg.chat.id, message, { parse_mode: 'HTML' });
+  } catch (error) {
+    console.error('Ошибка получения статистики пользователя:', error);
+    await sendUserMessage(bot, msg.chat.id, `❌ Ошибка: ${error.message}`);
+  }
+}
+
+/**
+ * Получает топ самых активных пользователей
+ * Использование: /top_users [limit] [days]
+ * Примеры: /top_users, /top_users 20 30
+ */
+export async function topUsers(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        '❌ У вас нет прав для выполнения этой команды.'
+      );
+      return;
+    }
+
+    const text = msg.text?.trim() || '';
+    const parts = text.split(/\s+/).filter(Boolean);
+    
+    const limit = parts.length >= 2 ? parseInt(parts[1], 10) : 10;
+    const days = parts.length >= 3 ? parseInt(parts[2], 10) : 30;
+    
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Лимит должен быть от 1 до 50.');
+      return;
+    }
+
+    if (isNaN(days) || days < 1) {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Количество дней должно быть положительным числом.');
+      return;
+    }
+
+    await sendUserMessage(bot, msg.chat.id, '🔄 Получение топа пользователей...');
+    
+    const topUsers = await getTopActiveUsers(limit, days);
+    
+    if (!topUsers || topUsers.length === 0) {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Нет данных за указанный период.');
+      return;
+    }
+
+    let message = `🏆 <b>Топ-${topUsers.length} активных пользователей</b>\n`;
+    message += `Период: последние ${days} дней\n\n`;
+
+    topUsers.forEach((userData, index) => {
+      const userName = userData.user?.username 
+        ? `@${userData.user.username}` 
+        : userData.user?.first_name || `ID:${userData.user?.telegram_id || 'unknown'}`;
+      
+      message += `${index + 1}. ${userName}\n`;
+      message += `   • Очки: ${userData.totalPoints}\n`;
+      message += `   • Игр: ${userData.totalGames} (ответил: ${userData.answeredGames})\n`;
+      message += `   • Точность: ${userData.accuracy}%\n`;
+      message += `   • Активных дней: ${userData.activeDays}\n`;
+      message += `\n`;
+    });
+
+    await sendUserMessage(bot, msg.chat.id, message, { parse_mode: 'HTML' });
+  } catch (error) {
+    console.error('Ошибка получения топа пользователей:', error);
+    await sendUserMessage(bot, msg.chat.id, `❌ Ошибка: ${error.message}`);
   }
 }

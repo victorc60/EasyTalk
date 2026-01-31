@@ -380,3 +380,398 @@ export async function getSavedDailyWordData(date = null, slot = 'default', id = 
     return null;
   }
 }
+
+/**
+ * Получает расширенную статистику за период для всех типов игр
+ * @param {string} startDate - Начальная дата в формате YYYY-MM-DD
+ * @param {string} endDate - Конечная дата в формате YYYY-MM-DD (по умолчанию сегодня)
+ * @param {string} gameType - Тип игры (опционально, если не указан - все типы)
+ */
+export async function getPeriodStats(startDate, endDate = null, gameType = null) {
+  try {
+    const end = endDate || new Date().toISOString().split('T')[0];
+    
+    const whereClause = {
+      game_date: {
+        [Op.gte]: startDate,
+        [Op.lte]: end
+      }
+    };
+    
+    if (gameType) {
+      whereClause.game_type = gameType;
+    }
+
+    const stats = await WordGameParticipation.findAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'User',
+        attributes: ['telegram_id', 'username', 'first_name'],
+        required: false
+      }],
+      order: [['game_date', 'DESC']]
+    });
+
+    // Группировка по типам игр
+    const byGameType = {};
+    const byDate = {};
+    const byUser = {};
+    
+    stats.forEach(stat => {
+      const type = stat.game_type;
+      const date = stat.game_date;
+      const userId = stat.user_id;
+      
+      // По типам игр
+      if (!byGameType[type]) {
+        byGameType[type] = {
+          total: 0,
+          answered: 0,
+          correct: 0,
+          totalPoints: 0,
+          avgResponseTime: 0,
+          responseTimes: []
+        };
+      }
+      byGameType[type].total++;
+      if (stat.answered) {
+        byGameType[type].answered++;
+        if (stat.correct) byGameType[type].correct++;
+        if (stat.response_time) {
+          byGameType[type].responseTimes.push(stat.response_time);
+        }
+      }
+      byGameType[type].totalPoints += stat.points_earned || 0;
+      
+      // По датам
+      if (!byDate[date]) {
+        byDate[date] = {
+          total: 0,
+          answered: 0,
+          correct: 0,
+          totalPoints: 0
+        };
+      }
+      byDate[date].total++;
+      if (stat.answered) {
+        byDate[date].answered++;
+        if (stat.correct) byDate[date].correct++;
+      }
+      byDate[date].totalPoints += stat.points_earned || 0;
+      
+      // По пользователям
+      if (!byUser[userId]) {
+        byUser[userId] = {
+          user: stat.User,
+          total: 0,
+          answered: 0,
+          correct: 0,
+          totalPoints: 0,
+          games: []
+        };
+      }
+      byUser[userId].total++;
+      if (stat.answered) {
+        byUser[userId].answered++;
+        if (stat.correct) byUser[userId].correct++;
+      }
+      byUser[userId].totalPoints += stat.points_earned || 0;
+      byUser[userId].games.push(stat);
+    });
+
+    // Вычисление среднего времени ответа для каждого типа игры
+    Object.keys(byGameType).forEach(type => {
+      const times = byGameType[type].responseTimes;
+      if (times.length > 0) {
+        byGameType[type].avgResponseTime = Math.round(
+          times.reduce((a, b) => a + b, 0) / times.length
+        );
+      }
+    });
+
+    // Вычисление процентов
+    Object.keys(byGameType).forEach(type => {
+      const data = byGameType[type];
+      data.participationRate = data.total > 0 
+        ? Math.round((data.answered / data.total) * 100) 
+        : 0;
+      data.accuracy = data.answered > 0 
+        ? Math.round((data.correct / data.answered) * 100) 
+        : 0;
+    });
+
+    return {
+      period: { startDate, endDate: end },
+      summary: {
+        totalGames: stats.length,
+        uniqueUsers: Object.keys(byUser).length,
+        totalAnswered: stats.filter(s => s.answered).length,
+        totalCorrect: stats.filter(s => s.correct).length,
+        totalPoints: stats.reduce((sum, s) => sum + (s.points_earned || 0), 0)
+      },
+      byGameType,
+      byDate,
+      byUser: Object.values(byUser).sort((a, b) => b.totalPoints - a.totalPoints),
+      rawStats: stats
+    };
+  } catch (error) {
+    console.error('Ошибка получения статистики за период:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Получает детальную статистику конкретного пользователя за период
+ * @param {number} userId - ID пользователя
+ * @param {string} startDate - Начальная дата (опционально)
+ * @param {string} endDate - Конечная дата (опционально)
+ * @param {number} days - Количество дней назад (если не указаны даты)
+ */
+export async function getUserDetailedStats(userId, startDate = null, endDate = null, days = 30) {
+  try {
+    let whereClause = { user_id: userId };
+    
+    if (startDate && endDate) {
+      whereClause.game_date = {
+        [Op.gte]: startDate,
+        [Op.lte]: endDate
+      };
+    } else if (startDate) {
+      whereClause.game_date = { [Op.gte]: startDate };
+    } else {
+      const start = new Date();
+      start.setDate(start.getDate() - days);
+      whereClause.game_date = { [Op.gte]: start.toISOString().split('T')[0] };
+    }
+
+    const stats = await WordGameParticipation.findAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'User',
+        attributes: ['telegram_id', 'username', 'first_name', 'points'],
+        required: false
+      }],
+      order: [['game_date', 'DESC'], ['game_type', 'ASC']]
+    });
+
+    if (stats.length === 0) {
+      return null;
+    }
+
+    // Группировка по типам игр
+    const byGameType = {};
+    const byDate = {};
+    const responseTimes = [];
+    
+    stats.forEach(stat => {
+      const type = stat.game_type;
+      const date = stat.game_date;
+      
+      if (!byGameType[type]) {
+        byGameType[type] = {
+          total: 0,
+          answered: 0,
+          correct: 0,
+          totalPoints: 0,
+          responseTimes: []
+        };
+      }
+      byGameType[type].total++;
+      if (stat.answered) {
+        byGameType[type].answered++;
+        if (stat.correct) byGameType[type].correct++;
+        if (stat.response_time) {
+          byGameType[type].responseTimes.push(stat.response_time);
+          responseTimes.push(stat.response_time);
+        }
+      }
+      byGameType[type].totalPoints += stat.points_earned || 0;
+      
+      if (!byDate[date]) {
+        byDate[date] = {
+          total: 0,
+          answered: 0,
+          correct: 0,
+          totalPoints: 0
+        };
+      }
+      byDate[date].total++;
+      if (stat.answered) {
+        byDate[date].answered++;
+        if (stat.correct) byDate[date].correct++;
+      }
+      byDate[date].totalPoints += stat.points_earned || 0;
+    });
+
+    // Вычисление метрик
+    Object.keys(byGameType).forEach(type => {
+      const data = byGameType[type];
+      data.participationRate = data.total > 0 
+        ? Math.round((data.answered / data.total) * 100) 
+        : 0;
+      data.accuracy = data.answered > 0 
+        ? Math.round((data.correct / data.answered) * 100) 
+        : 0;
+      if (data.responseTimes.length > 0) {
+        data.avgResponseTime = Math.round(
+          data.responseTimes.reduce((a, b) => a + b, 0) / data.responseTimes.length
+        );
+      }
+    });
+
+    const totalGames = stats.length;
+    const answeredGames = stats.filter(s => s.answered).length;
+    const correctGames = stats.filter(s => s.correct).length;
+    const totalPoints = stats.reduce((sum, s) => sum + (s.points_earned || 0), 0);
+    const avgResponseTime = responseTimes.length > 0
+      ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length)
+      : null;
+
+    return {
+      user: stats[0].User,
+      period: {
+        startDate: startDate || (stats.length > 0 ? stats[stats.length - 1].game_date : null),
+        endDate: endDate || (stats.length > 0 ? stats[0].game_date : null),
+        days: stats.length > 0 ? new Set(stats.map(s => s.game_date)).size : 0
+      },
+      summary: {
+        totalGames,
+        answeredGames,
+        correctGames,
+        missedGames: totalGames - answeredGames,
+        participationRate: totalGames > 0 ? Math.round((answeredGames / totalGames) * 100) : 0,
+        accuracy: answeredGames > 0 ? Math.round((correctGames / answeredGames) * 100) : 0,
+        totalPoints,
+        avgResponseTime
+      },
+      byGameType,
+      byDate,
+      games: stats
+    };
+  } catch (error) {
+    console.error('Ошибка получения детальной статистики пользователя:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Получает топ самых активных пользователей за период
+ * @param {number} limit - Количество пользователей в топе (по умолчанию 10)
+ * @param {number} days - Количество дней назад (по умолчанию 30)
+ */
+export async function getTopActiveUsers(limit = 10, days = 30) {
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    
+    const stats = await WordGameParticipation.findAll({
+      where: {
+        game_date: {
+          [Op.gte]: startDate.toISOString().split('T')[0]
+        }
+      },
+      include: [{
+        model: User,
+        as: 'User',
+        attributes: ['telegram_id', 'username', 'first_name', 'points'],
+        required: false
+      }]
+    });
+
+    // Группировка по пользователям
+    const userStats = {};
+    
+    stats.forEach(stat => {
+      const userId = stat.user_id;
+      if (!userStats[userId]) {
+        userStats[userId] = {
+          user: stat.User,
+          totalGames: 0,
+          answeredGames: 0,
+          correctGames: 0,
+          totalPoints: 0,
+          uniqueDays: new Set()
+        };
+      }
+      userStats[userId].totalGames++;
+      userStats[userId].uniqueDays.add(stat.game_date);
+      if (stat.answered) {
+        userStats[userId].answeredGames++;
+        if (stat.correct) userStats[userId].correctGames++;
+      }
+      userStats[userId].totalPoints += stat.points_earned || 0;
+    });
+
+    // Преобразование в массив и вычисление метрик
+    const topUsers = Object.values(userStats)
+      .map(data => ({
+        user: data.user,
+        totalGames: data.totalGames,
+        answeredGames: data.answeredGames,
+        correctGames: data.correctGames,
+        totalPoints: data.totalPoints,
+        activeDays: data.uniqueDays.size,
+        participationRate: data.totalGames > 0 
+          ? Math.round((data.answeredGames / data.totalGames) * 100) 
+          : 0,
+        accuracy: data.answeredGames > 0 
+          ? Math.round((data.correctGames / data.answeredGames) * 100) 
+          : 0
+      }))
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .slice(0, limit);
+
+    return topUsers;
+  } catch (error) {
+    console.error('Ошибка получения топа активных пользователей:', error.message);
+    return [];
+  }
+}
+
+/**
+ * Сравнивает статистику двух периодов
+ * @param {string} period1Start - Начало первого периода
+ * @param {string} period1End - Конец первого периода
+ * @param {string} period2Start - Начало второго периода
+ * @param {string} period2End - Конец второго периода
+ */
+export async function comparePeriods(period1Start, period1End, period2Start, period2End) {
+  try {
+    const [stats1, stats2] = await Promise.all([
+      getPeriodStats(period1Start, period1End),
+      getPeriodStats(period2Start, period2End)
+    ]);
+
+    if (!stats1 || !stats2) {
+      return null;
+    }
+
+    const calculateChange = (oldVal, newVal) => {
+      if (oldVal === 0) return newVal > 0 ? 100 : 0;
+      return Math.round(((newVal - oldVal) / oldVal) * 100);
+    };
+
+    return {
+      period1: {
+        dates: { start: period1Start, end: period1End },
+        summary: stats1.summary
+      },
+      period2: {
+        dates: { start: period2Start, end: period2End },
+        summary: stats2.summary
+      },
+      changes: {
+        totalGames: calculateChange(stats1.summary.totalGames, stats2.summary.totalGames),
+        uniqueUsers: calculateChange(stats1.summary.uniqueUsers, stats2.summary.uniqueUsers),
+        totalAnswered: calculateChange(stats1.summary.totalAnswered, stats2.summary.totalAnswered),
+        totalCorrect: calculateChange(stats1.summary.totalCorrect, stats2.summary.totalCorrect),
+        totalPoints: calculateChange(stats1.summary.totalPoints, stats2.summary.totalPoints)
+      }
+    };
+  } catch (error) {
+    console.error('Ошибка сравнения периодов:', error.message);
+    return null;
+  }
+}

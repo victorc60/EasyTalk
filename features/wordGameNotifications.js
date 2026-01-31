@@ -168,13 +168,25 @@ function buildGameSection({ title, prefix, stats, leaderboard = null }) {
     return `${prefix} <b>${title}</b>\nℹ️ Пока нет ответов.`;
   }
 
+  // Вычисление процента участия
+  const participationRate = stats.totalParticipants > 0
+    ? Math.round((stats.answeredCount / stats.totalParticipants) * 100)
+    : 0;
+
+  // Вычисление среднего времени ответа
+  const answeredParticipants = stats.participants?.filter(p => p.answered && p.response_time) || [];
+  const avgResponseTime = answeredParticipants.length > 0
+    ? Math.round(answeredParticipants.reduce((sum, p) => sum + (p.response_time || 0), 0) / answeredParticipants.length)
+    : null;
+
   const lines = [
     `${prefix} <b>${title}</b>`,
     `👥 Получили: ${stats.totalParticipants}`,
-    `✅ Ответили: ${stats.answeredCount}`,
+    `✅ Ответили: ${stats.answeredCount} (${participationRate}%)`,
     `❌ Не ответили: ${stats.unansweredCount ?? stats.totalParticipants - stats.answeredCount}`,
     stats.correctCount !== undefined ? `🎯 Правильных: ${stats.correctCount}` : null,
-    stats.accuracy !== undefined ? `🎯 Точность: ${stats.accuracy}%` : null,
+    stats.accuracy !== undefined ? `📊 Точность: ${stats.accuracy}%` : null,
+    avgResponseTime ? `⏱ Среднее время ответа: ${Math.round(avgResponseTime / 1000)}с` : null,
     `⭐️ Очки: ${stats.totalPoints}`,
     ''
   ].filter(Boolean);
@@ -184,12 +196,24 @@ function buildGameSection({ title, prefix, stats, leaderboard = null }) {
   if (leaderboard?.length) {
     section += `🏆 <b>Топ-${leaderboard.length}:</b>\n`;
     leaderboard.forEach((participant, index) => {
-      section += `${index + 1}. ${getParticipantName(participant)} - ${participant.points_earned} оч.\n`;
+      const timeInfo = participant.response_time 
+        ? ` (${Math.round(participant.response_time / 1000)}с)` 
+        : '';
+      section += `${index + 1}. ${getParticipantName(participant)} - ${participant.points_earned} оч.${timeInfo}\n`;
     });
     section += '\n';
   }
 
-  section += `👤 <b>Игроки:</b>\n${formatParticipantsList(stats.participants)}`;
+  // Ограничиваем список участников для читаемости
+  const maxParticipants = 20;
+  const participantsToShow = stats.participants?.slice(0, maxParticipants) || [];
+  const hasMore = stats.participants && stats.participants.length > maxParticipants;
+  
+  section += `👤 <b>Игроки${hasMore ? ` (показано ${maxParticipants} из ${stats.participants.length})` : ''}:</b>\n${formatParticipantsList(participantsToShow)}`;
+  if (hasMore) {
+    section += `\n<i>... и еще ${stats.participants.length - maxParticipants} игроков</i>`;
+  }
+  
   return section;
 }
 
