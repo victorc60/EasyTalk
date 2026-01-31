@@ -8,15 +8,12 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install production dependencies
-# Проверяем наличие package-lock.json, если его нет - используем npm install
-COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then \
-        npm ci --omit=dev --no-audit --no-fund || npm install --production --no-audit --no-fund; \
-    else \
-        npm install --production --no-audit --no-fund; \
-    fi
+# Копируем только package.json сначала для лучшего кэширования слоев
+COPY package.json ./
+RUN npm install --production --no-audit --no-fund --prefer-offline --no-optional
 
 # Copy the rest of the source (исключая то, что в .dockerignore)
+# Используем COPY . . для копирования всех файлов, но .dockerignore исключит ненужное
 COPY . .
 
 ENV NODE_ENV=production

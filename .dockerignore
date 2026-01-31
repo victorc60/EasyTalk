@@ -1,13 +1,80 @@
+# Dependencies
 node_modules
 npm-debug.log
 .npmrc
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Git
 .git
 .gitignore
-.DS_Store
-tmp
-logs
-*.md
+.gitattributes
+
+# IDE
 .vscode
 .idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Documentation (не нужны в контейнере)
+*.md
+!README.md
+
+# Test files
+test
+tests
+*.test.js
+*.spec.js
+__tests__
+test_api.js
+test-docker-build.sh
+scripts/
+
+# Build artifacts
+dist
+build
+*.map
+
+# Coverage
+coverage
+.nyc_output
+
+# Misc
+.cache
+*.cache
+
+# Отдельное веб-приложение (не нужно для основного бота)
+easytalks-bot/
+
+# Fix scripts (не нужны в продакшене)
+fix_whisper.js
+fix_word_repeat.js
+
+# Deployment docs (не нужны в контейнере)
+DEPLOYMENT_*.md
+CHECKLIST_*.md
+ENHANCED_*.md
+*_FIXES.md
+*_CHANGES.md
+*_TRACKING.md
+*_FEATURE.md
