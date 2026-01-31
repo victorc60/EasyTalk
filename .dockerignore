@@ -6,5 +6,8 @@ npm-debug.log
 .gitignore
 .DS_Store
 tmp
-temp
 logs
+*.md
+.vscode
+.idea
+*.log
