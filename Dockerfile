@@ -1,16 +1,16 @@
-FROM node:22-bookworm-slim
+FROM node:20-bookworm-slim
 
-# Установка дополнительных зависимостей для sharp (требуется для обработки изображений)
+# Установка минимальных системных зависимостей; libvips встроен в бинарники sharp
 RUN apt-get update && apt-get install -y \
-    libvips-dev \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Install production dependencies
-# Копируем только package.json сначала для лучшего кэширования слоев
-COPY package.json ./
-RUN npm install --production --no-audit --no-fund --prefer-offline --no-optional
+# Копируем только package.json и lock для кеша
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --include=optional --no-audit --no-fund --prefer-offline
 
 # Copy the rest of the source (исключая то, что в .dockerignore)
 # Используем COPY . . для копирования всех файлов, но .dockerignore исключит ненужное
