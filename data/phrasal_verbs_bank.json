@@ -18,5 +18,10 @@
   { "phrasalVerb": "shower with", "translation": "осыпать", "meaning": "дарить много комплиментов или подарков", "example": "She showered him with compliments all night.", "hint": "словно дождь из похвалы и цветов" },
   { "phrasalVerb": "stand by", "translation": "поддерживать", "meaning": "оставаться рядом и поддерживать в любой ситуации", "example": "She stood by him through long-distance weeks.", "hint": "стоять плечом к плечу" },
   { "phrasalVerb": "stick by", "translation": "быть верным", "meaning": "оставаться преданным несмотря на трудности", "example": "He sticks by her even when plans fall apart.", "hint": "не отходить, когда шатает ветер" },
-  { "phrasalVerb": "share in", "translation": "разделять", "meaning": "разделять чувства или событие вместе", "example": "Share in the joy of planning the proposal.", "hint": "держать одно сердце на двоих" }
+  { "phrasalVerb": "share in", "translation": "разделять", "meaning": "разделять чувства или событие вместе", "example": "Share in the joy of planning the proposal.", "hint": "держать одно сердце на двоих" },
+  { "phrasalVerb": "chat up", "translation": "подкатывать в разговоре", "meaning": "заигрывать, флиртуя словами", "example": "He tried to chat her up at the Valentine mixer.", "hint": "разыграть шарм через беседу" },
+  { "phrasalVerb": "cozy up to", "translation": "прижиматься, льнуть к", "meaning": "уютно устраиваться рядом, чтобы быть ближе", "example": "They cozied up to each other under one blanket.", "hint": "подползти поближе ради тепла и нежности" },
+  { "phrasalVerb": "fuss over", "translation": "опекать и баловать", "meaning": "проявлять чрезмерную заботу и внимание", "example": "She fussed over him with tea and sweets on February 14.", "hint": "кружиться вокруг, как заботливая птица" },
+  { "phrasalVerb": "wine and dine", "translation": "угощать изысканно", "meaning": "приглашать на роскошный ужин, чтобы впечатлить", "example": "He wined and dined her at a rooftop restaurant.", "hint": "много вина, много внимания в одном вечере" },
+  { "phrasalVerb": "pine for", "translation": "тосковать по", "meaning": "сильно скучать и жаждать чьей-то любви", "example": "He still pines for his long-distance sweetheart.", "hint": "сердце томится в ожидании" }
 ]
