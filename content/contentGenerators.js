@@ -65,46 +65,33 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  // Array of fascinating topics to choose from
-  const TOPICS = [
-    'science', 'space', 'animals', 'history', 'technology', 'human_body', 
-    'ocean', 'weather', 'food', 'art', 'music', 'sports', 'geography', 
-    'psychology', 'medicine', 'engineering', 'nature', 'culture', 'mathematics',
-    'architecture', 'transportation', 'communication', 'energy', 'environment'
+  // Always keep facts aligned with Valentine's Day, romance, and love traditions
+  const VALENTINE_TOPICS = [
+    'valentines_history',
+    'romantic_traditions',
+    'love_symbols',
+    'flowers_and_roses',
+    'chocolate_and_gifts',
+    'cupid_and_mythology',
+    'famous_love_letters',
+    'wedding_and_proposals',
+    'love_science_and_psychology',
+    'romantic_art_and_music',
+    'cultural_valentine_variants',
+    'relationship_rituals',
+    'languages_of_love',
+    'historic_couples',
+    'heart_iconography'
   ];
-  const HOLIDAY_TOPICS = [
-    'winter nature',
-    'snow and ice',
-    'polar lights',
-    'winter animals',
-    'winter solstice',
-    'christmas traditions',
-    'new year traditions',
-    'holiday foods',
-    'arctic science',
-    'winter sports',
-    'northern explorers',
-    'winter weather phenomena',
-    'holiday lights and decorations',
-    'gift-giving traditions',
-    'winter folklore'
-  ];
-  
-  // Select a random topic
-  const inHoliday = isHolidaySeason();
-  const topicsPool = inHoliday ? HOLIDAY_TOPICS : TOPICS;
-  const selectedTopic = topicsPool[Math.floor(Math.random() * topicsPool.length)];
-  
-  const seasonalNote = inHoliday
-    ? `\n- It must clearly relate to winter or the holiday season (Christmas/New Year): mention the seasonal context explicitly.`
-    : '';
-  
-  const PROMPT = `Generate a mind-blowing, fascinating fact about ${selectedTopic} that will make people say "Wow, that's incredible!" The fact should be:
-  - Completely true and scientifically accurate
-  - Surprising and counterintuitive
-  - Engaging for teenagers and adults
-  - Something that makes people want to share it
-  - Not commonly known${seasonalNote}
+
+  const selectedTopic = VALENTINE_TOPICS[Math.floor(Math.random() * VALENTINE_TOPICS.length)];
+
+  const PROMPT = `Generate a mind-blowing, fascinating fact about ${selectedTopic} that will make people say "Wow, that's incredible!" The fact must:
+  - Be clearly tied to Valentine's Day, romance, or love traditions (mention that context explicitly)
+  - Be completely true and accurate
+  - Be surprising and shareable
+  - Fit teens and adults
+  - Not be common trivia
   
   Include:
   - The fact in English (1-2 sentences, make it exciting)
