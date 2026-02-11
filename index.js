@@ -58,14 +58,26 @@ if (webhookUrl) {
   });
 }
 
+// Повторные попытки подключения к БД (удобно при старте на Railway, когда MySQL ещё поднимается)
+const DB_RETRY_ATTEMPTS = Number(process.env.DB_RETRY_ATTEMPTS) || 10;
+const DB_RETRY_DELAY_MS = Number(process.env.DB_RETRY_DELAY_MS) || 5000;
+
 async function initializeDatabase() {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync({ alter: true });
-    console.log('✅ База данных подключена');
-  } catch (error) {
-    console.error('❌ Ошибка базы данных:', error);
-    process.exit(1);
+  for (let attempt = 1; attempt <= DB_RETRY_ATTEMPTS; attempt++) {
+    try {
+      await sequelize.authenticate();
+      await sequelize.sync({ alter: true });
+      console.log('✅ База данных подключена');
+      return;
+    } catch (error) {
+      console.error(`❌ БД попытка ${attempt}/${DB_RETRY_ATTEMPTS}:`, error.message);
+      if (attempt === DB_RETRY_ATTEMPTS) {
+        console.error('❌ Не удалось подключиться к базе данных после всех попыток');
+        process.exit(1);
+      }
+      console.log(`⏳ Повтор через ${DB_RETRY_DELAY_MS / 1000} сек...`);
+      await new Promise((r) => setTimeout(r, DB_RETRY_DELAY_MS));
+    }
   }
 }
 
