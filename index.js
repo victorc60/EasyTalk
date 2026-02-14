@@ -36,7 +36,9 @@ if (!webhookUrl) {
   console.warn('TELEGRAM_WEBHOOK_URL or WEBHOOK_DOMAIN is not configured; falling back to polling.');
 }
 
-const bot = new TelegramBot(botToken, { polling: usePolling });
+// Создаём бота без автозапуска polling, чтобы не конкурировать с другим экземпляром (409)
+// и не вызывать getUpdates до готовности приложения (БД, setup). Polling запустим ниже после init.
+const bot = new TelegramBot(botToken, { polling: false });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const userSessions = {
@@ -84,6 +86,7 @@ async function initializeDatabase() {
 process.on('SIGTERM', async () => {
   console.log('Получен сигнал SIGTERM. Завершаем работу...');
   try {
+    bot.stopPolling?.();
     await sendAdminMessage(bot, '🛑 Бот останавливается (SIGTERM)');
     await sequelize.close();
     console.log('Соединение с базой данных закрыто');
@@ -118,7 +121,11 @@ process.on('unhandledRejection', (error) => {
       console.log(`Server listening on port ${port}`);
     });
 
-    if (!usePolling && webhookUrl) {
+    if (usePolling) {
+      bot.startPolling();
+      console.log('Polling запущен (убедитесь, что не работает другой экземпляр этого бота).');
+    }
+    if (webhookUrl) {
       await sendAdminMessage(bot, `🟢 Бот запущен (webhook)\n🔗 ${webhookUrl}\n⏰ Время сервера: ${new Date().toLocaleString()}`);
     } else {
       await sendAdminMessage(bot, `🟢 Бот запущен (polling)\n⏰ Время сервера: ${new Date().toLocaleString()}`);

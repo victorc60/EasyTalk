@@ -5,6 +5,7 @@ import {
   getDailyIdiomGameStats,
   getDailyPhrasalVerbGameStats,
   getDailyWordGameLeaderboard,
+  getDailyParticipantsByUser,
   recordWordGameParticipation
 } from '../services/wordGameServices.js';
 
@@ -17,11 +18,12 @@ export async function notifyDailyWordGameStats(bot, date = null) {
   try {
     console.log('Получение статистики ежедневных игр (слово + идиома)...');
 
-    const [wordStats, idiomStats, phrasalStats, leaderboard] = await Promise.all([
+    const [wordStats, idiomStats, phrasalStats, leaderboard, participantsByUser] = await Promise.all([
       getDailyWordGameStats(date),
       getDailyIdiomGameStats(date),
       getDailyPhrasalVerbGameStats(date),
-      getDailyWordGameLeaderboard(date, 5)
+      getDailyWordGameLeaderboard(date, 5),
+      getDailyParticipantsByUser(date)
     ]);
 
     if (!wordStats && !idiomStats && !phrasalStats) {
@@ -43,6 +45,8 @@ export async function notifyDailyWordGameStats(bot, date = null) {
     message += buildIdiomGameSection(idiomStats);
     message += '\n';
     message += buildPhrasalVerbSection(phrasalStats);
+    message += '\n';
+    message += buildWhoPlayedSection(participantsByUser);
 
     await sendAdminMessage(bot, message.trim(), { parse_mode: 'HTML' });
     console.log('Комплексная статистика игр отправлена администратору');
@@ -137,26 +141,31 @@ function getParticipantName(participant) {
   return `ID:${participant.user_id}`;
 }
 
-function formatParticipantsList(participants = []) {
-  if (!participants.length) {
-    return '—';
+/** Имя пользователя из объекта { user: { username, first_name } } или userId */
+function getUserDisplayName(entry) {
+  const u = entry.user;
+  if (u?.username) return `@${u.username}`;
+  if (u?.first_name) return u.first_name;
+  return `ID:${entry.userId}`;
+}
+
+/**
+ * Секция отчёта: только те, кто играл; для каждого — в какие игры и результат (✅/❌/⏳).
+ */
+function buildWhoPlayedSection(participantsByUser) {
+  if (!participantsByUser?.length) {
+    return '👤 <b>Кто играл</b>\nℹ️ Нет участников за этот день.\n';
   }
-  return participants
-    .sort((a, b) => {
-      if (a.answered === b.answered) {
-        if (a.correct === b.correct) {
-          return (b.points_earned || 0) - (a.points_earned || 0);
-        }
-        return (b.correct ? 1 : 0) - (a.correct ? 1 : 0);
-      }
-      return (b.answered ? 1 : 0) - (a.answered ? 1 : 0);
-    })
-    .map(participant => {
-      const status = participant.answered ? (participant.correct ? '✅' : '❌') : '⏳';
-      const points = participant.points_earned ? ` (+${participant.points_earned})` : '';
-      return `${status} ${getParticipantName(participant)}${points}`;
-    })
-    .join('\n');
+  const lines = ['👤 <b>Кто играл (только участники)</b>', ''];
+  for (const entry of participantsByUser) {
+    const name = getUserDisplayName(entry);
+    const gameParts = entry.games.map(g => {
+      const status = g.answered ? (g.correct ? '✅' : '❌') : '⏳';
+      return `${g.label} ${status}`;
+    });
+    lines.push(`${name}: ${gameParts.join(', ')}`);
+  }
+  return lines.join('\n') + '\n';
 }
 
 function buildGameSection({ title, prefix, stats, leaderboard = null }) {
@@ -204,16 +213,6 @@ function buildGameSection({ title, prefix, stats, leaderboard = null }) {
     section += '\n';
   }
 
-  // Ограничиваем список участников для читаемости
-  const maxParticipants = 20;
-  const participantsToShow = stats.participants?.slice(0, maxParticipants) || [];
-  const hasMore = stats.participants && stats.participants.length > maxParticipants;
-  
-  section += `👤 <b>Игроки${hasMore ? ` (показано ${maxParticipants} из ${stats.participants.length})` : ''}:</b>\n${formatParticipantsList(participantsToShow)}`;
-  if (hasMore) {
-    section += `\n<i>... и еще ${stats.participants.length - maxParticipants} игроков</i>`;
-  }
-  
   return section;
 }
 

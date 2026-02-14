@@ -302,6 +302,59 @@ export async function getDailyWordGameLeaderboard(date = null, limit = 10) {
   }
 }
 
+/** Названия типов игр для отчёта */
+const GAME_TYPE_LABELS = {
+  [GAME_TYPES.WORD]: 'Слово',
+  [GAME_TYPES.IDIOM]: 'Идиома',
+  [GAME_TYPES.PHRASAL_VERB]: 'Phrasal',
+  [GAME_TYPES.QUIZ]: 'Квиз'
+};
+
+/**
+ * Список пользователей, которые участвовали хотя бы в одной игре за день, с перечнем игр и результатами.
+ * Только игравшие — тех, кто не играл, в отчёт не включаем.
+ * @param {string} date - Дата YYYY-MM-DD (по умолчанию сегодня)
+ * @returns {Promise<Array<{ userId, user, games }>>}
+ */
+export async function getDailyParticipantsByUser(date = null) {
+  try {
+    const targetDate = resolveDate(date);
+    const participations = await WordGameParticipation.findAll({
+      where: { game_date: targetDate },
+      include: [{
+        model: User,
+        as: 'User',
+        attributes: ['telegram_id', 'username', 'first_name'],
+        required: false
+      }]
+    });
+
+    const byUser = new Map();
+    for (const p of participations) {
+      const uid = p.user_id;
+      if (!byUser.has(uid)) {
+        byUser.set(uid, {
+          userId: uid,
+          user: p.User || { telegram_id: uid, username: null, first_name: `ID:${uid}` },
+          games: []
+        });
+      }
+      byUser.get(uid).games.push({
+        gameType: p.game_type,
+        label: GAME_TYPE_LABELS[p.game_type] || p.game_type,
+        answered: p.answered,
+        correct: p.correct,
+        points: p.points_earned || 0
+      });
+    }
+
+    return Array.from(byUser.values());
+  } catch (error) {
+    console.error('Ошибка getDailyParticipantsByUser:', error.message);
+    return [];
+  }
+}
+
 export async function saveDailyWordData(wordData, slot = 'default', date = null) {
   try {
     const targetDate = date || new Date().toISOString().split('T')[0];
