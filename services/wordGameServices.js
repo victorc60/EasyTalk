@@ -165,7 +165,12 @@ async function getDailyGameStats(gameType, date = null, slot = null) {
       }]
     });
     
-    console.log(`Found ${stats.length} participation records`);
+    console.log(`[getDailyGameStats ${gameType}] Found ${stats.length} participation records`);
+    const withUser = stats.filter(s => s.User).length;
+    const withoutUser = stats.length - withUser;
+    if (withoutUser > 0) {
+      console.log(`[getDailyGameStats ${gameType}] ${withUser} с User, ${withoutUser} без User`);
+    }
 
     const totalParticipants = stats.length;
     const answeredCount = stats.filter(s => s.answered).length;

@@ -5,7 +5,6 @@ import {
   getDailyIdiomGameStats,
   getDailyPhrasalVerbGameStats,
   getDailyWordGameLeaderboard,
-  getDailyParticipantsByUser,
   recordWordGameParticipation
 } from '../services/wordGameServices.js';
 
@@ -18,12 +17,11 @@ export async function notifyDailyWordGameStats(bot, date = null) {
   try {
     console.log('Получение статистики ежедневных игр (слово + идиома)...');
 
-    const [wordStats, idiomStats, phrasalStats, leaderboard, participantsByUser] = await Promise.all([
+    const [wordStats, idiomStats, phrasalStats, leaderboard] = await Promise.all([
       getDailyWordGameStats(date),
       getDailyIdiomGameStats(date),
       getDailyPhrasalVerbGameStats(date),
-      getDailyWordGameLeaderboard(date, 5),
-      getDailyParticipantsByUser(date)
+      getDailyWordGameLeaderboard(date, 5)
     ]);
 
     if (!wordStats && !idiomStats && !phrasalStats) {
@@ -46,7 +44,7 @@ export async function notifyDailyWordGameStats(bot, date = null) {
     message += '\n';
     message += buildPhrasalVerbSection(phrasalStats);
     message += '\n';
-    message += buildWhoPlayedSection(participantsByUser);
+    message += buildWhoPlayedSection(wordStats, idiomStats, phrasalStats);
 
     await sendAdminMessage(bot, message.trim(), { parse_mode: 'HTML' });
     console.log('Комплексная статистика игр отправлена администратору');
@@ -150,22 +148,94 @@ function getUserDisplayName(entry) {
 }
 
 /**
- * Секция отчёта: только те, кто играл; для каждого — в какие игры и результат (✅/❌/⏳).
+ * Секция отчёта: показывает всех участников каждой игры отдельно.
+ * Только те, кто играл — тех, кто не играл, не показываем.
  */
-function buildWhoPlayedSection(participantsByUser) {
-  if (!participantsByUser?.length) {
+function buildWhoPlayedSection(wordStats, idiomStats, phrasalStats) {
+  const lines = ['👤 <b>Кто играл (по играм)</b>', ''];
+  
+  // Слово дня
+  if (wordStats?.participants?.length > 0) {
+    console.log(`[Отчёт] Слово дня: найдено ${wordStats.participants.length} участников из ${wordStats.totalParticipants}`);
+    if (wordStats.participants.length !== wordStats.totalParticipants) {
+      console.warn(`[Отчёт] ВНИМАНИЕ: количество участников не совпадает! participants.length=${wordStats.participants.length}, totalParticipants=${wordStats.totalParticipants}`);
+    }
+    lines.push(`🔤 <b>Слово дня</b> (${wordStats.totalParticipants} участников):`);
+    // Сортируем: сначала ответившие правильно, потом неправильно, потом не ответившие
+    const sorted = [...wordStats.participants].sort((a, b) => {
+      if (a.answered !== b.answered) return b.answered - a.answered;
+      if (a.correct !== b.correct) return b.correct - a.correct;
+      return (b.points_earned || 0) - (a.points_earned || 0);
+    });
+    const wordParticipants = sorted
+      .map(p => {
+        const name = getParticipantName(p);
+        const status = p.answered ? (p.correct ? '✅' : '❌') : '⏳';
+        const points = p.points_earned ? ` (+${p.points_earned})` : '';
+        return `${status} ${name}${points}`;
+      })
+      .join(', ');
+    lines.push(wordParticipants);
+    lines.push('');
+  }
+  
+  // Идиома дня
+  if (idiomStats?.participants?.length > 0) {
+    console.log(`[Отчёт] Идиома дня: найдено ${idiomStats.participants.length} участников из ${idiomStats.totalParticipants}`);
+    if (idiomStats.participants.length !== idiomStats.totalParticipants) {
+      console.warn(`[Отчёт] ВНИМАНИЕ: количество участников не совпадает! participants.length=${idiomStats.participants.length}, totalParticipants=${idiomStats.totalParticipants}`);
+    }
+    lines.push(`🧩 <b>Идиома дня</b> (${idiomStats.totalParticipants} участников):`);
+    const sorted = [...idiomStats.participants].sort((a, b) => {
+      if (a.answered !== b.answered) return b.answered - a.answered;
+      if (a.correct !== b.correct) return b.correct - a.correct;
+      return (b.points_earned || 0) - (a.points_earned || 0);
+    });
+    const idiomParticipants = sorted
+      .map(p => {
+        const name = getParticipantName(p);
+        const status = p.answered ? (p.correct ? '✅' : '❌') : '⏳';
+        const points = p.points_earned ? ` (+${p.points_earned})` : '';
+        return `${status} ${name}${points}`;
+      })
+      .join(', ');
+    lines.push(idiomParticipants);
+    lines.push('');
+  }
+  
+  // Phrasal Verb
+  if (phrasalStats?.participants?.length > 0) {
+    console.log(`[Отчёт] Phrasal Verb: найдено ${phrasalStats.participants.length} участников из ${phrasalStats.totalParticipants}`);
+    if (phrasalStats.participants.length !== phrasalStats.totalParticipants) {
+      console.warn(`[Отчёт] ВНИМАНИЕ: количество участников не совпадает! participants.length=${phrasalStats.participants.length}, totalParticipants=${phrasalStats.totalParticipants}`);
+    }
+    lines.push(`🔡 <b>Phrasal Verb</b> (${phrasalStats.totalParticipants} участников):`);
+    const sorted = [...phrasalStats.participants].sort((a, b) => {
+      if (a.answered !== b.answered) return b.answered - a.answered;
+      if (a.correct !== b.correct) return b.correct - a.correct;
+      return (b.points_earned || 0) - (a.points_earned || 0);
+    });
+    const phrasalParticipants = sorted
+      .map(p => {
+        const name = getParticipantName(p);
+        const status = p.answered ? (p.correct ? '✅' : '❌') : '⏳';
+        const points = p.points_earned ? ` (+${p.points_earned})` : '';
+        return `${status} ${name}${points}`;
+      })
+      .join(', ');
+    lines.push(phrasalParticipants);
+    lines.push('');
+  }
+  
+  // Если нет участников вообще
+  if (!wordStats?.participants?.length && !idiomStats?.participants?.length && !phrasalStats?.participants?.length) {
+    console.log('[Отчёт] Нет участников ни в одной игре');
     return '👤 <b>Кто играл</b>\nℹ️ Нет участников за этот день.\n';
   }
-  const lines = ['👤 <b>Кто играл (только участники)</b>', ''];
-  for (const entry of participantsByUser) {
-    const name = getUserDisplayName(entry);
-    const gameParts = entry.games.map(g => {
-      const status = g.answered ? (g.correct ? '✅' : '❌') : '⏳';
-      return `${g.label} ${status}`;
-    });
-    lines.push(`${name}: ${gameParts.join(', ')}`);
-  }
-  return lines.join('\n') + '\n';
+  
+  const result = lines.join('\n') + '\n';
+  console.log(`[Отчёт] Длина секции "Кто играл": ${result.length} символов`);
+  return result;
 }
 
 function buildGameSection({ title, prefix, stats, leaderboard = null }) {
