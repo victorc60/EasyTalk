@@ -133,14 +133,29 @@ async function setupBotCommands(bot) {
     ];
     const languages = [undefined, 'ru', 'en'];
 
+    // ID админов (основной ADMIN_ID из переменных + дополнительный ID)
+    const adminIds = [process.env.ADMIN_ID, '340048933'].filter(Boolean);
+
     for (const scope of scopes) {
       for (const language_code of languages) {
         const opts = language_code ? { scope, language_code } : { scope };
         await bot.deleteMyCommands(opts);
       }
     }
-    console.log('✅ Команды бота очищены (scopes: default/private/group; languages: all/ru/en)');
-    const commands = [
+    // Чистим команды для персональных чатов админов (на всякий случай)
+    for (const adminId of adminIds) {
+      for (const language_code of languages) {
+        const opts = language_code
+          ? { scope: { type: 'chat', chat_id: adminId }, language_code }
+          : { scope: { type: 'chat', chat_id: adminId } };
+        await bot.deleteMyCommands(opts);
+      }
+    }
+
+    console.log('✅ Команды бота очищены (scopes: default/private/group/admin chats; languages: all/ru/en)');
+
+    // Команды для обычных пользователей (без админских)
+    const userCommands = [
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
       { command: 'topic', description: 'Тема для обсуждения' },
@@ -152,18 +167,36 @@ async function setupBotCommands(bot) {
       { command: 'mode', description: 'Выбор режима общения' },
       { command: 'mode_free_talk', description: 'Свободное общение на английском' },
       { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
-      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' },
+      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
+    ];
+
+    // Дополнительные команды только для админов
+    const adminOnlyCommands = [
       { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' },
       { command: 'poll', description: 'Создать опрос (админ)' },
       { command: 'poll_results', description: 'Результаты опроса (админ)' }
     ];
+
+    // Устанавливаем команды для всех обычных чатов (без админских)
     for (const scope of scopes) {
       for (const language_code of languages) {
         const opts = language_code ? { scope, language_code } : { scope };
-        await bot.setMyCommands(commands, opts);
+        await bot.setMyCommands(userCommands, opts);
       }
     }
-    console.log('✅ Команды бота успешно установлены (scopes: default/private/group; languages: all/ru/en)');
+
+    // Отдельно устанавливаем полный набор команд в личных чатах админов
+    for (const adminId of adminIds) {
+      const adminCommands = [...userCommands, ...adminOnlyCommands];
+      for (const language_code of languages) {
+        const opts = language_code
+          ? { scope: { type: 'chat', chat_id: adminId }, language_code }
+          : { scope: { type: 'chat', chat_id: adminId } };
+        await bot.setMyCommands(adminCommands, opts);
+      }
+    }
+
+    console.log('✅ Команды бота установлены: пользователи без админ-команд, админы с полным набором');
   } catch (error) {
     console.error('❌ Ошибка установки команд бота:', error);
     await sendAdminMessage(bot, `‼️ Ошибка установки команд бота: ${error.message}`);
