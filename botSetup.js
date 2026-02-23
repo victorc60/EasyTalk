@@ -123,9 +123,23 @@ function setupSchedulers(bot, userSessions) {
 
 async function setupBotCommands(bot) {
   try {
-    // Clear existing default-scope commands for all languages
-    await bot.deleteMyCommands({ scope: { type: 'default' } });
-    console.log('✅ Все команды бота удалены');
+    // Telegram выбирает команды по наиболее специфичному scope и language_code.
+    // Если раньше были установлены команды для all_private_chats / all_group_chats или для ru/en,
+    // они могут "перебивать" default-список. Поэтому чистим и ставим команды сразу для всех.
+    const scopes = [
+      { type: 'default' },
+      { type: 'all_private_chats' },
+      { type: 'all_group_chats' }
+    ];
+    const languages = [undefined, 'ru', 'en'];
+
+    for (const scope of scopes) {
+      for (const language_code of languages) {
+        const opts = language_code ? { scope, language_code } : { scope };
+        await bot.deleteMyCommands(opts);
+      }
+    }
+    console.log('✅ Команды бота очищены (scopes: default/private/group; languages: all/ru/en)');
     const commands = [
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
@@ -143,9 +157,13 @@ async function setupBotCommands(bot) {
       { command: 'poll', description: 'Создать опрос (админ)' },
       { command: 'poll_results', description: 'Результаты опроса (админ)' }
     ];
-    // Set default-scope commands for all languages (omit language_code)
-    await bot.setMyCommands(commands, { scope: { type: 'default' } });
-    console.log('✅ Команды бота успешно установлены:', JSON.stringify(commands));
+    for (const scope of scopes) {
+      for (const language_code of languages) {
+        const opts = language_code ? { scope, language_code } : { scope };
+        await bot.setMyCommands(commands, opts);
+      }
+    }
+    console.log('✅ Команды бота успешно установлены (scopes: default/private/group; languages: all/ru/en)');
   } catch (error) {
     console.error('❌ Ошибка установки команд бота:', error);
     await sendAdminMessage(bot, `‼️ Ошибка установки команд бота: ${error.message}`);
