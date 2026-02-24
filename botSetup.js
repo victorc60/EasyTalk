@@ -154,14 +154,12 @@ async function setupBotCommands(bot) {
 
     console.log('✅ Команды бота очищены (scopes: default/private/group/admin chats; languages: all/ru/en)');
 
-    // Команды для обычных пользователей (без админских)
+    // Команды для обычных пользователей (без админских и без Boss Grammar в меню)
     const userCommands = [
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
       { command: 'topic', description: 'Тема для обсуждения' },
       { command: 'story', description: 'Voice storytelling with audio' },
-      { command: 'game_boss', description: 'Запуск Boss Grammar (WebApp)' },
-      { command: 'boss', description: 'Запуск Boss Grammar (WebApp)' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
       { command: 'mode', description: 'Выбор режима общения' },
