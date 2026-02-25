@@ -423,7 +423,7 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       ? `✅ <b>Правильно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно!</b>\n\n`;
     
-    resultMessage += `❄️🎯 <b>${gameSession.word}</b> → <b>${correctAnswer}</b>\n\n`;
+    resultMessage += `🌸🎯 <b>${gameSession.word}</b> → <b>${correctAnswer}</b>\n\n`;
     resultMessage += `📝 Пример: ${gameSession.example}\n`;
     resultMessage += `💡 ${gameSession.fact}\n`;
     resultMessage += `⚠️ Частые ошибки: ${gameSession.mistakes}\n\n`;
@@ -523,7 +523,7 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `❄️🧩 <b>${gameSession.idiom}</b>\n`;
+    resultMessage += `🌷🧩 <b>${gameSession.idiom}</b>\n`;
     resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
     resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
     if (gameSession.hint) {
@@ -622,7 +622,7 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `❄️🔡 <b>${gameSession.phrasalVerb}</b>\n`;
+    resultMessage += `🌿🔡 <b>${gameSession.phrasalVerb}</b>\n`;
     resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
     resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
     if (gameSession.hint) {
@@ -720,8 +720,11 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `❄️🧠 <b>${gameSession.question}</b>\n`;
+    resultMessage += `🌼🧠 <b>${gameSession.question}</b>\n`;
     resultMessage += `🎯 Правильный ответ: <b>${correctAnswer}</b>\n`;
+    if (gameSession.hint) {
+      resultMessage += `💡 Подсказка: ${gameSession.hint}\n`;
+    }
     if (gameSession.explanation) {
       resultMessage += `ℹ️ ${gameSession.explanation}\n`;
     }

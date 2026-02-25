@@ -20,7 +20,7 @@ export async function dailyFactBroadcast(bot) {
       await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать ежедневный факт');
       return;
     }
-    const decoratedFact = `❄️🎄 ${fact}`;
+    const decoratedFact = `🌷✨ ${fact}`;
 
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -135,7 +135,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
           await sendUserMessage(
             bot,
             userId,
-            `${timeoutMessagePrefix} Правильный перевод:\n❄️🎄 ${session.word} → ${session.translation}\n\n📝 Пример: ${session.example}\n💡 ${session.fact}\n⚠️ Частые ошибки: ${session.mistakes}\n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
+            `${timeoutMessagePrefix} Правильный перевод:\n🌸📘 ${session.word} → ${session.translation}\n\n📝 Пример: ${session.example}\n💡 ${session.fact}\n⚠️ Частые ошибки: ${session.mistakes}\n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
             { parse_mode: 'HTML' }
           );
 
@@ -153,7 +153,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         });
 
         return {
-          text: `❄️🎯 <b>Word of the Day</b>\n${broadcastWord.word}\n\n📝 Пример: ${broadcastWord.example}\n💡 ${broadcastWord.fact}\n\nВыберите правильный перевод:`,
+          text: `🌸🎯 <b>Word of the Day</b>\n${broadcastWord.word}\n\n📝 Пример: ${broadcastWord.example}\n💡 ${broadcastWord.fact}\n\nВыберите правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -205,7 +205,7 @@ export async function idiomGameBroadcast(bot, userSessions) {
         });
 
         return {
-          text: `❄️🧩 <b>Idiom of the Day</b>\n${idiomData.idiom}\n\n📝 Пример: ${idiomData.example || '—'}\n💡 Hint: ${idiomData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          text: `🌷🧩 <b>Idiom of the Day</b>\n${idiomData.idiom}\n\n📝 Пример: ${idiomData.example || '—'}\n💡 Подсказка: ${idiomData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -276,7 +276,7 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
         });
 
         return {
-          text: `❄️🔤 <b>Phrasal Verb of the Day</b>\n${phrasalVerbData.phrasalVerb}\n\n📝 Пример: ${phrasalVerbData.example || '—'}\n💡 Hint: ${phrasalVerbData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          text: `🌿🔤 <b>Phrasal Verb of the Day</b>\n${phrasalVerbData.phrasalVerb}\n\n📝 Пример: ${phrasalVerbData.example || '—'}\n💡 Подсказка: ${phrasalVerbData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -353,12 +353,13 @@ export async function quizGameBroadcast(bot, userSessions) {
           question: quizData.question,
           options: quizData.options,
           correctIndex: quizData.correctIndex,
+          hint: quizData.hint,
           explanation: quizData.explanation,
           startTime: Date.now()
         });
 
         return {
-          text: `❄️🧠 <b>Quiz of the Day</b>\n${quizData.question}\n\nВыбери правильный ответ:`,
+          text: `🌼🧠 <b>Quiz of the Day</b>\n${quizData.question}\n\n💡 Подсказка: ${quizData.hint || 'Подумай про контекст Международного женского дня'}\n\nВыбери правильный ответ:`,
           reply_markup: keyboard
         };
       },

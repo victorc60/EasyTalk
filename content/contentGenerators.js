@@ -65,64 +65,64 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  // Always keep facts aligned with Valentine's Day, romance, and love traditions
-  const VALENTINE_TOPICS = [
-    'valentines_history',
-    'romantic_traditions',
-    'love_symbols',
-    'flowers_and_roses',
-    'chocolate_and_gifts',
-    'cupid_and_mythology',
-    'famous_love_letters',
-    'wedding_and_proposals',
-    'love_science_and_psychology',
-    'romantic_art_and_music',
-    'cultural_valentine_variants',
-    'relationship_rituals',
-    'languages_of_love',
-    'historic_couples',
-    'heart_iconography'
+  // Keep facts aligned with International Women's Day in a broad, engaging way
+  const WOMENS_DAY_TOPICS = [
+    'international_womens_day_history',
+    'women_in_science',
+    'women_in_sports',
+    'women_in_technology',
+    'women_in_business',
+    'women_in_art_and_culture',
+    'education_and_equal_access',
+    'male_allies_and_teamwork',
+    'women_innovation_milestones',
+    'women_in_space',
+    'women_in_medicine',
+    'women_leadership_examples',
+    'global_iwd_traditions',
+    'women_rights_progress',
+    'inclusive_workplace_practices'
   ];
 
-  const selectedTopic = VALENTINE_TOPICS[Math.floor(Math.random() * VALENTINE_TOPICS.length)];
+  const selectedTopic = WOMENS_DAY_TOPICS[Math.floor(Math.random() * WOMENS_DAY_TOPICS.length)];
 
-  const PROMPT = `Generate a mind-blowing, fascinating fact about ${selectedTopic} that will make people say "Wow, that's incredible!" The fact must:
-  - Be clearly tied to Valentine's Day, romance, or love traditions (mention that context explicitly)
+  const PROMPT = `Generate one fascinating fact about ${selectedTopic} related to International Women's Day (March 8). The fact must:
+  - Be clearly tied to International Women's Day, women's achievements, or gender equality progress
   - Be completely true and accurate
-  - Be surprising and shareable
+  - Be surprising, practical, and interesting for both women and men
   - Fit teens and adults
-  - Not be common trivia
+  - Avoid cliches and obvious trivia
   
   Include:
-  - The fact in English (1-2 sentences, make it exciting)
+  - The fact in English (1-2 sentences)
   - Translation in Russian (accurate and natural)
-  - Brief explanation of why it's fascinating (1 sentence)
+  - Brief explanation of why it's important today (1 sentence)
   
   Format exactly as:
   🇬🇧 [fact]
   🇷🇺 [translation]
   💡 [explanation]
   
-  Make it truly amazing and unforgettable!`;
+  Keep wording concise and vivid.`;
   
   const MAX_ATTEMPTS = 5;
   const DEFAULT_FACTS = [
-    `🇬🇧 The first known Valentine love letter was written in 1415 by Charles, Duke of Orleans, from the Tower of London.\n🇷🇺 Первое известное любовное письмо ко Дню святого Валентина написал в 1415 году герцог Орлеанский из Тауэра.\n💡 The poem is still preserved in the British Library, proving February love notes are a 600-year tradition!`,
-    `🇬🇧 Victorians used flowers as a secret code: a red rose meant “I love you,” while yellow roses meant friendship.\n🇷🇺 Викторианцы общались языком цветов: красная роза означала «я тебя люблю», а жёлтые розы — дружбу.\n💡 The practice was called floriography, letting people send feelings without words.`,
-    `🇬🇧 The heart shape may come from the seed of an extinct plant, silphium, prized as an ancient love potion.\n🇷🇺 Сердечко могло появиться из формы семени вымершего растения сильфиума, ценившегося как любовное средство.\n💡 The seed was printed on ancient coins, giving us the curved-heart outline we still draw.`,
-    `🇬🇧 The very first heart-shaped chocolate box was sold by Richard Cadbury in 1861 as a keepsake you could reuse.\n🇷🇺 Первая коробка конфет в форме сердца вышла у Ричарда Кэдбери в 1861 году как сувенир, который можно хранить.\n💡 He designed it so people would save the box for love letters after the chocolates were gone.`,
-    `🇬🇧 Japan celebrates Valentine's Day twice: women gift chocolate on February 14, and men return gifts on White Day, March 14.\n🇷🇺 В Японии День святого Валентина отмечают дважды: 14 февраля женщины дарят шоколад, а 14 марта мужчины отвечают на White Day.\n💡 The tradition boosts chocolate sales and keeps the romantic exchange going for a month.`,
-    `🇬🇧 More than 8 billion conversation hearts can be made for one season—enough to stretch from New York to Paris and back.\n🇷🇺 За сезон производят свыше 8 миллиардов конфеток-сердечек — их хватит, чтобы растянуть цепочку от Нью-Йорка до Парижа и обратно.\n💡 The tiny candies have printed messages because early ones were stamped by hand like tickets.`,
-    `🇬🇧 Love locks on bridges started in the early 2000s and quickly spread worldwide, despite cities removing tons of padlocks for safety.\n🇷🇺 Замочки любви на мостах появились в начале 2000-х и быстро распространились по миру, хотя города снимают тонны замков ради безопасности.\n💡 Even when cities cut them off, couples keep returning to leave a new symbol of commitment.`,
-    `🇬🇧 The longest recorded marriage lasted 86 years and 290 days between Zelmyra and Herbert Fisher from North Carolina.\n🇷🇺 Самый долгий зарегистрированный брак длился 86 лет и 290 дней у Зелмиры и Герберта Фишер из Северной Каролины.\n💡 They married in 1924 and credited patience and humor as their secret to lasting love.`,
-    `🇬🇧 Cupid began as Eros in Greek mythology—a lean, mischievous god of desire—before Renaissance art turned him into the chubby cherub we know.\n🇷🇺 Купидон вырос из Эроса в греческих мифах — худого бога желания, которого Возрождение превратило в пухлого амура.\n💡 Artists softened him to make the idea of sudden love feel playful rather than dangerous.`,
-    `🇬🇧 The tradition of carving wooden “love spoons” in Wales dates back to the 1600s as a handmade promise of affection.\n🇷🇺 Традиция вырезать деревянные «ложки любви» в Уэльсе возникла в XVII веке как сделанный руками знак привязанности.\n💡 Each spoon’s symbols—hearts, keys, or locks—shared the carver’s hopes for the relationship.`
+    `🇬🇧 International Women's Day has been marked by the United Nations since 1975, helping turn local campaigns into a global agenda.\n🇷🇺 Организация Объединённых Наций отмечает Международный женский день с 1975 года, превращая локальные инициативы в глобальную повестку.\n💡 This made March 8 a worldwide platform for practical policy changes, not only symbolic events.`,
+    `🇬🇧 Marie Curie remains the only person to win Nobel Prizes in two different sciences: Physics and Chemistry.\n🇷🇺 Мария Кюри остаётся единственным человеком, получившим Нобелевские премии в двух разных науках: физике и химии.\n💡 Her record is a strong reminder that talent grows when barriers are removed.`,
+    `🇬🇧 The first computer algorithm was published by Ada Lovelace in 1843, long before modern computers existed.\n🇷🇺 Первый компьютерный алгоритм опубликовала Ада Лавлейс в 1843 году, задолго до появления современных компьютеров.\n💡 Her work shows how big breakthroughs often start as bold ideas on paper.`,
+    `🇬🇧 Katherine Johnson's calculations were critical for early NASA missions, including John Glenn's orbital flight.\n🇷🇺 Расчёты Кэтрин Джонсон были критически важны для ранних миссий NASA, включая орбитальный полёт Джона Гленна.\n💡 Precision and teamwork in STEM depend on diverse experts doing high-stakes work together.`,
+    `🇬🇧 International Women's Day themes often focus on access to education, because each extra year of schooling is linked to higher lifetime income.\n🇷🇺 Темы Международного женского дня часто связаны с доступом к образованию, потому что каждый дополнительный год обучения повышает доход в течение жизни.\n💡 Education is one of the most measurable tools for long-term social progress.`,
+    `🇬🇧 Women-led teams are repeatedly linked to stronger collaboration scores in workplace studies.\n🇷🇺 В исследованиях рабочих команд коллективы с женским лидерством часто показывают более высокий уровень сотрудничества.\n💡 Better collaboration benefits everyone in the team, regardless of gender.`,
+    `🇬🇧 In many countries, men join March 8 events as mentors and allies, helping turn awareness into shared action.\n🇷🇺 Во многих странах мужчины участвуют в мероприятиях 8 Марта как наставники и союзники, превращая обсуждение в совместные действия.\n💡 Equality progresses faster when responsibility is shared by everyone.`,
+    `🇬🇧 Women's football now draws massive global audiences, showing how quickly support grows when visibility improves.\n🇷🇺 Женский футбол сегодня собирает огромные международные аудитории, показывая, как быстро растёт интерес при лучшей видимости.\n💡 Investment plus media access can rapidly expand any sport ecosystem.`,
+    `🇬🇧 March 8 is celebrated differently worldwide: from policy forums to school projects and community volunteering.\n🇷🇺 8 Марта отмечают по-разному во всём мире: от экспертных форумов до школьных проектов и волонтёрских инициатив.\n💡 The variety of formats helps people connect values with real local action.`,
+    `🇬🇧 Mentorship programs for girls and young women are one of the most scalable ways to increase participation in tech and science.\n🇷🇺 Менторские программы для девушек и молодых женщин считаются одним из самых масштабируемых способов увеличить участие в технологиях и науке.\n💡 A single mentor can influence dozens of future career choices.`
   ];
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
       // Add topic variety to the prompt to avoid repetition
-      const topicPrompt = attempt > 0 ? `\n\nTry a different topic from this list: ${TOPICS.join(', ')}. Avoid repeating any previous facts.` : '';
+      const topicPrompt = attempt > 0 ? `\n\nTry a different topic from this list: ${WOMENS_DAY_TOPICS.join(', ')}. Avoid repeating any previous facts.` : '';
       const fact = await generateEnglishContent(PROMPT + topicPrompt);
 
       // Проверяем, что факт не пустой и соответствует формату
@@ -601,6 +601,7 @@ function loadCuratedQuizBank() {
         options: entry.options.map(opt => (opt || '').toString().trim()).filter(Boolean),
         correctIndex: Math.max(0, Math.min(entry.correctIndex, (entry.options?.length || 1) - 1)),
         explanation: entry.explanation || '',
+        hint: entry.hint || '',
         topic: entry.topic || 'general'
       }))
       .filter(entry => entry.options.length >= 2);
@@ -1332,7 +1333,8 @@ export async function quizOfTheDay() {
     question: quizEntry.question,
     options,
     correctIndex,
-    explanation: quizEntry.explanation || ''
+    explanation: quizEntry.explanation || '',
+    hint: quizEntry.hint || ''
   };
 }
 
