@@ -14,6 +14,9 @@ import './models/DailyWordGame.js';
 import './models/Poll.js';
 import './models/PollDelivery.js';
 import './models/PollResponse.js';
+import './models/MiniEventDay.js';
+import './models/MiniEventParticipant.js';
+import './models/MiniEventResponse.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });

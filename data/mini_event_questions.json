@@ -1,0 +1,162 @@
+[
+  {
+    "id": "grammar_01",
+    "type": "fill_gap",
+    "question": "Choose the correct option: She ___ to work every day.",
+    "options": ["go", "goes", "going", "gone"],
+    "correctIndex": 1,
+    "explanation": "With she/he/it in Present Simple, add -s."
+  },
+  {
+    "id": "grammar_02",
+    "type": "fill_gap",
+    "question": "Choose the correct option: They ___ dinner right now.",
+    "options": ["have", "are having", "had", "has"],
+    "correctIndex": 1,
+    "explanation": "Right now usually means Present Continuous."
+  },
+  {
+    "id": "grammar_03",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Я уже сделал домашнее задание\".",
+    "options": ["I already did homework.", "I have already done my homework.", "I am already doing homework.", "I do already homework."],
+    "correctIndex": 1,
+    "explanation": "Use Present Perfect for a completed action with current relevance."
+  },
+  {
+    "id": "grammar_04",
+    "type": "article",
+    "question": "Choose the correct article: I bought ___ umbrella because it was raining.",
+    "options": ["a", "an", "the", "-"],
+    "correctIndex": 1,
+    "explanation": "Umbrella starts with a vowel sound, so use an."
+  },
+  {
+    "id": "grammar_05",
+    "type": "preposition",
+    "question": "Choose the correct preposition: We are interested ___ learning English.",
+    "options": ["at", "on", "in", "for"],
+    "correctIndex": 2,
+    "explanation": "The fixed phrase is interested in."
+  },
+  {
+    "id": "grammar_06",
+    "type": "verb_form",
+    "question": "Choose the correct form: If it ___ tomorrow, we will stay home.",
+    "options": ["rains", "will rain", "rained", "rain"],
+    "correctIndex": 0,
+    "explanation": "In the if-clause of First Conditional, use Present Simple."
+  },
+  {
+    "id": "grammar_07",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Я привык вставать рано\".",
+    "options": ["I am used to getting up early.", "I use to get up early.", "I am use to get up early.", "I used getting up early."],
+    "correctIndex": 0,
+    "explanation": "Be used to + noun/gerund."
+  },
+  {
+    "id": "grammar_08",
+    "type": "comparison",
+    "question": "Choose the correct option: This exercise is ___ than the previous one.",
+    "options": ["difficult", "more difficult", "most difficult", "the more difficult"],
+    "correctIndex": 1,
+    "explanation": "For longer adjectives, use more + adjective in comparative form."
+  },
+  {
+    "id": "grammar_09",
+    "type": "modal",
+    "question": "Choose the best option: You ___ wear a seatbelt while driving.",
+    "options": ["must", "must to", "should to", "can to"],
+    "correctIndex": 0,
+    "explanation": "Must expresses strong obligation and does not take 'to'."
+  },
+  {
+    "id": "grammar_10",
+    "type": "verb_pattern",
+    "question": "Choose the correct option: I enjoy ___ books in English.",
+    "options": ["read", "to read", "reading", "to reading"],
+    "correctIndex": 2,
+    "explanation": "Enjoy is followed by a gerund (-ing)."
+  },
+  {
+    "id": "grammar_11",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Он сказал, что придет позже\".",
+    "options": ["He said that he will come later.", "He said that he would come later.", "He says that he would come later.", "He said that he comes later."],
+    "correctIndex": 1,
+    "explanation": "In reported speech after a past verb, will often shifts to would."
+  },
+  {
+    "id": "grammar_12",
+    "type": "question_form",
+    "question": "Choose the correct question: ___ you ever been to London?",
+    "options": ["Did", "Do", "Have", "Are"],
+    "correctIndex": 2,
+    "explanation": "Ever been uses Present Perfect: Have you ever been..."
+  },
+  {
+    "id": "grammar_13",
+    "type": "article",
+    "question": "Choose the best option: ___ sun rises in the east.",
+    "options": ["A", "An", "The", "-"],
+    "correctIndex": 2,
+    "explanation": "Unique things in nature usually take the definite article: the sun."
+  },
+  {
+    "id": "grammar_14",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Мне нужно улучшить произношение\".",
+    "options": ["I need improve pronunciation.", "I need to improve my pronunciation.", "I need improving pronunciation.", "I need for improve pronunciation."],
+    "correctIndex": 1,
+    "explanation": "Need is commonly followed by to + verb."
+  },
+  {
+    "id": "grammar_15",
+    "type": "time_expression",
+    "question": "Choose the correct option: I have lived here ___ 2019.",
+    "options": ["for", "since", "from", "during"],
+    "correctIndex": 1,
+    "explanation": "Since is used with a starting point in time."
+  },
+  {
+    "id": "grammar_16",
+    "type": "passive",
+    "question": "Choose the correct passive form: The letter ___ yesterday.",
+    "options": ["sent", "was sent", "is sent", "has sent"],
+    "correctIndex": 1,
+    "explanation": "Past Simple Passive: was/were + past participle."
+  },
+  {
+    "id": "grammar_17",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Если бы у меня было больше времени, я бы больше читал\".",
+    "options": ["If I have more time, I read more.", "If I had more time, I would read more.", "If I would have more time, I read more.", "If I had more time, I will read more."],
+    "correctIndex": 1,
+    "explanation": "Second Conditional: If + Past Simple, would + verb."
+  },
+  {
+    "id": "grammar_18",
+    "type": "relative_clause",
+    "question": "Choose the correct option: The woman ___ lives next door is a doctor.",
+    "options": ["which", "who", "where", "whose"],
+    "correctIndex": 1,
+    "explanation": "Use who for people in relative clauses."
+  },
+  {
+    "id": "grammar_19",
+    "type": "word_order",
+    "question": "Choose the correct sentence:",
+    "options": ["Always I drink coffee in the morning.", "I drink always coffee in the morning.", "I always drink coffee in the morning.", "I drink coffee always in the morning."],
+    "correctIndex": 2,
+    "explanation": "Adverbs of frequency usually go before the main verb."
+  },
+  {
+    "id": "grammar_20",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Мы собираемся поехать в отпуск летом\".",
+    "options": ["We are going to go on vacation in summer.", "We go to vacation in summer.", "We are go on vacation in summer.", "We going to vacation in summer."],
+    "correctIndex": 0,
+    "explanation": "Be going to + verb for plans/intention."
+  }
+]

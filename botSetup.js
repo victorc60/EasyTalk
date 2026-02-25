@@ -5,7 +5,8 @@ import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
+import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -96,6 +97,21 @@ function setupSchedulers(bot, userSessions) {
         quizGameBroadcast(bot, userSessions);
       }
     );
+
+    // Субботнее приглашение на мини-ивент
+    schedule.scheduleJob(
+      { dayOfWeek: 6, hour: 11, minute: 0, tz: 'Europe/Moscow' },
+      async () => {
+        console.log('Запуск рассылки приглашения mini-event');
+        await broadcastMiniEventInvite(bot);
+      }
+    );
+
+    // Минутный тикер мини-ивента (вопросы отправляются по готовности участника)
+    schedule.scheduleJob('*/1 * * * *', async () => {
+      await processMiniEventQueue(bot);
+      await finalizeEventDay(bot);
+    });
     
     // Статистика ежедневной игры со словами в 00:05 по Москве
     schedule.scheduleJob(CONFIG.WORD_GAME_STATS_TIME, () => {
@@ -160,6 +176,7 @@ async function setupBotCommands(bot) {
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
       { command: 'topic', description: 'Тема для обсуждения' },
       { command: 'story', description: 'Voice storytelling with audio' },
+      { command: 'mini_game', description: 'Субботняя мини-игра (10 вопросов)' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'leaders', description: 'Таблица лидеров' },
       { command: 'mode', description: 'Выбор режима общения' },
@@ -172,7 +189,9 @@ async function setupBotCommands(bot) {
     const adminOnlyCommands = [
       { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' },
       { command: 'poll', description: 'Создать опрос (админ)' },
-      { command: 'poll_results', description: 'Результаты опроса (админ)' }
+      { command: 'poll_results', description: 'Результаты опроса (админ)' },
+      { command: 'mini_event_invite', description: 'Рассылка mini-event (админ)' },
+      { command: 'mini_event_finalize', description: 'Завершить mini-event (админ)' }
     ];
 
     // Устанавливаем команды для всех обычных чатов (без админских)
@@ -223,6 +242,9 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/poll_results(?:\s+\d+)?/, (msg) => showPollResults(bot, msg));
   bot.onText(/\/poll$/, (msg) => startPollCreation(bot, msg, userSessions));
   bot.onText(/\/story/, (msg) => userSessions.storyHandlers.handleStoryCommand(bot, msg, userSessions));
+  bot.onText(/\/mini_game/, (msg) => miniGame(bot, msg));
+  bot.onText(/\/mini_event_invite/, (msg) => miniEventInviteAdmin(bot, msg));
+  bot.onText(/\/mini_event_finalize/, (msg) => miniEventFinalizeAdmin(bot, msg));
   bot.onText(/\/cancel_broadcast/, async (msg) => {
     const userId = msg.from.id.toString();
     if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
@@ -238,7 +260,7 @@ function setupCommandHandlers(bot, userSessions) {
 function setupCallbacks(bot, userSessions) {
   bot.on('callback_query', async (callbackQuery) => {
     try {
-      const chatId = callbackQuery.message.chat.id;
+      const chatId = callbackQuery.message?.chat?.id || callbackQuery.from?.id;
       const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
 
@@ -269,6 +291,17 @@ function setupCallbacks(bot, userSessions) {
       // Handle story callbacks
       if (data.startsWith('story_')) {
         await userSessions.storyHandlers.handleStoryCallback(bot, callbackQuery, userSessions);
+        return;
+      }
+
+      // Handle mini-event callbacks
+      if (data.startsWith('mini_ev_join_')) {
+        await handleMiniEventJoinCallback(bot, callbackQuery);
+        return;
+      }
+
+      if (data.startsWith('mini_ev_a_')) {
+        await handleMiniEventAnswerCallback(bot, callbackQuery);
         return;
       }
 

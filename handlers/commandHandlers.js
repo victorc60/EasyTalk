@@ -18,6 +18,7 @@ import {
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
+import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay } from '../services/miniEventService.js';
 
 export async function start(bot, msg) {
   try {
@@ -247,6 +248,55 @@ export async function showProgress(bot, msg) {
       bot,
       `‼️ Ошибка в команде /progress: ${error.message}\nStack: ${error.stack}`
     );
+  }
+}
+
+export async function miniGame(bot, msg) {
+  try {
+    await sendMiniEventEntryPoint(bot, msg.chat.id, msg.from.id);
+  } catch (error) {
+    console.error('Ошибка в команде /mini_game:', error);
+    await sendUserMessage(bot, msg.chat.id, '⚠️ Не удалось открыть мини-игру. Попробуйте позже.');
+  }
+}
+
+export async function miniEventInviteAdmin(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== '340048933') {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Эта команда доступна только администратору.');
+      return;
+    }
+
+    const result = await adminTriggerMiniEventInvite(bot);
+    await sendUserMessage(
+      bot,
+      msg.chat.id,
+      `📣 Mini-event invite отправлен.\n✅ ${result.success || 0}\n❌ ${result.fails || 0}`
+    );
+  } catch (error) {
+    console.error('Ошибка в команде /mini_event_invite:', error);
+    await sendUserMessage(bot, msg.chat.id, '⚠️ Ошибка отправки invite mini-event.');
+  }
+}
+
+export async function miniEventFinalizeAdmin(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== '340048933') {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Эта команда доступна только администратору.');
+      return;
+    }
+
+    const result = await finalizeEventDay(bot, null, true);
+    if (result.ok) {
+      await sendUserMessage(bot, msg.chat.id, `✅ Mini-event завершен. Участников: ${result.participants || 0}`);
+      return;
+    }
+    await sendUserMessage(bot, msg.chat.id, `⚠️ Не удалось завершить mini-event: ${result.error}`);
+  } catch (error) {
+    console.error('Ошибка в команде /mini_event_finalize:', error);
+    await sendUserMessage(bot, msg.chat.id, '⚠️ Ошибка завершения mini-event.');
   }
 }
 
