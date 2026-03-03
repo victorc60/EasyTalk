@@ -7,6 +7,7 @@ import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wo
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
+import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -27,6 +28,9 @@ export async function setupBot(bot, userSessions, openai) {
   setupCallbacks(bot, userSessions);
   setupPollAnswerHandler(bot);
   setupMessageHandler(bot, userSessions, openai);
+  runDailyBankAuditAndAutofill(bot).catch((error) => {
+    console.error('Ошибка стартового аудита банков:', error.message);
+  });
   console.log('🤖 Бот запущен и готов к работе!');
 }
 
@@ -121,6 +125,19 @@ function setupSchedulers(bot, userSessions) {
       // Then send statistics
       notifyDailyWordGameStats(bot);
     });
+
+    // Аудит покрытия банков и автопополнение раз в 15 дней (1, 16, 31 число) в 03:00 по Москве
+    const bankAuditRule = new schedule.RecurrenceRule();
+    bankAuditRule.tz = 'Europe/Moscow';
+    bankAuditRule.date = new schedule.Range(1, 31, 15);
+    bankAuditRule.hour = 3;
+    bankAuditRule.minute = 0;
+    bankAuditRule.second = 0;
+
+    schedule.scheduleJob(bankAuditRule, async () => {
+      console.log('Запуск аудита банков контента и автопополнения (каждые 15 дней)');
+      await runDailyBankAuditAndAutofill(bot);
+    });
     
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, () => {
       console.log('Запуск cleanupInactiveUsers');
@@ -190,6 +207,7 @@ async function setupBotCommands(bot) {
       { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' },
       { command: 'poll', description: 'Создать опрос (админ)' },
       { command: 'poll_results', description: 'Результаты опроса (админ)' },
+      { command: 'bank_audit', description: 'Аудит/автопополнение банков (админ)' },
       { command: 'mini_event_invite', description: 'Рассылка mini-event (админ)' },
       { command: 'mini_event_finalize', description: 'Завершить mini-event (админ)' }
     ];
@@ -245,6 +263,21 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/mini_game/, (msg) => miniGame(bot, msg));
   bot.onText(/\/mini_event_invite/, (msg) => miniEventInviteAdmin(bot, msg));
   bot.onText(/\/mini_event_finalize/, (msg) => miniEventFinalizeAdmin(bot, msg));
+  bot.onText(/\/bank_audit/, async (msg) => {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== '340048933') {
+      await sendUserMessage(bot, msg.chat.id, '⚠️ Эта команда доступна только администратору.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    await sendUserMessage(bot, msg.chat.id, '🧠 Запускаю аудит банков и автопополнение.');
+    try {
+      await runDailyBankAuditAndAutofill(bot, { batchSize: 30 });
+      await sendUserMessage(bot, msg.chat.id, '✅ Аудит завершен. Детали отправлены администратору.');
+    } catch (error) {
+      await sendUserMessage(bot, msg.chat.id, `⚠️ Ошибка аудита: ${error.message}`);
+    }
+  });
   bot.onText(/\/cancel_broadcast/, async (msg) => {
     const userId = msg.from.id.toString();
     if (userId !== process.env.ADMIN_ID && userId !== "340048933") {

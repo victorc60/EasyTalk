@@ -8,6 +8,7 @@ import MiniEventParticipant from '../models/MiniEventParticipant.js';
 import MiniEventResponse from '../models/MiniEventResponse.js';
 import { awardPoints } from './userServices.js';
 import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
+import { appendBankHistoryEntries } from './bankLifecycleService.js';
 
 const TZ = 'Europe/Moscow';
 const QUESTIONS_PER_EVENT = 10;
@@ -17,6 +18,7 @@ const PLACE_REWARDS = [300, 200, 100];
 const MIN_INTERVAL_MS = 30 * 1000;
 
 let questionBankCache = null;
+let miniEventHistoryPathCache = null;
 
 function getMoscowNow() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: TZ }));
@@ -75,6 +77,37 @@ function loadQuestionBank() {
   return questionBankCache;
 }
 
+function getMiniEventHistoryPath() {
+  if (miniEventHistoryPathCache) {
+    return miniEventHistoryPathCache;
+  }
+
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  miniEventHistoryPathCache = path.join(__dirname, '..', 'data', 'mini_event_history.json');
+  return miniEventHistoryPathCache;
+}
+
+function loadUsedMiniEventQuestionIds() {
+  const historyPath = getMiniEventHistoryPath();
+
+  if (!fs.existsSync(historyPath)) {
+    return new Set();
+  }
+
+  try {
+    const raw = fs.readFileSync(historyPath, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return new Set();
+    }
+    return new Set(parsed.map((id) => String(id).trim()).filter(Boolean));
+  } catch (error) {
+    console.error('Ошибка чтения mini_event_history.json:', error.message);
+    return new Set();
+  }
+}
+
 function shuffleInPlace(arr) {
   for (let i = arr.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -85,8 +118,29 @@ function shuffleInPlace(arr) {
 
 function pickQuestionIds() {
   const bank = loadQuestionBank();
-  const shuffled = shuffleInPlace([...bank]);
-  return shuffled.slice(0, QUESTIONS_PER_EVENT).map((q) => q.id);
+  const usedQuestionIds = loadUsedMiniEventQuestionIds();
+  const unusedQuestions = bank.filter((q) => !usedQuestionIds.has(String(q.id)));
+  const selected = [];
+  const selectedIds = new Set();
+
+  for (const question of shuffleInPlace([...unusedQuestions])) {
+    if (selected.length >= QUESTIONS_PER_EVENT) break;
+    selected.push(question);
+    selectedIds.add(String(question.id));
+  }
+
+  if (selected.length < QUESTIONS_PER_EVENT) {
+    const fallback = shuffleInPlace([...bank]);
+    for (const question of fallback) {
+      if (selected.length >= QUESTIONS_PER_EVENT) break;
+      const key = String(question.id);
+      if (selectedIds.has(key)) continue;
+      selected.push(question);
+      selectedIds.add(key);
+    }
+  }
+
+  return selected.slice(0, QUESTIONS_PER_EVENT).map((q) => q.id);
 }
 
 function getQuestionById(questionId) {
@@ -123,14 +177,20 @@ async function getOrCreateEventDay(eventDate) {
     is_closed: false
   };
 
-  const [day] = await MiniEventDay.findOrCreate({
+  const [day, created] = await MiniEventDay.findOrCreate({
     where: { event_date: eventDate },
     defaults
   });
 
+  if (created && Array.isArray(day.question_ids)) {
+    appendBankHistoryEntries('mini_event', day.question_ids);
+  }
+
   if (!Array.isArray(day.question_ids) || day.question_ids.length < QUESTIONS_PER_EVENT) {
-    await day.update({ question_ids: pickQuestionIds(), total_questions: QUESTIONS_PER_EVENT });
+    const newQuestionIds = pickQuestionIds();
+    await day.update({ question_ids: newQuestionIds, total_questions: QUESTIONS_PER_EVENT });
     await day.reload();
+    appendBankHistoryEntries('mini_event', newQuestionIds);
   }
 
   return day;
