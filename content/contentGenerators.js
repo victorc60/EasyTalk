@@ -65,64 +65,82 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  // Keep facts aligned with International Women's Day in a broad, engaging way
-  const WOMENS_DAY_TOPICS = [
-    'international_womens_day_history',
-    'women_in_science',
-    'women_in_sports',
-    'women_in_technology',
-    'women_in_business',
-    'women_in_art_and_culture',
-    'education_and_equal_access',
-    'male_allies_and_teamwork',
-    'women_innovation_milestones',
-    'women_in_space',
-    'women_in_medicine',
-    'women_leadership_examples',
-    'global_iwd_traditions',
-    'women_rights_progress',
-    'inclusive_workplace_practices'
+  const FACT_TOPICS = [
+    'language and learning',
+    'science and space',
+    'history and inventions',
+    'psychology and habits',
+    'technology and internet culture',
+    'health and wellbeing',
+    'animals and nature',
+    'cities and world geography',
+    'food and everyday life',
+    'books and communication',
+    'work and productivity',
+    'sports and human performance',
+    'music and creativity',
+    'finance basics',
+    'critical thinking'
   ];
 
-  const selectedTopic = WOMENS_DAY_TOPICS[Math.floor(Math.random() * WOMENS_DAY_TOPICS.length)];
+  const selectedTopic = FACT_TOPICS[Math.floor(Math.random() * FACT_TOPICS.length)];
 
-  const PROMPT = `Generate one fascinating fact about ${selectedTopic} related to International Women's Day (March 8). The fact must:
-  - Be clearly tied to International Women's Day, women's achievements, or gender equality progress
-  - Be completely true and accurate
-  - Be surprising, practical, and interesting for both women and men
+  const PROMPT = `Generate one fascinating and fully accurate "fact of the day" about ${selectedTopic}. The fact must:
+  - Be true and verifiable
+  - Be surprising but easy to understand
+  - Be useful or memorable for daily life
   - Fit teens and adults
-  - Avoid cliches and obvious trivia
-  
+  - Avoid repeating common cliches
+
   Include:
   - The fact in English (1-2 sentences)
   - Translation in Russian (accurate and natural)
-  - Brief explanation of why it's important today (1 sentence)
-  
+  - Brief explanation of why it matters today (1 sentence)
+
   Format exactly as:
   🇬🇧 [fact]
   🇷🇺 [translation]
   💡 [explanation]
-  
-  Keep wording concise and vivid.`;
-  
+
+  Keep wording concise, vivid, and practical.`;
+
   const MAX_ATTEMPTS = 5;
   const DEFAULT_FACTS = [
-    `🇬🇧 International Women's Day has been marked by the United Nations since 1975, helping turn local campaigns into a global agenda.\n🇷🇺 Организация Объединённых Наций отмечает Международный женский день с 1975 года, превращая локальные инициативы в глобальную повестку.\n💡 This made March 8 a worldwide platform for practical policy changes, not only symbolic events.`,
-    `🇬🇧 Marie Curie remains the only person to win Nobel Prizes in two different sciences: Physics and Chemistry.\n🇷🇺 Мария Кюри остаётся единственным человеком, получившим Нобелевские премии в двух разных науках: физике и химии.\n💡 Her record is a strong reminder that talent grows when barriers are removed.`,
-    `🇬🇧 The first computer algorithm was published by Ada Lovelace in 1843, long before modern computers existed.\n🇷🇺 Первый компьютерный алгоритм опубликовала Ада Лавлейс в 1843 году, задолго до появления современных компьютеров.\n💡 Her work shows how big breakthroughs often start as bold ideas on paper.`,
-    `🇬🇧 Katherine Johnson's calculations were critical for early NASA missions, including John Glenn's orbital flight.\n🇷🇺 Расчёты Кэтрин Джонсон были критически важны для ранних миссий NASA, включая орбитальный полёт Джона Гленна.\n💡 Precision and teamwork in STEM depend on diverse experts doing high-stakes work together.`,
-    `🇬🇧 International Women's Day themes often focus on access to education, because each extra year of schooling is linked to higher lifetime income.\n🇷🇺 Темы Международного женского дня часто связаны с доступом к образованию, потому что каждый дополнительный год обучения повышает доход в течение жизни.\n💡 Education is one of the most measurable tools for long-term social progress.`,
-    `🇬🇧 Women-led teams are repeatedly linked to stronger collaboration scores in workplace studies.\n🇷🇺 В исследованиях рабочих команд коллективы с женским лидерством часто показывают более высокий уровень сотрудничества.\n💡 Better collaboration benefits everyone in the team, regardless of gender.`,
-    `🇬🇧 In many countries, men join March 8 events as mentors and allies, helping turn awareness into shared action.\n🇷🇺 Во многих странах мужчины участвуют в мероприятиях 8 Марта как наставники и союзники, превращая обсуждение в совместные действия.\n💡 Equality progresses faster when responsibility is shared by everyone.`,
-    `🇬🇧 Women's football now draws massive global audiences, showing how quickly support grows when visibility improves.\n🇷🇺 Женский футбол сегодня собирает огромные международные аудитории, показывая, как быстро растёт интерес при лучшей видимости.\n💡 Investment plus media access can rapidly expand any sport ecosystem.`,
-    `🇬🇧 March 8 is celebrated differently worldwide: from policy forums to school projects and community volunteering.\n🇷🇺 8 Марта отмечают по-разному во всём мире: от экспертных форумов до школьных проектов и волонтёрских инициатив.\n💡 The variety of formats helps people connect values with real local action.`,
-    `🇬🇧 Mentorship programs for girls and young women are one of the most scalable ways to increase participation in tech and science.\n🇷🇺 Менторские программы для девушек и молодых женщин считаются одним из самых масштабируемых способов увеличить участие в технологиях и науке.\n💡 A single mentor can influence dozens of future career choices.`
+    `🇬🇧 Octopuses have three hearts, and two of them stop beating while the octopus swims.\n🇷🇺 У осьминогов три сердца, и два из них перестают биться, когда осьминог плывёт.\n💡 Nature often solves problems in ways that are very different from human biology.`,
+    `🇬🇧 Honey can stay edible for years because its low moisture and acidity make life hard for bacteria.\n🇷🇺 Мёд может оставаться съедобным годами, потому что низкая влажность и кислотность мешают бактериям.\n💡 Food science explains why some products naturally last much longer than others.`,
+    `🇬🇧 Your brain uses about 20% of your body's energy even when you are resting.\n🇷🇺 Мозг использует около 20% энергии тела даже в состоянии покоя.\n💡 Mental focus is physically expensive, so breaks and sleep are not optional.`,
+    `🇬🇧 Bananas are berries in botanical terms, but strawberries are not.\n🇷🇺 С точки зрения ботаники банан - это ягода, а клубника - нет.\n💡 Scientific definitions often differ from everyday language.`,
+    `🇬🇧 The shortest war in recorded history lasted less than an hour in 1896.\n🇷🇺 Самая короткая война в письменной истории длилась меньше часа в 1896 году.\n💡 History can change dramatically in minutes, not only in years.`,
+    `🇬🇧 The Eiffel Tower can grow slightly taller in summer because metal expands in heat.\n🇷🇺 Летом Эйфелева башня может становиться немного выше, потому что металл расширяется при нагреве.\n💡 Physics affects even giant structures in everyday weather.`,
+    `🇬🇧 There are more possible chess games than atoms in the observable universe.\n🇷🇺 Возможных шахматных партий больше, чем атомов в наблюдаемой Вселенной.\n💡 Combinatorics shows how quickly possibilities explode from simple rules.`,
+    `🇬🇧 Koalas have fingerprints so similar to humans that they can confuse visual analysis.\n🇷🇺 У коал отпечатки пальцев настолько похожи на человеческие, что могут запутать визуальный анализ.\n💡 Evolution can produce surprisingly similar patterns in different species.`,
+    `🇬🇧 The human body has enough blood vessels to circle Earth more than once if laid end to end.\n🇷🇺 В теле человека достаточно кровеносных сосудов, чтобы обогнуть Землю больше одного раза, если выстроить их в линию.\n💡 Internal systems are far more complex than they appear from outside.`,
+    `🇬🇧 A day on Venus is longer than a year on Venus.\n🇷🇺 День на Венере длится дольше, чем год на Венере.\n💡 Planetary motion can be very different from Earth's familiar cycles.`,
+    `🇬🇧 Reading on paper often improves recall compared to reading the same text on a screen.\n🇷🇺 Чтение с бумаги часто улучшает запоминание по сравнению с чтением того же текста с экрана.\n💡 The medium can influence how deeply we process information.`,
+    `🇬🇧 The first email was sent in 1971, and the @ symbol became standard because it clearly separates user and host.\n🇷🇺 Первое электронное письмо отправили в 1971 году, а символ @ стал стандартом, потому что чётко разделяет пользователя и сервер.\n💡 Small design choices can shape global communication for decades.`,
+    `🇬🇧 Trees can communicate stress through chemical signals and help nearby plants prepare defenses.\n🇷🇺 Деревья могут передавать сигналы стресса через химические вещества и помогать соседним растениям готовить защиту.\n💡 Ecosystems behave more like connected networks than isolated organisms.`,
+    `🇬🇧 The Pacific Ocean is wider than the Moon's diameter.\n🇷🇺 Тихий океан шире диаметра Луны.\n💡 Comparing familiar objects with space scales changes our intuition quickly.`,
+    `🇬🇧 Writing goals down increases the chance of following through compared to keeping them only in your head.\n🇷🇺 Запись целей повышает вероятность довести их до результата по сравнению с целями только в голове.\n💡 Externalizing plans makes action more concrete and trackable.`,
+    `🇬🇧 The first mechanical alarm clocks could ring only at one fixed time.\n🇷🇺 Первые механические будильники могли звонить только в одно фиксированное время.\n💡 Everyday tools become flexible through many small iterations.`,
+    `🇬🇧 The word 'robot' comes from a Czech word meaning forced labor.\n🇷🇺 Слово «robot» происходит от чешского слова со значением «подневольный труд».\n💡 Language history often reveals old social ideas behind modern terms.`,
+    `🇬🇧 Your sense of smell is strongly linked with memory because related brain regions are tightly connected.\n🇷🇺 Обоняние тесно связано с памятью, потому что соответствующие зоны мозга сильно взаимосвязаны.\n💡 This is why a single smell can instantly trigger old memories.`,
+    `🇬🇧 Ice is less dense than liquid water, which is why it floats.\n🇷🇺 Лёд менее плотный, чем жидкая вода, поэтому он плавает.\n💡 This unusual property helps lakes keep life under the ice in winter.`,
+    `🇬🇧 The first known vending machine was built in ancient Egypt to dispense holy water.\n🇷🇺 Первый известный торговый автомат был создан в Древнем Египте и выдавал святую воду.\n💡 Automation ideas are much older than modern electronics.`,
+    `🇬🇧 Sunlight takes about 8 minutes to reach Earth.\n🇷🇺 Солнечному свету требуется около 8 минут, чтобы долететь до Земли.\n💡 Even the nearest star is far enough to make light-delay visible.`,
+    `🇬🇧 Short walks can improve creative thinking compared to staying seated for long periods.\n🇷🇺 Короткие прогулки могут улучшать творческое мышление по сравнению с долгим сидением.\n💡 Movement helps reset attention and generate fresh ideas.`,
+    `🇬🇧 Penguins have knees, but they are hidden under feathers and body structure.\n🇷🇺 У пингвинов есть колени, но они скрыты перьями и строением тела.\n💡 Appearance can hide familiar anatomy in unexpected ways.`,
+    `🇬🇧 The dot over lowercase i and j has a name: a tittle.\n🇷🇺 Точка над строчными i и j имеет отдельное название: tittle.\n💡 Tiny language details can carry precise technical terms.`,
+    `🇬🇧 In many languages, the most common words are short because frequent use favors efficiency.\n🇷🇺 Во многих языках самые частые слова короткие, потому что частое использование требует эффективности.\n💡 Communication systems naturally optimize for speed and effort.`,
+    `🇬🇧 Saturn is so low in average density that it would float in a large enough body of water.\n🇷🇺 Средняя плотность Сатурна настолько низкая, что он плавал бы в достаточно большом водоёме.\n💡 Planet size does not always mean higher density.`,
+    `🇬🇧 A typical lightning bolt is hotter than the surface of the Sun for a brief moment.\n🇷🇺 Температура обычной молнии на короткий момент выше температуры поверхности Солнца.\n💡 Extreme physical events can happen around us very quickly.`,
+    `🇬🇧 People tend to remember unfinished tasks better than finished ones, known as the Zeigarnik effect.\n🇷🇺 Люди часто лучше помнят незавершённые задачи, это называют эффектом Зейгарник.\n💡 Closing small tasks reduces mental load and improves focus.`,
+    `🇬🇧 The first webcams were used to check coffee pots remotely in offices.\n🇷🇺 Первые веб-камеры использовали в офисах, чтобы удалённо проверять, есть ли кофе в кофейнике.\n💡 Many big technologies start with small practical annoyances.`,
+    `🇬🇧 Some turtles can breathe partly through specialized tissues near their tail while resting underwater.\n🇷🇺 Некоторые черепахи могут частично дышать через специальные ткани возле хвоста, когда отдыхают под водой.\n💡 Biology includes many adaptive mechanisms beyond textbook basics.`
   ];
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
-      // Add topic variety to the prompt to avoid repetition
-      const topicPrompt = attempt > 0 ? `\n\nTry a different topic from this list: ${WOMENS_DAY_TOPICS.join(', ')}. Avoid repeating any previous facts.` : '';
+      const topicPrompt = attempt > 0 ? `\n\nTry a different topic from this list: ${FACT_TOPICS.join(', ')}. Avoid repeating any previous facts.` : '';
       const fact = await generateEnglishContent(PROMPT + topicPrompt);
 
       // Проверяем, что факт не пустой и соответствует формату
@@ -152,6 +170,7 @@ export async function dailyFact() {
         }
         usedFactsCache.add(factKey);
         usedFactsCache.add(factKey2);
+        saveUsedFactsToDisk();
         console.log(`New fascinating fact generated about ${selectedTopic}: ${fact.substring(0, 100)}...`);
         return fact;
       } else {
@@ -173,11 +192,13 @@ export async function dailyFact() {
     const selectedFact = availableDefaultFacts[Math.floor(Math.random() * availableDefaultFacts.length)];
     const factKey = hashString(selectedFact.substring(0, 100));
     usedFactsCache.add(factKey);
+    saveUsedFactsToDisk();
     return selectedFact;
   } else {
     // If all default facts have been used, clear some cache and return a random one
     const oldestKey = usedFactsCache.values().next().value;
     if (oldestKey) usedFactsCache.delete(oldestKey);
+    saveUsedFactsToDisk();
   return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
   }
 }
@@ -202,6 +223,7 @@ let availableCuratedPhrasalVerbs = [];
 const usedQuizCache = new Set();
 const QUIZ_HISTORY_FILE = path.resolve(process.cwd(), 'data/quiz_history.json');
 const QUIZ_BANK_FILE = path.resolve(process.cwd(), 'data/quiz_bank.json');
+const FACT_HISTORY_FILE = path.resolve(process.cwd(), 'data/fact_history.json');
 let curatedQuizBank = [];
 const HOLIDAY_IDIOMS = [
   {
@@ -479,6 +501,42 @@ function saveUsedQuizToDisk() {
   }
 }
 
+function loadUsedFactsFromDisk() {
+  try {
+    if (fs.existsSync(FACT_HISTORY_FILE)) {
+      const raw = fs.readFileSync(FACT_HISTORY_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        for (const factKey of parsed) {
+          if (typeof factKey === 'string' && factKey.trim()) {
+            usedFactsCache.add(factKey.trim());
+          }
+        }
+        console.log(`📒 Загружено ${usedFactsCache.size} ключей фактов из истории`);
+      }
+    } else {
+      console.log('📒 Файл истории фактов не найден, создаём новый');
+    }
+  } catch (error) {
+    console.error('Не удалось загрузить историю фактов:', error.message);
+  }
+}
+
+function saveUsedFactsToDisk() {
+  try {
+    const dir = path.dirname(FACT_HISTORY_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const factKeys = Array.from(usedFactsCache);
+    const trimmed = factKeys.slice(Math.max(0, factKeys.length - CACHE_LIMIT));
+    fs.writeFileSync(FACT_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+    console.log(`💾 Сохранено ${trimmed.length} ключей фактов в историю`);
+  } catch (error) {
+    console.error('Не удалось сохранить историю фактов:', error.message);
+  }
+}
+
 function loadCuratedWordBank() {
   try {
     if (!fs.existsSync(WORD_BANK_FILE)) {
@@ -653,6 +711,7 @@ loadCuratedPhrasalVerbsBank();
 rebuildCuratedPhrasalVerbsPool();
 loadUsedQuizFromDisk();
 loadCuratedQuizBank();
+loadUsedFactsFromDisk();
 
 // Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {
