@@ -43,6 +43,7 @@ export const CONFIG = {
   IDIOM_GAME_TIME: { hour: 13, minute: 0, tz: 'Europe/Moscow' },
   PHRASAL_VERB_GAME_TIME: { hour: 20, minute: 0, tz: 'Europe/Moscow' },
   QUIZ_GAME_TIME: { hour: 8, minute: 30, tz: 'Europe/Moscow' },
+  WEEKLY_LEADERBOARD_TIME: { dayOfWeek: 0, hour: 21, minute: 5, tz: 'Europe/Moscow' },
   WORD_GAME_STATS_TIME: { hour: 0, minute: 5, tz: 'Europe/Moscow' },
   CLEANUP_TIME: '0 12 * * 0',
   WORD_GAME_TIMEOUT: null,

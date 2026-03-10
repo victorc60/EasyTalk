@@ -7,8 +7,240 @@ import { recordWordGameParticipation, saveDailyWordData, getSavedDailyWordData }
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import { Op, fn, col } from 'sequelize';
+import WordGameParticipation from '../models/WordGameParticipation.js';
+import MiniEventParticipant from '../models/MiniEventParticipant.js';
 
 let phrasalVerbRepeatWarningSent = false;
+const WEEKLY_REWARD_HISTORY_FILE = path.resolve(process.cwd(), 'data/weekly_leaderboard_rewards.json');
+const BONUS_BY_PLACE = [100, 75, 50];
+
+function getMoscowNow() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+}
+
+function formatDateOnly(date) {
+  const y = date.getFullYear();
+  const m = `${date.getMonth() + 1}`.padStart(2, '0');
+  const d = `${date.getDate()}`.padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function getWeekBoundsMoscow(refDate = new Date()) {
+  const moscow = new Date(refDate.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+  const weekDay = moscow.getDay(); // 0 - Sun, 1 - Mon, ...
+  const mondayOffset = (weekDay + 6) % 7;
+
+  const weekStart = new Date(moscow);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - mondayOffset);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const weekStartKey = formatDateOnly(weekStart);
+  const weekEndKey = formatDateOnly(weekEnd);
+
+  return {
+    weekStart,
+    weekEnd,
+    weekStartKey,
+    weekEndKey,
+    weekKey: `${weekStartKey}_${weekEndKey}`
+  };
+}
+
+function readWeeklyRewardHistory() {
+  try {
+    if (!fs.existsSync(WEEKLY_REWARD_HISTORY_FILE)) {
+      return { weeks: {} };
+    }
+    const raw = fs.readFileSync(WEEKLY_REWARD_HISTORY_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || typeof parsed.weeks !== 'object') {
+      return { weeks: {} };
+    }
+    return parsed;
+  } catch (error) {
+    console.error('Ошибка чтения weekly leaderboard history:', error.message);
+    return { weeks: {} };
+  }
+}
+
+function writeWeeklyRewardHistory(history) {
+  try {
+    const dir = path.dirname(WEEKLY_REWARD_HISTORY_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(WEEKLY_REWARD_HISTORY_FILE, JSON.stringify(history, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Ошибка записи weekly leaderboard history:', error.message);
+  }
+}
+
+async function getWeeklyLeaders(weekStartKey, weekEndKey) {
+  const [gameRows, miniEventRows] = await Promise.all([
+    WordGameParticipation.findAll({
+      attributes: [
+        'user_id',
+        [fn('SUM', col('points_earned')), 'total_points']
+      ],
+      where: {
+        game_date: {
+          [Op.between]: [weekStartKey, weekEndKey]
+        }
+      },
+      group: ['user_id'],
+      raw: true
+    }),
+    MiniEventParticipant.findAll({
+      attributes: [
+        'user_id',
+        [fn('SUM', col('reward_points')), 'total_points']
+      ],
+      where: {
+        event_date: {
+          [Op.between]: [weekStartKey, weekEndKey]
+        },
+        award_granted: true
+      },
+      group: ['user_id'],
+      raw: true
+    })
+  ]);
+
+  const pointsByUser = new Map();
+
+  for (const row of gameRows) {
+    const userId = String(row.user_id);
+    const total = Number(row.total_points) || 0;
+    pointsByUser.set(userId, (pointsByUser.get(userId) || 0) + total);
+  }
+
+  for (const row of miniEventRows) {
+    const userId = String(row.user_id);
+    const total = Number(row.total_points) || 0;
+    pointsByUser.set(userId, (pointsByUser.get(userId) || 0) + total);
+  }
+
+  const userIds = Array.from(pointsByUser.keys());
+  if (!userIds.length) {
+    return [];
+  }
+
+  const users = await User.findAll({
+    where: { telegram_id: userIds },
+    attributes: ['telegram_id', 'username', 'first_name', 'points'],
+    raw: true
+  });
+
+  const usersById = new Map(users.map((u) => [String(u.telegram_id), u]));
+
+  return userIds
+    .map((id) => {
+      const u = usersById.get(id) || {};
+      return {
+        userId: id,
+        weeklyPoints: pointsByUser.get(id) || 0,
+        totalPoints: Number(u.points) || 0,
+        displayName: u.username || u.first_name || `Игрок ${id}`
+      };
+    })
+    .filter((u) => u.weeklyPoints > 0)
+    .sort((a, b) => {
+      if (b.weeklyPoints !== a.weeklyPoints) return b.weeklyPoints - a.weeklyPoints;
+      if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+      return a.displayName.localeCompare(b.displayName, 'ru');
+    });
+}
+
+function buildWeeklyLeaderboardMessage(leaders, weekStartKey, weekEndKey, rewardedPlacesCount) {
+  const rankIcons = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+  const topFive = leaders.slice(0, 5);
+
+  let text = `🏆 <b>Итоги недели EasyTalk</b>\n`;
+  text += `📅 Период: ${weekStartKey} — ${weekEndKey}\n\n`;
+
+  if (!topFive.length) {
+    text += `Пока никто не набрал очков за эту неделю.\n`;
+    text += `Начинаем новую неделю с нуля и врываемся в топ! 🚀`;
+    return text;
+  }
+
+  text += `<b>Лидеры недели:</b>\n`;
+  text += topFive
+    .map((row, index) => `${rankIcons[index] || `${index + 1}.`} ${row.displayName} — <b>${row.weeklyPoints}</b> очков`)
+    .join('\n');
+
+  text += `\n\n🎉 Поздравляем победителей!`;
+  if (rewardedPlacesCount > 0) {
+    text += `\n🎁 Бонусы за неделю начислены: 1 место +100, 2 место +75, 3 место +50 очков.`;
+  }
+
+  text += `\n\n💪 Новая неделя = новый шанс подняться выше.`;
+  text += `\nПродолжай практиковать английский каждый день, и ты точно окажешься в топе!`;
+
+  return text;
+}
+
+export async function weeklyLeaderboardBroadcast(bot) {
+  try {
+    const { weekStartKey, weekEndKey, weekKey } = getWeekBoundsMoscow(getMoscowNow());
+    const leaders = await getWeeklyLeaders(weekStartKey, weekEndKey);
+    const topThree = leaders.slice(0, 3);
+
+    const history = readWeeklyRewardHistory();
+    const weekRecord = history.weeks?.[weekKey] || null;
+    const alreadyRewarded = Boolean(weekRecord?.awarded);
+    let rewardedPlacesCount = 0;
+
+    if (!alreadyRewarded && topThree.length > 0) {
+      const rewards = [];
+      for (let i = 0; i < topThree.length; i += 1) {
+        const bonus = BONUS_BY_PLACE[i];
+        if (!bonus) continue;
+        await awardPoints(topThree[i].userId, bonus);
+        rewards.push({ user_id: topThree[i].userId, bonus_points: bonus, place: i + 1 });
+        rewardedPlacesCount += 1;
+      }
+
+      history.weeks = history.weeks || {};
+      history.weeks[weekKey] = {
+        awarded: true,
+        awarded_at: new Date().toISOString(),
+        week_start: weekStartKey,
+        week_end: weekEndKey,
+        rewards
+      };
+      writeWeeklyRewardHistory(history);
+    }
+
+    const message = buildWeeklyLeaderboardMessage(leaders, weekStartKey, weekEndKey, rewardedPlacesCount);
+    const { success, fails } = await sendToAllUsers(
+      bot,
+      async () => message,
+      (error, user) => {
+        console.error(`Ошибка weekly leaderboard для пользователя ${user.telegram_id}:`, error.message);
+        if (error.response?.statusCode === 403) {
+          user.update({ isActive: false });
+        }
+      },
+      { parse_mode: 'HTML' }
+    );
+
+    await sendAdminMessage(
+      bot,
+      `📊 Недельный лидерборд отправлен (${weekStartKey} — ${weekEndKey})\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}\n🎁 Начислены бонусы местам 1-3: ${rewardedPlacesCount > 0 ? 'да' : 'нет (уже начислены или нет лидеров)'}`
+    );
+  } catch (error) {
+    console.error('Ошибка в weeklyLeaderboardBroadcast:', error.message);
+    await sendAdminMessage(bot, `‼️ Ошибка недельного лидерборда: ${error.message}`);
+  }
+}
 
 export async function dailyFactBroadcast(bot) {
   try {

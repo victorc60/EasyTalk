@@ -2,7 +2,7 @@
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
+import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
@@ -108,6 +108,20 @@ function setupSchedulers(bot, userSessions) {
       async () => {
         console.log('Запуск рассылки приглашения mini-event');
         await broadcastMiniEventInvite(bot);
+      }
+    );
+
+    // Воскресный недельный лидерборд (топ-5) с наградами 1-3 местам
+    schedule.scheduleJob(
+      {
+        dayOfWeek: CONFIG.WEEKLY_LEADERBOARD_TIME.dayOfWeek,
+        hour: CONFIG.WEEKLY_LEADERBOARD_TIME.hour,
+        minute: CONFIG.WEEKLY_LEADERBOARD_TIME.minute,
+        tz: CONFIG.WEEKLY_LEADERBOARD_TIME.tz
+      },
+      async () => {
+        console.log('Запуск weeklyLeaderboardBroadcast');
+        await weeklyLeaderboardBroadcast(bot);
       }
     );
 
