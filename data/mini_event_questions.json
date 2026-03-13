@@ -1,162 +1,162 @@
 [
   {
-    "id": "mini_week_01",
+    "id": "mini_sat_01",
     "type": "fill_gap",
-    "question": "Choose the correct option: My brother ___ football every Sunday.",
-    "options": ["play", "plays", "is play", "playing"],
-    "correctIndex": 1,
-    "explanation": "With he/she/it in Present Simple, use verb + s."
+    "question": "Choose the correct option: On Saturdays, we usually ___ breakfast together.",
+    "options": ["have", "has", "having", "had"],
+    "correctIndex": 0,
+    "explanation": "With we in Present Simple, use the base form of the verb."
   },
   {
-    "id": "mini_week_02",
-    "type": "fill_gap",
-    "question": "Choose the correct option: We ___ for the test at the moment.",
-    "options": ["study", "studied", "are studying", "studies"],
-    "correctIndex": 2,
-    "explanation": "At the moment indicates Present Continuous."
-  },
-  {
-    "id": "mini_week_03",
+    "id": "mini_sat_02",
     "type": "translation",
-    "question": "Pick the best translation of: \"Она уже отправила письмо\".",
-    "options": ["She already sent a letter.", "She has already sent the letter.", "She is already sending the letter.", "She already send the letter."],
+    "question": "Pick the best translation of: \"Я сейчас собираюсь на субботнее мероприятие\".",
+    "options": ["I go to the Saturday event now.", "I am going to the Saturday event now.", "I going to the Saturday event now.", "I went to the Saturday event now."],
     "correctIndex": 1,
-    "explanation": "Present Perfect fits a completed action with present result."
+    "explanation": "Use Present Continuous for an action happening now."
   },
   {
-    "id": "mini_week_04",
+    "id": "mini_sat_03",
     "type": "article",
-    "question": "Choose the correct article: He bought ___ orange at the market.",
+    "question": "Choose the correct article: We met ___ amazing speaker at the event.",
     "options": ["a", "an", "the", "-"],
     "correctIndex": 1,
-    "explanation": "Use an before vowel sounds."
+    "explanation": "Use an before a vowel sound."
   },
   {
-    "id": "mini_week_05",
+    "id": "mini_sat_04",
     "type": "preposition",
-    "question": "Choose the correct preposition: She is good ___ math.",
-    "options": ["at", "in", "on", "with"],
-    "correctIndex": 0,
-    "explanation": "The fixed phrase is good at something."
+    "question": "Choose the correct preposition: The workshop starts ___ 6 p.m.",
+    "options": ["on", "in", "at", "for"],
+    "correctIndex": 2,
+    "explanation": "Use at with exact times."
   },
   {
-    "id": "mini_week_06",
+    "id": "mini_sat_05",
     "type": "verb_form",
-    "question": "Choose the correct form: If they ___ early, we will catch the train.",
-    "options": ["leave", "will leave", "left", "leaves"],
+    "question": "Choose the correct option: If it ___ sunny tomorrow, we'll go outside after the mini-event.",
+    "options": ["is", "will be", "was", "being"],
     "correctIndex": 0,
-    "explanation": "First Conditional: use Present Simple after if."
+    "explanation": "In the if-clause of the First Conditional, use Present Simple."
   },
   {
-    "id": "mini_week_07",
+    "id": "mini_sat_06",
     "type": "translation",
-    "question": "Pick the best translation of: \"Я не привык к такому шуму\".",
-    "options": ["I am not used to this noise.", "I not used to this noise.", "I don't used to this noise.", "I am not use to this noise."],
-    "correctIndex": 0,
-    "explanation": "Use be used to + noun/gerund for current habit state."
+    "question": "Pick the best translation of: \"Мы уже подготовили задания на субботу\".",
+    "options": ["We already prepared the tasks for Saturday.", "We have already prepared the tasks for Saturday.", "We are already preparing the tasks for Saturday.", "We already prepare the tasks for Saturday."],
+    "correctIndex": 1,
+    "explanation": "Present Perfect works well for a completed action with a present result."
   },
   {
-    "id": "mini_week_08",
+    "id": "mini_sat_07",
     "type": "comparison",
-    "question": "Choose the correct option: Today is ___ than yesterday.",
-    "options": ["cold", "colder", "more colder", "the coldest"],
+    "question": "Choose the correct option: This exercise is ___ than the previous one.",
+    "options": ["easy", "easier", "more easy", "easiest"],
     "correctIndex": 1,
-    "explanation": "Short adjectives usually take -er in comparative form."
+    "explanation": "Short adjectives usually form the comparative with -er."
   },
   {
-    "id": "mini_week_09",
+    "id": "mini_sat_08",
     "type": "modal",
-    "question": "Choose the best option: You ___ be quiet in the library.",
-    "options": ["must", "must to", "can to", "should to"],
+    "question": "Choose the best option: You ___ check your answer before sending it.",
+    "options": ["should", "should to", "must to", "can to"],
     "correctIndex": 0,
-    "explanation": "Must expresses obligation and is used without to."
+    "explanation": "Should is followed by the base form without to."
   },
   {
-    "id": "mini_week_10",
-    "type": "verb_pattern",
-    "question": "Choose the correct option: They decided ___ a new project.",
-    "options": ["start", "to start", "starting", "to starting"],
-    "correctIndex": 1,
-    "explanation": "Decide is followed by to + infinitive."
-  },
-  {
-    "id": "mini_week_11",
-    "type": "translation",
-    "question": "Pick the best translation of: \"Он сказал, что уже поел\".",
-    "options": ["He said that he has already eaten.", "He said that he had already eaten.", "He says that he had already eaten.", "He said he already eat."],
-    "correctIndex": 1,
-    "explanation": "In reported speech with past reference, use had eaten."
-  },
-  {
-    "id": "mini_week_12",
+    "id": "mini_sat_09",
     "type": "question_form",
-    "question": "Choose the correct question: ___ your sister like coffee?",
+    "question": "Choose the correct question: ___ your friend want to join the mini-event?",
     "options": ["Do", "Does", "Is", "Has"],
     "correctIndex": 1,
     "explanation": "For he/she/it in Present Simple questions, use does."
   },
   {
-    "id": "mini_week_13",
-    "type": "article",
-    "question": "Choose the best option: We visited ___ Eiffel Tower last summer.",
-    "options": ["a", "an", "the", "-"],
-    "correctIndex": 2,
-    "explanation": "Use the with famous unique landmarks."
-  },
-  {
-    "id": "mini_week_14",
-    "type": "translation",
-    "question": "Pick the best translation of: \"Мне нужно позвонить маме вечером\".",
-    "options": ["I need call my mom tonight.", "I need to call my mom in the evening.", "I need calling my mom evening.", "I need for call my mom tonight."],
-    "correctIndex": 1,
-    "explanation": "Need is followed by to + verb."
-  },
-  {
-    "id": "mini_week_15",
-    "type": "time_expression",
-    "question": "Choose the correct option: They have worked here ___ five years.",
-    "options": ["since", "for", "from", "at"],
-    "correctIndex": 1,
-    "explanation": "For is used with a duration (five years)."
-  },
-  {
-    "id": "mini_week_16",
-    "type": "passive",
-    "question": "Choose the correct passive form: The homework ___ by Tom yesterday.",
-    "options": ["was done", "is done", "did", "has done"],
-    "correctIndex": 0,
-    "explanation": "Past Simple Passive: was/were + past participle."
-  },
-  {
-    "id": "mini_week_17",
-    "type": "translation",
-    "question": "Pick the best translation of: \"Если бы я был на твоем месте, я бы извинился\".",
-    "options": ["If I am you, I will apologize.", "If I were you, I would apologize.", "If I was you, I apologize.", "If I would be you, I apologized."],
-    "correctIndex": 1,
-    "explanation": "Second Conditional: If + Past Simple, would + verb."
-  },
-  {
-    "id": "mini_week_18",
-    "type": "relative_clause",
-    "question": "Choose the correct option: This is the book ___ I told you about.",
-    "options": ["who", "which", "where", "whose"],
-    "correctIndex": 1,
-    "explanation": "Use which for things in relative clauses."
-  },
-  {
-    "id": "mini_week_19",
+    "id": "mini_sat_10",
     "type": "word_order",
     "question": "Choose the correct sentence:",
-    "options": ["She every day walks to school.", "She walks to school every day.", "She walks every day to school always.", "Every day she walk to school."],
-    "correctIndex": 1,
-    "explanation": "Standard order: subject + verb + object/place + time."
+    "options": ["We usually on Saturday practice English.", "We practice English on Saturday usually.", "We usually practice English on Saturday.", "Usually we practice on Saturday English."],
+    "correctIndex": 2,
+    "explanation": "The natural order is adverb of frequency + verb + object + time."
   },
   {
-    "id": "mini_week_20",
+    "id": "mini_sat_11",
     "type": "translation",
-    "question": "Pick the best translation of: \"Мы собираемся устроить пикник в воскресенье\".",
-    "options": ["We are going to have a picnic on Sunday.", "We going to have picnic on Sunday.", "We are go have a picnic Sunday.", "We will to have a picnic on Sunday."],
+    "question": "Pick the best translation of: \"Она сказала, что придет чуть позже\".",
+    "options": ["She said that she will come a bit later.", "She said that she would come a bit later.", "She says that she would come a bit later.", "She said that she come a bit later."],
+    "correctIndex": 1,
+    "explanation": "In reported speech after a past verb, will often changes to would."
+  },
+  {
+    "id": "mini_sat_12",
+    "type": "verb_pattern",
+    "question": "Choose the correct option: They decided ___ the quiz together.",
+    "options": ["do", "to do", "doing", "to doing"],
+    "correctIndex": 1,
+    "explanation": "Decide is followed by to + infinitive."
+  },
+  {
+    "id": "mini_sat_13",
+    "type": "time_expression",
+    "question": "Choose the correct option: She has lived here ___ 2021.",
+    "options": ["for", "since", "during", "from"],
+    "correctIndex": 1,
+    "explanation": "Use since with a starting point in time."
+  },
+  {
+    "id": "mini_sat_14",
+    "type": "passive",
+    "question": "Choose the correct passive form: The winners ___ at the end of the event.",
+    "options": ["announce", "will announce", "will be announced", "are announce"],
+    "correctIndex": 2,
+    "explanation": "Future passive is formed with will be + past participle."
+  },
+  {
+    "id": "mini_sat_15",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Если у меня будет время, я выполню все упражнения\".",
+    "options": ["If I will have time, I do all the exercises.", "If I have time, I will do all the exercises.", "If I had time, I will do all the exercises.", "If I have time, I do all the exercises."],
+    "correctIndex": 1,
+    "explanation": "First Conditional: If + Present Simple, will + verb."
+  },
+  {
+    "id": "mini_sat_16",
+    "type": "relative_clause",
+    "question": "Choose the correct option: This is the teacher ___ gave us the task.",
+    "options": ["which", "where", "who", "what"],
+    "correctIndex": 2,
+    "explanation": "Use who for people in relative clauses."
+  },
+  {
+    "id": "mini_sat_17",
+    "type": "translation",
+    "question": "Pick the best translation of: \"Мне нравится атмосфера этого субботнего мини-ивента\".",
+    "options": ["I like the atmosphere of this Saturday mini-event.", "I am like the atmosphere of this Saturday mini-event.", "I liking the atmosphere of this Saturday mini-event.", "I like atmosphere of this Saturday mini-event the."],
     "correctIndex": 0,
-    "explanation": "Use be going to + verb for planned actions."
+    "explanation": "Like is followed directly by the object; the sentence also needs the article the."
+  },
+  {
+    "id": "mini_sat_18",
+    "type": "article",
+    "question": "Choose the correct option: After the game, we went to ___ cafe near the park.",
+    "options": ["a", "an", "the", "-"],
+    "correctIndex": 0,
+    "explanation": "Use a when mentioning a singular countable noun for the first time."
+  },
+  {
+    "id": "mini_sat_19",
+    "type": "modal",
+    "question": "Choose the best option: Participants ___ bring a notebook, but it can be useful.",
+    "options": ["mustn't", "don't have to", "can't", "shouldn't to"],
+    "correctIndex": 1,
+    "explanation": "Don't have to means there is no obligation."
+  },
+  {
+    "id": "mini_sat_20",
+    "type": "translation",
+    "question": "Pick the best translation of: \"К какому времени ты закончишь все задания?\".",
+    "options": ["What time will you finish all the tasks by?", "To what time you will finish all the tasks?", "What time will finish you all the tasks?", "By what time will you finish all the tasks?"],
+    "correctIndex": 3,
+    "explanation": "By what time is the correct question form for a deadline."
   }
 ]
