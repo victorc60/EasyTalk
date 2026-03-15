@@ -2,7 +2,7 @@
 import WordGameParticipation from '../models/WordGameParticipation.js';
 import DailyWordGame from '../models/DailyWordGame.js';
 import User from '../models/User.js';
-import { Op } from 'sequelize';
+import { Op, fn, col } from 'sequelize';
 
 export const GAME_TYPES = {
   WORD: 'word',
@@ -11,7 +11,30 @@ export const GAME_TYPES = {
   QUIZ: 'quiz'
 };
 
-const resolveDate = (date = null) => date || new Date().toISOString().split('T')[0];
+const TZ_MOSCOW = 'Europe/Moscow';
+
+/** Возвращает дату в формате YYYY-MM-DD по Москве (для единообразия с рассылками и недельным топом). */
+function getMoscowDateString(date = new Date()) {
+  const d = typeof date === 'string' ? new Date(date + 'T12:00:00Z') : date;
+  return d.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
+}
+
+/** Границы текущей недели (Пн–Вс) по Москве. */
+function getMoscowWeekBounds(refDate = new Date()) {
+  const moscow = new Date(refDate.toLocaleString('en-US', { timeZone: TZ_MOSCOW }));
+  const weekDay = moscow.getDay();
+  const mondayOffset = (weekDay + 6) % 7;
+  const weekStart = new Date(moscow);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - mondayOffset);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  const weekStartKey = weekStart.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
+  const weekEndKey = weekEnd.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
+  return { weekStartKey, weekEndKey };
+}
+
+const resolveDate = (date = null) => date || getMoscowDateString();
 
 /**
  * Универсальная запись участия пользователя в играх
@@ -36,7 +59,8 @@ export async function recordGameParticipation({
   slot = 'default'
 }) {
   try {
-    const today = resolveDate();
+    // Используем дату по Москве, чтобы день/неделя совпадали с рассылками и недельным топом
+    const today = getMoscowDateString();
     await WordGameParticipation.upsert({
       user_id: userId,
       game_type: gameType,
@@ -140,6 +164,37 @@ export function recordQuizGameParticipation(
     gameType: GAME_TYPES.QUIZ,
     slot
   });
+}
+
+/**
+ * Сумма очков пользователя за сегодня (по Москве).
+ */
+export async function getPointsForUserToday(userId) {
+  const today = getMoscowDateString();
+  const rows = await WordGameParticipation.findAll({
+    attributes: [[fn('SUM', col('points_earned')), 'total']],
+    where: { user_id: userId, game_date: today },
+    raw: true
+  });
+  const n = Number(rows[0]?.total);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * Сумма очков пользователя за текущую неделю (Пн–Вс по Москве).
+ */
+export async function getPointsForUserThisWeek(userId) {
+  const { weekStartKey, weekEndKey } = getMoscowWeekBounds();
+  const rows = await WordGameParticipation.findAll({
+    attributes: [[fn('SUM', col('points_earned')), 'total']],
+    where: {
+      user_id: userId,
+      game_date: { [Op.between]: [weekStartKey, weekEndKey] }
+    },
+    raw: true
+  });
+  const n = Number(rows[0]?.total);
+  return Number.isFinite(n) ? n : 0;
 }
 
 /**

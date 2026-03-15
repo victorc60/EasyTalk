@@ -13,7 +13,9 @@ import {
   getPeriodStats,
   getUserDetailedStats,
   getTopActiveUsers,
-  comparePeriods
+  comparePeriods,
+  getPointsForUserToday,
+  getPointsForUserThisWeek
 } from '../services/wordGameServices.js';
 import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
@@ -225,20 +227,29 @@ function getModeDescription(modeId) {
 
 export async function showProgress(bot, msg) {
   try {
-    const user = await User.findOne({ where: { telegram_id: msg.from.id } });
+    const userId = msg.from.id;
+    const user = await User.findOne({ where: { telegram_id: userId } });
     if (!user) {
       await sendUserMessage(bot, msg.chat.id, 'ℹ️ Сначала запустите бота командой /start');
       return;
     }
-    
+
+    const [pointsToday, pointsThisWeek] = await Promise.all([
+      getPointsForUserToday(userId),
+      getPointsForUserThisWeek(userId)
+    ]);
+
     const progressMessage = `
 📊 <b>Твой прогресс:</b>
 
-🏅 Очков: ${user.points}
+🏅 Всего очков: ${user.points}
+📈 За сегодня: ${pointsToday} очков
+📆 За неделю: ${pointsThisWeek} очков
+
 📅 Первый визит: ${user.first_activity.toLocaleDateString()}
 🔄 Последняя активность: ${user.last_activity.toLocaleDateString()}
 
-Продолжай практиковать английский!`;
+Продолжай практиковать английский — участвуй в играх и попадай в топ-5 за неделю!`;
     
     await sendUserMessage(bot, msg.chat.id, progressMessage, { parse_mode: 'HTML' });
   } catch (error) {
