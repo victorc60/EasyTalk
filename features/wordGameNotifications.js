@@ -10,29 +10,41 @@ import {
 /**
  * Отправляет уведомление администратору о статистике участия в ежедневной игре со словами
  * @param {Object} bot - Экземпляр Telegram бота
- * @param {string} date - Дата для получения статистики (по умолчанию сегодня)
+ * @param {string} date - Дата для получения статистики (по умолчанию "прошедший день" относительно Москвы)
  */
+const TZ_MOSCOW = 'Europe/Moscow';
+
+function getMoscowDateString(date = new Date()) {
+  return date.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
+}
+
+function getYesterdayMoscowDateString() {
+  const moscowNow = new Date(new Date().toLocaleString('en-US', { timeZone: TZ_MOSCOW }));
+  moscowNow.setDate(moscowNow.getDate() - 1);
+  return getMoscowDateString(moscowNow);
+}
+
 export async function notifyDailyWordGameStats(bot, date = null) {
   try {
     console.log('Получение статистики ежедневных игр (слово + идиома)...');
 
+    // Важно: планировщик отправляет отчёт в 00:05 по Москве.
+    // В этот момент "сегодня" уже наступил, но игра относится к предыдущему дню.
+    const reportDay = date || getYesterdayMoscowDateString();
+    console.log(`📅 Daily report day: ${reportDay}`);
+
     const [wordStats, idiomStats, phrasalStats] = await Promise.all([
-      getDailyWordGameStats(date),
-      getDailyIdiomGameStats(date),
-      getDailyPhrasalVerbGameStats(date)
+      getDailyWordGameStats(reportDay),
+      getDailyIdiomGameStats(reportDay),
+      getDailyPhrasalVerbGameStats(reportDay)
     ]);
 
     if (!wordStats && !idiomStats && !phrasalStats) {
-      await sendAdminMessage(bot, '⚠️ Не удалось получить статистику игр за сегодня');
+      await sendAdminMessage(bot, `⚠️ Не удалось получить статистику игр за ${reportDay}`);
       return;
     }
 
-    const reportDate =
-      wordStats?.date ||
-      idiomStats?.date ||
-      phrasalStats?.date ||
-      date ||
-      new Date().toISOString().split('T')[0];
+    const reportDate = reportDay;
     let message = `📊 <b>Отчет по ежедневным играм</b>\n`;
     message += `📅 Дата: ${reportDate}\n\n`;
 
