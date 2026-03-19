@@ -8,17 +8,30 @@ export function upsertMetric({ sessionId, bossId, durationMs, accuracy, win }) {
   ).run(null, bossId, durationMs, accuracy, win ? 1 : 0, Date.now());
 }
 
+const normalizeTimestamp = (value) => {
+  if (value === undefined || value === null || value === '') return null;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  // Accept both seconds and milliseconds timestamps from clients.
+  return n < 1_000_000_000_000 ? n * 1000 : n;
+};
+
 export function getMetricsSummary({ from, to }) {
   const params = [];
   const where = [];
+  const normalizedFrom = normalizeTimestamp(from);
+  const normalizedTo = normalizeTimestamp(to);
 
-  if (from) {
-    where.push('created_at >= ?');
-    params.push(Number(from));
+  // We count only sessions where at least one answer was submitted.
+  where.push('current_index > 0');
+
+  if (normalizedFrom !== null) {
+    where.push('COALESCE(finished_at, created_at) >= ?');
+    params.push(normalizedFrom);
   }
-  if (to) {
-    where.push('created_at <= ?');
-    params.push(Number(to));
+  if (normalizedTo !== null) {
+    where.push('COALESCE(finished_at, created_at) <= ?');
+    params.push(normalizedTo);
   }
 
   const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
@@ -27,20 +40,24 @@ export function getMetricsSummary({ from, to }) {
     .prepare(
       `SELECT
          COUNT(*) as total,
-         AVG(accuracy) as avgAccuracy,
-         SUM(win) as wins,
-         MIN(duration_ms) as minDuration,
-         MAX(duration_ms) as maxDuration,
-         AVG(duration_ms) as avgDuration
-       FROM metrics
+         AVG(CASE WHEN total > 0 THEN (correct * 100.0) / total ELSE 0 END) as avgAccuracy,
+         SUM(CASE WHEN finished_at IS NOT NULL AND correct = total THEN 1 ELSE 0 END) as wins,
+         MIN(CASE WHEN finished_at IS NOT NULL THEN (finished_at - created_at) END) as minDuration,
+         MAX(CASE WHEN finished_at IS NOT NULL THEN (finished_at - created_at) END) as maxDuration,
+         AVG(CASE WHEN finished_at IS NOT NULL THEN (finished_at - created_at) END) as avgDuration
+       FROM sessions
        ${whereClause}`,
     )
     .get(...params);
 
   const bosses = db
     .prepare(
-      `SELECT boss_id, COUNT(*) as total, AVG(accuracy) as avgAccuracy, SUM(win) as wins
-       FROM metrics
+      `SELECT
+         boss_id,
+         COUNT(*) as total,
+         AVG(CASE WHEN total > 0 THEN (correct * 100.0) / total ELSE 0 END) as avgAccuracy,
+         SUM(CASE WHEN finished_at IS NOT NULL AND correct = total THEN 1 ELSE 0 END) as wins
+       FROM sessions
        ${whereClause}
        GROUP BY boss_id`,
     )
