@@ -3,7 +3,7 @@ import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
+import { recordWordGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -12,46 +12,11 @@ import path from 'path';
 import { Op, fn, col } from 'sequelize';
 import WordGameParticipation from '../models/WordGameParticipation.js';
 import MiniEventParticipant from '../models/MiniEventParticipant.js';
+import { getMoscowWeekRangeKeys } from '../utils/moscowWeek.js';
 
 let phrasalVerbRepeatWarningSent = false;
 const WEEKLY_REWARD_HISTORY_FILE = path.resolve(process.cwd(), 'data/weekly_leaderboard_rewards.json');
 const BONUS_BY_PLACE = [100, 75, 50];
-
-function getMoscowNow() {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
-}
-
-function formatDateOnly(date) {
-  const y = date.getFullYear();
-  const m = `${date.getMonth() + 1}`.padStart(2, '0');
-  const d = `${date.getDate()}`.padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function getWeekBoundsMoscow(refDate = new Date()) {
-  const moscow = new Date(refDate.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
-  const weekDay = moscow.getDay(); // 0 - Sun, 1 - Mon, ...
-  const mondayOffset = (weekDay + 6) % 7;
-
-  const weekStart = new Date(moscow);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(weekStart.getDate() - mondayOffset);
-
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  weekEnd.setHours(23, 59, 59, 999);
-
-  const weekStartKey = formatDateOnly(weekStart);
-  const weekEndKey = formatDateOnly(weekEnd);
-
-  return {
-    weekStart,
-    weekEnd,
-    weekStartKey,
-    weekEndKey,
-    weekKey: `${weekStartKey}_${weekEndKey}`
-  };
-}
 
 function readWeeklyRewardHistory() {
   try {
@@ -83,7 +48,7 @@ function writeWeeklyRewardHistory(history) {
 }
 
 async function getWeeklyLeaders(weekStartKey, weekEndKey) {
-  const [gameRows, miniEventRows] = await Promise.all([
+  const [gameRows, miniRewardedRows, miniQuizRows] = await Promise.all([
     WordGameParticipation.findAll({
       attributes: [
         'user_id',
@@ -110,22 +75,37 @@ async function getWeeklyLeaders(weekStartKey, weekEndKey) {
       },
       group: ['user_id'],
       raw: true
+    }),
+    // Ивент ещё не финализован — очки только в quiz_points (иначе неделя «пустая» до 23:00)
+    MiniEventParticipant.findAll({
+      attributes: [
+        'user_id',
+        [fn('SUM', col('quiz_points')), 'total_points']
+      ],
+      where: {
+        event_date: {
+          [Op.between]: [weekStartKey, weekEndKey]
+        },
+        award_granted: false
+      },
+      group: ['user_id'],
+      raw: true
     })
   ]);
 
   const pointsByUser = new Map();
 
-  for (const row of gameRows) {
-    const userId = String(row.user_id);
-    const total = Number(row.total_points) || 0;
-    pointsByUser.set(userId, (pointsByUser.get(userId) || 0) + total);
-  }
+  const addRows = (rows) => {
+    for (const row of rows) {
+      const userId = String(row.user_id);
+      const total = Number(row.total_points) || 0;
+      pointsByUser.set(userId, (pointsByUser.get(userId) || 0) + total);
+    }
+  };
 
-  for (const row of miniEventRows) {
-    const userId = String(row.user_id);
-    const total = Number(row.total_points) || 0;
-    pointsByUser.set(userId, (pointsByUser.get(userId) || 0) + total);
-  }
+  addRows(gameRows);
+  addRows(miniRewardedRows);
+  addRows(miniQuizRows);
 
   const userIds = Array.from(pointsByUser.keys());
   if (!userIds.length) {
@@ -133,7 +113,7 @@ async function getWeeklyLeaders(weekStartKey, weekEndKey) {
   }
 
   const users = await User.findAll({
-    where: { telegram_id: userIds },
+    where: { telegram_id: { [Op.in]: userIds } },
     attributes: ['telegram_id', 'username', 'first_name', 'points'],
     raw: true
   });
@@ -189,7 +169,7 @@ function buildWeeklyLeaderboardMessage(leaders, weekStartKey, weekEndKey, reward
 
 export async function weeklyLeaderboardBroadcast(bot) {
   try {
-    const { weekStartKey, weekEndKey, weekKey } = getWeekBoundsMoscow(getMoscowNow());
+    const { weekStartKey, weekEndKey, weekKey } = getMoscowWeekRangeKeys(new Date());
     const leaders = await getWeeklyLeaders(weekStartKey, weekEndKey);
     const topThree = leaders.slice(0, 3);
 
@@ -242,21 +222,84 @@ export async function weeklyLeaderboardBroadcast(bot) {
   }
 }
 
-export async function dailyFactBroadcast(bot) {
+function getMoscowDateString(date = new Date()) {
+  return date.toLocaleDateString('en-CA', { timeZone: 'Europe/Moscow' });
+}
+
+async function finalizeExpiredFactSessions(userSessions) {
+  if (!userSessions.factGames?.size) {
+    return 0;
+  }
+
+  const todayKey = getMoscowDateString();
+  let finalizedCount = 0;
+
+  for (const [userId, session] of userSessions.factGames.entries()) {
+    if (!session || session.dateKey === todayKey) {
+      continue;
+    }
+
+    await recordFactGameParticipation(
+      userId,
+      session.claim,
+      false,
+      false,
+      0,
+      null,
+      'default',
+      session.dateKey
+    );
+    userSessions.factGames.delete(userId);
+    finalizedCount += 1;
+  }
+
+  return finalizedCount;
+}
+
+export async function dailyFactBroadcast(bot, userSessions) {
   try {
     console.log('Запуск рассылки ежедневного факта...');
-    
+
+    const closedSessions = await finalizeExpiredFactSessions(userSessions);
     const fact = await dailyFact();
     if (!fact) {
-      console.error('Не удалось сгенерировать ежедневный факт');
-      await sendAdminMessage(bot, '⚠️ Не удалось сгенерировать ежедневный факт');
+      console.error('Не удалось получить ежедневный факт');
+      await sendAdminMessage(bot, '⚠️ Не удалось получить ежедневный факт');
       return;
     }
-    const decoratedFact = `🌷✨ ${fact}`;
 
     const { success, fails } = await sendToAllUsers(
       bot,
-      async () => decoratedFact,
+      async (userId) => {
+        const sessionId = Math.random().toString(36).slice(2, 10);
+        const dateKey = getMoscowDateString();
+
+        userSessions.factGames.set(userId, {
+          sessionId,
+          factId: fact.id,
+          claim: fact.claim,
+          claimRu: fact.claimRu,
+          isTrue: fact.isTrue,
+          explanation: fact.explanation,
+          startTime: Date.now(),
+          dateKey,
+          expired: false
+        });
+
+        return {
+          text:
+            `🌷✨ <b>Fact of the Day</b>\n\n` +
+            `🇬🇧 ${fact.claim}\n` +
+            `🇷🇺 ${fact.claimRu}\n\n` +
+            `Веришь или не веришь?`,
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '✅ Верю', callback_data: `fact_game_${userId}_${sessionId}_true` }],
+              [{ text: '🤔 Не верю', callback_data: `fact_game_${userId}_${sessionId}_false` }]
+            ]
+          }
+        };
+      },
       (error, user) => {
         console.error(`Ошибка для пользователя ${user.telegram_id}: ${error.message}`);
         if (error.response?.statusCode === 403) {
@@ -269,7 +312,7 @@ export async function dailyFactBroadcast(bot) {
     
     await sendAdminMessage(
       bot,
-      `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}${success === 0 && fails === 0 ? '\nℹ️ Нет зарегистрированных пользователей в базе данных' : ''}`
+      `📊 Ежедневный факт отправлен\n✅ Успешно: ${success}\n❌ Ошибок: ${fails}\n🧹 Закрыто просроченных fact-сессий: ${closedSessions}${success === 0 && fails === 0 ? '\nℹ️ Нет зарегистрированных пользователей в базе данных' : ''}`
     );
   } catch (error) {
     console.error('Ошибка в dailyFactBroadcast:', error.message);

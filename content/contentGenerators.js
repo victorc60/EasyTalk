@@ -2,17 +2,15 @@
 import { OpenAI } from 'openai';
 import { CONFIG } from '../config.js';
 import axios from 'axios';
-import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const usedFactsCache = new Set();
-const CACHE_LIMIT = 200; // Increased to store more facts and reduce repetition
-function hashString(str) {
-  if (!str) return ''; // Защита от пустых строк
-  return crypto.createHash('md5').update(str).digest('hex').substring(0, 16); // MD5, обрезанный до 16 символов
-}
+const CACHE_LIMIT = 200;
+const FACT_HISTORY_FILE = path.resolve(process.cwd(), 'data/fact_history.json');
+const FACTS_BANK_FILE = path.resolve(process.cwd(), 'data/facts_bank.json');
+let curatedFactsBank = [];
 
 const HOLIDAY_START_DAY = 15; // 15 ноября
 const HOLIDAY_END_DAY = 20; // 20 января
@@ -65,142 +63,34 @@ async function generateEnglishContent(prompt, format = 'text') {
 }
 
 export async function dailyFact() {
-  const FACT_TOPICS = [
-    'language and learning',
-    'science and space',
-    'history and inventions',
-    'psychology and habits',
-    'technology and internet culture',
-    'health and wellbeing',
-    'animals and nature',
-    'cities and world geography',
-    'food and everyday life',
-    'books and communication',
-    'work and productivity',
-    'sports and human performance',
-    'music and creativity',
-    'finance basics',
-    'critical thinking'
-  ];
-
-  const selectedTopic = FACT_TOPICS[Math.floor(Math.random() * FACT_TOPICS.length)];
-
-  const PROMPT = `Generate one fascinating and fully accurate "fact of the day" about ${selectedTopic}. The fact must:
-  - Be true and verifiable
-  - Be surprising but easy to understand
-  - Be useful or memorable for daily life
-  - Fit teens and adults
-  - Avoid repeating common cliches
-
-  Include:
-  - The fact in English (1-2 sentences)
-  - Translation in Russian (accurate and natural)
-  - Brief explanation of why it matters today (1 sentence)
-
-  Format exactly as:
-  🇬🇧 [fact]
-  🇷🇺 [translation]
-  💡 [explanation]
-
-  Keep wording concise, vivid, and practical.`;
-
-  const MAX_ATTEMPTS = 5;
-  const DEFAULT_FACTS = [
-    `🇬🇧 Octopuses have three hearts, and two of them stop beating while the octopus swims.\n🇷🇺 У осьминогов три сердца, и два из них перестают биться, когда осьминог плывёт.\n💡 Nature often solves problems in ways that are very different from human biology.`,
-    `🇬🇧 Honey can stay edible for years because its low moisture and acidity make life hard for bacteria.\n🇷🇺 Мёд может оставаться съедобным годами, потому что низкая влажность и кислотность мешают бактериям.\n💡 Food science explains why some products naturally last much longer than others.`,
-    `🇬🇧 Your brain uses about 20% of your body's energy even when you are resting.\n🇷🇺 Мозг использует около 20% энергии тела даже в состоянии покоя.\n💡 Mental focus is physically expensive, so breaks and sleep are not optional.`,
-    `🇬🇧 Bananas are berries in botanical terms, but strawberries are not.\n🇷🇺 С точки зрения ботаники банан - это ягода, а клубника - нет.\n💡 Scientific definitions often differ from everyday language.`,
-    `🇬🇧 The shortest war in recorded history lasted less than an hour in 1896.\n🇷🇺 Самая короткая война в письменной истории длилась меньше часа в 1896 году.\n💡 History can change dramatically in minutes, not only in years.`,
-    `🇬🇧 The Eiffel Tower can grow slightly taller in summer because metal expands in heat.\n🇷🇺 Летом Эйфелева башня может становиться немного выше, потому что металл расширяется при нагреве.\n💡 Physics affects even giant structures in everyday weather.`,
-    `🇬🇧 There are more possible chess games than atoms in the observable universe.\n🇷🇺 Возможных шахматных партий больше, чем атомов в наблюдаемой Вселенной.\n💡 Combinatorics shows how quickly possibilities explode from simple rules.`,
-    `🇬🇧 Koalas have fingerprints so similar to humans that they can confuse visual analysis.\n🇷🇺 У коал отпечатки пальцев настолько похожи на человеческие, что могут запутать визуальный анализ.\n💡 Evolution can produce surprisingly similar patterns in different species.`,
-    `🇬🇧 The human body has enough blood vessels to circle Earth more than once if laid end to end.\n🇷🇺 В теле человека достаточно кровеносных сосудов, чтобы обогнуть Землю больше одного раза, если выстроить их в линию.\n💡 Internal systems are far more complex than they appear from outside.`,
-    `🇬🇧 A day on Venus is longer than a year on Venus.\n🇷🇺 День на Венере длится дольше, чем год на Венере.\n💡 Planetary motion can be very different from Earth's familiar cycles.`,
-    `🇬🇧 Reading on paper often improves recall compared to reading the same text on a screen.\n🇷🇺 Чтение с бумаги часто улучшает запоминание по сравнению с чтением того же текста с экрана.\n💡 The medium can influence how deeply we process information.`,
-    `🇬🇧 The first email was sent in 1971, and the @ symbol became standard because it clearly separates user and host.\n🇷🇺 Первое электронное письмо отправили в 1971 году, а символ @ стал стандартом, потому что чётко разделяет пользователя и сервер.\n💡 Small design choices can shape global communication for decades.`,
-    `🇬🇧 Trees can communicate stress through chemical signals and help nearby plants prepare defenses.\n🇷🇺 Деревья могут передавать сигналы стресса через химические вещества и помогать соседним растениям готовить защиту.\n💡 Ecosystems behave more like connected networks than isolated organisms.`,
-    `🇬🇧 The Pacific Ocean is wider than the Moon's diameter.\n🇷🇺 Тихий океан шире диаметра Луны.\n💡 Comparing familiar objects with space scales changes our intuition quickly.`,
-    `🇬🇧 Writing goals down increases the chance of following through compared to keeping them only in your head.\n🇷🇺 Запись целей повышает вероятность довести их до результата по сравнению с целями только в голове.\n💡 Externalizing plans makes action more concrete and trackable.`,
-    `🇬🇧 The first mechanical alarm clocks could ring only at one fixed time.\n🇷🇺 Первые механические будильники могли звонить только в одно фиксированное время.\n💡 Everyday tools become flexible through many small iterations.`,
-    `🇬🇧 The word 'robot' comes from a Czech word meaning forced labor.\n🇷🇺 Слово «robot» происходит от чешского слова со значением «подневольный труд».\n💡 Language history often reveals old social ideas behind modern terms.`,
-    `🇬🇧 Your sense of smell is strongly linked with memory because related brain regions are tightly connected.\n🇷🇺 Обоняние тесно связано с памятью, потому что соответствующие зоны мозга сильно взаимосвязаны.\n💡 This is why a single smell can instantly trigger old memories.`,
-    `🇬🇧 Ice is less dense than liquid water, which is why it floats.\n🇷🇺 Лёд менее плотный, чем жидкая вода, поэтому он плавает.\n💡 This unusual property helps lakes keep life under the ice in winter.`,
-    `🇬🇧 The first known vending machine was built in ancient Egypt to dispense holy water.\n🇷🇺 Первый известный торговый автомат был создан в Древнем Египте и выдавал святую воду.\n💡 Automation ideas are much older than modern electronics.`,
-    `🇬🇧 Sunlight takes about 8 minutes to reach Earth.\n🇷🇺 Солнечному свету требуется около 8 минут, чтобы долететь до Земли.\n💡 Even the nearest star is far enough to make light-delay visible.`,
-    `🇬🇧 Short walks can improve creative thinking compared to staying seated for long periods.\n🇷🇺 Короткие прогулки могут улучшать творческое мышление по сравнению с долгим сидением.\n💡 Movement helps reset attention and generate fresh ideas.`,
-    `🇬🇧 Penguins have knees, but they are hidden under feathers and body structure.\n🇷🇺 У пингвинов есть колени, но они скрыты перьями и строением тела.\n💡 Appearance can hide familiar anatomy in unexpected ways.`,
-    `🇬🇧 The dot over lowercase i and j has a name: a tittle.\n🇷🇺 Точка над строчными i и j имеет отдельное название: tittle.\n💡 Tiny language details can carry precise technical terms.`,
-    `🇬🇧 In many languages, the most common words are short because frequent use favors efficiency.\n🇷🇺 Во многих языках самые частые слова короткие, потому что частое использование требует эффективности.\n💡 Communication systems naturally optimize for speed and effort.`,
-    `🇬🇧 Saturn is so low in average density that it would float in a large enough body of water.\n🇷🇺 Средняя плотность Сатурна настолько низкая, что он плавал бы в достаточно большом водоёме.\n💡 Planet size does not always mean higher density.`,
-    `🇬🇧 A typical lightning bolt is hotter than the surface of the Sun for a brief moment.\n🇷🇺 Температура обычной молнии на короткий момент выше температуры поверхности Солнца.\n💡 Extreme physical events can happen around us very quickly.`,
-    `🇬🇧 People tend to remember unfinished tasks better than finished ones, known as the Zeigarnik effect.\n🇷🇺 Люди часто лучше помнят незавершённые задачи, это называют эффектом Зейгарник.\n💡 Closing small tasks reduces mental load and improves focus.`,
-    `🇬🇧 The first webcams were used to check coffee pots remotely in offices.\n🇷🇺 Первые веб-камеры использовали в офисах, чтобы удалённо проверять, есть ли кофе в кофейнике.\n💡 Many big technologies start with small practical annoyances.`,
-    `🇬🇧 Some turtles can breathe partly through specialized tissues near their tail while resting underwater.\n🇷🇺 Некоторые черепахи могут частично дышать через специальные ткани возле хвоста, когда отдыхают под водой.\n💡 Biology includes many adaptive mechanisms beyond textbook basics.`
-  ];
-
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    try {
-      const topicPrompt = attempt > 0 ? `\n\nTry a different topic from this list: ${FACT_TOPICS.join(', ')}. Avoid repeating any previous facts.` : '';
-      const fact = await generateEnglishContent(PROMPT + topicPrompt);
-
-      // Проверяем, что факт не пустой и соответствует формату
-      if (!fact || fact.trim() === '' || !fact.includes('🇬🇧') || !fact.includes('🇷🇺') || !fact.includes('💡')) {
-        console.warn(`Attempt ${attempt + 1}: Invalid fact format:`, fact);
-        continue;
-      }
-
-      // Enhanced duplicate detection - check both the beginning and key phrases
-      const factKey = hashString(fact.substring(0, 100)); // Increased to 100 characters for better uniqueness
-      const factKey2 = hashString(fact.toLowerCase().replace(/[^a-zа-я]/g, '').substring(0, 50)); // Remove punctuation and spaces
-      
-      if (!factKey || !factKey2) {
-        console.warn(`Attempt ${attempt + 1}: Failed to generate fact keys for:`, fact.substring(0, 50));
-        continue;
-      }
-
-      // Check if this fact or a very similar one has been used
-      const isDuplicate = usedFactsCache.has(factKey) || usedFactsCache.has(factKey2);
-      
-      if (!isDuplicate) {
-        // Ограничиваем размер кэша
-        if (usedFactsCache.size >= CACHE_LIMIT) {
-          const oldestKey = usedFactsCache.values().next().value;
-          usedFactsCache.delete(oldestKey);
-          console.log('Removed oldest fact key from cache:', oldestKey);
-        }
-        usedFactsCache.add(factKey);
-        usedFactsCache.add(factKey2);
-        saveUsedFactsToDisk();
-        console.log(`New fascinating fact generated about ${selectedTopic}: ${fact.substring(0, 100)}...`);
-        return fact;
-      } else {
-        console.warn(`Attempt ${attempt + 1}: Fact already used (keys: ${factKey}, ${factKey2})`);
-      }
-    } catch (error) {
-      console.warn(`Attempt ${attempt + 1} failed:`, error.message);
-    }
+  const bank = getCuratedFactsBank();
+  if (!bank.length) {
+    console.warn('⚠️ Банк фактов пуст');
+    return null;
   }
 
-  console.warn(`Failed to generate new fact after ${MAX_ATTEMPTS} attempts, returning default fact`);
-  // Return a random default fact that hasn't been used recently
-  const availableDefaultFacts = DEFAULT_FACTS.filter(fact => {
-    const factKey = hashString(fact.substring(0, 100));
-    return !usedFactsCache.has(factKey);
-  });
-  
-  if (availableDefaultFacts.length > 0) {
-    const selectedFact = availableDefaultFacts[Math.floor(Math.random() * availableDefaultFacts.length)];
-    const factKey = hashString(selectedFact.substring(0, 100));
-    usedFactsCache.add(factKey);
-    saveUsedFactsToDisk();
-    return selectedFact;
-  } else {
-    // If all default facts have been used, clear some cache and return a random one
-    const oldestKey = usedFactsCache.values().next().value;
-    if (oldestKey) usedFactsCache.delete(oldestKey);
-    saveUsedFactsToDisk();
-  return DEFAULT_FACTS[Math.floor(Math.random() * DEFAULT_FACTS.length)];
+  const unusedFacts = bank.filter((fact) => !usedFactsCache.has(fact.id));
+  const pool = unusedFacts.length ? unusedFacts : bank;
+  const factEntry = shuffleArray([...pool]).pop();
+
+  if (!factEntry) {
+    return null;
   }
+
+  usedFactsCache.add(factEntry.id);
+  if (usedFactsCache.size > CACHE_LIMIT) {
+    const oldest = usedFactsCache.values().next().value;
+    usedFactsCache.delete(oldest);
+  }
+  saveUsedFactsToDisk();
+
+  return {
+    id: factEntry.id,
+    claim: factEntry.claim,
+    claimRu: factEntry.claimRu,
+    isTrue: factEntry.isTrue,
+    explanation: factEntry.explanation
+  };
 }
 
 // Добавляем в начало файла
@@ -223,7 +113,6 @@ let availableCuratedPhrasalVerbs = [];
 const usedQuizCache = new Set();
 const QUIZ_HISTORY_FILE = path.resolve(process.cwd(), 'data/quiz_history.json');
 const QUIZ_BANK_FILE = path.resolve(process.cwd(), 'data/quiz_bank.json');
-const FACT_HISTORY_FILE = path.resolve(process.cwd(), 'data/fact_history.json');
 let curatedQuizBank = [];
 const HOLIDAY_IDIOMS = [
   {
@@ -537,6 +426,57 @@ function saveUsedFactsToDisk() {
   }
 }
 
+function loadCuratedFactsBank() {
+  try {
+    if (!fs.existsSync(FACTS_BANK_FILE)) {
+      console.warn('📘 Файл фактов не найден');
+      curatedFactsBank = [];
+      return curatedFactsBank;
+    }
+
+    const raw = fs.readFileSync(FACTS_BANK_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('формат facts bank должен быть массивом');
+    }
+
+    const seen = new Set();
+    curatedFactsBank = parsed
+      .filter(entry =>
+        entry &&
+        typeof entry.id === 'string' &&
+        entry.id.trim() &&
+        typeof entry.claim === 'string' &&
+        entry.claim.trim() &&
+        typeof entry.claimRu === 'string' &&
+        entry.claimRu.trim() &&
+        typeof entry.isTrue === 'boolean' &&
+        typeof entry.explanation === 'string' &&
+        entry.explanation.trim()
+      )
+      .map(entry => ({
+        id: entry.id.trim(),
+        claim: entry.claim.trim(),
+        claimRu: entry.claimRu.trim(),
+        isTrue: entry.isTrue,
+        explanation: entry.explanation.trim()
+      }))
+      .filter(entry => {
+        const key = entry.id.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+    console.log(`📘 Загружено ${curatedFactsBank.length} фактов из банка`);
+  } catch (error) {
+    console.error('Не удалось загрузить банк фактов:', error.message);
+    curatedFactsBank = [];
+  }
+
+  return curatedFactsBank;
+}
+
 function loadCuratedWordBank() {
   try {
     if (!fs.existsSync(WORD_BANK_FILE)) {
@@ -692,6 +632,13 @@ function getCuratedPhrasalVerbsBank() {
   return curatedPhrasalVerbsBank;
 }
 
+function getCuratedFactsBank() {
+  if (!curatedFactsBank.length) {
+    return loadCuratedFactsBank();
+  }
+  return curatedFactsBank;
+}
+
 function getCuratedWordBank() {
   if (!curatedWordBank.length) {
     return loadCuratedWordBank();
@@ -712,6 +659,7 @@ rebuildCuratedPhrasalVerbsPool();
 loadUsedQuizFromDisk();
 loadCuratedQuizBank();
 loadUsedFactsFromDisk();
+loadCuratedFactsBank();
 
 // Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {

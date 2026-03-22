@@ -49,6 +49,7 @@ const userSessions = {
   idiomGames: new Map(),
   phrasalVerbGames: new Map(),
   quizGames: new Map(),
+  factGames: new Map(),
   activeDialogs: new Map(),
   conversationModes: new Map(),
   pollDrafts: new Map(),

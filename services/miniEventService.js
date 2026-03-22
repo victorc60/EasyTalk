@@ -752,3 +752,58 @@ export async function adminTriggerMiniEventInvite(bot) {
   await day.update({ invite_sent_at: null, is_closed: false, finalized_at: null });
   return broadcastMiniEventInvite(bot, true);
 }
+
+/**
+ * Сводка субботнего мини-ивента за календарный день (event_date = YYYY-MM-DD по Москве).
+ * Используется в ежедневном админ-отчёте.
+ *
+ * - joined: нажали «Участвовать»
+ * - played: ответили хотя бы на 1 вопрос
+ * - totalPoints: после финала — сумма reward_points по участникам; до финала — сумма quiz_points
+ */
+export async function getMiniEventDailySummary(eventDate) {
+  if (!eventDate || !/^\d{4}-\d{2}-\d{2}$/.test(String(eventDate))) {
+    return null;
+  }
+
+  const rows = await MiniEventParticipant.findAll({
+    where: { event_date: eventDate },
+    attributes: ['user_id', 'answered_count', 'quiz_points', 'reward_points', 'award_granted', 'status'],
+  });
+
+  if (rows.length === 0) {
+    return {
+      eventDate,
+      joined: 0,
+      played: 0,
+      completed: 0,
+      totalPoints: 0,
+      anyFinalized: false,
+      playedUserIds: [],
+    };
+  }
+
+  const joined = rows.length;
+  const playedRows = rows.filter((r) => (r.answered_count || 0) > 0);
+  const played = playedRows.length;
+  const playedUserIds = playedRows.map((r) => String(r.user_id));
+  const completed = rows.filter((r) => r.status === 'completed').length;
+  const anyFinalized = rows.some((r) => r.award_granted);
+
+  const totalPoints = rows.reduce((sum, r) => {
+    if (r.award_granted) {
+      return sum + (Number(r.reward_points) || 0);
+    }
+    return sum + (Number(r.quiz_points) || 0);
+  }, 0);
+
+  return {
+    eventDate,
+    joined,
+    played,
+    completed,
+    totalPoints,
+    anyFinalized,
+    playedUserIds,
+  };
+}

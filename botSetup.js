@@ -5,7 +5,7 @@ import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
 import StoryHandlers from './handlers/storyHandlers.js';
@@ -40,7 +40,7 @@ function setupSchedulers(bot, userSessions) {
     console.log('Текущее время Moscow:', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }));
     schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, () => {
       console.log('Запуск dailyFactBroadcast');
-      dailyFactBroadcast(bot);
+      dailyFactBroadcast(bot, userSessions);
     });
     const buildRule = (time) => {
       const rule = new schedule.RecurrenceRule();
@@ -137,7 +137,7 @@ function setupSchedulers(bot, userSessions) {
       // First handle any remaining active games
       handleEndOfDayWordGames(bot, userSessions);
       // Then send statistics
-      notifyDailyWordGameStats(bot);
+      notifyDailyWordGameStats(bot, { isScheduledRun: true });
     });
 
     // Аудит покрытия банков и автопополнение раз в 15 дней (1, 16, 31 число) в 03:00 по Москве
@@ -332,6 +332,11 @@ function setupCallbacks(bot, userSessions) {
       // Handle quiz game callbacks
       if (data.startsWith('quiz_game_')) {
         await handleQuizGameCallback(bot, callbackQuery, userSessions);
+        return;
+      }
+
+      if (data.startsWith('fact_game_')) {
+        await handleFactGameCallback(bot, callbackQuery, userSessions);
         return;
       }
 

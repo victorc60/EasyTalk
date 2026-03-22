@@ -3,12 +3,14 @@ import WordGameParticipation from '../models/WordGameParticipation.js';
 import DailyWordGame from '../models/DailyWordGame.js';
 import User from '../models/User.js';
 import { Op, fn, col } from 'sequelize';
+import { getMoscowWeekRangeKeys } from '../utils/moscowWeek.js';
 
 export const GAME_TYPES = {
   WORD: 'word',
   IDIOM: 'idiom',
   PHRASAL_VERB: 'phrasal_verb',
-  QUIZ: 'quiz'
+  QUIZ: 'quiz',
+  FACT: 'fact'
 };
 
 const TZ_MOSCOW = 'Europe/Moscow';
@@ -19,18 +21,9 @@ function getMoscowDateString(date = new Date()) {
   return d.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
 }
 
-/** Границы текущей недели (Пн–Вс) по Москве. */
+/** Границы текущей недели (Пн–Вс) по Москве — без парсинга toLocaleString (баг на UTC-серверах). */
 function getMoscowWeekBounds(refDate = new Date()) {
-  const moscow = new Date(refDate.toLocaleString('en-US', { timeZone: TZ_MOSCOW }));
-  const weekDay = moscow.getDay();
-  const mondayOffset = (weekDay + 6) % 7;
-  const weekStart = new Date(moscow);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(weekStart.getDate() - mondayOffset);
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  const weekStartKey = weekStart.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
-  const weekEndKey = weekEnd.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
+  const { weekStartKey, weekEndKey } = getMoscowWeekRangeKeys(refDate);
   return { weekStartKey, weekEndKey };
 }
 
@@ -56,15 +49,15 @@ export async function recordGameParticipation({
   pointsEarned = 0,
   responseTime = null,
   gameType = GAME_TYPES.WORD,
-  slot = 'default'
+  slot = 'default',
+  gameDate = null
 }) {
   try {
-    // Используем дату по Москве, чтобы день/неделя совпадали с рассылками и недельным топом
-    const today = getMoscowDateString();
+    const targetDate = gameDate || getMoscowDateString();
     await WordGameParticipation.upsert({
       user_id: userId,
       game_type: gameType,
-      game_date: today,
+      game_date: targetDate,
       slot,
       word,
       answered,
@@ -89,7 +82,8 @@ export function recordWordGameParticipation(
   correct,
   pointsEarned = 0,
   responseTime = null,
-  slot = 'default'
+  slot = 'default',
+  gameDate = null
 ) {
   return recordGameParticipation({
     userId,
@@ -99,7 +93,8 @@ export function recordWordGameParticipation(
     pointsEarned,
     responseTime,
     gameType: GAME_TYPES.WORD,
-    slot
+    slot,
+    gameDate
   });
 }
 
@@ -110,7 +105,8 @@ export function recordIdiomGameParticipation(
   correct,
   pointsEarned = 0,
   responseTime = null,
-  slot = 'default'
+  slot = 'default',
+  gameDate = null
 ) {
   return recordGameParticipation({
     userId,
@@ -120,7 +116,8 @@ export function recordIdiomGameParticipation(
     pointsEarned,
     responseTime,
     gameType: GAME_TYPES.IDIOM,
-    slot
+    slot,
+    gameDate
   });
 }
 
@@ -131,7 +128,8 @@ export function recordPhrasalVerbGameParticipation(
   correct,
   pointsEarned = 0,
   responseTime = null,
-  slot = 'default'
+  slot = 'default',
+  gameDate = null
 ) {
   return recordGameParticipation({
     userId,
@@ -141,7 +139,8 @@ export function recordPhrasalVerbGameParticipation(
     pointsEarned,
     responseTime,
     gameType: GAME_TYPES.PHRASAL_VERB,
-    slot
+    slot,
+    gameDate
   });
 }
 
@@ -152,7 +151,8 @@ export function recordQuizGameParticipation(
   correct,
   pointsEarned = 0,
   responseTime = null,
-  slot = 'default'
+  slot = 'default',
+  gameDate = null
 ) {
   return recordGameParticipation({
     userId,
@@ -162,7 +162,31 @@ export function recordQuizGameParticipation(
     pointsEarned,
     responseTime,
     gameType: GAME_TYPES.QUIZ,
-    slot
+    slot,
+    gameDate
+  });
+}
+
+export function recordFactGameParticipation(
+  userId,
+  factClaim,
+  answered,
+  correct,
+  pointsEarned = 0,
+  responseTime = null,
+  slot = 'default',
+  gameDate = null
+) {
+  return recordGameParticipation({
+    userId,
+    word: factClaim,
+    answered,
+    correct,
+    pointsEarned,
+    responseTime,
+    gameType: GAME_TYPES.FACT,
+    slot,
+    gameDate
   });
 }
 

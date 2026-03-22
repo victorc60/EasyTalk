@@ -7,7 +7,8 @@ import {
   recordWordGameParticipation, 
   recordIdiomGameParticipation, 
   recordPhrasalVerbGameParticipation, 
-  recordQuizGameParticipation, 
+  recordQuizGameParticipation,
+  recordFactGameParticipation,
   getSavedDailyWordData, 
   hasUserAnsweredWordGame,
   getPeriodStats,
@@ -17,7 +18,7 @@ import {
   getPointsForUserToday,
   getPointsForUserThisWeek
 } from '../services/wordGameServices.js';
-import { notifyDailyWordGameStats } from '../features/wordGameNotifications.js';
+import { notifyDailyWordGameStats, getTodayMoscowDateString } from '../features/wordGameNotifications.js';
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
 import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay } from '../services/miniEventService.js';
@@ -611,6 +612,88 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
   }
 }
 
+export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
+  try {
+    const data = callbackQuery.data;
+    const userId = callbackQuery.from.id;
+
+    const parts = data.split('_');
+    if (parts.length !== 5 || parts[0] !== 'fact' || parts[1] !== 'game') {
+      return;
+    }
+
+    const targetUserId = parseInt(parts[2], 10);
+    const sessionId = parts[3];
+    const selectedChoice = parts[4];
+
+    if (targetUserId !== userId) return;
+
+    if (!userSessions.factGames) {
+      userSessions.factGames = new Map();
+    }
+
+    const gameSession = userSessions.factGames.get(userId);
+    if (!gameSession || gameSession.sessionId !== sessionId || gameSession.expired) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⏰ Время факта дня истекло!',
+        show_alert: true
+      });
+      return;
+    }
+
+    if (!['true', 'false'].includes(selectedChoice)) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⚠️ Неверный вариант',
+        show_alert: true
+      });
+      return;
+    }
+
+    const selectedValue = selectedChoice === 'true';
+    const isCorrect = selectedValue === gameSession.isTrue;
+    const points = isCorrect ? 10 : 0;
+
+    if (isCorrect) {
+      await awardPoints(userId, points);
+    }
+
+    const responseTime = gameSession.startTime ? Date.now() - gameSession.startTime : null;
+    await recordFactGameParticipation(
+      userId,
+      gameSession.claim,
+      true,
+      isCorrect,
+      points,
+      responseTime
+    );
+
+    const truthLabel = gameSession.isTrue ? 'True' : 'False';
+    let resultMessage = isCorrect
+      ? `✅ <b>Верно!</b> +${points} очков\n\n`
+      : `❌ <b>Неверно.</b>\n\n`;
+
+    resultMessage += `🌷✨ <b>Fact of the Day</b>\n`;
+    resultMessage += `🇬🇧 ${gameSession.claim}\n`;
+    resultMessage += `🇷🇺 ${gameSession.claimRu}\n\n`;
+    resultMessage += `🎯 Правильный ответ: <b>${truthLabel}</b>\n\n`;
+    resultMessage += `${gameSession.explanation}`;
+
+    await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${truthLabel}`,
+      show_alert: false
+    });
+
+    userSessions.factGames.delete(userId);
+  } catch (error) {
+    console.error('Ошибка при обработке callback fact game:', error);
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: '⚠️ Произошла ошибка',
+      show_alert: true
+    });
+  }
+}
+
 export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSessions) {
   try {
     const data = callbackQuery.data;
@@ -818,16 +901,25 @@ export async function wordGameStats(bot, msg, userSessions = null) {
       );
       return;
     }
-    
+
     console.log('Starting word game stats command...');
     await sendUserMessage(bot, msg.chat.id, '🔄 Получение статистики...');
-    
-    // Try simple version first (doesn't require database)
-    if (userSessions) {
-      await notifySimpleWordGameStats(bot, userSessions);
-    } else {
-      // Fallback to database version
-      await notifyDailyWordGameStats(bot);
+
+    const parts = (msg.text || '').trim().split(/\s+/);
+    let reportDate = getTodayMoscowDateString();
+    if (parts[1] && /^\d{4}-\d{2}-\d{2}$/.test(parts[1])) {
+      reportDate = parts[1];
+    }
+
+    try {
+      await notifyDailyWordGameStats(bot, { reportDate, isScheduledRun: false });
+    } catch (dbError) {
+      console.error('Полная статистика недоступна, fallback:', dbError.message);
+      if (userSessions) {
+        await notifySimpleWordGameStats(bot, userSessions);
+      } else {
+        throw dbError;
+      }
     }
   } catch (error) {
     console.error('Ошибка при получении статистики игры:', error);
