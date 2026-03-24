@@ -6,26 +6,9 @@ import fs from 'fs';
 import path from 'path';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const usedFactsCache = new Set();
-const CACHE_LIMIT = 200;
-const FACT_HISTORY_FILE = path.resolve(process.cwd(), 'data/fact_history.json');
 const FACTS_BANK_FILE = path.resolve(process.cwd(), 'data/facts_bank.json');
 let curatedFactsBank = [];
-
-const HOLIDAY_START_DAY = 15; // 15 ноября
-const HOLIDAY_END_DAY = 20; // 20 января
-
-function isHolidaySeason(date = new Date()) {
-  const d = new Date(date);
-  const month = d.getMonth(); // 0-11
-  const day = d.getDate();
-  // Ноябрь (с 15 числа), весь декабрь, до 20 января
-  return (
-    (month === 10 && day >= HOLIDAY_START_DAY) || // November
-    month === 11 || // December
-    (month === 0 && day <= HOLIDAY_END_DAY) // January
-  );
-}
+let factCursor = -1;
 
 async function generateEnglishContent(prompt, format = 'text') {
   try {
@@ -69,20 +52,11 @@ export async function dailyFact() {
     return null;
   }
 
-  const unusedFacts = bank.filter((fact) => !usedFactsCache.has(fact.id));
-  const pool = unusedFacts.length ? unusedFacts : bank;
-  const factEntry = shuffleArray([...pool]).pop();
+  const factEntry = getNextSequentialEntry(bank, 'fact');
 
   if (!factEntry) {
     return null;
   }
-
-  usedFactsCache.add(factEntry.id);
-  if (usedFactsCache.size > CACHE_LIMIT) {
-    const oldest = usedFactsCache.values().next().value;
-    usedFactsCache.delete(oldest);
-  }
-  saveUsedFactsToDisk();
 
   return {
     id: factEntry.id,
@@ -93,336 +67,54 @@ export async function dailyFact() {
   };
 }
 
-// Добавляем в начало файла
-const usedWordsCache = new Set();
-const MAX_CACHE_SIZE = 365; // Храним 365 последних слов (около года)
-const WORD_HISTORY_FILE = path.resolve(process.cwd(), 'data/word_history.json');
 const WORD_BANK_FILE = path.resolve(process.cwd(), 'data/word_bank.json');
 let curatedWordBank = [];
-let availableCuratedWords = [];
-const usedIdiomsCache = new Set();
-const IDIOM_HISTORY_FILE = path.resolve(process.cwd(), 'data/idiom_history.json');
+let wordCursor = -1;
 const IDIOM_BANK_FILE = path.resolve(process.cwd(), 'data/idiom_bank.json');
 let curatedIdiomBank = [];
-let availableCuratedIdioms = [];
-const usedPhrasalVerbsCache = new Set();
-const PHRASAL_VERBS_HISTORY_FILE = path.resolve(process.cwd(), 'data/phrasal_verbs_history.json');
+let idiomCursor = -1;
 const PHRASAL_VERBS_BANK_FILE = path.resolve(process.cwd(), 'data/phrasal_verbs_bank.json');
 let curatedPhrasalVerbsBank = [];
-let availableCuratedPhrasalVerbs = [];
-const usedQuizCache = new Set();
-const QUIZ_HISTORY_FILE = path.resolve(process.cwd(), 'data/quiz_history.json');
+let phrasalVerbCursor = -1;
 const QUIZ_BANK_FILE = path.resolve(process.cwd(), 'data/quiz_bank.json');
 let curatedQuizBank = [];
-const HOLIDAY_IDIOMS = [
-  {
-    idiom: 'snowed under',
-    translation: 'завален делами',
-    meaning: 'to have too much work',
-    example: "I'm snowed under before the holidays.",
-    hint: 'как под сугробом'
-  },
-  {
-    idiom: 'the dead of winter',
-    translation: 'середина зимы',
-    meaning: 'the coldest, darkest part of winter',
-    example: 'They went camping in the dead of winter.',
-    hint: 'самая глушь зимы'
-  },
-  {
-    idiom: 'break the ice',
-    translation: 'растопить лед',
-    meaning: 'to make people feel more relaxed',
-    example: 'A small gift helps break the ice at holiday parties.',
-    hint: 'начать общение'
-  },
-  {
-    idiom: 'left out in the cold',
-    translation: 'оставить за бортом',
-    meaning: 'to be ignored or excluded',
-    example: 'Don’t leave anyone out in the cold during the celebrations.',
-    hint: 'когда тебя забыли'
-  }
-];
+let quizCursor = -1;
+let defaultIdiomCursor = -1;
+let defaultPhrasalVerbCursor = -1;
 
-const HOLIDAY_PHRASAL_VERBS = [
-  {
-    phrasalVerb: 'wrap up',
-    translation: 'укутаться',
-    meaning: 'одеться тепло',
-    example: 'Wrap up before you go out in the snow.',
-    hint: 'несколько слоёв одежды',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'snow in',
-    translation: 'завалить снегом',
-    meaning: 'заблокировать снегом',
-    example: 'We got snowed in and canceled the trip.',
-    hint: 'дверь не открыть',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'light up',
-    translation: 'зажигать',
-    meaning: 'освещать огнями',
-    example: 'They light up the tree every evening.',
-    hint: 'гирлянды включены',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'hand out',
-    translation: 'раздавать',
-    meaning: 'дарить или выдавать',
-    example: 'They hand out gifts at the party.',
-    hint: 'делиться подарками',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'look forward to',
-    translation: 'ждать с нетерпением',
-    meaning: 'с нетерпением ожидать события',
-    example: 'Kids look forward to Christmas morning.',
-    hint: 'предвкушение праздника',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'warm up',
-    translation: 'согреваться',
-    meaning: 'становиться теплее',
-    example: 'Warm up by the fireplace.',
-    hint: 'греться у огня',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'set up',
-    translation: 'устанавливать',
-    meaning: 'ставить декор или елку',
-    example: 'Let’s set up the Christmas tree.',
-    hint: 'подготовить украшения',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'dress up',
-    translation: 'наряжаться',
-    meaning: 'надеть праздничную одежду/костюм',
-    example: 'The kids dress up as elves.',
-    hint: 'праздничные костюмы',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'ring in',
-    translation: 'встретить (Новый год)',
-    meaning: 'отпраздновать наступление',
-    example: 'We ring in the New Year together.',
-    hint: 'под бой курантов',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'count down',
-    translation: 'вести обратный отсчёт',
-    meaning: 'считать секунды до события',
-    example: 'They count down to midnight.',
-    hint: '10, 9, 8...',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'give away',
-    translation: 'дарить',
-    meaning: 'раздавать в подарок',
-    example: 'They give away toys to kids.',
-    hint: 'подарки безвозмездно',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'cool down',
-    translation: 'остывать',
-    meaning: 'становиться холоднее',
-    example: 'The weather cools down in December.',
-    hint: 'похолодание',
-    topic: 'holiday'
+function getNextCursorValue(bankLength, currentCursor) {
+  if (!bankLength) {
+    return -1;
   }
-];
-
-function loadUsedWordsFromDisk() {
-  try {
-    if (fs.existsSync(WORD_HISTORY_FILE)) {
-      const raw = fs.readFileSync(WORD_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const word of parsed) {
-          if (typeof word === 'string' && word.trim()) {
-            usedWordsCache.add(word.trim().toLowerCase());
-          }
-        }
-        console.log(`📚 Загружено ${usedWordsCache.size} слов из истории`);
-      }
-    } else {
-      console.log('📚 Файл истории слов не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю слов:', error.message);
+  if (currentCursor < 0 || currentCursor >= bankLength - 1) {
+    return 0;
   }
+  return currentCursor + 1;
 }
 
-function saveUsedWordsToDisk() {
-  try {
-    const dir = path.dirname(WORD_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    // Сохраняем не более MAX_CACHE_SIZE последних слов
-    const wordsArray = Array.from(usedWordsCache);
-    const trimmed = wordsArray.slice(Math.max(0, wordsArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(WORD_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} слов в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю слов:', error.message);
+function getNextSequentialEntry(bank, type) {
+  if (!Array.isArray(bank) || !bank.length) {
+    return null;
   }
-}
 
-function loadUsedIdiomsFromDisk() {
-  try {
-    if (fs.existsSync(IDIOM_HISTORY_FILE)) {
-      const raw = fs.readFileSync(IDIOM_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const idiom of parsed) {
-          if (typeof idiom === 'string' && idiom.trim()) {
-            usedIdiomsCache.add(idiom.trim().toLowerCase());
-          }
-        }
-        console.log(`📒 Загружено ${usedIdiomsCache.size} идиом из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории идиом не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю идиом:', error.message);
-  }
-}
-
-function saveUsedIdiomsToDisk() {
-  try {
-    const dir = path.dirname(IDIOM_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const idiomsArray = Array.from(usedIdiomsCache);
-    const trimmed = idiomsArray.slice(Math.max(0, idiomsArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(IDIOM_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} идиом в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю идиом:', error.message);
-  }
-}
-
-// Функции для работы с Phrasal Verbs
-function loadUsedPhrasalVerbsFromDisk() {
-  try {
-    if (fs.existsSync(PHRASAL_VERBS_HISTORY_FILE)) {
-      const raw = fs.readFileSync(PHRASAL_VERBS_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const phrasalVerb of parsed) {
-          if (typeof phrasalVerb === 'string' && phrasalVerb.trim()) {
-            usedPhrasalVerbsCache.add(phrasalVerb.trim().toLowerCase());
-          }
-        }
-        console.log(`📒 Загружено ${usedPhrasalVerbsCache.size} phrasal verbs из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории phrasal verbs не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю phrasal verbs:', error.message);
-  }
-}
-
-function saveUsedPhrasalVerbsToDisk() {
-  try {
-    const dir = path.dirname(PHRASAL_VERBS_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const phrasalVerbsArray = Array.from(usedPhrasalVerbsCache);
-    const trimmed = phrasalVerbsArray.slice(Math.max(0, phrasalVerbsArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(PHRASAL_VERBS_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} phrasal verbs в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю phrasal verbs:', error.message);
-  }
-}
-
-function loadUsedQuizFromDisk() {
-  try {
-    if (fs.existsSync(QUIZ_HISTORY_FILE)) {
-      const raw = fs.readFileSync(QUIZ_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const entry of parsed) {
-          if (typeof entry === 'string' && entry.trim()) {
-            usedQuizCache.add(entry.trim().toLowerCase());
-          }
-        }
-        console.log(`📒 Загружено ${usedQuizCache.size} quiz вопросов из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории квиза не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю квиза:', error.message);
-  }
-}
-
-function saveUsedQuizToDisk() {
-  try {
-    const dir = path.dirname(QUIZ_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const quizArray = Array.from(usedQuizCache);
-    const trimmed = quizArray.slice(Math.max(0, quizArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(QUIZ_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} quiz вопросов в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю квиза:', error.message);
-  }
-}
-
-function loadUsedFactsFromDisk() {
-  try {
-    if (fs.existsSync(FACT_HISTORY_FILE)) {
-      const raw = fs.readFileSync(FACT_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const factKey of parsed) {
-          if (typeof factKey === 'string' && factKey.trim()) {
-            usedFactsCache.add(factKey.trim());
-          }
-        }
-        console.log(`📒 Загружено ${usedFactsCache.size} ключей фактов из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории фактов не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю фактов:', error.message);
-  }
-}
-
-function saveUsedFactsToDisk() {
-  try {
-    const dir = path.dirname(FACT_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const factKeys = Array.from(usedFactsCache);
-    const trimmed = factKeys.slice(Math.max(0, factKeys.length - CACHE_LIMIT));
-    fs.writeFileSync(FACT_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} ключей фактов в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю фактов:', error.message);
+  switch (type) {
+    case 'fact':
+      factCursor = getNextCursorValue(bank.length, factCursor);
+      return bank[factCursor] ?? null;
+    case 'word':
+      wordCursor = getNextCursorValue(bank.length, wordCursor);
+      return bank[wordCursor] ?? null;
+    case 'idiom':
+      idiomCursor = getNextCursorValue(bank.length, idiomCursor);
+      return bank[idiomCursor] ?? null;
+    case 'phrasal_verb':
+      phrasalVerbCursor = getNextCursorValue(bank.length, phrasalVerbCursor);
+      return bank[phrasalVerbCursor] ?? null;
+    case 'quiz':
+      quizCursor = getNextCursorValue(bank.length, quizCursor);
+      return bank[quizCursor] ?? null;
+    default:
+      return null;
   }
 }
 
@@ -646,34 +338,47 @@ function getCuratedWordBank() {
   return curatedWordBank;
 }
 
-// Инициализируем кэш слов из файла при загрузке модуля
-loadUsedWordsFromDisk();
+export function isWordPresentInBank(word) {
+  if (!word) {
+    return false;
+  }
+
+  const bank = loadCuratedWordBank();
+  const normalized = word.trim().toLowerCase();
+  return bank.some((entry) => entry.word.trim().toLowerCase() === normalized);
+}
+
 loadCuratedWordBank();
-rebuildCuratedWordPool();
-loadUsedIdiomsFromDisk();
 loadCuratedIdiomBank();
-rebuildCuratedIdiomPool();
-loadUsedPhrasalVerbsFromDisk();
 loadCuratedPhrasalVerbsBank();
-rebuildCuratedPhrasalVerbsPool();
-loadUsedQuizFromDisk();
 loadCuratedQuizBank();
-loadUsedFactsFromDisk();
 loadCuratedFactsBank();
 
-// Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {
-  const wordLower = word.trim().toLowerCase();
-  pushWordToHistory(wordLower);
-  console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
+  if (!word) {
+    return;
+  }
+
+  const bank = getCuratedWordBank();
+  const normalized = word.trim().toLowerCase();
+  const index = bank.findIndex((entry) => entry.word.trim().toLowerCase() === normalized);
+
+  if (index === -1) {
+    console.warn(`⚠️ Слово "${word}" не найдено в текущем word bank`);
+    return;
+  }
+
+  wordCursor = index;
+  console.log(`🔧 Следующее слово дня будет выбрано после "${word}"`);
 }
 
 export async function wordOfTheDay() {
+  loadCuratedWordBank();
   const wordEntry = pickCuratedWordSequential();
   
   if (!wordEntry) {
-    console.warn('⚠️ Словарь не доступен, используем резервное слово');
-    return getDefaultWordWithOptions();
+    console.warn('⚠️ Словарь слов пуст или недоступен');
+    return null;
   }
 
   const { options, correctIndex } = buildAnswerOptions(wordEntry);
@@ -701,442 +406,36 @@ function shuffleArray(array) {
   return shuffled;
 }
 
-function matchesHolidayWord(entry) {
-  const text = [
-    entry.word,
-    entry.translation,
-    entry.topic,
-    entry.meaning
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const enKeywords = ['winter', 'snow', 'ice', 'frost', 'christmas', 'holiday', 'new year', 'festive', 'sleigh', 'gingerbread'];
-  const ruKeywords = ['зим', 'снег', 'мороз', 'лед', 'рожде', 'новогод', 'празд', 'елк', 'каникул'];
-
-  return enKeywords.some(k => text.includes(k)) || ruKeywords.some(k => text.includes(k));
-}
-
-function matchesHolidayIdiom(entry) {
-  const text = [
-    entry.idiom,
-    entry.translation,
-    entry.topic,
-    entry.meaning,
-    entry.hint
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const enKeywords = ['winter', 'snow', 'ice', 'cold', 'christmas', 'holiday', 'new year', 'frost'];
-  const ruKeywords = ['зим', 'снег', 'мороз', 'лед', 'рожде', 'новогод', 'празд'];
-
-  return enKeywords.some(k => text.includes(k)) || ruKeywords.some(k => text.includes(k));
-}
-
-function matchesHolidayPhrasalVerb(entry) {
-  const text = [
-    entry.phrasalVerb,
-    entry.translation,
-    entry.meaning,
-    entry.example,
-    entry.topic,
-    entry.hint
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const enKeywords = ['winter', 'snow', 'ice', 'cold', 'freeze', 'frost', 'christmas', 'holiday', 'new year', 'gift', 'fireplace', 'santa'];
-  const ruKeywords = ['зим', 'снег', 'лед', 'мороз', 'рожде', 'новогод', 'подар', 'камин', 'елк', 'санта'];
-
-  return enKeywords.some(k => text.includes(k)) || ruKeywords.some(k => text.includes(k));
-}
-
-function pickHolidayWord() {
-  const bank = getCuratedWordBank();
-  const topicMatches = bank.filter(entry => (entry.topic || '').toLowerCase().includes('holiday'));
-  const keywordMatches = bank.filter(entry => matchesHolidayWord(entry));
-  const candidates = topicMatches.length ? topicMatches : keywordMatches;
-  const unused = candidates.filter(entry => !usedWordsCache.has(entry.word.trim().toLowerCase()));
-  const pool = unused.length ? unused : candidates;
-
-  if (!pool.length) {
-    return null;
-  }
-
-  const entry = shuffleArray(pool).pop();
-  const normalizedWord = entry.word.trim().toLowerCase();
-  usedWordsCache.add(normalizedWord);
-  if (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
-  }
-  removeWordFromCuratedPool(normalizedWord);
-  saveUsedWordsToDisk();
-  return entry;
-}
-
-function pickHolidayIdiom() {
-  const bank = getCuratedIdiomBank();
-  const topicMatches = bank.filter(entry => (entry.topic || '').toLowerCase().includes('holiday'));
-  const keywordMatches = bank.filter(entry => matchesHolidayIdiom(entry));
-  const candidates = topicMatches.length ? topicMatches : keywordMatches;
-  const unused = candidates.filter(entry => !usedIdiomsCache.has(entry.idiom.trim().toLowerCase()));
-  const pool = unused.length ? unused : [];
-
-  if (pool.length) {
-    const entry = shuffleArray(pool).pop();
-    const normalized = entry.idiom.trim().toLowerCase();
-    usedIdiomsCache.add(normalized);
-    if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedIdiomsCache.values().next().value;
-      usedIdiomsCache.delete(oldest);
-    }
-    saveUsedIdiomsToDisk();
-    return entry;
-  }
-
-  const fallbackPool = HOLIDAY_IDIOMS.filter(entry => !usedIdiomsCache.has(entry.idiom.trim().toLowerCase()));
-  if (fallbackPool.length) {
-    const entry = shuffleArray(fallbackPool).pop();
-    const key = entry.idiom.trim().toLowerCase();
-    usedIdiomsCache.add(key);
-    if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedIdiomsCache.values().next().value;
-      usedIdiomsCache.delete(oldest);
-    }
-    saveUsedIdiomsToDisk();
-    return entry;
-  }
-  return null;
-}
-
-function pickHolidayPhrasalVerb() {
-  const bank = getCuratedPhrasalVerbsBank();
-  const topicMatches = bank.filter(entry => (entry.topic || '').toLowerCase().includes('holiday'));
-  const keywordMatches = bank.filter(entry => matchesHolidayPhrasalVerb(entry));
-  const candidates = topicMatches.length ? topicMatches : keywordMatches;
-  const unused = candidates.filter(entry => !usedPhrasalVerbsCache.has(entry.phrasalVerb.trim().toLowerCase()));
-  const pool = unused.length ? unused : [];
-
-  if (pool.length) {
-    const entry = shuffleArray(pool).pop();
-    const normalized = entry.phrasalVerb.trim().toLowerCase();
-    usedPhrasalVerbsCache.add(normalized);
-    if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedPhrasalVerbsCache.values().next().value;
-      usedPhrasalVerbsCache.delete(oldest);
-    }
-    saveUsedPhrasalVerbsToDisk();
-    return entry;
-  }
-
-  const fallbackPool = HOLIDAY_PHRASAL_VERBS.filter(entry => !usedPhrasalVerbsCache.has(entry.phrasalVerb.trim().toLowerCase()));
-  if (fallbackPool.length) {
-    const entry = shuffleArray(fallbackPool).pop();
-    const key = entry.phrasalVerb.trim().toLowerCase();
-    usedPhrasalVerbsCache.add(key);
-    if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedPhrasalVerbsCache.values().next().value;
-      usedPhrasalVerbsCache.delete(oldest);
-    }
-    saveUsedPhrasalVerbsToDisk();
-    return entry;
-  }
-  return null;
-}
-
-function rebuildCuratedWordPool() {
-  if (!curatedWordBank.length) {
-    loadCuratedWordBank();
-  }
-  if (!curatedWordBank.length) {
-    availableCuratedWords = [];
-    return;
-  }
-
-  const unused = [];
-  for (const entry of curatedWordBank) {
-    const normalized = entry.word.trim().toLowerCase();
-    if (!usedWordsCache.has(normalized)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : curatedWordBank;
-  availableCuratedWords = shuffleArray([...poolSource]);
-}
-
-function rebuildCuratedIdiomPool() {
-  if (!curatedIdiomBank.length) {
-    loadCuratedIdiomBank();
-  }
-  if (!curatedIdiomBank.length) {
-    availableCuratedIdioms = [];
-    return;
-  }
-
-  const unused = [];
-  for (const entry of curatedIdiomBank) {
-    const normalized = entry.idiom.trim().toLowerCase();
-    if (!usedIdiomsCache.has(normalized)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : curatedIdiomBank;
-  availableCuratedIdioms = shuffleArray([...poolSource]);
-}
-
-function rebuildCuratedPhrasalVerbsPool() {
-  if (!curatedPhrasalVerbsBank.length) {
-    loadCuratedPhrasalVerbsBank();
-  }
-  if (!curatedPhrasalVerbsBank.length) {
-    availableCuratedPhrasalVerbs = [];
-    return;
-  }
-
-  const unused = [];
-  for (const entry of curatedPhrasalVerbsBank) {
-    const normalized = entry.phrasalVerb.trim().toLowerCase();
-    if (!usedPhrasalVerbsCache.has(normalized)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : curatedPhrasalVerbsBank;
-  availableCuratedPhrasalVerbs = shuffleArray([...poolSource]);
-}
-
 export function getPhrasalVerbUsageStats() {
   const bank = getCuratedPhrasalVerbsBank();
   const total = bank.length;
-  let usedFromBank = 0;
-
-  for (const entry of bank) {
-    const key = entry.phrasalVerb.trim().toLowerCase();
-    if (usedPhrasalVerbsCache.has(key)) {
-      usedFromBank += 1;
-    }
-  }
-
-  const remaining = Math.max(total - usedFromBank, 0);
+  const used = total > 0 ? Math.min(phrasalVerbCursor + 1, total) : 0;
+  const remaining = Math.max(total - used, 0);
 
   return {
     total,
-    used: usedFromBank,
+    used,
     remaining,
     nextWillRepeat: total > 0 && remaining === 0,
-    usageRate: total > 0 ? Math.round((usedFromBank / total) * 100) : 0
+    usageRate: total > 0 ? Math.round((used / total) * 100) : 0
   };
-}
-
-function removeWordFromCuratedPool(wordLower) {
-  if (!availableCuratedWords.length) {
-    return;
-  }
-  availableCuratedWords = availableCuratedWords.filter(
-    (entry) => entry.word.trim().toLowerCase() !== wordLower
-  );
-}
-
-function pushWordToHistory(wordLower) {
-  if (!wordLower) {
-    return;
-  }
-
-  if (usedWordsCache.has(wordLower)) {
-    usedWordsCache.delete(wordLower);
-  }
-
-  usedWordsCache.add(wordLower);
-
-  while (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
-  }
-
-  saveUsedWordsToDisk();
-}
-
-function getDefaultWordWithOptions() {
-  const defaultWords = [
-    {
-      word: "ephemeral",
-      translation: "недолговечный",
-      options: [
-        "недолговечный",
-        "вечный",
-        "красивый", 
-        "временный"
-      ],
-      example: "The beauty of cherry blossoms is ephemeral.",
-      fact: "From Greek 'ephemeros' meaning 'lasting only one day'",
-      mistakes: "Don't confuse with 'eternal' - they're opposites"
-    },
-    {
-      word: "quintessential",
-      translation: "наиболее типичный",
-      options: [
-        "наиболее типичный",
-        "важный",
-        "красивый",
-        "редкий"
-      ],
-      example: "He's the quintessential English gentleman.",
-      fact: "Comes from 'quintessence' - the fifth element in ancient philosophy",
-      mistakes: "Often misspelled as 'quintessential' (missing the 'e')"
-    },
-    {
-      word: "serendipity",
-      translation: "счастливая случайность",
-      options: [
-        "счастливая случайность",
-        "удача",
-        "везение",
-        "случай"
-      ],
-      example: "Finding this book was pure serendipity.",
-      fact: "Coined by Horace Walpole in 1754, inspired by Persian fairy tale",
-      mistakes: "Often confused with 'luck' - serendipity implies discovery"
-    },
-    {
-      word: "ubiquitous",
-      translation: "вездесущий",
-      options: [
-        "вездесущий",
-        "важный",
-        "популярный",
-        "известный"
-      ],
-      example: "Smartphones have become ubiquitous in modern life.",
-      fact: "From Latin 'ubique' meaning 'everywhere'",
-      mistakes: "Don't confuse with 'popular' - ubiquitous means everywhere present"
-    }
-  ];
-  
-  // Ищем дефолтное слово, которое ещё не использовалось
-  for (const word of defaultWords) {
-    const key = word.word.trim().toLowerCase();
-    console.log(`🔍 Проверяем дефолтное слово: "${word.word}" (${key})`);
-    if (!usedWordsCache.has(key)) {
-      pushWordToHistory(key);
-      console.log(`✅ Дефолтное слово "${word.word}" добавлено в историю`);
-      // Перемешиваем варианты ответов
-      const shuffledOptions = shuffleArray([...word.options]);
-      const correctIndex = shuffledOptions.findIndex(
-        option => option.toLowerCase() === word.translation.toLowerCase()
-      );
-      return { ...word, options: shuffledOptions, correctIndex: correctIndex >= 0 ? correctIndex : 0 };
-    } else {
-      console.log(`⚠️ Дефолтное слово "${word.word}" уже использовалось ранее`);
-    }
-  }
-  
-  // Если все дефолтные слова уже использовались, возвращаем первое с перемешанными вариантами
-  const firstWord = defaultWords[0];
-  const key = firstWord.word.trim().toLowerCase();
-  console.log(`⚠️ Все дефолтные слова использованы, возвращаем "${firstWord.word}"`);
-  pushWordToHistory(key);
-  const shuffledOptions = shuffleArray([...firstWord.options]);
-  const correctIndex = shuffledOptions.findIndex(
-    option => option.toLowerCase() === firstWord.translation.toLowerCase()
-  );
-  return { ...firstWord, options: shuffledOptions, correctIndex: correctIndex >= 0 ? correctIndex : 0 };
 }
 
 function pickCuratedWordSequential() {
   const bank = getCuratedWordBank();
-  if (!bank.length) {
-    return null;
-  }
-
-  const orderedWords = bank.map((entry) => entry.word.trim().toLowerCase());
-  const history = Array.from(usedWordsCache);
-  const lastUsedWord = history.length ? history[history.length - 1] : null;
-
-  let nextIndex = 0;
-  if (lastUsedWord) {
-    const currentIndex = orderedWords.indexOf(lastUsedWord);
-    if (currentIndex >= 0) {
-      nextIndex = (currentIndex + 1) % bank.length;
-    }
-  }
-
-  const entry = bank[nextIndex];
-  const normalizedWord = entry.word.trim().toLowerCase();
-  pushWordToHistory(normalizedWord);
-
-  return entry;
+  return getNextSequentialEntry(bank, 'word');
 }
 
 function pickCuratedIdiom() {
-  if (!availableCuratedIdioms.length) {
-    rebuildCuratedIdiomPool();
-  }
-
-  const entry = availableCuratedIdioms.pop();
-  if (!entry) return null;
-
-  const normalized = entry.idiom.trim().toLowerCase();
-  usedIdiomsCache.add(normalized);
-  if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedIdiomsCache.values().next().value;
-    usedIdiomsCache.delete(oldest);
-  }
-  saveUsedIdiomsToDisk();
-
-  return entry;
+  return getNextSequentialEntry(getCuratedIdiomBank(), 'idiom');
 }
 
 function pickCuratedPhrasalVerb() {
-  if (!availableCuratedPhrasalVerbs.length) {
-    rebuildCuratedPhrasalVerbsPool();
-  }
-
-  const entry = availableCuratedPhrasalVerbs.pop();
-  if (!entry) return null;
-
-  const normalized = entry.phrasalVerb.trim().toLowerCase();
-  usedPhrasalVerbsCache.add(normalized);
-  if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedPhrasalVerbsCache.values().next().value;
-    usedPhrasalVerbsCache.delete(oldest);
-  }
-  saveUsedPhrasalVerbsToDisk();
-
-  return entry;
+  return getNextSequentialEntry(getCuratedPhrasalVerbsBank(), 'phrasal_verb');
 }
 
 function pickQuizQuestion() {
-  const bank = getCuratedQuizBank();
-  if (!bank.length) return null;
-
-  const unused = [];
-  for (const entry of bank) {
-    const key = entry.question.trim().toLowerCase();
-    if (!usedQuizCache.has(key)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : bank;
-  const entry = shuffleArray([...poolSource]).pop();
-  if (!entry) return null;
-
-  const normalized = entry.question.trim().toLowerCase();
-  usedQuizCache.add(normalized);
-  if (usedQuizCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedQuizCache.values().next().value;
-    usedQuizCache.delete(oldest);
-  }
-  saveUsedQuizToDisk();
-
-  return entry;
+  return getNextSequentialEntry(getCuratedQuizBank(), 'quiz');
 }
 
 function buildAnswerOptions(entry) {
@@ -1359,24 +658,10 @@ function getDefaultPhrasalVerbWithOptions() {
     }
   ];
 
-  for (const phrasalVerb of defaultPhrasalVerbs) {
-    const key = phrasalVerb.phrasalVerb.trim().toLowerCase();
-    if (!usedPhrasalVerbsCache.has(key)) {
-      usedPhrasalVerbsCache.add(key);
-      if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-        const oldest = usedPhrasalVerbsCache.values().next().value;
-        usedPhrasalVerbsCache.delete(oldest);
-      }
-      saveUsedPhrasalVerbsToDisk();
-      const { options, correctIndex } = buildPhrasalVerbOptions(phrasalVerb);
-      return { ...phrasalVerb, options, correctIndex };
-    }
-  }
-
-  // Если всё использовано, возвращаем первую
-  const first = defaultPhrasalVerbs[0];
-  const { options, correctIndex } = buildPhrasalVerbOptions(first);
-  return { ...first, options, correctIndex };
+  defaultPhrasalVerbCursor = getNextCursorValue(defaultPhrasalVerbs.length, defaultPhrasalVerbCursor);
+  const entry = defaultPhrasalVerbs[defaultPhrasalVerbCursor];
+  const { options, correctIndex } = buildPhrasalVerbOptions(entry);
+  return { ...entry, options, correctIndex };
 }
 
 function buildIdiomOptions(entry) {
@@ -1458,24 +743,10 @@ function getDefaultIdiomWithOptions() {
     }
   ];
 
-  for (const idiom of defaultIdioms) {
-    const key = idiom.idiom.trim().toLowerCase();
-    if (!usedIdiomsCache.has(key)) {
-      usedIdiomsCache.add(key);
-      if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-        const oldest = usedIdiomsCache.values().next().value;
-        usedIdiomsCache.delete(oldest);
-      }
-      saveUsedIdiomsToDisk();
-      const { options, correctIndex } = buildIdiomOptions(idiom);
-      return { ...idiom, options, correctIndex };
-    }
-  }
-
-  // Если всё использовано, возвращаем первую
-  const first = defaultIdioms[0];
-  const { options, correctIndex } = buildIdiomOptions(first);
-  return { ...first, options, correctIndex };
+  defaultIdiomCursor = getNextCursorValue(defaultIdioms.length, defaultIdiomCursor);
+  const entry = defaultIdioms[defaultIdiomCursor];
+  const { options, correctIndex } = buildIdiomOptions(entry);
+  return { ...entry, options, correctIndex };
 }
 
 // ---------------------- Daily Horoscope ----------------------

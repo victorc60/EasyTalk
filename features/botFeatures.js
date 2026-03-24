@@ -1,7 +1,7 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, isWordPresentInBank } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { recordWordGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
@@ -323,8 +323,18 @@ export async function dailyFactBroadcast(bot, userSessions) {
 export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
   try {
     let wordRecord = await getSavedDailyWordData(null, slot);
+    if (wordRecord && !isWordPresentInBank(wordRecord.word)) {
+      console.warn(`⚠️ Сохранённое слово дня отсутствует в текущем word_bank.json: ${wordRecord.word}`);
+      wordRecord = null;
+    }
+
     if (!wordRecord) {
       const generatedWord = await wordOfTheDay();
+      if (!generatedWord) {
+        console.warn('⚠️ Не удалось получить слово дня из word_bank.json');
+        await sendAdminMessage(bot, '⚠️ Слово дня не отправлено: word_bank.json пуст или недоступен.');
+        return;
+      }
       const savedRecord = await saveDailyWordData(generatedWord, slot);
       if (!savedRecord) {
         console.warn('⚠️ Не удалось сохранить слово дня в базе');
@@ -517,7 +527,7 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
       phrasalVerbRepeatWarningSent = true;
       await sendAdminMessage(
         bot,
-        `⚠️ Банк phrasal verbs исчерпан: ${phrasalVerbUsage.used}/${phrasalVerbUsage.total}. Следующая рассылка пойдёт с повтором.\nДобавь новые записи в data/phrasal_verbs_bank.json или очисти историю data/phrasal_verbs_history.json при необходимости.`
+        `⚠️ Банк phrasal verbs исчерпан: ${phrasalVerbUsage.used}/${phrasalVerbUsage.total}. Следующая рассылка пойдёт с повтором.\nДобавь новые записи в data/phrasal_verbs_bank.json, если хочешь продлить цикл без повторов.`
       );
     } else if (!phrasalVerbUsage?.nextWillRepeat) {
       phrasalVerbRepeatWarningSent = false;
