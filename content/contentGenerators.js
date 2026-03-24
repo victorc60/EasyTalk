@@ -664,22 +664,12 @@ loadCuratedFactsBank();
 // Функция для ручного добавления слова в использованные (для исправления повторов)
 export function addWordToUsedHistory(word) {
   const wordLower = word.trim().toLowerCase();
-  usedWordsCache.add(wordLower);
-  removeWordFromCuratedPool(wordLower);
-  saveUsedWordsToDisk();
+  pushWordToHistory(wordLower);
   console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
 }
 
 export async function wordOfTheDay() {
-  let wordEntry = null;
-
-  if (isHolidaySeason()) {
-    wordEntry = pickHolidayWord();
-  }
-
-  if (!wordEntry) {
-    wordEntry = pickCuratedWord();
-  }
+  const wordEntry = pickCuratedWordSequential();
   
   if (!wordEntry) {
     console.warn('⚠️ Словарь не доступен, используем резервное слово');
@@ -954,6 +944,25 @@ function removeWordFromCuratedPool(wordLower) {
   );
 }
 
+function pushWordToHistory(wordLower) {
+  if (!wordLower) {
+    return;
+  }
+
+  if (usedWordsCache.has(wordLower)) {
+    usedWordsCache.delete(wordLower);
+  }
+
+  usedWordsCache.add(wordLower);
+
+  while (usedWordsCache.size > MAX_CACHE_SIZE) {
+    const oldest = usedWordsCache.values().next().value;
+    usedWordsCache.delete(oldest);
+  }
+
+  saveUsedWordsToDisk();
+}
+
 function getDefaultWordWithOptions() {
   const defaultWords = [
     {
@@ -1015,13 +1024,7 @@ function getDefaultWordWithOptions() {
     const key = word.word.trim().toLowerCase();
     console.log(`🔍 Проверяем дефолтное слово: "${word.word}" (${key})`);
     if (!usedWordsCache.has(key)) {
-      usedWordsCache.add(key);
-      // Ограничиваем размер кэша и сохраняем
-      if (usedWordsCache.size > MAX_CACHE_SIZE) {
-        const oldest = usedWordsCache.values().next().value;
-        usedWordsCache.delete(oldest);
-      }
-      saveUsedWordsToDisk();
+      pushWordToHistory(key);
       console.log(`✅ Дефолтное слово "${word.word}" добавлено в историю`);
       // Перемешиваем варианты ответов
       const shuffledOptions = shuffleArray([...word.options]);
@@ -1038,12 +1041,7 @@ function getDefaultWordWithOptions() {
   const firstWord = defaultWords[0];
   const key = firstWord.word.trim().toLowerCase();
   console.log(`⚠️ Все дефолтные слова использованы, возвращаем "${firstWord.word}"`);
-  usedWordsCache.add(key);
-  if (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
-  }
-  saveUsedWordsToDisk();
+  pushWordToHistory(key);
   const shuffledOptions = shuffleArray([...firstWord.options]);
   const correctIndex = shuffledOptions.findIndex(
     option => option.toLowerCase() === firstWord.translation.toLowerCase()
@@ -1051,23 +1049,27 @@ function getDefaultWordWithOptions() {
   return { ...firstWord, options: shuffledOptions, correctIndex: correctIndex >= 0 ? correctIndex : 0 };
 }
 
-function pickCuratedWord() {
-  if (!availableCuratedWords.length) {
-    rebuildCuratedWordPool();
-  }
-
-  const entry = availableCuratedWords.pop();
-  if (!entry) {
+function pickCuratedWordSequential() {
+  const bank = getCuratedWordBank();
+  if (!bank.length) {
     return null;
   }
 
-  const normalizedWord = entry.word.trim().toLowerCase();
-  usedWordsCache.add(normalizedWord);
-  if (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
+  const orderedWords = bank.map((entry) => entry.word.trim().toLowerCase());
+  const history = Array.from(usedWordsCache);
+  const lastUsedWord = history.length ? history[history.length - 1] : null;
+
+  let nextIndex = 0;
+  if (lastUsedWord) {
+    const currentIndex = orderedWords.indexOf(lastUsedWord);
+    if (currentIndex >= 0) {
+      nextIndex = (currentIndex + 1) % bank.length;
+    }
   }
-  saveUsedWordsToDisk();
+
+  const entry = bank[nextIndex];
+  const normalizedWord = entry.word.trim().toLowerCase();
+  pushWordToHistory(normalizedWord);
 
   return entry;
 }
@@ -1215,17 +1217,7 @@ function buildMistakeLine(entry) {
 }
 
 export async function idiomOfTheDay() {
-  let idiomEntry = null;
-
-  if (isHolidaySeason()) {
-    idiomEntry = pickHolidayIdiom();
-    if (!idiomEntry) {
-      console.warn('⚠️ Нет доступных праздничных идиом без повторов');
-      return null;
-    }
-  } else {
-    idiomEntry = pickCuratedIdiom();
-  }
+  const idiomEntry = pickCuratedIdiom();
 
   if (!idiomEntry) {
     console.warn('⚠️ Список идиом пуст, используем резервную идиому');
@@ -1293,17 +1285,7 @@ function buildPhrasalVerbOptions(entry) {
 }
 
 export async function phrasalVerbOfTheDay() {
-  let phrasalVerbEntry = null;
-
-  if (isHolidaySeason()) {
-    phrasalVerbEntry = pickHolidayPhrasalVerb();
-    if (!phrasalVerbEntry) {
-      console.warn('⚠️ Нет доступных праздничных phrasal verbs без повторов');
-      return null;
-    }
-  } else {
-    phrasalVerbEntry = pickCuratedPhrasalVerb();
-  }
+  const phrasalVerbEntry = pickCuratedPhrasalVerb();
 
   if (!phrasalVerbEntry) {
     console.warn('⚠️ Список phrasal verbs пуст, используем резервный');
