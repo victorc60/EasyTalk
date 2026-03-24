@@ -12,6 +12,7 @@ import { startBossGrammarWebhook } from './services/bossGrammarWebhook.js';
 import './models/WordGameParticipation.js'; // Import to initialize the model
 import './models/DailyWordGame.js';
 import './models/DailyGameSession.js';
+import './models/WeeklyLeaderboardReward.js';
 import './models/Poll.js';
 import './models/PollDelivery.js';
 import './models/PollResponse.js';
@@ -68,12 +69,33 @@ if (webhookUrl) {
 // Повторные попытки подключения к БД (удобно при старте на Railway, когда MySQL ещё поднимается)
 const DB_RETRY_ATTEMPTS = Number(process.env.DB_RETRY_ATTEMPTS) || 10;
 const DB_RETRY_DELAY_MS = Number(process.env.DB_RETRY_DELAY_MS) || 5000;
+const DB_SYNC_MODE = process.env.DB_SYNC_MODE || 'safe';
+
+function getSyncOptions() {
+  switch (DB_SYNC_MODE) {
+    case 'alter':
+      return { alter: true };
+    case 'force':
+      return { force: true };
+    case 'off':
+      return null;
+    case 'safe':
+    default:
+      return {};
+  }
+}
 
 async function initializeDatabase() {
   for (let attempt = 1; attempt <= DB_RETRY_ATTEMPTS; attempt++) {
     try {
       await sequelize.authenticate();
-      await sequelize.sync({ alter: true });
+      const syncOptions = getSyncOptions();
+      if (syncOptions) {
+        await sequelize.sync(syncOptions);
+        console.log(`🗄️ Схема БД синхронизирована в режиме "${DB_SYNC_MODE}"`);
+      } else {
+        console.log('🗄️ Синхронизация схемы БД отключена (DB_SYNC_MODE=off)');
+      }
       console.log('✅ База данных подключена');
       return;
     } catch (error) {

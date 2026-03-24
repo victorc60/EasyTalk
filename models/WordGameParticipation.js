@@ -57,16 +57,20 @@ const WordGameParticipation = sequelize.define('WordGameParticipation', {
   tableName: 'word_game_participation',
   indexes: [
     {
+      name: 'uq_wgp_user_date_type_slot',
       fields: ['user_id', 'game_date', 'game_type', 'slot'],
       unique: true
     },
     {
+      name: 'idx_wgp_date_type',
       fields: ['game_date', 'game_type']
     },
     {
+      name: 'idx_wgp_game_type',
       fields: ['game_type']
     },
     {
+      name: 'idx_wgp_answered',
       fields: ['answered']
     }
   ]

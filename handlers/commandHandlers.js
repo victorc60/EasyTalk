@@ -4,12 +4,14 @@ import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
 import { 
+  GAME_TYPES,
   recordWordGameParticipation, 
   recordIdiomGameParticipation, 
   recordPhrasalVerbGameParticipation, 
   recordQuizGameParticipation,
   recordFactGameParticipation,
   getSavedDailyWordData, 
+  getSavedDailyGameSession,
   hasUserAnsweredWordGame,
   getPeriodStats,
   getUserDetailedStats,
@@ -533,7 +535,25 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
 
     if (targetUserId !== userId) return;
 
-    const gameSession = userSessions.idiomGames.get(userId);
+    let gameSession = userSessions.idiomGames.get(userId);
+    if ((!gameSession || gameSession.sessionId !== sessionId)) {
+      const savedSession = await getSavedDailyGameSession(GAME_TYPES.IDIOM, sessionId);
+      if (savedSession) {
+        gameSession = {
+          sessionId: savedSession.sessionId,
+          idiom: savedSession.prompt,
+          translation: savedSession.translation,
+          meaning: savedSession.meta?.meaning || savedSession.translation,
+          example: savedSession.meta?.example || '',
+          hint: savedSession.meta?.hint || '',
+          options: savedSession.options || [],
+          correctIndex: savedSession.correctIndex,
+          startTime: null
+        };
+        userSessions.idiomGames.set(userId, gameSession);
+      }
+    }
+
     if (!gameSession || gameSession.sessionId !== sessionId) {
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: '⏰ Время игры истекло!',
@@ -632,7 +652,25 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
       userSessions.factGames = new Map();
     }
 
-    const gameSession = userSessions.factGames.get(userId);
+    let gameSession = userSessions.factGames.get(userId);
+    if ((!gameSession || gameSession.sessionId !== sessionId)) {
+      const savedSession = await getSavedDailyGameSession(GAME_TYPES.FACT, sessionId);
+      if (savedSession) {
+        gameSession = {
+          sessionId: savedSession.sessionId,
+          factId: savedSession.id,
+          claim: savedSession.prompt,
+          claimRu: savedSession.meta?.claimRu || '',
+          isTrue: Boolean(savedSession.meta?.isTrue),
+          explanation: savedSession.meta?.explanation || '',
+          startTime: null,
+          dateKey: savedSession.gameDate,
+          expired: false
+        };
+        userSessions.factGames.set(userId, gameSession);
+      }
+    }
+
     if (!gameSession || gameSession.sessionId !== sessionId || gameSession.expired) {
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: '⏰ Время факта дня истекло!',
@@ -714,7 +752,25 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
       userSessions.phrasalVerbGames = new Map();
     }
 
-    const gameSession = userSessions.phrasalVerbGames.get(userId);
+    let gameSession = userSessions.phrasalVerbGames.get(userId);
+    if ((!gameSession || gameSession.sessionId !== sessionId)) {
+      const savedSession = await getSavedDailyGameSession(GAME_TYPES.PHRASAL_VERB, sessionId);
+      if (savedSession) {
+        gameSession = {
+          sessionId: savedSession.sessionId,
+          phrasalVerb: savedSession.prompt,
+          translation: savedSession.translation,
+          meaning: savedSession.meta?.meaning || savedSession.translation,
+          example: savedSession.meta?.example || '',
+          hint: savedSession.meta?.hint || '',
+          options: savedSession.options || [],
+          correctIndex: savedSession.correctIndex,
+          startTime: null
+        };
+        userSessions.phrasalVerbGames.set(userId, gameSession);
+      }
+    }
+
     if (!gameSession || gameSession.sessionId !== sessionId) {
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: '⏰ Время игры истекло!',
@@ -813,7 +869,23 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
       userSessions.quizGames = new Map();
     }
 
-    const gameSession = userSessions.quizGames.get(userId);
+    let gameSession = userSessions.quizGames.get(userId);
+    if ((!gameSession || gameSession.sessionId !== sessionId)) {
+      const savedSession = await getSavedDailyGameSession(GAME_TYPES.QUIZ, sessionId);
+      if (savedSession) {
+        gameSession = {
+          sessionId: savedSession.sessionId,
+          question: savedSession.prompt,
+          options: savedSession.options || [],
+          correctIndex: savedSession.correctIndex,
+          hint: savedSession.meta?.hint || '',
+          explanation: savedSession.meta?.explanation || '',
+          startTime: null
+        };
+        userSessions.quizGames.set(userId, gameSession);
+      }
+    }
+
     if (!gameSession || gameSession.sessionId !== sessionId) {
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: '⏰ Время квиза истекло!',

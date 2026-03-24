@@ -52,10 +52,12 @@ const DailyGameSession = sequelize.define('DailyGameSession', {
   updatedAt: 'updated_at',
   indexes: [
     {
+      name: 'uq_dgs_type_date_slot',
       unique: true,
       fields: ['game_type', 'game_date', 'slot']
     },
     {
+      name: 'idx_dgs_type_session',
       fields: ['game_type', 'session_id']
     }
   ]

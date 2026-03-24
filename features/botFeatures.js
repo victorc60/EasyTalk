@@ -12,40 +12,11 @@ import path from 'path';
 import { Op, fn, col } from 'sequelize';
 import WordGameParticipation from '../models/WordGameParticipation.js';
 import MiniEventParticipant from '../models/MiniEventParticipant.js';
+import WeeklyLeaderboardReward from '../models/WeeklyLeaderboardReward.js';
 import { getMoscowWeekRangeKeys } from '../utils/moscowWeek.js';
 
 let phrasalVerbRepeatWarningSent = false;
-const WEEKLY_REWARD_HISTORY_FILE = path.resolve(process.cwd(), 'data/weekly_leaderboard_rewards.json');
 const BONUS_BY_PLACE = [100, 75, 50];
-
-function readWeeklyRewardHistory() {
-  try {
-    if (!fs.existsSync(WEEKLY_REWARD_HISTORY_FILE)) {
-      return { weeks: {} };
-    }
-    const raw = fs.readFileSync(WEEKLY_REWARD_HISTORY_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || typeof parsed.weeks !== 'object') {
-      return { weeks: {} };
-    }
-    return parsed;
-  } catch (error) {
-    console.error('Ошибка чтения weekly leaderboard history:', error.message);
-    return { weeks: {} };
-  }
-}
-
-function writeWeeklyRewardHistory(history) {
-  try {
-    const dir = path.dirname(WEEKLY_REWARD_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(WEEKLY_REWARD_HISTORY_FILE, JSON.stringify(history, null, 2), 'utf8');
-  } catch (error) {
-    console.error('Ошибка записи weekly leaderboard history:', error.message);
-  }
-}
 
 async function getWeeklyLeaders(weekStartKey, weekEndKey) {
   const [gameRows, miniRewardedRows, miniQuizRows] = await Promise.all([
@@ -172,9 +143,9 @@ export async function weeklyLeaderboardBroadcast(bot) {
     const { weekStartKey, weekEndKey, weekKey } = getMoscowWeekRangeKeys(new Date());
     const leaders = await getWeeklyLeaders(weekStartKey, weekEndKey);
     const topThree = leaders.slice(0, 3);
-
-    const history = readWeeklyRewardHistory();
-    const weekRecord = history.weeks?.[weekKey] || null;
+    const weekRecord = await WeeklyLeaderboardReward.findOne({
+      where: { week_key: weekKey }
+    });
     const alreadyRewarded = Boolean(weekRecord?.awarded);
     let rewardedPlacesCount = 0;
 
@@ -187,16 +158,24 @@ export async function weeklyLeaderboardBroadcast(bot) {
         rewards.push({ user_id: topThree[i].userId, bonus_points: bonus, place: i + 1 });
         rewardedPlacesCount += 1;
       }
-
-      history.weeks = history.weeks || {};
-      history.weeks[weekKey] = {
-        awarded: true,
-        awarded_at: new Date().toISOString(),
-        week_start: weekStartKey,
-        week_end: weekEndKey,
-        rewards
-      };
-      writeWeeklyRewardHistory(history);
+      if (weekRecord) {
+        await weekRecord.update({
+          awarded: true,
+          awarded_at: new Date(),
+          week_start: weekStartKey,
+          week_end: weekEndKey,
+          rewards
+        });
+      } else {
+        await WeeklyLeaderboardReward.create({
+          week_key: weekKey,
+          awarded: true,
+          awarded_at: new Date(),
+          week_start: weekStartKey,
+          week_end: weekEndKey,
+          rewards
+        });
+      }
     }
 
     const message = buildWeeklyLeaderboardMessage(leaders, weekStartKey, weekEndKey, rewardedPlacesCount);
