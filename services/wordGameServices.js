@@ -1,6 +1,7 @@
 // services/wordGameServices.js
 import WordGameParticipation from '../models/WordGameParticipation.js';
 import DailyWordGame from '../models/DailyWordGame.js';
+import DailyGameSession from '../models/DailyGameSession.js';
 import User from '../models/User.js';
 import { Op, fn, col } from 'sequelize';
 import { getMoscowWeekRangeKeys } from '../utils/moscowWeek.js';
@@ -54,7 +55,15 @@ export async function recordGameParticipation({
 }) {
   try {
     const targetDate = gameDate || getMoscowDateString();
-    await WordGameParticipation.upsert({
+    const where = {
+      user_id: userId,
+      game_type: gameType,
+      game_date: targetDate,
+      slot
+    };
+
+    const existing = await WordGameParticipation.findOne({ where });
+    const payload = {
       user_id: userId,
       game_type: gameType,
       game_date: targetDate,
@@ -64,7 +73,28 @@ export async function recordGameParticipation({
       correct,
       points_earned: pointsEarned,
       response_time: responseTime
-    });
+    };
+
+    if (existing) {
+      const existingAnswered = existing.answered === true;
+      const nextAnswered = existingAnswered || answered === true;
+      const nextCorrect = existing.correct === true || correct === true;
+      const nextPoints = Math.max(existing.points_earned || 0, pointsEarned || 0);
+      const nextResponseTime = existingAnswered
+        ? existing.response_time
+        : (responseTime ?? existing.response_time);
+
+      await existing.update({
+        word: word || existing.word,
+        answered: nextAnswered,
+        correct: nextCorrect,
+        points_earned: nextPoints,
+        response_time: nextResponseTime
+      });
+    } else {
+      await WordGameParticipation.create(payload);
+    }
+
     console.log(
       `Записано участие пользователя ${userId} в игре "${gameType}" для "${word}" (slot=${slot}): ответил=${answered}, правильно=${correct}`
     );
@@ -441,7 +471,7 @@ export async function getDailyParticipantsByUser(date = null) {
 
 export async function saveDailyWordData(wordData, slot = 'default', date = null) {
   try {
-    const targetDate = date || new Date().toISOString().split('T')[0];
+    const targetDate = date || getMoscowDateString();
     const defaults = {
       game_date: targetDate,
       slot,
@@ -477,7 +507,7 @@ export async function getSavedDailyWordData(date = null, slot = 'default', id = 
     if (id) {
       record = await DailyWordGame.findByPk(id);
     } else {
-      const targetDate = date || new Date().toISOString().split('T')[0];
+      const targetDate = date || getMoscowDateString();
       record = await DailyWordGame.findOne({
         where: { game_date: targetDate, slot }
       });
@@ -514,6 +544,99 @@ export async function getSavedDailyWordData(date = null, slot = 'default', id = 
     };
   } catch (error) {
     console.error('Ошибка получения слова дня из базы:', error.message);
+    return null;
+  }
+}
+
+export async function saveDailyGameSession({
+  gameType,
+  sessionId,
+  prompt,
+  translation = null,
+  options = [],
+  correctIndex = 0,
+  slot = 'default',
+  gameDate = null,
+  meta = {}
+}) {
+  try {
+    const targetDate = gameDate || getMoscowDateString();
+    const defaults = {
+      game_type: gameType,
+      game_date: targetDate,
+      slot,
+      session_id: sessionId,
+      prompt,
+      translation,
+      options,
+      correct_index: Number.isInteger(correctIndex) ? correctIndex : 0,
+      meta
+    };
+
+    const [record, created] = await DailyGameSession.findOrCreate({
+      where: { game_type: gameType, game_date: targetDate, slot },
+      defaults
+    });
+
+    if (!created) {
+      await record.update(defaults);
+    }
+
+    return record.get({ plain: true });
+  } catch (error) {
+    console.error(`Ошибка сохранения daily game session (${gameType}):`, error.message);
+    return null;
+  }
+}
+
+export async function getSavedDailyGameSession(gameType, sessionId, date = null, slot = null) {
+  try {
+    const where = {
+      game_type: gameType,
+      session_id: sessionId
+    };
+
+    if (slot) {
+      where.slot = slot;
+    }
+
+    if (date) {
+      where.game_date = date;
+    } else {
+      where.game_date = getMoscowDateString();
+    }
+
+    let record = await DailyGameSession.findOne({ where });
+
+    if (!record && !date) {
+      record = await DailyGameSession.findOne({
+        where: {
+          game_type: gameType,
+          session_id: sessionId,
+          ...(slot ? { slot } : {})
+        },
+        order: [['game_date', 'DESC']]
+      });
+    }
+
+    if (!record) {
+      return null;
+    }
+
+    return {
+      id: record.id,
+      gameType: record.game_type,
+      gameDate: record.game_date,
+      slot: record.slot,
+      sessionId: record.session_id,
+      prompt: record.prompt,
+      translation: record.translation,
+      options: Array.isArray(record.options) ? record.options : [],
+      correctIndex: Number.isInteger(record.correct_index) ? record.correct_index : 0,
+      meta: record.meta || {}
+    };
+  } catch (error) {
+    console.error(`Ошибка получения daily game session (${gameType}):`, error.message);
     return null;
   }
 }

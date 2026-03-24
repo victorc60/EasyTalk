@@ -3,7 +3,7 @@ import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, isWordPresentInBank } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
-import { recordWordGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData } from '../services/wordGameServices.js';
+import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -268,10 +268,33 @@ export async function dailyFactBroadcast(bot, userSessions) {
       return;
     }
 
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    await saveDailyGameSession({
+      gameType: GAME_TYPES.FACT,
+      sessionId,
+      prompt: fact.claim,
+      translation: fact.isTrue ? 'True' : 'False',
+      options: ['True', 'False'],
+      correctIndex: fact.isTrue ? 0 : 1,
+      meta: {
+        claimRu: fact.claimRu,
+        isTrue: fact.isTrue,
+        explanation: fact.explanation
+      }
+    });
+
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        const sessionId = Math.random().toString(36).slice(2, 10);
+        await recordFactGameParticipation(
+          userId,
+          fact.claim,
+          false,
+          false,
+          0,
+          null
+        );
+
         const dateKey = getMoscowDateString();
 
         userSessions.factGames.set(userId, {
@@ -380,6 +403,16 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
+        await recordWordGameParticipation(
+          userId,
+          broadcastWord.word,
+          false,
+          false,
+          0,
+          null,
+          broadcastWord.slot || 'default'
+        );
+
         const keyboard = {
           inline_keyboard: broadcastWord.options.map((option, index) => [{
             text: `${index + 1}. ${option}`,
@@ -466,10 +499,33 @@ export async function idiomGameBroadcast(bot, userSessions) {
       return;
     }
 
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    await saveDailyGameSession({
+      gameType: GAME_TYPES.IDIOM,
+      sessionId,
+      prompt: idiomData.idiom,
+      translation: idiomData.translation,
+      options: idiomData.options,
+      correctIndex: idiomData.correctIndex,
+      meta: {
+        meaning: idiomData.meaning,
+        example: idiomData.example,
+        hint: idiomData.hint
+      }
+    });
+
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        const sessionId = Math.random().toString(36).slice(2, 10);
+        await recordIdiomGameParticipation(
+          userId,
+          idiomData.idiom,
+          false,
+          false,
+          0,
+          null
+        );
+
         const keyboard = {
           inline_keyboard: idiomData.options.map((option, index) => [{
             text: `${index + 1}. ${option}`,
@@ -533,10 +589,33 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
       phrasalVerbRepeatWarningSent = false;
     }
 
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    await saveDailyGameSession({
+      gameType: GAME_TYPES.PHRASAL_VERB,
+      sessionId,
+      prompt: phrasalVerbData.phrasalVerb,
+      translation: phrasalVerbData.translation,
+      options: phrasalVerbData.options,
+      correctIndex: phrasalVerbData.correctIndex,
+      meta: {
+        meaning: phrasalVerbData.meaning,
+        example: phrasalVerbData.example,
+        hint: phrasalVerbData.hint
+      }
+    });
+
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        const sessionId = Math.random().toString(36).slice(2, 10);
+        await recordPhrasalVerbGameParticipation(
+          userId,
+          phrasalVerbData.phrasalVerb,
+          false,
+          false,
+          0,
+          null
+        );
+
         const keyboard = {
           inline_keyboard: phrasalVerbData.options.map((option, index) => [{
             text: `${index + 1}. ${option}`,
@@ -618,10 +697,31 @@ export async function quizGameBroadcast(bot, userSessions) {
       return;
     }
 
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    await saveDailyGameSession({
+      gameType: GAME_TYPES.QUIZ,
+      sessionId,
+      prompt: quizData.question,
+      options: quizData.options,
+      correctIndex: quizData.correctIndex,
+      meta: {
+        hint: quizData.hint,
+        explanation: quizData.explanation
+      }
+    });
+
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        const sessionId = Math.random().toString(36).slice(2, 10);
+        await recordQuizGameParticipation(
+          userId,
+          quizData.question,
+          false,
+          false,
+          0,
+          null
+        );
+
         const keyboard = {
           inline_keyboard: quizData.options.map((option, index) => [{
             text: `${index + 1}. ${option}`,

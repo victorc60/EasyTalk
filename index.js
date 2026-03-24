@@ -11,6 +11,7 @@ import { setupBot } from './botSetup.js';
 import { startBossGrammarWebhook } from './services/bossGrammarWebhook.js';
 import './models/WordGameParticipation.js'; // Import to initialize the model
 import './models/DailyWordGame.js';
+import './models/DailyGameSession.js';
 import './models/Poll.js';
 import './models/PollDelivery.js';
 import './models/PollResponse.js';
