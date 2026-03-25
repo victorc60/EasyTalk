@@ -9,21 +9,6 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const usedFactsCache = new Set();
 const CACHE_LIMIT = 200; // Increased to store more facts and reduce repetition
 
-const HOLIDAY_START_DAY = 15; // 15 ноября
-const HOLIDAY_END_DAY = 20; // 20 января
-
-function isHolidaySeason(date = new Date()) {
-  const d = new Date(date);
-  const month = d.getMonth(); // 0-11
-  const day = d.getDate();
-  // Ноябрь (с 15 числа), весь декабрь, до 20 января
-  return (
-    (month === 10 && day >= HOLIDAY_START_DAY) || // November
-    month === 11 || // December
-    (month === 0 && day <= HOLIDAY_END_DAY) // January
-  );
-}
-
 async function generateEnglishContent(prompt, format = 'text') {
   try {
     const { choices } = await openai.chat.completions.create({
@@ -100,135 +85,6 @@ const QUIZ_HISTORY_FILE = path.resolve(process.cwd(), 'data/quiz_history.json');
 const QUIZ_BANK_FILE = path.resolve(process.cwd(), 'data/quiz_bank.json');
 const FACT_HISTORY_FILE = path.resolve(process.cwd(), 'data/fact_history.json');
 let curatedQuizBank = [];
-const HOLIDAY_IDIOMS = [
-  {
-    idiom: 'snowed under',
-    translation: 'завален делами',
-    meaning: 'to have too much work',
-    example: "I'm snowed under before the holidays.",
-    hint: 'как под сугробом'
-  },
-  {
-    idiom: 'the dead of winter',
-    translation: 'середина зимы',
-    meaning: 'the coldest, darkest part of winter',
-    example: 'They went camping in the dead of winter.',
-    hint: 'самая глушь зимы'
-  },
-  {
-    idiom: 'break the ice',
-    translation: 'растопить лед',
-    meaning: 'to make people feel more relaxed',
-    example: 'A small gift helps break the ice at holiday parties.',
-    hint: 'начать общение'
-  },
-  {
-    idiom: 'left out in the cold',
-    translation: 'оставить за бортом',
-    meaning: 'to be ignored or excluded',
-    example: 'Don’t leave anyone out in the cold during the celebrations.',
-    hint: 'когда тебя забыли'
-  }
-];
-
-const HOLIDAY_PHRASAL_VERBS = [
-  {
-    phrasalVerb: 'wrap up',
-    translation: 'укутаться',
-    meaning: 'одеться тепло',
-    example: 'Wrap up before you go out in the snow.',
-    hint: 'несколько слоёв одежды',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'snow in',
-    translation: 'завалить снегом',
-    meaning: 'заблокировать снегом',
-    example: 'We got snowed in and canceled the trip.',
-    hint: 'дверь не открыть',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'light up',
-    translation: 'зажигать',
-    meaning: 'освещать огнями',
-    example: 'They light up the tree every evening.',
-    hint: 'гирлянды включены',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'hand out',
-    translation: 'раздавать',
-    meaning: 'дарить или выдавать',
-    example: 'They hand out gifts at the party.',
-    hint: 'делиться подарками',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'look forward to',
-    translation: 'ждать с нетерпением',
-    meaning: 'с нетерпением ожидать события',
-    example: 'Kids look forward to Christmas morning.',
-    hint: 'предвкушение праздника',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'warm up',
-    translation: 'согреваться',
-    meaning: 'становиться теплее',
-    example: 'Warm up by the fireplace.',
-    hint: 'греться у огня',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'set up',
-    translation: 'устанавливать',
-    meaning: 'ставить декор или елку',
-    example: 'Let’s set up the Christmas tree.',
-    hint: 'подготовить украшения',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'dress up',
-    translation: 'наряжаться',
-    meaning: 'надеть праздничную одежду/костюм',
-    example: 'The kids dress up as elves.',
-    hint: 'праздничные костюмы',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'ring in',
-    translation: 'встретить (Новый год)',
-    meaning: 'отпраздновать наступление',
-    example: 'We ring in the New Year together.',
-    hint: 'под бой курантов',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'count down',
-    translation: 'вести обратный отсчёт',
-    meaning: 'считать секунды до события',
-    example: 'They count down to midnight.',
-    hint: '10, 9, 8...',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'give away',
-    translation: 'дарить',
-    meaning: 'раздавать в подарок',
-    example: 'They give away toys to kids.',
-    hint: 'подарки безвозмездно',
-    topic: 'holiday'
-  },
-  {
-    phrasalVerb: 'cool down',
-    translation: 'остывать',
-    meaning: 'становиться холоднее',
-    example: 'The weather cools down in December.',
-    hint: 'похолодание',
-    topic: 'holiday'
-  }
-];
 
 function loadUsedWordsFromDisk() {
   try {
@@ -647,6 +503,16 @@ function getCuratedWordBank() {
   return curatedWordBank;
 }
 
+export function isWordPresentInBank(word) {
+  if (!word) {
+    return false;
+  }
+
+  const bank = loadCuratedWordBank();
+  const normalized = word.trim().toLowerCase();
+  return bank.some((entry) => entry.word.trim().toLowerCase() === normalized);
+}
+
 // Инициализируем кэш слов из файла при загрузке модуля
 loadUsedWordsFromDisk();
 loadCuratedWordBank();
@@ -703,154 +569,6 @@ function shuffleArray(array) {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
-}
-
-function matchesHolidayWord(entry) {
-  const text = [
-    entry.word,
-    entry.translation,
-    entry.topic,
-    entry.meaning
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const enKeywords = ['winter', 'snow', 'ice', 'frost', 'christmas', 'holiday', 'new year', 'festive', 'sleigh', 'gingerbread'];
-  const ruKeywords = ['зим', 'снег', 'мороз', 'лед', 'рожде', 'новогод', 'празд', 'елк', 'каникул'];
-
-  return enKeywords.some(k => text.includes(k)) || ruKeywords.some(k => text.includes(k));
-}
-
-function matchesHolidayIdiom(entry) {
-  const text = [
-    entry.idiom,
-    entry.translation,
-    entry.topic,
-    entry.meaning,
-    entry.hint
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const enKeywords = ['winter', 'snow', 'ice', 'cold', 'christmas', 'holiday', 'new year', 'frost'];
-  const ruKeywords = ['зим', 'снег', 'мороз', 'лед', 'рожде', 'новогод', 'празд'];
-
-  return enKeywords.some(k => text.includes(k)) || ruKeywords.some(k => text.includes(k));
-}
-
-function matchesHolidayPhrasalVerb(entry) {
-  const text = [
-    entry.phrasalVerb,
-    entry.translation,
-    entry.meaning,
-    entry.example,
-    entry.topic,
-    entry.hint
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const enKeywords = ['winter', 'snow', 'ice', 'cold', 'freeze', 'frost', 'christmas', 'holiday', 'new year', 'gift', 'fireplace', 'santa'];
-  const ruKeywords = ['зим', 'снег', 'лед', 'мороз', 'рожде', 'новогод', 'подар', 'камин', 'елк', 'санта'];
-
-  return enKeywords.some(k => text.includes(k)) || ruKeywords.some(k => text.includes(k));
-}
-
-function pickHolidayWord() {
-  const bank = getCuratedWordBank();
-  const topicMatches = bank.filter(entry => (entry.topic || '').toLowerCase().includes('holiday'));
-  const keywordMatches = bank.filter(entry => matchesHolidayWord(entry));
-  const candidates = topicMatches.length ? topicMatches : keywordMatches;
-  const unused = candidates.filter(entry => !usedWordsCache.has(entry.word.trim().toLowerCase()));
-  const pool = unused.length ? unused : candidates;
-
-  if (!pool.length) {
-    return null;
-  }
-
-  const entry = shuffleArray(pool).pop();
-  const normalizedWord = entry.word.trim().toLowerCase();
-  usedWordsCache.add(normalizedWord);
-  if (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
-  }
-  removeWordFromCuratedPool(normalizedWord);
-  saveUsedWordsToDisk();
-  return entry;
-}
-
-function pickHolidayIdiom() {
-  const bank = getCuratedIdiomBank();
-  const topicMatches = bank.filter(entry => (entry.topic || '').toLowerCase().includes('holiday'));
-  const keywordMatches = bank.filter(entry => matchesHolidayIdiom(entry));
-  const candidates = topicMatches.length ? topicMatches : keywordMatches;
-  const unused = candidates.filter(entry => !usedIdiomsCache.has(entry.idiom.trim().toLowerCase()));
-  const pool = unused.length ? unused : [];
-
-  if (pool.length) {
-    const entry = shuffleArray(pool).pop();
-    const normalized = entry.idiom.trim().toLowerCase();
-    usedIdiomsCache.add(normalized);
-    if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedIdiomsCache.values().next().value;
-      usedIdiomsCache.delete(oldest);
-    }
-    saveUsedIdiomsToDisk();
-    return entry;
-  }
-
-  const fallbackPool = HOLIDAY_IDIOMS.filter(entry => !usedIdiomsCache.has(entry.idiom.trim().toLowerCase()));
-  if (fallbackPool.length) {
-    const entry = shuffleArray(fallbackPool).pop();
-    const key = entry.idiom.trim().toLowerCase();
-    usedIdiomsCache.add(key);
-    if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedIdiomsCache.values().next().value;
-      usedIdiomsCache.delete(oldest);
-    }
-    saveUsedIdiomsToDisk();
-    return entry;
-  }
-  return null;
-}
-
-function pickHolidayPhrasalVerb() {
-  const bank = getCuratedPhrasalVerbsBank();
-  const topicMatches = bank.filter(entry => (entry.topic || '').toLowerCase().includes('holiday'));
-  const keywordMatches = bank.filter(entry => matchesHolidayPhrasalVerb(entry));
-  const candidates = topicMatches.length ? topicMatches : keywordMatches;
-  const unused = candidates.filter(entry => !usedPhrasalVerbsCache.has(entry.phrasalVerb.trim().toLowerCase()));
-  const pool = unused.length ? unused : [];
-
-  if (pool.length) {
-    const entry = shuffleArray(pool).pop();
-    const normalized = entry.phrasalVerb.trim().toLowerCase();
-    usedPhrasalVerbsCache.add(normalized);
-    if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedPhrasalVerbsCache.values().next().value;
-      usedPhrasalVerbsCache.delete(oldest);
-    }
-    saveUsedPhrasalVerbsToDisk();
-    return entry;
-  }
-
-  const fallbackPool = HOLIDAY_PHRASAL_VERBS.filter(entry => !usedPhrasalVerbsCache.has(entry.phrasalVerb.trim().toLowerCase()));
-  if (fallbackPool.length) {
-    const entry = shuffleArray(fallbackPool).pop();
-    const key = entry.phrasalVerb.trim().toLowerCase();
-    usedPhrasalVerbsCache.add(key);
-    if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-      const oldest = usedPhrasalVerbsCache.values().next().value;
-      usedPhrasalVerbsCache.delete(oldest);
-    }
-    saveUsedPhrasalVerbsToDisk();
-    return entry;
-  }
-  return null;
 }
 
 function rebuildCuratedWordPool() {
@@ -946,103 +664,6 @@ function removeWordFromCuratedPool(wordLower) {
   availableCuratedWords = availableCuratedWords.filter(
     (entry) => entry.word.trim().toLowerCase() !== wordLower
   );
-}
-
-function getDefaultWordWithOptions() {
-  const defaultWords = [
-    {
-      word: "ephemeral",
-      translation: "недолговечный",
-      options: [
-        "недолговечный",
-        "вечный",
-        "красивый", 
-        "временный"
-      ],
-      example: "The beauty of cherry blossoms is ephemeral.",
-      fact: "From Greek 'ephemeros' meaning 'lasting only one day'",
-      mistakes: "Don't confuse with 'eternal' - they're opposites"
-    },
-    {
-      word: "quintessential",
-      translation: "наиболее типичный",
-      options: [
-        "наиболее типичный",
-        "важный",
-        "красивый",
-        "редкий"
-      ],
-      example: "He's the quintessential English gentleman.",
-      fact: "Comes from 'quintessence' - the fifth element in ancient philosophy",
-      mistakes: "Often misspelled as 'quintessential' (missing the 'e')"
-    },
-    {
-      word: "serendipity",
-      translation: "счастливая случайность",
-      options: [
-        "счастливая случайность",
-        "удача",
-        "везение",
-        "случай"
-      ],
-      example: "Finding this book was pure serendipity.",
-      fact: "Coined by Horace Walpole in 1754, inspired by Persian fairy tale",
-      mistakes: "Often confused with 'luck' - serendipity implies discovery"
-    },
-    {
-      word: "ubiquitous",
-      translation: "вездесущий",
-      options: [
-        "вездесущий",
-        "важный",
-        "популярный",
-        "известный"
-      ],
-      example: "Smartphones have become ubiquitous in modern life.",
-      fact: "From Latin 'ubique' meaning 'everywhere'",
-      mistakes: "Don't confuse with 'popular' - ubiquitous means everywhere present"
-    }
-  ];
-  
-  // Ищем дефолтное слово, которое ещё не использовалось
-  for (const word of defaultWords) {
-    const key = word.word.trim().toLowerCase();
-    console.log(`🔍 Проверяем дефолтное слово: "${word.word}" (${key})`);
-    if (!usedWordsCache.has(key)) {
-      usedWordsCache.add(key);
-      // Ограничиваем размер кэша и сохраняем
-      if (usedWordsCache.size > MAX_CACHE_SIZE) {
-        const oldest = usedWordsCache.values().next().value;
-        usedWordsCache.delete(oldest);
-      }
-      saveUsedWordsToDisk();
-      console.log(`✅ Дефолтное слово "${word.word}" добавлено в историю`);
-      // Перемешиваем варианты ответов
-      const shuffledOptions = shuffleArray([...word.options]);
-      const correctIndex = shuffledOptions.findIndex(
-        option => option.toLowerCase() === word.translation.toLowerCase()
-      );
-      return { ...word, options: shuffledOptions, correctIndex: correctIndex >= 0 ? correctIndex : 0 };
-    } else {
-      console.log(`⚠️ Дефолтное слово "${word.word}" уже использовалось ранее`);
-    }
-  }
-  
-  // Если все дефолтные слова уже использовались, возвращаем первое с перемешанными вариантами
-  const firstWord = defaultWords[0];
-  const key = firstWord.word.trim().toLowerCase();
-  console.log(`⚠️ Все дефолтные слова использованы, возвращаем "${firstWord.word}"`);
-  usedWordsCache.add(key);
-  if (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
-  }
-  saveUsedWordsToDisk();
-  const shuffledOptions = shuffleArray([...firstWord.options]);
-  const correctIndex = shuffledOptions.findIndex(
-    option => option.toLowerCase() === firstWord.translation.toLowerCase()
-  );
-  return { ...firstWord, options: shuffledOptions, correctIndex: correctIndex >= 0 ? correctIndex : 0 };
 }
 
 function pickCuratedWord() {
@@ -1309,58 +930,6 @@ export async function quizOfTheDay() {
   };
 }
 
-function getDefaultPhrasalVerbWithOptions() {
-  const defaultPhrasalVerbs = [
-    {
-      phrasalVerb: 'give up',
-      translation: 'сдаваться',
-      meaning: 'прекращать попытки или отказываться от чего-то',
-      example: "Don't give up on your dreams.",
-      hint: 'момент, когда опускаешь руки'
-    },
-    {
-      phrasalVerb: 'look forward to',
-      translation: 'ждать с нетерпением',
-      meaning: 'с нетерпением ожидать чего-то',
-      example: 'I look forward to seeing you tomorrow.',
-      hint: 'думать о будущем как о подарке'
-    },
-    {
-      phrasalVerb: 'put off',
-      translation: 'откладывать',
-      meaning: 'переносить на более позднее время',
-      example: "We had to put off the meeting until next week.",
-      hint: 'переставить дело на полку'
-    },
-    {
-      phrasalVerb: 'get along',
-      translation: 'ладить',
-      meaning: 'хорошо общаться с кем-то',
-      example: 'They get along very well.',
-      hint: 'быть на одной волне'
-    }
-  ];
-
-  for (const phrasalVerb of defaultPhrasalVerbs) {
-    const key = phrasalVerb.phrasalVerb.trim().toLowerCase();
-    if (!usedPhrasalVerbsCache.has(key)) {
-      usedPhrasalVerbsCache.add(key);
-      if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-        const oldest = usedPhrasalVerbsCache.values().next().value;
-        usedPhrasalVerbsCache.delete(oldest);
-      }
-      saveUsedPhrasalVerbsToDisk();
-      const { options, correctIndex } = buildPhrasalVerbOptions(phrasalVerb);
-      return { ...phrasalVerb, options, correctIndex };
-    }
-  }
-
-  // Если всё использовано, возвращаем первую
-  const first = defaultPhrasalVerbs[0];
-  const { options, correctIndex } = buildPhrasalVerbOptions(first);
-  return { ...first, options, correctIndex };
-}
-
 function buildIdiomOptions(entry) {
   const bank = getCuratedIdiomBank();
   const correct = entry.translation.trim();
@@ -1389,58 +958,6 @@ function buildIdiomOptions(entry) {
   }
 
   return { options: shuffled, correctIndex };
-}
-
-function getDefaultIdiomWithOptions() {
-  const defaultIdioms = [
-    {
-      idiom: 'a piece of cake',
-      translation: 'очень легко',
-      meaning: 'что-то очень простое',
-      example: 'The test was a piece of cake for her.',
-      hint: 'Сладость для простоты'
-    },
-    {
-      idiom: 'break the ice',
-      translation: 'растопить лёд',
-      meaning: 'снять напряжение, начать разговор',
-      example: 'He told a joke to break the ice.',
-      hint: 'Начало общения'
-    },
-    {
-      idiom: 'cost an arm and a leg',
-      translation: 'стоить целое состояние',
-      meaning: 'быть очень дорогим',
-      example: 'That car cost him an arm and a leg.',
-      hint: 'Про деньги'
-    },
-    {
-      idiom: 'hit the books',
-      translation: 'удариться в учёбу',
-      meaning: 'усиленно готовиться к учёбе',
-      example: 'I need to hit the books tonight.',
-      hint: 'Про учёбу'
-    }
-  ];
-
-  for (const idiom of defaultIdioms) {
-    const key = idiom.idiom.trim().toLowerCase();
-    if (!usedIdiomsCache.has(key)) {
-      usedIdiomsCache.add(key);
-      if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-        const oldest = usedIdiomsCache.values().next().value;
-        usedIdiomsCache.delete(oldest);
-      }
-      saveUsedIdiomsToDisk();
-      const { options, correctIndex } = buildIdiomOptions(idiom);
-      return { ...idiom, options, correctIndex };
-    }
-  }
-
-  // Если всё использовано, возвращаем первую
-  const first = defaultIdioms[0];
-  const { options, correctIndex } = buildIdiomOptions(first);
-  return { ...first, options, correctIndex };
 }
 
 // ---------------------- Daily Horoscope ----------------------
