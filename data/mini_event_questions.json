@@ -2,135 +2,372 @@
   {
     "block": "🟢 РАЗМИНКА",
     "note": "Вопросы 1–5 | Уровень A2 | 1 очко каждый | Простая грамматика — артикли, предлоги, Present Simple",
-    "id": "mini_sat_01",
+    "id": "mini_sat_w2_01",
     "type": "preposition",
-    "question": "Your friends are meeting at a café. Complete the message: 'See you ___ 6 p.m.!'",
-    "options": [
-      "in",
-      "on",
-      "at",
-      "by"
-    ],
-    "correctIndex": 2,
-    "explanation": "Use at with exact clock times: at 6 p.m., at noon, at midnight."
-  },
-  {
-    "id": "mini_sat_02",
-    "type": "article",
-    "question": "You arrive and tell someone: 'I found ___ great spot near the window!' — which article fits?",
-    "options": [
-      "a",
-      "an",
-      "the",
-      "—"
-    ],
-    "correctIndex": 0,
-    "explanation": "Use a when you mention a singular countable noun for the first time."
-  },
-  {
-    "id": "mini_sat_03",
-    "type": "fill_gap",
-    "question": "The host greets everyone: 'We usually ___ this quiz every Saturday.' — choose the correct form.",
-    "options": [
-      "have",
-      "has",
-      "having",
-      "to have"
-    ],
-    "correctIndex": 0,
-    "explanation": "With we in Present Simple, use the base form: have (not has)."
-  },
-  {
-    "id": "mini_sat_04",
-    "type": "question_form",
-    "question": "You want to ask about your friend. Choose the correct question: '___ your friend want to join?'",
-    "options": [
-      "Do",
-      "Does",
-      "Is",
-      "Has"
-    ],
+    "question": "You write a note to your flatmate: 'There's some food ___ the fridge — help yourself!' Which preposition is correct?",
+    "options": ["at", "in", "on", "by"],
     "correctIndex": 1,
-    "explanation": "For he/she/it in Present Simple questions, use does — not do."
+    "explanation": "Use in for enclosed spaces: in the fridge, in the box, in the bag."
   },
   {
-    "id": "mini_sat_05",
-    "type": "word_order",
-    "question": "Which sentence has the correct word order?",
-    "options": [
-      "We usually on Saturday practice English.",
-      "We practice English on Saturday usually.",
-      "We usually practice English on Saturday.",
-      "Usually we practice on Saturday English."
-    ],
+    "id": "mini_sat_w2_02",
+    "type": "article",
+    "question": "You're telling a story: 'I saw ___ elephant at the zoo — it was enormous!' Which article fits?",
+    "options": ["a", "an", "the", "—"],
+    "correctIndex": 1,
+    "explanation": "Use an before words that start with a vowel sound: an elephant, an apple, an hour."
+  },
+  {
+    "id": "mini_sat_w2_03",
+    "type": "fill_gap",
+    "question": "Your colleague says: 'She ___ always late on Mondays.' Which form is correct?",
+    "options": ["is", "are", "be", "does"],
+    "correctIndex": 0,
+    "explanation": "With he/she/it, use is in Present Simple. 'Always' here describes a state, not an action."
+  },
+  {
+    "id": "mini_sat_w2_04",
+    "type": "question_form",
+    "question": "You want to know your new neighbour's routine. Choose the correct question: '___ you walk to work every day?'",
+    "options": ["Does", "Do", "Are", "Have"],
+    "correctIndex": 1,
+    "explanation": "For I/you/we/they in Present Simple questions, use do — not does."
+  },
+  {
+    "id": "mini_sat_w2_05",
+    "type": "vocabulary",
+    "question": "A shop sign says: 'Open ___ Monday to Friday, 9 a.m. to 6 p.m.' Which preposition completes the sign?",
+    "options": ["since", "for", "from", "between"],
     "correctIndex": 2,
-    "explanation": "Natural order: adverb of frequency → verb → object → time expression."
+    "explanation": "From ... to is the standard pattern for a range of times or days: from Monday to Friday."
   },
   {
     "block": "🟡 ОСНОВНОЙ РАУНД",
-    "note": "Вопросы 6–14 | Уровень B1 | 2 очка каждый | Present Perfect, Passive, Conditionals, модальные",
-    "id": "mini_sat_06",
+    "note": "Вопросы 6–20 | Уровень B1 | 2 очка каждый | Present Perfect, Past Simple, Passive, Conditionals, модальные",
+    "id": "mini_sat_w2_06",
     "type": "tense",
-    "question": "The host announces: 'Good news — we ___ already prepared all the tasks for today!' — spot the error in the alternatives.",
+    "question": "Your friend is proud: 'I ___ this whole novel in three days!' He finished yesterday. Which is correct?",
     "options": [
-      "We already prepared the tasks.",
-      "We have already prepared the tasks.",
-      "We are already preparing the tasks.",
-      "We already prepare the tasks."
+      "have read",
+      "read",
+      "was reading",
+      "am reading"
     ],
     "correctIndex": 1,
-    "explanation": "Present Perfect (have + past participle) is used for a completed action with a present result."
+    "explanation": "Past Simple is used for completed actions at a specific, finished time — 'in three days' means it's done and over."
   },
   {
-    "id": "mini_sat_07",
-    "type": "modal",
-    "question": "A friend hesitates before answering. You encourage them: 'You ___ check your answer before sending it.' — which modal fits best?",
+    "id": "mini_sat_w2_07",
+    "type": "tense",
+    "question": "The host hasn't seen a player before. He asks: '___ you ever been to one of our quiz nights?' Which is correct?",
     "options": [
-      "should",
-      "should to",
-      "must to",
-      "can to"
+      "Did",
+      "Were",
+      "Have",
+      "Do"
+    ],
+    "correctIndex": 2,
+    "explanation": "Have you ever + past participle = Present Perfect. It's used for life experiences without a specific time."
+  },
+  {
+    "id": "mini_sat_w2_08",
+    "type": "passive",
+    "question": "A sign on the door reads: 'This building ___ in 1887.' Choose the correct passive form.",
+    "options": [
+      "built",
+      "was built",
+      "has built",
+      "is building"
+    ],
+    "correctIndex": 1,
+    "explanation": "Passive in Past Simple = was/were + past participle. The building didn't build itself!"
+  },
+  {
+    "id": "mini_sat_w2_09",
+    "type": "conditional",
+    "question": "You're giving advice: 'If I ___ you, I would apologise right away.' Which form is correct?",
+    "options": [
+      "am",
+      "was",
+      "were",
+      "will be"
+    ],
+    "correctIndex": 2,
+    "explanation": "Second conditional uses were for all persons in formal and standard English: 'If I were you...' This is a hypothetical situation."
+  },
+  {
+    "id": "mini_sat_w2_10",
+    "type": "modal",
+    "question": "Your bag is missing at the café. You tell a friend: 'Someone ___ taken it — I left it right here!' Which modal fits?",
+    "options": [
+      "must have",
+      "should have",
+      "can have",
+      "would have"
     ],
     "correctIndex": 0,
-    "explanation": "Should is followed directly by the base verb — no to needed."
+    "explanation": "Must have + past participle = logical deduction about the past. You're almost certain something happened."
   },
   {
-    "id": "mini_sat_08",
+    "id": "mini_sat_w2_11",
     "type": "modal",
-    "question": "Someone asks if they need a notebook. The host replies: 'You ___ bring one — but it might come in handy!'",
+    "question": "There's a noise outside at 2 a.m. You say: 'That ___ be the postman — it's the middle of the night!' Which fits?",
     "options": [
       "mustn't",
-      "don't have to",
       "can't",
-      "shouldn't"
+      "shouldn't",
+      "wouldn't"
     ],
     "correctIndex": 1,
-    "explanation": "Don't have to = no obligation. Mustn't = forbidden. These are very different!"
+    "explanation": "Can't = impossibility in the present. 'That can't be him' means it's logically impossible."
   },
   {
-    "id": "mini_sat_09",
+    "id": "mini_sat_w2_12",
+    "type": "conjunction",
+    "question": "You're explaining why you left early: 'I went home early ___ I had a terrible headache.' Which conjunction fits?",
+    "options": [
+      "although",
+      "despite",
+      "because",
+      "however"
+    ],
+    "correctIndex": 2,
+    "explanation": "Because introduces a reason clause. Although and despite introduce contrast. However connects sentences."
+  },
+  {
+    "id": "mini_sat_w2_13",
+    "type": "reported_speech",
+    "question": "Your friend said: 'I love this café!' You tell someone else later: 'She said she ___ that café.' Which is correct?",
+    "options": [
+      "loves",
+      "loved",
+      "is loving",
+      "has loved"
+    ],
+    "correctIndex": 1,
+    "explanation": "In reported speech, Present Simple shifts back to Past Simple: 'I love' → 'she said she loved'."
+  },
+  {
+    "id": "mini_sat_w2_14",
+    "type": "relative_clause",
+    "question": "You describe a colleague: 'That's the guy ___ helped me move last weekend.' Which relative pronoun is correct?",
+    "options": [
+      "which",
+      "what",
+      "who",
+      "whom"
+    ],
+    "correctIndex": 2,
+    "explanation": "Use who for people in defining relative clauses. Which is for things. What is not used as a relative pronoun here."
+  },
+  {
+    "id": "mini_sat_w2_15",
     "type": "comparison",
-    "question": "Round 2 starts. Someone says: 'Wow, this question is ___ than the last one!' — fill the gap.",
+    "question": "Two phones on display. A customer says: 'This one is by far ___ phone I've ever used.' Which form is correct?",
     "options": [
-      "easy",
-      "easier",
-      "more easy",
-      "easiest"
+      "good",
+      "better",
+      "the best",
+      "the better"
     ],
-    "correctIndex": 1,
-    "explanation": "Short adjectives (1–2 syllables) form the comparative with -er: easier, harder, longer."
+    "correctIndex": 2,
+    "explanation": "Superlatives need the definite article: the best, the worst, the most expensive. 'Ever' confirms it's a superlative situation."
   },
   {
-    "id": "mini_sat_10",
-    "type": "time_expression",
-    "question": "You're chatting with a regular: 'She has lived in this city ___ 2021.' — which word fits?",
+    "id": "mini_sat_w2_16",
+    "type": "gerund_infinitive",
+    "question": "You're considering a plan: 'We should avoid ___ the same mistake twice.' Which form fits after avoid?",
     "options": [
-      "for",
+      "to make",
+      "make",
+      "making",
+      "made"
+    ],
+    "correctIndex": 2,
+    "explanation": "Avoid is always followed by a gerund (-ing form): avoid making, avoid going, avoid losing."
+  },
+  {
+    "id": "mini_sat_w2_17",
+    "type": "gerund_infinitive",
+    "question": "A coach motivates the team: 'Don't forget ___ warm up before the match!' Which form is correct?",
+    "options": [
+      "warming",
+      "warmed",
+      "to warm",
+      "warm"
+    ],
+    "correctIndex": 2,
+    "explanation": "Forget + to-infinitive = forget to do something (in the future). Forget + -ing = forget that something happened (in the past)."
+  },
+  {
+    "id": "mini_sat_w2_18",
+    "type": "time_expression",
+    "question": "A traveller tells you: 'I've been waiting at this station ___ three hours.' Which word fits?",
+    "options": [
       "since",
+      "for",
       "during",
-      "from"
+      "while"
     ],
     "correctIndex": 1,
-    "explanation": "Since = from a specific point in time. For = a duration (for 3 years)."
+    "explanation": "For + duration (three hours, a week, ages). Since + a specific point in time (since noon, since 2020)."
+  },
+  {
+    "id": "mini_sat_w2_19",
+    "type": "tense",
+    "question": "You arrive and your flatmate says: 'I ___ dinner when you called — that's why I didn't pick up!' What's correct?",
+    "options": [
+      "cooked",
+      "was cooking",
+      "have cooked",
+      "had cooked"
+    ],
+    "correctIndex": 1,
+    "explanation": "Past Continuous (was/were + -ing) describes an action in progress when another event interrupted it."
+  },
+  {
+    "id": "mini_sat_w2_20",
+    "type": "conditional",
+    "question": "Your friend regrets a decision: 'If I ___ harder, I would have passed the exam.' Which form is correct?",
+    "options": [
+      "studied",
+      "had studied",
+      "would study",
+      "have studied"
+    ],
+    "correctIndex": 1,
+    "explanation": "Third conditional: If + had + past participle → would have + past participle. It's for hypothetical past situations."
+  },
+  {
+    "block": "🔴 ФИНАЛЬНЫЙ РАУНД",
+    "note": "Вопросы 21–30 | Уровень B2 | 3 очка каждый | Сложные конструкции, лексика, типичные ловушки",
+    "id": "mini_sat_w2_21",
+    "type": "vocabulary_trap",
+    "question": "Two similar words — spot the difference. 'Despite ___ tired, she finished the report.' Which is correct?",
+    "options": [
+      "being",
+      "she was",
+      "that she was",
+      "to be"
+    ],
+    "correctIndex": 0,
+    "explanation": "Despite and in spite of are followed by a noun or gerund (-ing), never by a subject + verb. Correct: Despite being tired."
+  },
+  {
+    "id": "mini_sat_w2_22",
+    "type": "passive_advanced",
+    "question": "A journalist writes: 'The new law ___ next month, according to officials.' Which passive form fits?",
+    "options": [
+      "will introduce",
+      "will be introduced",
+      "is introducing",
+      "has been introduced"
+    ],
+    "correctIndex": 1,
+    "explanation": "Future passive = will be + past participle. The law doesn't introduce itself — something/someone introduces it."
+  },
+  {
+    "id": "mini_sat_w2_23",
+    "type": "inversion",
+    "question": "A dramatic announcement: '___ had the doors opened than the crowd rushed in.' Which option completes this correctly?",
+    "options": [
+      "Hardly",
+      "No sooner",
+      "Scarcely",
+      "Barely"
+    ],
+    "correctIndex": 1,
+    "explanation": "'No sooner ... than' is a fixed inversion structure. The others (Hardly/Scarcely/Barely) pair with 'when', not 'than'."
+  },
+  {
+    "id": "mini_sat_w2_24",
+    "type": "phrasal_verb",
+    "question": "Your project is almost done. You tell your boss: 'We need to ___ a few final details before submitting.' Which phrasal verb fits?",
+    "options": [
+      "sort out",
+      "sort up",
+      "sort away",
+      "sort along"
+    ],
+    "correctIndex": 0,
+    "explanation": "Sort out = resolve or deal with something. It's a very common business and everyday phrasal verb. The others don't exist."
+  },
+  {
+    "id": "mini_sat_w2_25",
+    "type": "collocation",
+    "question": "A formal email starts: 'I am writing to ___ a complaint about the service I received.' Which verb collocates correctly?",
+    "options": [
+      "do",
+      "make",
+      "have",
+      "put"
+    ],
+    "correctIndex": 1,
+    "explanation": "Make a complaint is the standard collocation in formal English. You also make a decision, make an effort, make progress."
+  },
+  {
+    "id": "mini_sat_w2_26",
+    "type": "mixed_conditionals",
+    "question": "Your friend is broke today. He says: 'If I hadn't quit my job, I ___ more money right now.' What's correct?",
+    "options": [
+      "would have",
+      "would be having",
+      "had had",
+      "would have had"
+    ],
+    "correctIndex": 0,
+    "explanation": "Mixed conditional: past cause (If I hadn't quit) → present result (I would have money now). Would + bare infinitive for the present result."
+  },
+  {
+    "id": "mini_sat_w2_27",
+    "type": "cleft_sentence",
+    "question": "You want to emphasise something: 'It was the final question ___ nobody could answer.' Which relative pronoun fits?",
+    "options": [
+      "who",
+      "what",
+      "which",
+      "when"
+    ],
+    "correctIndex": 2,
+    "explanation": "In cleft sentences with 'It was + thing', use which or that to introduce the relative clause. Who is for people."
+  },
+  {
+    "id": "mini_sat_w2_28",
+    "type": "register",
+    "question": "You're writing a formal letter. Which version sounds most appropriate?",
+    "options": [
+      "I'm gonna need the report by Friday.",
+      "Could you possibly send me the report by Friday?",
+      "Send the report. Friday. Thanks.",
+      "Hey, I need that report — Friday OK?"
+    ],
+    "correctIndex": 1,
+    "explanation": "Formal register uses polite modal structures: Could you possibly...? This avoids contractions, slang, and blunt imperatives."
+  },
+  {
+    "id": "mini_sat_w2_29",
+    "type": "confusable_words",
+    "question": "Two words that are often confused. 'The new policy will ___ everyone in the company.' Which word is correct?",
+    "options": [
+      "effect",
+      "affect",
+      "infect",
+      "reflect"
+    ],
+    "correctIndex": 1,
+    "explanation": "Affect (verb) = to have an impact on. Effect (noun) = the result. 'The policy affects people' — 'the effect of the policy'."
+  },
+  {
+    "id": "mini_sat_w2_30",
+    "type": "emphasis_do",
+    "question": "You're defending your opinion firmly: 'I ___ understand your point, but I still disagree.' Which option adds natural emphasis?",
+    "options": [
+      "really do",
+      "am doing",
+      "have done",
+      "was doing"
+    ],
+    "correctIndex": 0,
+    "explanation": "The emphatic 'do/does/did' before a verb adds stress in spoken and written English: 'I do understand', 'She does care', 'He did try'."
   }
 ]
