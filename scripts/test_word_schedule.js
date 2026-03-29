@@ -1,21 +1,21 @@
 // scripts/test_word_schedule.js
 // Lightweight self-test for node-schedule recurrence rules with time zones.
-// Schedules two one-minute-apart jobs in Europe/Moscow time and prints when they fire.
+// Schedules two one-minute-apart jobs in Europe/Chisinau time and prints when they fire.
 
 import schedule from 'node-schedule';
 
 function buildRule(targetDate) {
   const rule = new schedule.RecurrenceRule();
-  rule.tz = 'Europe/Moscow';
+  rule.tz = 'Europe/Chisinau';
   rule.hour = targetDate.getHours();
   rule.minute = targetDate.getMinutes();
   rule.second = targetDate.getSeconds();
   return rule;
 }
 
-// Compute two targets: +1 minute and +2 minutes in Moscow time.
+// Compute two targets: +1 minute and +2 minutes in Chisinau time.
 const now = new Date();
-const moscowNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+const moscowNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Chisinau' }));
 
 function addMinutes(date, minutes) {
   const next = new Date(date);
@@ -29,14 +29,14 @@ const targets = [
 ];
 
 console.log('🕒 Current time (server):', now.toISOString());
-console.log('🕒 Current time (Moscow):', moscowNow.toISOString());
+console.log('🕒 Current time (Chisinau):', moscowNow.toISOString());
 
 targets.forEach(({ label, date }, idx) => {
   const rule = buildRule(date);
   const job = schedule.scheduleJob(`test_word_game_${idx}`, rule, () => {
     const firedAt = new Date();
-    const firedMsk = new Date(firedAt.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
-    console.log(`✅ Fired ${label} at server=${firedAt.toISOString()} moscow=${firedMsk.toISOString()}`);
+    const firedMsk = new Date(firedAt.toLocaleString('en-US', { timeZone: 'Europe/Chisinau' }));
+    console.log(`✅ Fired ${label} at server=${firedAt.toISOString()} chisinau=${firedMsk.toISOString()}`);
   });
 
   if (!job) {

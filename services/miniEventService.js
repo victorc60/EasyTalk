@@ -7,10 +7,10 @@ import MiniEventDay from '../models/MiniEventDay.js';
 import MiniEventParticipant from '../models/MiniEventParticipant.js';
 import MiniEventResponse from '../models/MiniEventResponse.js';
 import { awardPoints } from './userServices.js';
-import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
+import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
 import { appendBankHistoryEntries } from './bankLifecycleService.js';
 
-const TZ = 'Europe/Moscow';
+const TZ = 'Europe/Chisinau';
 const QUESTIONS_PER_EVENT = 10;
 const CORRECT_ANSWER_POINTS = 20;
 const PARTICIPATION_REWARD = 50;
@@ -254,11 +254,12 @@ async function sendQuestionToParticipant(bot, day, participant) {
 
   const rank = await getRank(eventDate, participant.user_id);
   const progressText = `Прогресс: ${participant.answered_count}/${day.total_questions}.\nТекущее место: ${rank.rank || '-'} из ${rank.total}.`;
+  const safeQuestionText = escapeHtml(question.question);
 
   const message =
     `🎮 <b>Мини-игра выходного дня</b>\n` +
     `Вопрос ${participant.current_question_index + 1}/${day.total_questions}\n\n` +
-    `${question.question}\n\n` +
+    `${safeQuestionText}\n\n` +
     `${progressText}\n\n` +
     `Следующий вопрос придет только после твоего ответа.`;
 
@@ -754,7 +755,7 @@ export async function adminTriggerMiniEventInvite(bot) {
 }
 
 /**
- * Сводка субботнего мини-ивента за календарный день (event_date = YYYY-MM-DD по Москве).
+ * Сводка субботнего мини-ивента за календарный день (event_date = YYYY-MM-DD по Кишинёву).
  * Используется в ежедневном админ-отчёте.
  *
  * - joined: нажали «Участвовать»

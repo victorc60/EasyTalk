@@ -1,12 +1,12 @@
 /**
- * Календарная неделя (пн–вс) в часовом поясе Europe/Moscow.
+ * Календарная неделя (пн–вс) в часовом поясе Europe/Chisinau.
  *
- * Важно: нельзя делать `new Date(d.toLocaleString(..., { timeZone: 'Europe/Moscow' }))` —
+ * Важно: нельзя делать `new Date(d.toLocaleString(..., { timeZone: 'Europe/Chisinau' }))` —
  * строка парсится в локальном TZ сервера (Railway UTC и т.д.), из‑за этого съезжают
  * границы недели и недельная статистика оказывается пустой.
  */
 
-const TZ_MOSCOW = 'Europe/Moscow';
+const TZ_MOSCOW = 'Europe/Chisinau';
 
 /** Карта короткого имени дня недели (en-US) → 0=вс … 6=сб */
 const WEEKDAY_SUN0 = {
@@ -50,7 +50,7 @@ export function addIsoCalendarDays(ymd, deltaDays) {
 }
 
 /**
- * Понедельник–воскресенье (неделя, в которую попадает refDate по Москве).
+ * Понедельник–воскресенье (неделя, в которую попадает refDate по Кишинёву).
  * @returns {{ weekStartKey: string, weekEndKey: string, weekKey: string }}
  */
 export function getMoscowWeekRangeKeys(refDate = new Date()) {

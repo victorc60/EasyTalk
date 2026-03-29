@@ -7,7 +7,7 @@ import { sendAdminMessage } from '../utils/botUtils.js';
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const CANDIDATES_DIR = path.join(DATA_DIR, 'candidates');
 const AUTOFILL_BATCH_SIZE = 30;
-const AUDIT_TZ = 'Europe/Moscow';
+const AUDIT_TZ = 'Europe/Chisinau';
 
 const BANK_SPECS = {
   word: {

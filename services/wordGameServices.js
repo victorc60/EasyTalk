@@ -4,7 +4,7 @@ import DailyWordGame from '../models/DailyWordGame.js';
 import DailyGameSession from '../models/DailyGameSession.js';
 import User from '../models/User.js';
 import { Op, fn, col } from 'sequelize';
-import { getMoscowWeekRangeKeys } from '../utils/moscowWeek.js';
+import { addIsoCalendarDays, getMoscowWeekRangeKeys } from '../utils/moscowWeek.js';
 
 export const GAME_TYPES = {
   WORD: 'word',
@@ -14,21 +14,23 @@ export const GAME_TYPES = {
   FACT: 'fact'
 };
 
-const TZ_MOSCOW = 'Europe/Moscow';
+const TZ_MOSCOW = 'Europe/Chisinau';
 
-/** Возвращает дату в формате YYYY-MM-DD по Москве (для единообразия с рассылками и недельным топом). */
+/** Возвращает дату в формате YYYY-MM-DD по Кишинёву (для единообразия с рассылками и недельным топом). */
 function getMoscowDateString(date = new Date()) {
   const d = typeof date === 'string' ? new Date(date + 'T12:00:00Z') : date;
   return d.toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
 }
 
-/** Границы текущей недели (Пн–Вс) по Москве — без парсинга toLocaleString (баг на UTC-серверах). */
+/** Границы текущей недели (Пн–Вс) по Кишинёву — без парсинга toLocaleString (баг на UTC-серверах). */
 function getMoscowWeekBounds(refDate = new Date()) {
   const { weekStartKey, weekEndKey } = getMoscowWeekRangeKeys(refDate);
   return { weekStartKey, weekEndKey };
 }
 
 const resolveDate = (date = null) => date || getMoscowDateString();
+const getDateDaysAgo = (days = 0, refDate = new Date()) =>
+  addIsoCalendarDays(getMoscowDateString(refDate), -Math.max(0, Number(days) || 0));
 
 /**
  * Универсальная запись участия пользователя в играх
@@ -221,7 +223,7 @@ export function recordFactGameParticipation(
 }
 
 /**
- * Сумма очков пользователя за сегодня (по Москве).
+ * Сумма очков пользователя за сегодня (по Кишинёву).
  */
 export async function getPointsForUserToday(userId) {
   const today = getMoscowDateString();
@@ -235,7 +237,7 @@ export async function getPointsForUserToday(userId) {
 }
 
 /**
- * Сумма очков пользователя за текущую неделю (Пн–Вс по Москве).
+ * Сумма очков пользователя за текущую неделю (Пн–Вс по Кишинёву).
  */
 export async function getPointsForUserThisWeek(userId) {
   const { weekStartKey, weekEndKey } = getMoscowWeekBounds();
@@ -348,15 +350,14 @@ export async function hasUserAnsweredWordGame(userId, slot = 'default', date = n
  */
 export async function getUserWordGameStats(userId, days = 7) {
   try {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    const startDate = getDateDaysAgo(days);
     
     const stats = await WordGameParticipation.findAll({
       where: {
         user_id: userId,
         game_type: GAME_TYPES.WORD,
         game_date: {
-          [Op.gte]: startDate.toISOString().split('T')[0]
+          [Op.gte]: startDate
         }
       },
       order: [['game_date', 'DESC']]
@@ -649,7 +650,7 @@ export async function getSavedDailyGameSession(gameType, sessionId, date = null,
  */
 export async function getPeriodStats(startDate, endDate = null, gameType = null) {
   try {
-    const end = endDate || new Date().toISOString().split('T')[0];
+    const end = endDate || getMoscowDateString();
     
     const whereClause = {
       game_date: {
@@ -800,9 +801,7 @@ export async function getUserDetailedStats(userId, startDate = null, endDate = n
     } else if (startDate) {
       whereClause.game_date = { [Op.gte]: startDate };
     } else {
-      const start = new Date();
-      start.setDate(start.getDate() - days);
-      whereClause.game_date = { [Op.gte]: start.toISOString().split('T')[0] };
+      whereClause.game_date = { [Op.gte]: getDateDaysAgo(days) };
     }
 
     const stats = await WordGameParticipation.findAll({
@@ -923,13 +922,12 @@ export async function getUserDetailedStats(userId, startDate = null, endDate = n
  */
 export async function getTopActiveUsers(limit = 10, days = 30) {
   try {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    const startDate = getDateDaysAgo(days);
     
     const stats = await WordGameParticipation.findAll({
       where: {
         game_date: {
-          [Op.gte]: startDate.toISOString().split('T')[0]
+          [Op.gte]: startDate
         }
       },
       include: [{

@@ -10,19 +10,19 @@ import {
 import { getMiniEventDailySummary } from '../services/miniEventService.js';
 import { CONFIG } from '../config.js';
 
-const TZ_MOSCOW = 'Europe/Moscow';
+const TZ_MOSCOW = 'Europe/Chisinau';
 
 const MONTHS_RU = [
   'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
   'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
 ];
 
-/** Сегодня по календарю Москвы (YYYY-MM-DD). */
+/** Сегодня по календарю Кишинёва (YYYY-MM-DD). */
 export function getTodayMoscowDateString() {
   return new Date().toLocaleDateString('en-CA', { timeZone: TZ_MOSCOW });
 }
 
-/** Вчера по календарю Москвы (YYYY-MM-DD) — для автоотчёта сразу после полуночи. */
+/** Вчера по календарю Кишинёва (YYYY-MM-DD) — для автоотчёта сразу после полуночи. */
 export function getYesterdayMoscowDateString() {
   const moscowNow = new Date(new Date().toLocaleString('en-US', { timeZone: TZ_MOSCOW }));
   moscowNow.setDate(moscowNow.getDate() - 1);
@@ -33,7 +33,7 @@ function formatTimeLabel(time) {
   if (!time || time.hour === undefined || time.minute === undefined) return '';
   const h = String(time.hour).padStart(2, '0');
   const m = String(time.minute).padStart(2, '0');
-  return `${h}:${m} МСК`;
+  return `${h}:${m} Кишинёв`;
 }
 
 function formatReportHeadingDate(yyyyMmDd) {
@@ -82,13 +82,13 @@ function collectAnsweredUserIds(stats) {
  *
  * @param {Object} bot
  * @param {Object} [options]
- * @param {string|null} [options.reportDate] — YYYY-MM-DD (Москва). Если не задано — вчера (закрытый день для cron в 00:05).
+ * @param {string|null} [options.reportDate] — YYYY-MM-DD (Кишинёв). Если не задано — текущий день.
  * @param {boolean} [options.isScheduledRun] — пометка в тексте, что отчёт автоматический.
  */
 export async function notifyDailyWordGameStats(bot, options = {}) {
   try {
     const { reportDate: explicitDate, isScheduledRun = false } = options;
-    const reportDay = explicitDate || getYesterdayMoscowDateString();
+    const reportDay = explicitDate || getTodayMoscowDateString();
 
     console.log(`📅 Daily admin report (games): ${reportDay}`);
 
@@ -122,9 +122,9 @@ export async function notifyDailyWordGameStats(bot, options = {}) {
     const wordTimeLabel = wordTimes.length ? wordTimes.join(', ') : '';
 
     let message = `📊 <b>Ежедневный отчёт по играм</b>\n`;
-    message += `📅 Дата (Москва): <b>${formatReportHeadingDate(reportDay)}</b>\n`;
+    message += `📅 Дата (Кишинёв): <b>${formatReportHeadingDate(reportDay)}</b>\n`;
     if (isScheduledRun) {
-      message += `<i>Автоотчёт в 00:05 — календарный день, только что завершившийся в полночь.</i>\n`;
+      message += `<i>Автоотчёт в 23:00 по Кишинёву — день закрыт и статистика зафиксирована.</i>\n`;
     }
     message += `\n`;
 
@@ -237,7 +237,7 @@ export async function scheduleWordGameStatsNotification(bot, delayMinutes = 10) 
   const delayMs = delayMinutes * 60 * 1000;
 
   setTimeout(async () => {
-    await notifyDailyWordGameStats(bot);
+    await notifyDailyWordGameStats(bot, { reportDate: getTodayMoscowDateString() });
   }, delayMs);
 
   console.log(`Запланировано уведомление о статистике игры через ${delayMinutes} минут`);

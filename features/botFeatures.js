@@ -1,6 +1,6 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
-import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
+import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, isWordPresentInBank } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
@@ -124,7 +124,7 @@ function buildWeeklyLeaderboardMessage(leaders, weekStartKey, weekEndKey, reward
 
   text += `<b>Лидеры недели:</b>\n`;
   text += topFive
-    .map((row, index) => `${rankIcons[index] || `${index + 1}.`} ${row.displayName} — <b>${row.weeklyPoints}</b> очков`)
+    .map((row, index) => `${rankIcons[index] || `${index + 1}.`} ${escapeHtml(row.displayName)} — <b>${row.weeklyPoints}</b> очков`)
     .join('\n');
 
   text += `\n\n🎉 Поздравляем победителей!`;
@@ -202,7 +202,7 @@ export async function weeklyLeaderboardBroadcast(bot) {
 }
 
 function getMoscowDateString(date = new Date()) {
-  return date.toLocaleDateString('en-CA', { timeZone: 'Europe/Moscow' });
+  return date.toLocaleDateString('en-CA', { timeZone: 'Europe/Chisinau' });
 }
 
 async function finalizeExpiredFactSessions(userSessions) {
@@ -400,13 +400,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         };
 
         const startTime = Date.now();
-        const now = new Date();
-        const moscowTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
-        const endOfDay = new Date(moscowTime);
-        endOfDay.setHours(23, 59, 59, 999);
-        const timeUntilEndOfDay = endOfDay.getTime() - moscowTime.getTime();
-        const timeoutDuration = CONFIG.WORD_GAME_TIMEOUT ?? timeUntilEndOfDay;
-        const timeoutMessagePrefix = CONFIG.WORD_GAME_TIMEOUT ? '⏰ Время вышло!' : '🌙 День закончился!';
+        let timer = null;
 
         let userGameMap = userSessions.wordGames.get(userId);
         if (!userGameMap) {
@@ -414,33 +408,41 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
           userSessions.wordGames.set(userId, userGameMap);
         }
 
-        const timer = setTimeout(async () => {
-          const activeMap = userSessions.wordGames.get(userId);
-          const session = activeMap?.get(broadcastWord.id.toString());
-          if (!session) return;
+        if (CONFIG.WORD_GAME_TIMEOUT) {
+          timer = setTimeout(async () => {
+            const activeMap = userSessions.wordGames.get(userId);
+            const session = activeMap?.get(broadcastWord.id.toString());
+            if (!session) return;
 
-          await recordWordGameParticipation(
-            userId,
-            session.word,
-            false,
-            false,
-            0,
-            null,
-            session.slot || 'default'
-          );
+            await recordWordGameParticipation(
+              userId,
+              session.word,
+              false,
+              false,
+              0,
+              null,
+              session.slot || 'default'
+            );
 
-          await sendUserMessage(
-            bot,
-            userId,
-            `${timeoutMessagePrefix} Правильный перевод:\n🌸📘 ${session.word} → ${session.translation}\n\n📝 Пример: ${session.example}\n💡 ${session.fact}\n⚠️ Частые ошибки: ${session.mistakes}\n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
-            { parse_mode: 'HTML' }
-          );
+            const safeWord = escapeHtml(session.word);
+            const safeTranslation = escapeHtml(session.translation);
+            const safeExample = escapeHtml(session.example);
+            const safeFact = escapeHtml(session.fact);
+            const safeMistakes = escapeHtml(session.mistakes);
 
-          activeMap.delete(broadcastWord.id.toString());
-          if (activeMap.size === 0) {
-            userSessions.wordGames.delete(userId);
-          }
-        }, timeoutDuration);
+            await sendUserMessage(
+              bot,
+              userId,
+              `⏰ Время вышло! Правильный перевод:\n🌸📘 ${safeWord} → ${safeTranslation}\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n⚠️ Частые ошибки: ${safeMistakes}\n\n<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`,
+              { parse_mode: 'HTML' }
+            );
+
+            activeMap.delete(broadcastWord.id.toString());
+            if (activeMap.size === 0) {
+              userSessions.wordGames.delete(userId);
+            }
+          }, CONFIG.WORD_GAME_TIMEOUT);
+        }
 
         userGameMap.set(broadcastWord.id.toString(), {
           ...broadcastWord,
@@ -449,8 +451,12 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
           timer
         });
 
+        const safeWord = escapeHtml(broadcastWord.word);
+        const safeExample = escapeHtml(broadcastWord.example);
+        const safeFact = escapeHtml(broadcastWord.fact);
+
         return {
-          text: `🌸🎯 <b>Word of the Day</b>\n${broadcastWord.word}\n\n📝 Пример: ${broadcastWord.example}\n💡 ${broadcastWord.fact}\n\nВыберите правильный перевод:`,
+          text: `🌸🎯 <b>Word of the Day</b>\n${safeWord}\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -524,8 +530,12 @@ export async function idiomGameBroadcast(bot, userSessions) {
           startTime: Date.now()
         });
 
+        const safeIdiom = escapeHtml(idiomData.idiom);
+        const safeExample = escapeHtml(idiomData.example || '—');
+        const safeHint = escapeHtml(idiomData.hint || 'Попробуй вспомнить контекст');
+
         return {
-          text: `🌷🧩 <b>Idiom of the Day</b>\n${idiomData.idiom}\n\n📝 Пример: ${idiomData.example || '—'}\n💡 Подсказка: ${idiomData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          text: `🌷🧩 <b>Idiom of the Day</b>\n${safeIdiom}\n\n📝 Пример: ${safeExample}\n💡 Подсказка: ${safeHint}\n\nВыбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -618,8 +628,12 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
           startTime: Date.now()
         });
 
+        const safePhrasalVerb = escapeHtml(phrasalVerbData.phrasalVerb);
+        const safeExample = escapeHtml(phrasalVerbData.example || '—');
+        const safeHint = escapeHtml(phrasalVerbData.hint || 'Попробуй вспомнить контекст');
+
         return {
-          text: `🌿🔤 <b>Phrasal Verb of the Day</b>\n${phrasalVerbData.phrasalVerb}\n\n📝 Пример: ${phrasalVerbData.example || '—'}\n💡 Подсказка: ${phrasalVerbData.hint || 'Попробуй вспомнить контекст'}\n\nВыбери правильный перевод:`,
+          text: `🌿🔤 <b>Phrasal Verb of the Day</b>\n${safePhrasalVerb}\n\n📝 Пример: ${safeExample}\n💡 Подсказка: ${safeHint}\n\nВыбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -722,8 +736,11 @@ export async function quizGameBroadcast(bot, userSessions) {
           startTime: Date.now()
         });
 
+        const safeQuestion = escapeHtml(quizData.question);
+        const safeHint = escapeHtml(quizData.hint || 'Подумай про контекст Международного женского дня');
+
         return {
-          text: `🌼🧠 <b>Quiz of the Day</b>\n${quizData.question}\n\n💡 Подсказка: ${quizData.hint || 'Подумай про контекст Международного женского дня'}\n\nВыбери правильный ответ:`,
+          text: `🌼🧠 <b>Quiz of the Day</b>\n${safeQuestion}\n\n💡 Подсказка: ${safeHint}\n\nВыбери правильный ответ:`,
           reply_markup: keyboard
         };
       },
@@ -764,10 +781,14 @@ export async function startRolePlay(bot, chatId, userSessions, character = null)
     ]
   });
 
+  const safeName = escapeHtml(character.name);
+  const safeDescription = escapeHtml(character.description);
+  const safeGreeting = escapeHtml(character.greeting);
+
   await sendUserMessage(
     bot,
     chatId,
-    `🎭 <b>Role Play: ${character.name}</b>\n\n<i>${character.description}</i>\n\n${character.greeting}\n\nУ вас ${CONFIG.MAX_DIALOG_MESSAGES} сообщений для диалога.`,
+    `🎭 <b>Role Play: ${safeName}</b>\n\n<i>${safeDescription}</i>\n\n${safeGreeting}\n\nУ вас ${CONFIG.MAX_DIALOG_MESSAGES} сообщений для диалога.`,
     { parse_mode: 'HTML' }
   );
 }
@@ -860,10 +881,16 @@ export async function broadcastMessage(bot, content) {
 
 export async function sendConversationStarter(bot, chatId) {
   const topic = await conversationTopic();
-  
-  let message = `💬 <b>Тема для обсуждения:</b> ${topic.topic}\n\n`;
-  message += `<b>Вопросы:</b>\n- ${topic.questions.join('\n- ')}\n\n`;
-  message += `<b>Полезные слова:</b>\n${topic.vocabulary.map(v => `• ${v.word} - ${v.translation}`).join('\n')}`;
+
+  const safeTopic = escapeHtml(topic.topic);
+  const safeQuestions = topic.questions.map((question) => `- ${escapeHtml(question)}`).join('\n');
+  const safeVocabulary = topic.vocabulary
+    .map((vocabularyItem) => `• ${escapeHtml(vocabularyItem.word)} - ${escapeHtml(vocabularyItem.translation)}`)
+    .join('\n');
+
+  let message = `💬 <b>Тема для обсуждения:</b> ${safeTopic}\n\n`;
+  message += `<b>Вопросы:</b>\n${safeQuestions}\n\n`;
+  message += `<b>Полезные слова:</b>\n${safeVocabulary}`;
   
   await sendUserMessage(bot, chatId, message, { parse_mode: 'HTML' });
 }
@@ -882,7 +909,7 @@ export async function showLeaderboard(bot, chatId, userId) {
       leaderboardMessage += topUsers
         .map((user, index) => {
           const displayName = user.username || user.first_name || `Игрок ${index + 1}`;
-          return `${index + 1}. ${displayName}: ${user.points} очков`;
+          return `${index + 1}. ${escapeHtml(displayName)}: ${user.points} очков`;
         })
         .join('\n');
     }

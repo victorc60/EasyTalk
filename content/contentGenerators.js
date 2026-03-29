@@ -320,6 +320,7 @@ function loadCuratedWordBank() {
     if (!fs.existsSync(WORD_BANK_FILE)) {
       console.warn('📘 Файл словаря не найден, продолжим с резервными словами');
       curatedWordBank = [];
+      availableCuratedWords = [];
       return curatedWordBank;
     }
     const raw = fs.readFileSync(WORD_BANK_FILE, 'utf8');
@@ -355,10 +356,12 @@ function loadCuratedWordBank() {
         };
       })
       .filter((entry) => entry.word && entry.translation);
+    availableCuratedWords = [];
     console.log(`📘 Загружено ${curatedWordBank.length} слов из словаря`);
   } catch (error) {
     console.error('Не удалось загрузить словарь слов:', error.message);
     curatedWordBank = [];
+    availableCuratedWords = [];
   }
   return curatedWordBank;
 }
@@ -368,6 +371,7 @@ function loadCuratedIdiomBank() {
     if (!fs.existsSync(IDIOM_BANK_FILE)) {
       console.warn('📘 Файл идиом не найден, продолжим с резервными идиомами');
       curatedIdiomBank = [];
+      availableCuratedIdioms = [];
       return curatedIdiomBank;
     }
     const raw = fs.readFileSync(IDIOM_BANK_FILE, 'utf8');
@@ -392,10 +396,12 @@ function loadCuratedIdiomBank() {
         seen.add(key);
         return true;
       });
+    availableCuratedIdioms = [];
     console.log(`📘 Загружено ${curatedIdiomBank.length} идиом из словаря (уникальные)`);
   } catch (error) {
     console.error('Не удалось загрузить идиомы:', error.message);
     curatedIdiomBank = [];
+    availableCuratedIdioms = [];
   }
   return curatedIdiomBank;
 }
@@ -405,6 +411,7 @@ function loadCuratedPhrasalVerbsBank() {
     if (!fs.existsSync(PHRASAL_VERBS_BANK_FILE)) {
       console.warn('📘 Файл phrasal verbs не найден, продолжим с резервными');
       curatedPhrasalVerbsBank = [];
+      availableCuratedPhrasalVerbs = [];
       return curatedPhrasalVerbsBank;
     }
     const raw = fs.readFileSync(PHRASAL_VERBS_BANK_FILE, 'utf8');
@@ -429,10 +436,12 @@ function loadCuratedPhrasalVerbsBank() {
         seen.add(key);
         return true;
       });
+    availableCuratedPhrasalVerbs = [];
     console.log(`📘 Загружено ${curatedPhrasalVerbsBank.length} phrasal verbs из словаря (уникальные)`);
   } catch (error) {
     console.error('Не удалось загрузить phrasal verbs:', error.message);
     curatedPhrasalVerbsBank = [];
+    availableCuratedPhrasalVerbs = [];
   }
   return curatedPhrasalVerbsBank;
 }
@@ -511,6 +520,16 @@ export function isWordPresentInBank(word) {
   const bank = loadCuratedWordBank();
   const normalized = word.trim().toLowerCase();
   return bank.some((entry) => entry.word.trim().toLowerCase() === normalized);
+}
+
+export function isPhrasalVerbPresentInBank(phrasalVerb) {
+  if (!phrasalVerb) {
+    return false;
+  }
+
+  const bank = loadCuratedPhrasalVerbsBank();
+  const normalized = phrasalVerb.trim().toLowerCase();
+  return bank.some((entry) => entry.phrasalVerb.trim().toLowerCase() === normalized);
 }
 
 // Инициализируем кэш слов из файла при загрузке модуля
@@ -895,6 +914,11 @@ export async function phrasalVerbOfTheDay() {
     return null;
   }
 
+  if (!isPhrasalVerbPresentInBank(phrasalVerbEntry.phrasalVerb)) {
+    console.warn(`⚠️ Выбранный phrasal verb отсутствует в текущем phrasal_verbs_bank.json: ${phrasalVerbEntry.phrasalVerb}`);
+    return null;
+  }
+
   const { options, correctIndex } = buildPhrasalVerbOptions(phrasalVerbEntry);
 
   return {
@@ -1033,9 +1057,7 @@ export async function dailyHoroscope() {
   loadHistory();
 
   const getTodayKey = () => {
-    const now = new Date();
-    const moscowDate = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
-    return moscowDate.toISOString().split('T')[0];
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Chisinau' });
   };
 
   const buildHeader = () => `🔮 Daily Horoscope ✨\n<em>Your cosmic guidance for today</em>\n\n`;

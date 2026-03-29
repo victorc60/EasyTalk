@@ -1,9 +1,9 @@
 // handlers/commandHandlers.js
 import User from '../models/User.js';
-import { sendUserMessage, sendAdminMessage } from '../utils/botUtils.js';
+import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
-import { 
+import {
   GAME_TYPES,
   recordWordGameParticipation, 
   recordIdiomGameParticipation, 
@@ -24,6 +24,7 @@ import { notifyDailyWordGameStats, getTodayMoscowDateString } from '../features/
 import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleWordGameNotifications.js';
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
 import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay } from '../services/miniEventService.js';
+import { addIsoCalendarDays } from '../utils/moscowWeek.js';
 
 export async function start(bot, msg) {
   try {
@@ -48,8 +49,9 @@ export async function start(bot, msg) {
       await user.update({ is_active: true, last_activity: new Date() });
     }
 
+    const safeFirstName = escapeHtml(msg.from.first_name || 'друг');
     const welcomeMessage = `
-👋 <b>Привет, ${msg.from.first_name}!</b> Я твой помощник в изучении английского.
+👋 <b>Привет, ${safeFirstName}!</b> Я твой помощник в изучении английского.
 
 📌 <b>Доступные режимы:</b>
 1. <b>Свободное общение</b> - /mode_free_talk
@@ -463,6 +465,11 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     const isCorrect = selectedIndex === resolvedCorrectIndex;
     const selectedAnswer = gameSession.options[selectedIndex];
     const correctAnswer = gameSession.translation;
+    const safeWord = escapeHtml(gameSession.word);
+    const safeCorrectAnswer = escapeHtml(correctAnswer);
+    const safeExample = escapeHtml(gameSession.example);
+    const safeFact = escapeHtml(gameSession.fact);
+    const safeMistakes = escapeHtml(gameSession.mistakes);
     
     // Award points
     const points = isCorrect ? 10 : 0;
@@ -487,10 +494,10 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       ? `✅ <b>Правильно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно!</b>\n\n`;
     
-    resultMessage += `🌸🎯 <b>${gameSession.word}</b> → <b>${correctAnswer}</b>\n\n`;
-    resultMessage += `📝 Пример: ${gameSession.example}\n`;
-    resultMessage += `💡 ${gameSession.fact}\n`;
-    resultMessage += `⚠️ Частые ошибки: ${gameSession.mistakes}\n\n`;
+    resultMessage += `🌸🎯 <b>${safeWord}</b> → <b>${safeCorrectAnswer}</b>\n\n`;
+    resultMessage += `📝 Пример: ${safeExample}\n`;
+    resultMessage += `💡 ${safeFact}\n`;
+    resultMessage += `⚠️ Частые ошибки: ${safeMistakes}\n\n`;
     resultMessage += `<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`;
     
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -600,19 +607,24 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
 
     const selectedAnswer = gameSession.options[selectedIndex];
     const correctAnswer = gameSession.translation;
+    const safeIdiom = escapeHtml(gameSession.idiom);
+    const safeCorrectAnswer = escapeHtml(correctAnswer);
+    const safeMeaning = escapeHtml(gameSession.meaning);
+    const safeHint = escapeHtml(gameSession.hint);
+    const safeExample = escapeHtml(gameSession.example);
 
     let resultMessage = isCorrect
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `🌷🧩 <b>${gameSession.idiom}</b>\n`;
-    resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
-    resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
+    resultMessage += `🌷🧩 <b>${safeIdiom}</b>\n`;
+    resultMessage += `🎯 Правильный перевод: <b>${safeCorrectAnswer}</b>\n`;
+    resultMessage += `ℹ️ Значение: ${safeMeaning}\n`;
     if (gameSession.hint) {
-      resultMessage += `💡 Подсказка: ${gameSession.hint}\n`;
+      resultMessage += `💡 Подсказка: ${safeHint}\n`;
     }
     if (gameSession.example) {
-      resultMessage += `📝 Пример: ${gameSession.example}`;
+      resultMessage += `📝 Пример: ${safeExample}`;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -706,15 +718,19 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
     );
 
     const truthLabel = gameSession.isTrue ? 'True' : 'False';
+    const safeClaim = escapeHtml(gameSession.claim);
+    const safeClaimRu = escapeHtml(gameSession.claimRu);
+    const safeTruthLabel = escapeHtml(truthLabel);
+    const safeExplanation = escapeHtml(gameSession.explanation);
     let resultMessage = isCorrect
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неверно.</b>\n\n`;
 
     resultMessage += `🌷✨ <b>Fact of the Day</b>\n`;
-    resultMessage += `🇬🇧 ${gameSession.claim}\n`;
-    resultMessage += `🇷🇺 ${gameSession.claimRu}\n\n`;
-    resultMessage += `🎯 Правильный ответ: <b>${truthLabel}</b>\n\n`;
-    resultMessage += `${gameSession.explanation}`;
+    resultMessage += `🇬🇧 ${safeClaim}\n`;
+    resultMessage += `🇷🇺 ${safeClaimRu}\n\n`;
+    resultMessage += `🎯 Правильный ответ: <b>${safeTruthLabel}</b>\n\n`;
+    resultMessage += `${safeExplanation}`;
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
     await bot.answerCallbackQuery(callbackQuery.id, {
@@ -817,19 +833,24 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
 
     const selectedAnswer = gameSession.options[selectedIndex];
     const correctAnswer = gameSession.translation;
+    const safePhrasalVerb = escapeHtml(gameSession.phrasalVerb);
+    const safeCorrectAnswer = escapeHtml(correctAnswer);
+    const safeMeaning = escapeHtml(gameSession.meaning);
+    const safeHint = escapeHtml(gameSession.hint);
+    const safeExample = escapeHtml(gameSession.example);
 
     let resultMessage = isCorrect
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `🌿🔡 <b>${gameSession.phrasalVerb}</b>\n`;
-    resultMessage += `🎯 Правильный перевод: <b>${correctAnswer}</b>\n`;
-    resultMessage += `ℹ️ Значение: ${gameSession.meaning}\n`;
+    resultMessage += `🌿🔡 <b>${safePhrasalVerb}</b>\n`;
+    resultMessage += `🎯 Правильный перевод: <b>${safeCorrectAnswer}</b>\n`;
+    resultMessage += `ℹ️ Значение: ${safeMeaning}\n`;
     if (gameSession.hint) {
-      resultMessage += `💡 Подсказка: ${gameSession.hint}\n`;
+      resultMessage += `💡 Подсказка: ${safeHint}\n`;
     }
     if (gameSession.example) {
-      resultMessage += `📝 Пример: ${gameSession.example}`;
+      resultMessage += `📝 Пример: ${safeExample}`;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -931,18 +952,22 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
     );
 
     const correctAnswer = gameSession.options[resolvedCorrectIndex];
+    const safeQuestion = escapeHtml(gameSession.question);
+    const safeCorrectAnswer = escapeHtml(correctAnswer);
+    const safeHint = escapeHtml(gameSession.hint);
+    const safeExplanation = escapeHtml(gameSession.explanation);
 
     let resultMessage = isCorrect
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
 
-    resultMessage += `🌼🧠 <b>${gameSession.question}</b>\n`;
-    resultMessage += `🎯 Правильный ответ: <b>${correctAnswer}</b>\n`;
+    resultMessage += `🌼🧠 <b>${safeQuestion}</b>\n`;
+    resultMessage += `🎯 Правильный ответ: <b>${safeCorrectAnswer}</b>\n`;
     if (gameSession.hint) {
-      resultMessage += `💡 Подсказка: ${gameSession.hint}\n`;
+      resultMessage += `💡 Подсказка: ${safeHint}\n`;
     }
     if (gameSession.explanation) {
-      resultMessage += `ℹ️ ${gameSession.explanation}\n`;
+      resultMessage += `ℹ️ ${safeExplanation}\n`;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -1260,16 +1285,12 @@ export async function periodStats(bot, msg) {
         );
         return;
       }
-      const start = new Date();
-      start.setDate(start.getDate() - days);
-      startDate = start.toISOString().split('T')[0];
-      endDate = new Date().toISOString().split('T')[0];
+      endDate = getTodayMoscowDateString();
+      startDate = addIsoCalendarDays(endDate, -days);
     } else {
       // По умолчанию - последние 7 дней
-      const start = new Date();
-      start.setDate(start.getDate() - 7);
-      startDate = start.toISOString().split('T')[0];
-      endDate = new Date().toISOString().split('T')[0];
+      endDate = getTodayMoscowDateString();
+      startDate = addIsoCalendarDays(endDate, -7);
     }
 
     await sendUserMessage(bot, msg.chat.id, '🔄 Получение статистики за период...');

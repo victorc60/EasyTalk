@@ -2,7 +2,7 @@
 import User from '../models/User.js';
 import sequelize from '../database/database.js';
 import { Op } from 'sequelize';
-import { sendAdminMessage, sendUserMessage } from '../utils/botUtils.js';
+import { sendAdminMessage, sendUserMessage, formatTelegramError } from '../utils/botUtils.js';
 
 export async function sendToAllUsers(bot, messageGenerator, errorHandler, options = {}) {
   try {
@@ -54,7 +54,7 @@ export async function sendToAllUsers(bot, messageGenerator, errorHandler, option
         await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
         results.fails++;
-        console.error(`Ошибка отправки пользователю ${user.telegram_id}:`, error.message);
+        console.error(`Ошибка отправки пользователю ${user.telegram_id}: ${formatTelegramError(error)}`);
         if (errorHandler) {
           errorHandler(error, user);
         }
@@ -67,10 +67,10 @@ export async function sendToAllUsers(bot, messageGenerator, errorHandler, option
 
     return results;
   } catch (error) {
-    console.error('Ошибка массовой рассылки:', error.message);
+    console.error(`Ошибка массовой рассылки: ${formatTelegramError(error)}`);
     await sendAdminMessage(
       bot,
-      `‼️ Ошибка массовой рассылки: ${error.message}`
+      `‼️ Ошибка массовой рассылки: ${formatTelegramError(error)}`
     );
     return { success: 0, fails: 0 };
   }

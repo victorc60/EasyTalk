@@ -37,14 +37,14 @@ export async function setupBot(bot, userSessions, openai) {
 function setupSchedulers(bot, userSessions) {
   try {
     console.log('Текущее время сервера:', new Date().toLocaleString('ru-RU', { timeZone: 'UTC' }));
-    console.log('Текущее время Moscow:', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }));
+    console.log('Текущее время Chisinau:', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Chisinau' }));
     schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, () => {
       console.log('Запуск dailyFactBroadcast');
       dailyFactBroadcast(bot, userSessions);
     });
     const buildRule = (time) => {
       const rule = new schedule.RecurrenceRule();
-      rule.tz = time.tz || 'Europe/Moscow';
+      rule.tz = time.tz || 'Europe/Chisinau';
       rule.hour = time.hour;
       rule.minute = time.minute;
       rule.second = 0;
@@ -77,19 +77,19 @@ function setupSchedulers(bot, userSessions) {
         logNextRun(job, `слова дня (${slotId})`);
       }
     });
-    // Идиома дня в 13:00 по Москве
+    // Идиома дня в 13:00 по Кишинёву
     schedule.scheduleJob(
       { hour: CONFIG.IDIOM_GAME_TIME.hour, minute: CONFIG.IDIOM_GAME_TIME.minute, tz: CONFIG.IDIOM_GAME_TIME.tz },
       () => {
-        console.log('Запуск idiomGameBroadcast в 13:00 Europe/Moscow');
+        console.log('Запуск idiomGameBroadcast в 13:00 Europe/Chisinau');
         idiomGameBroadcast(bot, userSessions);
       }
     );
-    // Phrasal Verb дня в 20:00 по Москве
+    // Phrasal Verb дня в 20:00 по Кишинёву
     schedule.scheduleJob(
       { hour: CONFIG.PHRASAL_VERB_GAME_TIME.hour, minute: CONFIG.PHRASAL_VERB_GAME_TIME.minute, tz: CONFIG.PHRASAL_VERB_GAME_TIME.tz },
       () => {
-        console.log('Запуск phrasalVerbGameBroadcast в 20:00 Europe/Moscow');
+        console.log('Запуск phrasalVerbGameBroadcast в 20:00 Europe/Chisinau');
         phrasalVerbGameBroadcast(bot, userSessions);
       }
     );
@@ -104,7 +104,7 @@ function setupSchedulers(bot, userSessions) {
 
     // Субботнее приглашение на мини-ивент
     schedule.scheduleJob(
-      { dayOfWeek: 6, hour: 11, minute: 0, tz: 'Europe/Moscow' },
+      { dayOfWeek: 6, hour: 11, minute: 0, tz: 'Europe/Chisinau' },
       async () => {
         console.log('Запуск рассылки приглашения mini-event');
         await broadcastMiniEventInvite(bot);
@@ -131,18 +131,20 @@ function setupSchedulers(bot, userSessions) {
       await finalizeEventDay(bot);
     });
     
-    // Статистика ежедневной игры со словами в 00:05 по Москве
-    schedule.scheduleJob(CONFIG.WORD_GAME_STATS_TIME, () => {
-      console.log('Запуск обработки завершения дня и статистики в 00:05 Europe/Moscow');
+    // Статистика ежедневной игры со словами в 23:00 по Кишинёву
+    schedule.scheduleJob(CONFIG.WORD_GAME_STATS_TIME, async () => {
+      console.log('Запуск обработки завершения дня и статистики в 23:00 Europe/Chisinau');
+      // First finalize mini-event results if today's cutoff has passed
+      await finalizeEventDay(bot);
       // First handle any remaining active games
-      handleEndOfDayWordGames(bot, userSessions);
+      await handleEndOfDayWordGames(bot, userSessions);
       // Then send statistics
-      notifyDailyWordGameStats(bot, { isScheduledRun: true });
+      await notifyDailyWordGameStats(bot, { isScheduledRun: true });
     });
 
-    // Аудит покрытия банков и автопополнение раз в 15 дней (1, 16, 31 число) в 03:00 по Москве
+    // Аудит покрытия банков и автопополнение раз в 15 дней (1, 16, 31 число) в 03:00 по Кишинёву
     const bankAuditRule = new schedule.RecurrenceRule();
-    bankAuditRule.tz = 'Europe/Moscow';
+    bankAuditRule.tz = 'Europe/Chisinau';
     bankAuditRule.date = new schedule.Range(1, 31, 15);
     bankAuditRule.hour = 3;
     bankAuditRule.minute = 0;
