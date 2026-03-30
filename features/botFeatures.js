@@ -3,7 +3,7 @@ import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, isWordPresentInBank } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
-import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
+import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, getPreviousDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -331,7 +331,8 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
     }
 
     if (!wordRecord) {
-      const generatedWord = await wordOfTheDay();
+      const previousWordRecord = await getPreviousDailyWordData(slot);
+      const generatedWord = await wordOfTheDay(previousWordRecord?.word || null);
       if (!generatedWord) {
         console.warn('⚠️ Не удалось получить слово дня из word_bank.json');
         await sendAdminMessage(bot, '⚠️ Слово дня не отправлено: word_bank.json пуст или недоступен.');

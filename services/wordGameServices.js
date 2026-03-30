@@ -325,22 +325,26 @@ export function getDailyQuizGameStats(date = null, slot = null) {
   return getDailyGameStats(GAME_TYPES.QUIZ, date, slot);
 }
 
-export async function hasUserAnsweredWordGame(userId, slot = 'default', date = null) {
+export async function hasUserAnsweredGame(userId, gameType = GAME_TYPES.WORD, slot = 'default', date = null) {
   try {
     const targetDate = resolveDate(date);
     const participation = await WordGameParticipation.findOne({
       where: {
         user_id: userId,
-        game_type: GAME_TYPES.WORD,
+        game_type: gameType,
         game_date: targetDate,
         slot
       }
     });
     return participation?.answered === true;
   } catch (error) {
-    console.error('Ошибка проверки статуса ответа в игре слов:', error.message);
+    console.error(`Ошибка проверки статуса ответа в игре (${gameType}):`, error.message);
     return false;
   }
+}
+
+export function hasUserAnsweredWordGame(userId, slot = 'default', date = null) {
+  return hasUserAnsweredGame(userId, GAME_TYPES.WORD, slot, date);
 }
 
 /**
@@ -425,6 +429,39 @@ const GAME_TYPE_LABELS = {
   [GAME_TYPES.QUIZ]: 'Квиз'
 };
 
+function normalizeDailyWordRecord(record) {
+  if (!record) {
+    return null;
+  }
+
+  const options = Array.isArray(record.options) ? record.options : [];
+  const translation = record.translation || '';
+  const lowerTranslation = translation.toLowerCase();
+  let correctIndex = typeof record.correct_index === 'number' ? record.correct_index : -1;
+
+  if (correctIndex < 0 || correctIndex >= options.length) {
+    correctIndex = options.findIndex(
+      option => option?.toLowerCase?.() === lowerTranslation
+    );
+    if (correctIndex === -1) {
+      correctIndex = 0;
+    }
+  }
+
+  return {
+    id: record.id,
+    slot: record.slot,
+    game_date: record.game_date,
+    word: record.word,
+    translation,
+    options,
+    correctIndex,
+    example: record.example,
+    fact: record.fact,
+    mistakes: record.mistakes
+  };
+}
+
 /**
  * Список пользователей, которые участвовали хотя бы в одной игре за день, с перечнем игр и результатами.
  * Только игравшие — тех, кто не играл, в отчёт не включаем.
@@ -502,6 +539,24 @@ export async function saveDailyWordData(wordData, slot = 'default', date = null)
   }
 }
 
+export async function getPreviousDailyWordData(slot = 'default', date = null) {
+  try {
+    const targetDate = resolveDate(date);
+    const record = await DailyWordGame.findOne({
+      where: {
+        slot,
+        game_date: { [Op.lt]: targetDate }
+      },
+      order: [['game_date', 'DESC'], ['id', 'DESC']]
+    });
+
+    return normalizeDailyWordRecord(record);
+  } catch (error) {
+    console.error('Ошибка получения предыдущего слова дня из базы:', error.message);
+    return null;
+  }
+}
+
 export async function getSavedDailyWordData(date = null, slot = 'default', id = null) {
   try {
     let record = null;
@@ -518,31 +573,7 @@ export async function getSavedDailyWordData(date = null, slot = 'default', id = 
       return null;
     }
 
-    const options = Array.isArray(record.options) ? record.options : [];
-    const translation = record.translation || '';
-    const lowerTranslation = translation.toLowerCase();
-    let correctIndex = typeof record.correct_index === 'number' ? record.correct_index : -1;
-    if (correctIndex < 0 || correctIndex >= options.length) {
-      correctIndex = options.findIndex(
-        option => option?.toLowerCase?.() === lowerTranslation
-      );
-      if (correctIndex === -1) {
-        correctIndex = 0;
-      }
-    }
-
-    return {
-      id: record.id,
-      slot: record.slot,
-      game_date: record.game_date,
-      word: record.word,
-      translation,
-      options,
-      correctIndex,
-      example: record.example,
-      fact: record.fact,
-      mistakes: record.mistakes
-    };
+    return normalizeDailyWordRecord(record);
   } catch (error) {
     console.error('Ошибка получения слова дня из базы:', error.message);
     return null;

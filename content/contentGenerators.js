@@ -556,9 +556,32 @@ export function addWordToUsedHistory(word) {
   console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
 }
 
-export async function wordOfTheDay() {
+function pickSequentialWord(previousWord = null) {
   loadCuratedWordBank();
-  const wordEntry = pickCuratedWord();
+  const bank = getCuratedWordBank();
+
+  if (!bank.length) {
+    return null;
+  }
+
+  if (!previousWord) {
+    return bank[0];
+  }
+
+  const previousIndex = bank.findIndex(
+    (entry) => entry.word.trim().toLowerCase() === previousWord.trim().toLowerCase()
+  );
+
+  if (previousIndex === -1) {
+    return bank[0];
+  }
+
+  return bank[(previousIndex + 1) % bank.length];
+}
+
+export async function wordOfTheDay(previousWord = null) {
+  // Слово дня теперь идёт строго по порядку из word_bank.json.
+  const wordEntry = pickSequentialWord(previousWord);
   
   if (!wordEntry) {
     console.warn('⚠️ Word of the Day не может быть сформирован: word_bank.json пуст или недоступен');

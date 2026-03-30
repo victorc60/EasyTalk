@@ -12,6 +12,7 @@ import {
   recordFactGameParticipation,
   getSavedDailyWordData, 
   getSavedDailyGameSession,
+  hasUserAnsweredGame,
   hasUserAnsweredWordGame,
   getPeriodStats,
   getUserDetailedStats,
@@ -25,6 +26,45 @@ import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleW
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
 import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay } from '../services/miniEventService.js';
 import { addIsoCalendarDays } from '../utils/moscowWeek.js';
+
+function getPendingGameAnswers(userSessions) {
+  if (!userSessions.pendingGameAnswers) {
+    userSessions.pendingGameAnswers = new Set();
+  }
+
+  return userSessions.pendingGameAnswers;
+}
+
+function buildPendingGameAnswerKey(gameType, userId, sessionId, gameDate = null, slot = 'default') {
+  return `${gameType}:${userId}:${sessionId}:${gameDate || 'today'}:${slot}`;
+}
+
+async function disableGameKeyboard(bot, callbackQuery) {
+  const chatId = callbackQuery.message?.chat?.id;
+  const messageId = callbackQuery.message?.message_id;
+
+  if (!chatId || !messageId) {
+    return;
+  }
+
+  try {
+    await bot.editMessageReplyMarkup(
+      { inline_keyboard: [] },
+      { chat_id: chatId, message_id: messageId }
+    );
+  } catch (error) {
+    const description = error?.response?.body?.description || error?.message || '';
+    if (
+      description.includes('message is not modified') ||
+      description.includes('message to edit not found') ||
+      description.includes("message can't be edited")
+    ) {
+      return;
+    }
+
+    console.warn(`Не удалось отключить кнопки игры: ${description}`);
+  }
+}
 
 export async function start(bot, msg) {
   try {
@@ -396,7 +436,9 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
           mistakes: savedWord.mistakes,
           startTime: null,
           timer: null,
-          slot: savedWord.slot || 'default'
+          slot: savedWord.slot || 'default',
+          gameDate: savedWord.game_date || getTodayMoscowDateString(),
+          answered: false
         };
         if (!userGameMap) {
           userSessions.wordGames.set(userId, new Map([[gameSession.id, gameSession]]));
@@ -424,15 +466,14 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       });
       return;
     }
-    
-    // Clear the timer since user answered
-    if (gameSession.timer) {
-      clearTimeout(gameSession.timer);
-    }
 
     const slot = gameSession.slot || 'default';
+    const gameDate = gameSession.gameDate || gameSession.game_date || getTodayMoscowDateString();
+    const pendingAnswers = getPendingGameAnswers(userSessions);
+    const pendingKey = buildPendingGameAnswerKey(GAME_TYPES.WORD, userId, gameId, gameDate, slot);
 
-    if (gameSession.answered) {
+    if (gameSession.answered || pendingAnswers.has(pendingKey)) {
+      await disableGameKeyboard(bot, callbackQuery);
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: 'ℹ️ Ты уже ответил на это слово',
         show_alert: true
@@ -442,8 +483,9 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       return;
     }
 
-    const alreadyAnswered = await hasUserAnsweredWordGame(userId, slot);
+    const alreadyAnswered = await hasUserAnsweredWordGame(userId, slot, gameDate);
     if (alreadyAnswered) {
+      await disableGameKeyboard(bot, callbackQuery);
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: 'ℹ️ Ты уже ответил на это слово сегодня',
         show_alert: true
@@ -452,68 +494,72 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       activeMap?.delete(gameId);
       return;
     }
+
     gameSession.answered = true;
-    
-    // Check if answer is correct
-    const resolvedCorrectIndex = Math.max(
-      0,
-      Math.min(
-        typeof gameSession.correctIndex === 'number' ? gameSession.correctIndex : 0,
-        (gameSession.options?.length || 1) - 1
-      )
-    );
-    const isCorrect = selectedIndex === resolvedCorrectIndex;
-    const selectedAnswer = gameSession.options[selectedIndex];
-    const correctAnswer = gameSession.translation;
-    const safeWord = escapeHtml(gameSession.word);
-    const safeCorrectAnswer = escapeHtml(correctAnswer);
-    const safeExample = escapeHtml(gameSession.example);
-    const safeFact = escapeHtml(gameSession.fact);
-    const safeMistakes = escapeHtml(gameSession.mistakes);
-    
-    // Award points
-    const points = isCorrect ? 10 : 0;
-    if (isCorrect) {
-      await awardPoints(userId, points);
-    }
-    
-    // Record participation in database
-    const responseTime = gameSession.startTime ? Date.now() - gameSession.startTime : null;
-    await recordWordGameParticipation(
-      userId, 
-      gameSession.word, 
-      true, // answered
-      isCorrect, 
-      points, 
-      responseTime,
-      gameSession.slot || 'default'
-    );
-    
-    // Send result message
-    let resultMessage = isCorrect 
-      ? `✅ <b>Правильно!</b> +${points} очков\n\n`
-      : `❌ <b>Неправильно!</b>\n\n`;
-    
-    resultMessage += `🌸🎯 <b>${safeWord}</b> → <b>${safeCorrectAnswer}</b>\n\n`;
-    resultMessage += `📝 Пример: ${safeExample}\n`;
-    resultMessage += `💡 ${safeFact}\n`;
-    resultMessage += `⚠️ Частые ошибки: ${safeMistakes}\n\n`;
-    resultMessage += `<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`;
-    
-    await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
-    
-    // Answer the callback query
-    await bot.answerCallbackQuery(callbackQuery.id, {
-      text: isCorrect ? '✅ Правильно!' : '❌ Неправильно!',
-      show_alert: false
-    });
-    
-    // Remove game session
-    const activeMap = userSessions.wordGames.get(userId);
-    if (activeMap) {
-      activeMap.delete(gameId);
-      if (activeMap.size === 0) {
-        userSessions.wordGames.delete(userId);
+    pendingAnswers.add(pendingKey);
+    await disableGameKeyboard(bot, callbackQuery);
+
+    try {
+      if (gameSession.timer) {
+        clearTimeout(gameSession.timer);
+      }
+
+      const resolvedCorrectIndex = Math.max(
+        0,
+        Math.min(
+          typeof gameSession.correctIndex === 'number' ? gameSession.correctIndex : 0,
+          (gameSession.options?.length || 1) - 1
+        )
+      );
+      const isCorrect = selectedIndex === resolvedCorrectIndex;
+      const correctAnswer = gameSession.translation;
+      const safeWord = escapeHtml(gameSession.word);
+      const safeCorrectAnswer = escapeHtml(correctAnswer);
+      const safeExample = escapeHtml(gameSession.example);
+      const safeFact = escapeHtml(gameSession.fact);
+      const safeMistakes = escapeHtml(gameSession.mistakes);
+
+      const points = isCorrect ? 10 : 0;
+      if (isCorrect) {
+        await awardPoints(userId, points);
+      }
+
+      const responseTime = gameSession.startTime ? Date.now() - gameSession.startTime : null;
+      await recordWordGameParticipation(
+        userId,
+        gameSession.word,
+        true,
+        isCorrect,
+        points,
+        responseTime,
+        slot,
+        gameDate
+      );
+
+      let resultMessage = isCorrect
+        ? `✅ <b>Правильно!</b> +${points} очков\n\n`
+        : `❌ <b>Неправильно!</b>\n\n`;
+
+      resultMessage += `🌸🎯 <b>${safeWord}</b> → <b>${safeCorrectAnswer}</b>\n\n`;
+      resultMessage += `📝 Пример: ${safeExample}\n`;
+      resultMessage += `💡 ${safeFact}\n`;
+      resultMessage += `⚠️ Частые ошибки: ${safeMistakes}\n\n`;
+      resultMessage += `<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`;
+
+      await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: isCorrect ? '✅ Правильно!' : '❌ Неправильно!',
+        show_alert: false
+      });
+    } finally {
+      pendingAnswers.delete(pendingKey);
+      const activeMap = userSessions.wordGames.get(userId);
+      if (activeMap) {
+        activeMap.delete(gameId);
+        if (activeMap.size === 0) {
+          userSessions.wordGames.delete(userId);
+        }
       }
     }
     
@@ -555,7 +601,10 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
           hint: savedSession.meta?.hint || '',
           options: savedSession.options || [],
           correctIndex: savedSession.correctIndex,
-          startTime: null
+          startTime: null,
+          slot: savedSession.slot || 'default',
+          gameDate: savedSession.gameDate || getTodayMoscowDateString(),
+          answered: false
         };
         userSessions.idiomGames.set(userId, gameSession);
       }
@@ -581,6 +630,37 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
       return;
     }
 
+    const slot = gameSession.slot || 'default';
+    const gameDate = gameSession.gameDate || getTodayMoscowDateString();
+    const pendingAnswers = getPendingGameAnswers(userSessions);
+    const pendingKey = buildPendingGameAnswerKey(GAME_TYPES.IDIOM, userId, sessionId, gameDate, slot);
+
+    if (gameSession.answered || pendingAnswers.has(pendingKey)) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на эту идиому',
+        show_alert: true
+      });
+      userSessions.idiomGames.delete(userId);
+      return;
+    }
+
+    const alreadyAnswered = await hasUserAnsweredGame(userId, GAME_TYPES.IDIOM, slot, gameDate);
+    if (alreadyAnswered) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на эту идиому',
+        show_alert: true
+      });
+      userSessions.idiomGames.delete(userId);
+      return;
+    }
+
+    gameSession.answered = true;
+    pendingAnswers.add(pendingKey);
+    await disableGameKeyboard(bot, callbackQuery);
+
+    try {
     const resolvedCorrectIndex = Math.max(
       0,
       Math.min(
@@ -602,7 +682,9 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
       true,
       isCorrect,
       points,
-      responseTime
+      responseTime,
+      slot,
+      gameDate
     );
 
     const selectedAnswer = gameSession.options[selectedIndex];
@@ -633,8 +715,10 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
       text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
       show_alert: false
     });
-
-    userSessions.idiomGames.delete(userId);
+    } finally {
+      pendingAnswers.delete(pendingKey);
+      userSessions.idiomGames.delete(userId);
+    }
   } catch (error) {
     console.error('Ошибка при обработке callback idiom game:', error);
     await bot.answerCallbackQuery(callbackQuery.id, {
@@ -676,8 +760,10 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
           isTrue: Boolean(savedSession.meta?.isTrue),
           explanation: savedSession.meta?.explanation || '',
           startTime: null,
-          dateKey: savedSession.gameDate,
-          expired: false
+          dateKey: savedSession.gameDate || getTodayMoscowDateString(),
+          slot: savedSession.slot || 'default',
+          expired: false,
+          answered: false
         };
         userSessions.factGames.set(userId, gameSession);
       }
@@ -699,6 +785,37 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
       return;
     }
 
+    const slot = gameSession.slot || 'default';
+    const gameDate = gameSession.dateKey || getTodayMoscowDateString();
+    const pendingAnswers = getPendingGameAnswers(userSessions);
+    const pendingKey = buildPendingGameAnswerKey(GAME_TYPES.FACT, userId, sessionId, gameDate, slot);
+
+    if (gameSession.answered || pendingAnswers.has(pendingKey)) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на этот факт',
+        show_alert: true
+      });
+      userSessions.factGames.delete(userId);
+      return;
+    }
+
+    const alreadyAnswered = await hasUserAnsweredGame(userId, GAME_TYPES.FACT, slot, gameDate);
+    if (alreadyAnswered) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на этот факт',
+        show_alert: true
+      });
+      userSessions.factGames.delete(userId);
+      return;
+    }
+
+    gameSession.answered = true;
+    pendingAnswers.add(pendingKey);
+    await disableGameKeyboard(bot, callbackQuery);
+
+    try {
     const selectedValue = selectedChoice === 'true';
     const isCorrect = selectedValue === gameSession.isTrue;
     const points = isCorrect ? 10 : 0;
@@ -714,7 +831,9 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
       true,
       isCorrect,
       points,
-      responseTime
+      responseTime,
+      slot,
+      gameDate
     );
 
     const truthLabel = gameSession.isTrue ? 'True' : 'False';
@@ -737,8 +856,10 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
       text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${truthLabel}`,
       show_alert: false
     });
-
-    userSessions.factGames.delete(userId);
+    } finally {
+      pendingAnswers.delete(pendingKey);
+      userSessions.factGames.delete(userId);
+    }
   } catch (error) {
     console.error('Ошибка при обработке callback fact game:', error);
     await bot.answerCallbackQuery(callbackQuery.id, {
@@ -781,7 +902,10 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
           hint: savedSession.meta?.hint || '',
           options: savedSession.options || [],
           correctIndex: savedSession.correctIndex,
-          startTime: null
+          startTime: null,
+          slot: savedSession.slot || 'default',
+          gameDate: savedSession.gameDate || getTodayMoscowDateString(),
+          answered: false
         };
         userSessions.phrasalVerbGames.set(userId, gameSession);
       }
@@ -807,6 +931,37 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
       return;
     }
 
+    const slot = gameSession.slot || 'default';
+    const gameDate = gameSession.gameDate || getTodayMoscowDateString();
+    const pendingAnswers = getPendingGameAnswers(userSessions);
+    const pendingKey = buildPendingGameAnswerKey(GAME_TYPES.PHRASAL_VERB, userId, sessionId, gameDate, slot);
+
+    if (gameSession.answered || pendingAnswers.has(pendingKey)) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на этот phrasal verb',
+        show_alert: true
+      });
+      userSessions.phrasalVerbGames.delete(userId);
+      return;
+    }
+
+    const alreadyAnswered = await hasUserAnsweredGame(userId, GAME_TYPES.PHRASAL_VERB, slot, gameDate);
+    if (alreadyAnswered) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на этот phrasal verb',
+        show_alert: true
+      });
+      userSessions.phrasalVerbGames.delete(userId);
+      return;
+    }
+
+    gameSession.answered = true;
+    pendingAnswers.add(pendingKey);
+    await disableGameKeyboard(bot, callbackQuery);
+
+    try {
     const resolvedCorrectIndex = Math.max(
       0,
       Math.min(
@@ -828,7 +983,9 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
       true,
       isCorrect,
       points,
-      responseTime
+      responseTime,
+      slot,
+      gameDate
     );
 
     const selectedAnswer = gameSession.options[selectedIndex];
@@ -859,8 +1016,10 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
       text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
       show_alert: false
     });
-
-    userSessions.phrasalVerbGames.delete(userId);
+    } finally {
+      pendingAnswers.delete(pendingKey);
+      userSessions.phrasalVerbGames.delete(userId);
+    }
   } catch (error) {
     console.error('Ошибка при обработке callback phrasal verb game:', error);
     await bot.answerCallbackQuery(callbackQuery.id, {
@@ -901,7 +1060,10 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
           correctIndex: savedSession.correctIndex,
           hint: savedSession.meta?.hint || '',
           explanation: savedSession.meta?.explanation || '',
-          startTime: null
+          startTime: null,
+          slot: savedSession.slot || 'default',
+          gameDate: savedSession.gameDate || getTodayMoscowDateString(),
+          answered: false
         };
         userSessions.quizGames.set(userId, gameSession);
       }
@@ -927,6 +1089,37 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
       return;
     }
 
+    const slot = gameSession.slot || 'default';
+    const gameDate = gameSession.gameDate || getTodayMoscowDateString();
+    const pendingAnswers = getPendingGameAnswers(userSessions);
+    const pendingKey = buildPendingGameAnswerKey(GAME_TYPES.QUIZ, userId, sessionId, gameDate, slot);
+
+    if (gameSession.answered || pendingAnswers.has(pendingKey)) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на этот квиз',
+        show_alert: true
+      });
+      userSessions.quizGames.delete(userId);
+      return;
+    }
+
+    const alreadyAnswered = await hasUserAnsweredGame(userId, GAME_TYPES.QUIZ, slot, gameDate);
+    if (alreadyAnswered) {
+      await disableGameKeyboard(bot, callbackQuery);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил на этот квиз',
+        show_alert: true
+      });
+      userSessions.quizGames.delete(userId);
+      return;
+    }
+
+    gameSession.answered = true;
+    pendingAnswers.add(pendingKey);
+    await disableGameKeyboard(bot, callbackQuery);
+
+    try {
     const resolvedCorrectIndex = Math.max(
       0,
       Math.min(
@@ -948,7 +1141,9 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
       true,
       isCorrect,
       points,
-      responseTime
+      responseTime,
+      slot,
+      gameDate
     );
 
     const correctAnswer = gameSession.options[resolvedCorrectIndex];
@@ -976,8 +1171,10 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
       text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
       show_alert: false
     });
-
-    userSessions.quizGames.delete(userId);
+    } finally {
+      pendingAnswers.delete(pendingKey);
+      userSessions.quizGames.delete(userId);
+    }
   } catch (error) {
     console.error('Ошибка при обработке callback quiz game:', error);
     await bot.answerCallbackQuery(callbackQuery.id, {
@@ -1130,13 +1327,10 @@ export async function addWordToHistory(bot, msg) {
       return;
     }
 
-    const { addWordToUsedHistory } = await import('../content/contentGenerators.js');
-    addWordToUsedHistory(word);
-    
     await sendUserMessage(
       bot,
       msg.chat.id,
-      `✅ Слово "${word}" добавлено в историю использованных слов.\n\nТеперь оно не будет повторяться в играх со словами.`,
+      `ℹ️ Слово дня теперь идет строго по порядку из data/word_bank.json.\n\nКоманда /add_word больше не влияет на автоматический выбор слова. Если хотите поменять следующее слово, измените порядок записей в data/word_bank.json.`,
       { parse_mode: 'HTML' }
     );
   } catch (error) {
