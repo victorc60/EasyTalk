@@ -288,11 +288,14 @@ export async function dailyFactBroadcast(bot, userSessions) {
           expired: false
         });
 
+        const safeClaim = escapeHtml(fact.claim);
+        const safeClaimRu = escapeHtml(fact.claimRu);
+
         return {
           text:
             `🌷✨ <b>Fact of the Day</b>\n\n` +
-            `🇬🇧 ${fact.claim}\n` +
-            `🇷🇺 ${fact.claimRu}\n\n` +
+            `🇬🇧 ${safeClaim}\n` +
+            `🇷🇺 ${safeClaimRu}\n\n` +
             `Веришь или не веришь?`,
           reply_markup: {
             inline_keyboard: [
@@ -307,7 +310,8 @@ export async function dailyFactBroadcast(bot, userSessions) {
         if (error.response?.statusCode === 403) {
           user.update({ isActive: false });
         }
-      }
+      },
+      { parse_mode: 'HTML' }
     );
 
     console.log(`Рассылка завершена. Успешно: ${success}, Ошибок: ${fails}`);
