@@ -1,9 +1,9 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, isWordPresentInBank } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, consumeWordFromBank, consumeIdiomFromBank, consumePhrasalVerbFromBank, consumeQuizFromBank, consumeFactFromBank } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
-import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, getPreviousDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
+import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -248,7 +248,7 @@ export async function dailyFactBroadcast(bot, userSessions) {
     }
 
     const sessionId = Math.random().toString(36).slice(2, 10);
-    await saveDailyGameSession({
+    const savedSession = await saveDailyGameSession({
       gameType: GAME_TYPES.FACT,
       sessionId,
       prompt: fact.claim,
@@ -261,6 +261,15 @@ export async function dailyFactBroadcast(bot, userSessions) {
         explanation: fact.explanation
       }
     });
+
+    if (!savedSession) {
+      console.warn('⚠️ Не удалось сохранить факт дня в базе');
+      return;
+    }
+
+    if (!consumeFactFromBank(fact.id)) {
+      console.warn(`⚠️ Не удалось удалить использованный факт из facts_bank.json: ${fact.id}`);
+    }
 
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -329,14 +338,9 @@ export async function dailyFactBroadcast(bot, userSessions) {
 export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
   try {
     let wordRecord = await getSavedDailyWordData(null, slot);
-    if (wordRecord && !isWordPresentInBank(wordRecord.word)) {
-      console.warn(`⚠️ Сохранённое слово дня отсутствует в текущем word_bank.json: ${wordRecord.word}`);
-      wordRecord = null;
-    }
 
     if (!wordRecord) {
-      const previousWordRecord = await getPreviousDailyWordData(slot);
-      const generatedWord = await wordOfTheDay(previousWordRecord?.word || null);
+      const generatedWord = await wordOfTheDay();
       if (!generatedWord) {
         console.warn('⚠️ Не удалось получить слово дня из word_bank.json');
         await sendAdminMessage(bot, '⚠️ Слово дня не отправлено: word_bank.json пуст или недоступен.');
@@ -348,6 +352,10 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         return;
       }
       wordRecord = savedRecord;
+
+      if (!consumeWordFromBank(wordRecord.word)) {
+        console.warn(`⚠️ Не удалось удалить использованное слово из word_bank.json: ${wordRecord.word}`);
+      }
     } else {
       console.log(`🔁 Используем сохранённое слово дня (${slot}): ${wordRecord.word}`);
     }
@@ -490,7 +498,7 @@ export async function idiomGameBroadcast(bot, userSessions) {
     }
 
     const sessionId = Math.random().toString(36).slice(2, 10);
-    await saveDailyGameSession({
+    const savedSession = await saveDailyGameSession({
       gameType: GAME_TYPES.IDIOM,
       sessionId,
       prompt: idiomData.idiom,
@@ -503,6 +511,15 @@ export async function idiomGameBroadcast(bot, userSessions) {
         hint: idiomData.hint
       }
     });
+
+    if (!savedSession) {
+      console.warn('⚠️ Не удалось сохранить идиому дня в базе');
+      return;
+    }
+
+    if (!consumeIdiomFromBank(idiomData.idiom)) {
+      console.warn(`⚠️ Не удалось удалить использованную идиому из idiom_bank.json: ${idiomData.idiom}`);
+    }
 
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -584,7 +601,7 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
     }
 
     const sessionId = Math.random().toString(36).slice(2, 10);
-    await saveDailyGameSession({
+    const savedSession = await saveDailyGameSession({
       gameType: GAME_TYPES.PHRASAL_VERB,
       sessionId,
       prompt: phrasalVerbData.phrasalVerb,
@@ -597,6 +614,15 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
         hint: phrasalVerbData.hint
       }
     });
+
+    if (!savedSession) {
+      console.warn('⚠️ Не удалось сохранить phrasal verb дня в базе');
+      return;
+    }
+
+    if (!consumePhrasalVerbFromBank(phrasalVerbData.phrasalVerb)) {
+      console.warn(`⚠️ Не удалось удалить использованный phrasal verb из phrasal_verbs_bank.json: ${phrasalVerbData.phrasalVerb}`);
+    }
 
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -696,7 +722,7 @@ export async function quizGameBroadcast(bot, userSessions) {
     }
 
     const sessionId = Math.random().toString(36).slice(2, 10);
-    await saveDailyGameSession({
+    const savedSession = await saveDailyGameSession({
       gameType: GAME_TYPES.QUIZ,
       sessionId,
       prompt: quizData.question,
@@ -707,6 +733,15 @@ export async function quizGameBroadcast(bot, userSessions) {
         explanation: quizData.explanation
       }
     });
+
+    if (!savedSession) {
+      console.warn('⚠️ Не удалось сохранить квиз дня в базе');
+      return;
+    }
+
+    if (!consumeQuizFromBank(quizData.question)) {
+      console.warn(`⚠️ Не удалось удалить использованный вопрос из quiz_bank.json: ${quizData.question}`);
+    }
 
     const { success, fails } = await sendToAllUsers(
       bot,

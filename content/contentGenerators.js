@@ -4,10 +4,15 @@ import { CONFIG } from '../config.js';
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import { dataFilePath } from '../utils/projectPaths.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const usedFactsCache = new Set();
 const CACHE_LIMIT = 200; // Increased to store more facts and reduce repetition
+
+function normalizeKey(value = '') {
+  return String(value ?? '').trim().toLowerCase();
+}
 
 async function generateEnglishContent(prompt, format = 'text') {
   try {
@@ -64,26 +69,26 @@ export async function dailyFact() {
 // Добавляем в начало файла
 const usedWordsCache = new Set();
 const MAX_CACHE_SIZE = 365; // Храним 365 последних слов (около года)
-const WORD_HISTORY_FILE = path.resolve(process.cwd(), 'data/word_history.json');
-const WORD_BANK_FILE = path.resolve(process.cwd(), 'data/word_bank.json');
-const FACTS_BANK_FILE = path.resolve(process.cwd(), 'data/facts_bank.json');
+const WORD_HISTORY_FILE = dataFilePath('word_history.json');
+const WORD_BANK_FILE = dataFilePath('word_bank.json');
+const FACTS_BANK_FILE = dataFilePath('facts_bank.json');
 let curatedWordBank = [];
 let curatedFactsBank = [];
 let availableCuratedWords = [];
 const usedIdiomsCache = new Set();
-const IDIOM_HISTORY_FILE = path.resolve(process.cwd(), 'data/idiom_history.json');
-const IDIOM_BANK_FILE = path.resolve(process.cwd(), 'data/idiom_bank.json');
+const IDIOM_HISTORY_FILE = dataFilePath('idiom_history.json');
+const IDIOM_BANK_FILE = dataFilePath('idiom_bank.json');
 let curatedIdiomBank = [];
 let availableCuratedIdioms = [];
 const usedPhrasalVerbsCache = new Set();
-const PHRASAL_VERBS_HISTORY_FILE = path.resolve(process.cwd(), 'data/phrasal_verbs_history.json');
-const PHRASAL_VERBS_BANK_FILE = path.resolve(process.cwd(), 'data/phrasal_verbs_bank.json');
+const PHRASAL_VERBS_HISTORY_FILE = dataFilePath('phrasal_verbs_history.json');
+const PHRASAL_VERBS_BANK_FILE = dataFilePath('phrasal_verbs_bank.json');
 let curatedPhrasalVerbsBank = [];
 let availableCuratedPhrasalVerbs = [];
 const usedQuizCache = new Set();
-const QUIZ_HISTORY_FILE = path.resolve(process.cwd(), 'data/quiz_history.json');
-const QUIZ_BANK_FILE = path.resolve(process.cwd(), 'data/quiz_bank.json');
-const FACT_HISTORY_FILE = path.resolve(process.cwd(), 'data/fact_history.json');
+const QUIZ_HISTORY_FILE = dataFilePath('quiz_history.json');
+const QUIZ_BANK_FILE = dataFilePath('quiz_bank.json');
+const FACT_HISTORY_FILE = dataFilePath('fact_history.json');
 let curatedQuizBank = [];
 
 function loadUsedWordsFromDisk() {
@@ -266,6 +271,68 @@ function saveUsedFactsToDisk() {
   } catch (error) {
     console.error('Не удалось сохранить историю фактов:', error.message);
   }
+}
+
+function writeJsonArray(filePath, rows) {
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), 'utf8');
+}
+
+function removeEntryFromBankFile(filePath, matcher) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return false;
+    }
+
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const rows = JSON.parse(raw);
+    if (!Array.isArray(rows)) {
+      return false;
+    }
+
+    const index = rows.findIndex(matcher);
+    if (index === -1) {
+      return false;
+    }
+
+    rows.splice(index, 1);
+    writeJsonArray(filePath, rows);
+    return true;
+  } catch (error) {
+    console.error(`Не удалось удалить запись из ${filePath}:`, error.message);
+    return false;
+  }
+}
+
+function refreshWordBank() {
+  curatedWordBank = [];
+  availableCuratedWords = [];
+  loadCuratedWordBank();
+}
+
+function refreshIdiomBank() {
+  curatedIdiomBank = [];
+  availableCuratedIdioms = [];
+  loadCuratedIdiomBank();
+}
+
+function refreshPhrasalVerbsBank() {
+  curatedPhrasalVerbsBank = [];
+  availableCuratedPhrasalVerbs = [];
+  loadCuratedPhrasalVerbsBank();
+}
+
+function refreshQuizBank() {
+  curatedQuizBank = [];
+  loadCuratedQuizBank();
+}
+
+function refreshFactsBank() {
+  curatedFactsBank = [];
+  loadCuratedFactsBank();
 }
 
 function loadCuratedFactsBank() {
@@ -556,7 +623,7 @@ export function addWordToUsedHistory(word) {
   console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
 }
 
-function pickSequentialWord(previousWord = null) {
+function pickSequentialWord() {
   loadCuratedWordBank();
   const bank = getCuratedWordBank();
 
@@ -564,24 +631,23 @@ function pickSequentialWord(previousWord = null) {
     return null;
   }
 
-  if (!previousWord) {
-    return bank[0];
+  const nextUnused = bank.find((entry) => !usedWordsCache.has(normalizeKey(entry.word)));
+  const entry = nextUnused || bank[0];
+  const normalized = normalizeKey(entry.word);
+
+  usedWordsCache.add(normalized);
+  if (usedWordsCache.size > MAX_CACHE_SIZE) {
+    const oldest = usedWordsCache.values().next().value;
+    usedWordsCache.delete(oldest);
   }
+  saveUsedWordsToDisk();
 
-  const previousIndex = bank.findIndex(
-    (entry) => entry.word.trim().toLowerCase() === previousWord.trim().toLowerCase()
-  );
-
-  if (previousIndex === -1) {
-    return bank[0];
-  }
-
-  return bank[(previousIndex + 1) % bank.length];
+  return entry;
 }
 
-export async function wordOfTheDay(previousWord = null) {
-  // Слово дня теперь идёт строго по порядку из word_bank.json.
-  const wordEntry = pickSequentialWord(previousWord);
+export async function wordOfTheDay() {
+  // Слово дня идёт по локальному банку проекта, а использованные записи удаляются после фиксации на день.
+  const wordEntry = pickSequentialWord();
   
   if (!wordEntry) {
     console.warn('⚠️ Word of the Day не может быть сформирован: word_bank.json пуст или недоступен');
@@ -601,6 +667,61 @@ export async function wordOfTheDay(previousWord = null) {
     fact: buildFactLine(wordEntry),
     mistakes: buildMistakeLine(wordEntry)
   };
+}
+
+export function consumeWordFromBank(word) {
+  const removed = removeEntryFromBankFile(
+    WORD_BANK_FILE,
+    (row) => normalizeKey(row?.word) === normalizeKey(word)
+  );
+  if (removed) {
+    refreshWordBank();
+  }
+  return removed;
+}
+
+export function consumeIdiomFromBank(idiom) {
+  const removed = removeEntryFromBankFile(
+    IDIOM_BANK_FILE,
+    (row) => normalizeKey(row?.idiom) === normalizeKey(idiom)
+  );
+  if (removed) {
+    refreshIdiomBank();
+  }
+  return removed;
+}
+
+export function consumePhrasalVerbFromBank(phrasalVerb) {
+  const removed = removeEntryFromBankFile(
+    PHRASAL_VERBS_BANK_FILE,
+    (row) => normalizeKey(row?.phrasalVerb) === normalizeKey(phrasalVerb)
+  );
+  if (removed) {
+    refreshPhrasalVerbsBank();
+  }
+  return removed;
+}
+
+export function consumeQuizFromBank(question) {
+  const removed = removeEntryFromBankFile(
+    QUIZ_BANK_FILE,
+    (row) => normalizeKey(row?.question) === normalizeKey(question)
+  );
+  if (removed) {
+    refreshQuizBank();
+  }
+  return removed;
+}
+
+export function consumeFactFromBank(id) {
+  const removed = removeEntryFromBankFile(
+    FACTS_BANK_FILE,
+    (row) => normalizeKey(row?.id) === normalizeKey(id)
+  );
+  if (removed) {
+    refreshFactsBank();
+  }
+  return removed;
 }
 
 // Функция для перемешивания массива
@@ -1019,8 +1140,8 @@ export async function dailyHoroscope() {
     libra: '⚖️', scorpio: '🦂', sagittarius: '🏹', capricorn: '🐐', aquarius: '🏺', pisces: '🐟'
   };
 
-  const HORO_HISTORY_FILE = path.resolve(process.cwd(), 'data/horoscope_history.json');
-  const HORO_CACHE_FILE = path.resolve(process.cwd(), 'data/horoscope_cache.json');
+  const HORO_HISTORY_FILE = dataFilePath('horoscope_history.json');
+  const HORO_CACHE_FILE = dataFilePath('horoscope_cache.json');
   const HORO_CACHE_LIMIT = 60;
   const API_BASE_URL = 'https://aztro.sameerkumar.website';
 

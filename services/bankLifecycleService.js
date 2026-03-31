@@ -3,8 +3,8 @@ import path from 'path';
 import { OpenAI } from 'openai';
 import { CONFIG } from '../config.js';
 import { sendAdminMessage } from '../utils/botUtils.js';
+import { DATA_DIR } from '../utils/projectPaths.js';
 
-const DATA_DIR = path.resolve(process.cwd(), 'data');
 const CANDIDATES_DIR = path.join(DATA_DIR, 'candidates');
 const AUTOFILL_BATCH_SIZE = 30;
 const AUDIT_TZ = 'Europe/Chisinau';

@@ -1,32 +1,272 @@
 [
-  { "word": "serendipity", "translation": "счастливая случайность", "level": "B2", "partOfSpeech": "noun", "topic": "life" },
-  { "word": "mindful", "translation": "осознанный", "level": "B1", "partOfSpeech": "adjective", "topic": "wellbeing" },
-  { "word": "thrive", "translation": "процветать", "level": "B2", "partOfSpeech": "verb", "topic": "growth" },
-  { "word": "savvy", "translation": "смекалистый", "level": "B2", "partOfSpeech": "adjective", "topic": "career" },
-  { "word": "reset", "translation": "перезагрузка", "level": "B1", "partOfSpeech": "noun", "topic": "productivity" },
-  { "word": "spark", "translation": "искра", "level": "B1", "partOfSpeech": "noun", "topic": "creativity" },
-  { "word": "durable", "translation": "долговечный", "level": "B1", "partOfSpeech": "adjective", "topic": "lifestyle" },
-  { "word": "wanderlust", "translation": "тяга к путешествиям", "level": "B2", "partOfSpeech": "noun", "topic": "travel" },
-  { "word": "insight", "translation": "глубокое понимание", "level": "B2", "partOfSpeech": "noun", "topic": "learning" },
-  { "word": "habit", "translation": "привычка", "level": "A2", "partOfSpeech": "noun", "topic": "daily_routine" },
-  { "word": "momentum", "translation": "импульс", "level": "B2", "partOfSpeech": "noun", "topic": "progress" },
-  { "word": "clarity", "translation": "ясность", "level": "B1", "partOfSpeech": "noun", "topic": "communication" },
-  { "word": "proactive", "translation": "инициативный", "level": "B2", "partOfSpeech": "adjective", "topic": "work" },
-  { "word": "wholesome", "translation": "полезный", "level": "B1", "partOfSpeech": "adjective", "topic": "health" },
-  { "word": "shortcut", "translation": "короткий путь", "level": "B1", "partOfSpeech": "noun", "topic": "problem_solving" },
-  { "word": "nurture", "translation": "развивать", "level": "B2", "partOfSpeech": "verb", "topic": "education" },
-  { "word": "resilient", "translation": "устойчивый", "level": "B2", "partOfSpeech": "adjective", "topic": "mindset" },
-  { "word": "bold", "translation": "смелый", "level": "A2", "partOfSpeech": "adjective", "topic": "personality" },
-  { "word": "curiosity", "translation": "любопытство", "level": "B1", "partOfSpeech": "noun", "topic": "learning" },
-  { "word": "milestone", "translation": "важный этап", "level": "B2", "partOfSpeech": "noun", "topic": "goals" },
-  { "word": "efficient", "translation": "эффективный", "level": "B1", "partOfSpeech": "adjective", "topic": "work" },
-  { "word": "unplug", "translation": "отключаться", "level": "B1", "partOfSpeech": "verb", "topic": "wellbeing" },
-  { "word": "focus", "translation": "сосредоточенность", "level": "A2", "partOfSpeech": "noun", "topic": "study" },
-  { "word": "elevate", "translation": "поднимать на уровень выше", "level": "B2", "partOfSpeech": "verb", "topic": "career" },
-  { "word": "flexible", "translation": "гибкий", "level": "A2", "partOfSpeech": "adjective", "topic": "teamwork" },
-  { "word": "balance", "translation": "баланс", "level": "B1", "partOfSpeech": "noun", "topic": "lifestyle" },
-  { "word": "intentional", "translation": "осмысленный", "level": "B2", "partOfSpeech": "adjective", "topic": "mindset" },
-  { "word": "uplift", "translation": "поддерживать и вдохновлять", "level": "B2", "partOfSpeech": "verb", "topic": "community" },
-  { "word": "resourceful", "translation": "находчивый", "level": "B2", "partOfSpeech": "adjective", "topic": "problem_solving" },
-  { "word": "gratitude", "translation": "благодарность", "level": "B1", "partOfSpeech": "noun", "topic": "wellbeing" }
+  {
+    "id": "word_001",
+    "word": "deadline",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["дедлайн", "крайний срок"],
+    "pronunciation": "/ˈdedlaɪn/",
+    "example": "We have a deadline tomorrow, so let's finish the report today."
+  },
+  {
+    "id": "word_002",
+    "word": "approve",
+    "partOfSpeech": "verb",
+    "level": "A2",
+    "translations": ["одобрить", "утвердить"],
+    "pronunciation": "/əˈpruːv/",
+    "example": "The manager needs to approve the payment before we send it."
+  },
+  {
+    "id": "word_003",
+    "word": "statement",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["выписка", "заявление"],
+    "pronunciation": "/ˈsteɪtmənt/",
+    "example": "Can you send me my bank statement for last month?"
+  },
+  {
+    "id": "word_004",
+    "word": "transfer",
+    "partOfSpeech": "verb",
+    "level": "A2",
+    "translations": ["переводить", "перечислять"],
+    "pronunciation": "/trænsˈfɜːr/",
+    "example": "I need to transfer money to a client account by end of day."
+  },
+  {
+    "id": "word_005",
+    "word": "confirm",
+    "partOfSpeech": "verb",
+    "level": "A2",
+    "translations": ["подтвердить", "подтверждать"],
+    "pronunciation": "/kənˈfɜːrm/",
+    "example": "Please confirm your identity before we proceed."
+  },
+  {
+    "id": "word_006",
+    "word": "policy",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["политика", "правило", "регламент"],
+    "pronunciation": "/ˈpɒlɪsi/",
+    "example": "Our policy does not allow refunds after 30 days."
+  },
+  {
+    "id": "word_007",
+    "word": "outstanding",
+    "partOfSpeech": "adjective",
+    "level": "B1",
+    "translations": ["непогашенный", "незакрытый"],
+    "pronunciation": "/ˌaʊtˈstændɪŋ/",
+    "example": "There is an outstanding balance on this account."
+  },
+  {
+    "id": "word_008",
+    "word": "schedule",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["расписание", "план", "график"],
+    "pronunciation": "/ˈʃedjuːl/",
+    "example": "Let's check the schedule and find a time for the meeting."
+  },
+  {
+    "id": "word_009",
+    "word": "colleague",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["коллега"],
+    "pronunciation": "/ˈkɒliːɡ/",
+    "example": "My colleague will cover for me while I'm on leave."
+  },
+  {
+    "id": "word_010",
+    "word": "complaint",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["жалоба", "претензия"],
+    "pronunciation": "/kəmˈpleɪnt/",
+    "example": "The client filed a complaint about the wrong charge."
+  },
+  {
+    "id": "word_011",
+    "word": "liability",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["обязательство", "ответственность"],
+    "pronunciation": "/ˌlaɪəˈbɪlɪti/",
+    "example": "The bank is not liable for transactions made without authorisation."
+  },
+  {
+    "id": "word_012",
+    "word": "submit",
+    "partOfSpeech": "verb",
+    "level": "A2",
+    "translations": ["подать", "отправить", "предоставить"],
+    "pronunciation": "/səbˈmɪt/",
+    "example": "Please submit your report by Friday."
+  },
+  {
+    "id": "word_013",
+    "word": "overdue",
+    "partOfSpeech": "adjective",
+    "level": "B1",
+    "translations": ["просроченный", "запоздавший"],
+    "pronunciation": "/ˌoʊvərˈduː/",
+    "example": "This invoice is overdue - it should have been paid last week."
+  },
+  {
+    "id": "word_014",
+    "word": "handover",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["передача дел", "передача обязанностей"],
+    "pronunciation": "/ˈhændoʊvər/",
+    "example": "Before she left, she prepared a handover document for the new employee."
+  },
+  {
+    "id": "word_015",
+    "word": "verify",
+    "partOfSpeech": "verb",
+    "level": "B1",
+    "translations": ["проверить", "верифицировать"],
+    "pronunciation": "/ˈverɪfaɪ/",
+    "example": "We need to verify the client's documents before opening the account."
+  },
+  {
+    "id": "word_016",
+    "word": "memo",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["служебная записка", "меморандум"],
+    "pronunciation": "/ˈmemoʊ/",
+    "example": "Did you read the memo about the new expense rules?"
+  },
+  {
+    "id": "word_017",
+    "word": "forecast",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["прогноз", "план показателей"],
+    "pronunciation": "/ˈfɔːrkæst/",
+    "example": "The sales forecast for next quarter looks promising."
+  },
+  {
+    "id": "word_018",
+    "word": "reimburse",
+    "partOfSpeech": "verb",
+    "level": "B1",
+    "translations": ["возместить", "компенсировать"],
+    "pronunciation": "/ˌriːɪmˈbɜːrs/",
+    "example": "Keep your receipts and the company will reimburse your travel costs."
+  },
+  {
+    "id": "word_019",
+    "word": "feedback",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["обратная связь", "отзыв"],
+    "pronunciation": "/ˈfiːdbæk/",
+    "example": "Could you give me some feedback on my presentation?"
+  },
+  {
+    "id": "word_020",
+    "word": "workload",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["рабочая нагрузка", "объём работы"],
+    "pronunciation": "/ˈwɜːrkloʊd/",
+    "example": "My workload has increased a lot since two colleagues went on leave."
+  },
+  {
+    "id": "word_021",
+    "word": "branch",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["отделение", "филиал"],
+    "pronunciation": "/bræntʃ/",
+    "example": "The nearest branch opens at 9 a.m."
+  },
+  {
+    "id": "word_022",
+    "word": "comply",
+    "partOfSpeech": "verb",
+    "level": "B1",
+    "translations": ["соблюдать", "выполнять требования"],
+    "pronunciation": "/kəmˈplaɪ/",
+    "example": "All staff must comply with the new data protection rules."
+  },
+  {
+    "id": "word_023",
+    "word": "minutes",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["протокол встречи", "протокол совещания"],
+    "pronunciation": "/ˈmɪnɪts/",
+    "example": "Who is going to take the minutes at today's meeting?"
+  },
+  {
+    "id": "word_024",
+    "word": "authorise",
+    "partOfSpeech": "verb",
+    "level": "B1",
+    "translations": ["авторизовать", "давать разрешение"],
+    "pronunciation": "/ˈɔːθəraɪz/",
+    "example": "Only the head of department can authorise payments above $5,000."
+  },
+  {
+    "id": "word_025",
+    "word": "audit",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["аудит", "проверка"],
+    "pronunciation": "/ˈɔːdɪt/",
+    "example": "We have an internal audit next week, so please organise all your files."
+  },
+  {
+    "id": "word_026",
+    "word": "allowance",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["надбавка", "пособие", "лимит"],
+    "pronunciation": "/əˈlaʊəns/",
+    "example": "Employees get a monthly travel allowance of $100."
+  },
+  {
+    "id": "word_027",
+    "word": "update",
+    "partOfSpeech": "verb",
+    "level": "A2",
+    "translations": ["обновить", "сообщить о статусе"],
+    "pronunciation": "/ˈʌpdeɪt/",
+    "example": "Please update me on the status of this application."
+  },
+  {
+    "id": "word_028",
+    "word": "quarter",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["квартал", "четверть года"],
+    "pronunciation": "/ˈkwɔːrtər/",
+    "example": "We exceeded our targets in the third quarter."
+  },
+  {
+    "id": "word_029",
+    "word": "escalate",
+    "partOfSpeech": "verb",
+    "level": "B1",
+    "translations": ["эскалировать", "передавать выше"],
+    "pronunciation": "/ˈeskəleɪt/",
+    "example": "If you can't resolve the issue, please escalate it to your supervisor."
+  },
+  {
+    "id": "word_030",
+    "word": "tenure",
+    "partOfSpeech": "noun",
+    "level": "B1",
+    "translations": ["срок работы", "стаж на должности"],
+    "pronunciation": "/ˈtenjər/",
+    "example": "During her tenure as manager, the team doubled in size."
+  }
 ]
