@@ -1,4 +1,7 @@
 // handlers/commandHandlers.js
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import User from '../models/User.js';
 import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
@@ -26,6 +29,73 @@ import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleW
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
 import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay } from '../services/miniEventService.js';
 import { addIsoCalendarDays } from '../utils/moscowWeek.js';
+
+// ── Streak helpers ──────────────────────────────────────────────
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const STREAKS_FILE = path.resolve(__dirname, '../data/streaks.json');
+
+function loadStreaks() {
+  try {
+    if (fs.existsSync(STREAKS_FILE)) {
+      return JSON.parse(fs.readFileSync(STREAKS_FILE, 'utf8'));
+    }
+  } catch (e) {
+    console.error('Не удалось загрузить streaks.json:', e.message);
+  }
+  return {};
+}
+
+function saveStreaks(streaks) {
+  try {
+    fs.writeFileSync(STREAKS_FILE, JSON.stringify(streaks, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Не удалось сохранить streaks.json:', e.message);
+  }
+}
+
+function updateStreak(userId, isCorrect, todayKey) {
+  const streaks = loadStreaks();
+  const key = String(userId);
+  const userStreak = streaks[key] || { count: 0, lastDate: null };
+  const yesterday = addIsoCalendarDays(todayKey, -1);
+
+  if (isCorrect) {
+    if (userStreak.lastDate === yesterday) {
+      userStreak.count += 1;
+    } else if (userStreak.lastDate === todayKey) {
+      // уже отвечал сегодня — не меняем
+    } else {
+      userStreak.count = 1;
+    }
+    userStreak.lastDate = todayKey;
+  } else {
+    userStreak.count = 0;
+    userStreak.lastDate = todayKey;
+  }
+
+  streaks[key] = userStreak;
+  saveStreaks(streaks);
+  return userStreak.count;
+}
+
+function buildStreakLine(streakCount) {
+  const days = streakCount <= 4 ? 'дня' : 'дней';
+  if (streakCount >= 7) return `\n🔥 <b>Серия: ${streakCount} ${days} подряд!</b> Невероятно!`;
+  if (streakCount >= 3) return `\n🔥 <b>Серия: ${streakCount} ${days} подряд!</b> Так держать!`;
+  if (streakCount === 2) return `\n⭐ <b>Серия: 2 дня подряд!</b> Продолжай!`;
+  if (streakCount === 1) return `\n✨ <b>Начало серии!</b> Отвечай правильно каждый день`;
+  return '';
+}
+
+function buildHintText(translation) {
+  const words = translation.trim().split(/\s+/);
+  const masked = words.map(w => {
+    if (w.length <= 2) return w;
+    return w.slice(0, 2) + '_'.repeat(w.length - 2);
+  });
+  return `💡 Подсказка: <b>${masked.join(' ')}</b> (${translation.length} букв)`;
+}
+// ────────────────────────────────────────────────────────────────
 
 function getPendingGameAnswers(userSessions) {
   if (!userSessions.pendingGameAnswers) {
@@ -536,6 +606,8 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
         gameDate
       );
 
+      const streakCount = updateStreak(userId, isCorrect, gameDate);
+
       let resultMessage = isCorrect
         ? `✅ <b>Правильно!</b> +${points} очков\n\n`
         : `❌ <b>Неправильно!</b>\n\n`;
@@ -545,6 +617,9 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       resultMessage += `💡 ${safeFact}\n`;
       resultMessage += `⚠️ Частые ошибки: ${safeMistakes}\n\n`;
       resultMessage += `<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`;
+      if (isCorrect) {
+        resultMessage += buildStreakLine(streakCount);
+      }
 
       await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
 
@@ -567,6 +642,65 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
     console.error('Ошибка при обработке callback word game:', error);
     await bot.answerCallbackQuery(callbackQuery.id, {
       text: '⚠️ Произошла ошибка',
+      show_alert: true
+    });
+  }
+}
+
+export async function handleWordHintCallback(bot, callbackQuery, userSessions) {
+  try {
+    const data = callbackQuery.data;
+    const userId = callbackQuery.from.id;
+
+    // word_hint_{userId}_{gameId}
+    const parts = data.split('_');
+    if (parts.length !== 4 || parts[0] !== 'word' || parts[1] !== 'hint') {
+      return;
+    }
+    const targetUserId = parseInt(parts[2]);
+    const gameId = parts[3];
+
+    if (targetUserId !== userId) return;
+
+    const userGameMap = userSessions.wordGames.get(userId);
+    const gameSession = userGameMap?.get(gameId);
+
+    if (!gameSession) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: '⏰ Игра устарела, подсказка недоступна',
+        show_alert: true
+      });
+      return;
+    }
+
+    if (gameSession.answered) {
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: 'ℹ️ Ты уже ответил',
+        show_alert: false
+      });
+      return;
+    }
+
+    if (gameSession.hintUsed) {
+      const hintText = buildHintText(gameSession.translation);
+      await bot.answerCallbackQuery(callbackQuery.id, {
+        text: hintText.replace(/<[^>]+>/g, ''),
+        show_alert: true
+      });
+      return;
+    }
+
+    gameSession.hintUsed = true;
+    const hintText = buildHintText(gameSession.translation);
+
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: hintText.replace(/<[^>]+>/g, ''),
+      show_alert: true
+    });
+  } catch (error) {
+    console.error('Ошибка при обработке hint callback:', error);
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: '⚠️ Ошибка подсказки',
       show_alert: true
     });
   }

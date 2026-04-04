@@ -1,9 +1,10 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, consumeWordFromBank, consumeIdiomFromBank, consumePhrasalVerbFromBank, consumeQuizFromBank, consumeFactFromBank } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, consumeIdiomFromBank, consumePhrasalVerbFromBank, consumeQuizFromBank, consumeFactFromBank } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
+import { appendBankHistoryEntry } from '../services/bankLifecycleService.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -352,13 +353,11 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         return;
       }
       wordRecord = savedRecord;
-
-      if (!consumeWordFromBank(wordRecord.word)) {
-        console.warn(`⚠️ Не удалось удалить использованное слово из word_bank.json: ${wordRecord.word}`);
-      }
     } else {
       console.log(`🔁 Используем сохранённое слово дня (${slot}): ${wordRecord.word}`);
     }
+
+    appendBankHistoryEntry('word', wordRecord.word);
 
     const broadcastWord = {
       id: wordRecord.id,
@@ -406,10 +405,13 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         );
 
         const keyboard = {
-          inline_keyboard: broadcastWord.options.map((option, index) => [{
-            text: `${index + 1}. ${option}`,
-            callback_data: `word_game_${userId}_${broadcastWord.id}_${index}`
-          }])
+          inline_keyboard: [
+            ...broadcastWord.options.map((option, index) => [{
+              text: `${index + 1}. ${option}`,
+              callback_data: `word_game_${userId}_${broadcastWord.id}_${index}`
+            }]),
+            [{ text: '💡 Подсказка', callback_data: `word_hint_${userId}_${broadcastWord.id}` }]
+          ]
         };
 
         const startTime = Date.now();

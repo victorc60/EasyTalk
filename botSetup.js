@@ -5,7 +5,7 @@ import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
 import StoryHandlers from './handlers/storyHandlers.js';
@@ -316,6 +316,12 @@ function setupCallbacks(bot, userSessions) {
       // Handle word game callbacks
       if (data.startsWith('word_game_')) {
         await handleWordGameCallback(bot, callbackQuery, userSessions);
+        return;
+      }
+
+      // Handle word hint callbacks
+      if (data.startsWith('word_hint_')) {
+        await handleWordHintCallback(bot, callbackQuery, userSessions);
         return;
       }
 

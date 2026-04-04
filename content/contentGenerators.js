@@ -71,6 +71,7 @@ const usedWordsCache = new Set();
 const MAX_CACHE_SIZE = 365; // Храним 365 последних слов (около года)
 const WORD_HISTORY_FILE = dataFilePath('word_history.json');
 const WORD_BANK_FILE = dataFilePath('word_bank.json');
+const WORD_INDEX_FILE = dataFilePath('word_index.json');
 const FACTS_BANK_FILE = dataFilePath('facts_bank.json');
 let curatedWordBank = [];
 let curatedFactsBank = [];
@@ -623,6 +624,29 @@ export function addWordToUsedHistory(word) {
   console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
 }
 
+function loadWordIndex() {
+  try {
+    if (fs.existsSync(WORD_INDEX_FILE)) {
+      const raw = fs.readFileSync(WORD_INDEX_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (typeof parsed.index === 'number' && parsed.index >= 0) {
+        return parsed.index;
+      }
+    }
+  } catch (e) {
+    console.error('Не удалось загрузить word_index.json:', e.message);
+  }
+  return 0;
+}
+
+function saveWordIndex(index) {
+  try {
+    fs.writeFileSync(WORD_INDEX_FILE, JSON.stringify({ index }, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Не удалось сохранить word_index.json:', e.message);
+  }
+}
+
 function pickSequentialWord() {
   loadCuratedWordBank();
   const bank = getCuratedWordBank();
@@ -631,10 +655,15 @@ function pickSequentialWord() {
     return null;
   }
 
-  const nextUnused = bank.find((entry) => !usedWordsCache.has(normalizeKey(entry.word)));
-  const entry = nextUnused || bank[0];
-  const normalized = normalizeKey(entry.word);
+  const currentIndex = loadWordIndex();
+  const safeIndex = currentIndex % bank.length;
+  const entry = bank[safeIndex];
 
+  // Сдвигаем указатель на следующее слово (циклически)
+  saveWordIndex((safeIndex + 1) % bank.length);
+
+  // Обновляем историю для логов (не влияет на выбор)
+  const normalized = normalizeKey(entry.word);
   usedWordsCache.add(normalized);
   if (usedWordsCache.size > MAX_CACHE_SIZE) {
     const oldest = usedWordsCache.values().next().value;
