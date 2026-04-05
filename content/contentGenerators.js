@@ -150,6 +150,17 @@ function loadUsedIdiomsFromDisk() {
   }
 }
 
+export function seedUsedIdiomsCache(idiomList) {
+  for (const idiom of idiomList) {
+    if (typeof idiom === 'string' && idiom.trim()) {
+      usedIdiomsCache.add(idiom.trim().toLowerCase());
+    }
+  }
+  availableCuratedIdioms = [];
+  rebuildCuratedIdiomPool();
+  console.log(`🔄 usedIdiomsCache заполнен из БД: ${usedIdiomsCache.size} идиом`);
+}
+
 function saveUsedIdiomsToDisk() {
   try {
     const dir = path.dirname(IDIOM_HISTORY_FILE);
@@ -1027,7 +1038,6 @@ function buildMistakeLine(entry) {
 }
 
 export async function idiomOfTheDay() {
-  loadCuratedIdiomBank();
   const idiomEntry = pickCuratedIdiom();
 
   if (!idiomEntry) {
