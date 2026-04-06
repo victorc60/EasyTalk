@@ -161,6 +161,35 @@ export function seedUsedIdiomsCache(idiomList) {
   console.log(`🔄 usedIdiomsCache заполнен из БД: ${usedIdiomsCache.size} идиом`);
 }
 
+export function seedUsedWordsCache(wordList) {
+  for (const word of wordList) {
+    if (typeof word === 'string' && word.trim()) {
+      usedWordsCache.add(word.trim().toLowerCase());
+    }
+  }
+  console.log(`🔄 usedWordsCache заполнен из БД: ${usedWordsCache.size} слов`);
+}
+
+export function seedUsedPhrasalVerbsCache(pvList) {
+  for (const pv of pvList) {
+    if (typeof pv === 'string' && pv.trim()) {
+      usedPhrasalVerbsCache.add(pv.trim().toLowerCase());
+    }
+  }
+  availableCuratedPhrasalVerbs = [];
+  rebuildCuratedPhrasalVerbsPool();
+  console.log(`🔄 usedPhrasalVerbsCache заполнен из БД: ${usedPhrasalVerbsCache.size} phrasal verbs`);
+}
+
+export function seedUsedQuizCache(quizList) {
+  for (const q of quizList) {
+    if (typeof q === 'string' && q.trim()) {
+      usedQuizCache.add(q.trim().toLowerCase());
+    }
+  }
+  console.log(`🔄 usedQuizCache заполнен из БД: ${usedQuizCache.size} квизов`);
+}
+
 function saveUsedIdiomsToDisk() {
   try {
     const dir = path.dirname(IDIOM_HISTORY_FILE);
@@ -666,12 +695,16 @@ function pickSequentialWord() {
     return null;
   }
 
+  // Фильтруем уже использованные слова (история из БД пережила рестарт)
+  const available = bank.filter(e => !usedWordsCache.has(normalizeKey(e.word)));
+  const pool = available.length > 0 ? available : bank;
+
   const currentIndex = loadWordIndex();
-  const safeIndex = currentIndex % bank.length;
-  const entry = bank[safeIndex];
+  const safeIndex = currentIndex % pool.length;
+  const entry = pool[safeIndex];
 
   // Сдвигаем указатель на следующее слово (циклически)
-  saveWordIndex((safeIndex + 1) % bank.length);
+  saveWordIndex((safeIndex + 1) % pool.length);
 
   // Обновляем историю для логов (не влияет на выбор)
   const normalized = normalizeKey(entry.word);
@@ -1089,7 +1122,6 @@ function buildPhrasalVerbOptions(entry) {
 }
 
 export async function phrasalVerbOfTheDay() {
-  loadCuratedPhrasalVerbsBank();
   const phrasalVerbEntry = pickCuratedPhrasalVerb();
 
   if (!phrasalVerbEntry) {

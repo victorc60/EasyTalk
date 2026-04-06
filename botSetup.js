@@ -8,8 +8,8 @@ import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
-import { getUsedIdiomPrompts } from './services/wordGameServices.js';
-import { seedUsedIdiomsCache } from './content/contentGenerators.js';
+import { getUsedIdiomPrompts, getUsedWordPrompts, getUsedPhrasalVerbPrompts, getUsedQuizPrompts } from './services/wordGameServices.js';
+import { seedUsedIdiomsCache, seedUsedWordsCache, seedUsedPhrasalVerbsCache, seedUsedQuizCache } from './content/contentGenerators.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -36,6 +36,15 @@ export async function setupBot(bot, userSessions, openai) {
 
   getUsedIdiomPrompts().then(seedUsedIdiomsCache).catch((error) => {
     console.error('Ошибка загрузки истории идиом из БД:', error.message);
+  });
+  getUsedWordPrompts().then(seedUsedWordsCache).catch((error) => {
+    console.error('Ошибка загрузки истории слов из БД:', error.message);
+  });
+  getUsedPhrasalVerbPrompts().then(seedUsedPhrasalVerbsCache).catch((error) => {
+    console.error('Ошибка загрузки истории phrasal verbs из БД:', error.message);
+  });
+  getUsedQuizPrompts().then(seedUsedQuizCache).catch((error) => {
+    console.error('Ошибка загрузки истории квизов из БД:', error.message);
   });
 
   console.log('🤖 Бот запущен и готов к работе!');

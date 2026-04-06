@@ -635,6 +635,48 @@ export async function getUsedIdiomPrompts() {
   }
 }
 
+export async function getUsedWordPrompts() {
+  try {
+    const sessions = await DailyGameSession.findAll({
+      where: { game_type: GAME_TYPES.WORD },
+      attributes: ['prompt'],
+      raw: true
+    });
+    return sessions.map(s => s.prompt).filter(Boolean);
+  } catch (error) {
+    console.error('Ошибка получения истории слов из БД:', error.message);
+    return [];
+  }
+}
+
+export async function getUsedPhrasalVerbPrompts() {
+  try {
+    const sessions = await DailyGameSession.findAll({
+      where: { game_type: GAME_TYPES.PHRASAL_VERB },
+      attributes: ['prompt'],
+      raw: true
+    });
+    return sessions.map(s => s.prompt).filter(Boolean);
+  } catch (error) {
+    console.error('Ошибка получения истории phrasal verbs из БД:', error.message);
+    return [];
+  }
+}
+
+export async function getUsedQuizPrompts() {
+  try {
+    const sessions = await DailyGameSession.findAll({
+      where: { game_type: GAME_TYPES.QUIZ },
+      attributes: ['prompt'],
+      raw: true
+    });
+    return sessions.map(s => s.prompt).filter(Boolean);
+  } catch (error) {
+    console.error('Ошибка получения истории квизов из БД:', error.message);
+    return [];
+  }
+}
+
 export async function getSavedDailyGameSession(gameType, sessionId, date = null, slot = null) {
   try {
     const where = {
