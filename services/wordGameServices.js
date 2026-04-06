@@ -57,15 +57,8 @@ export async function recordGameParticipation({
 }) {
   try {
     const targetDate = gameDate || getMoscowDateString();
-    const where = {
-      user_id: userId,
-      game_type: gameType,
-      game_date: targetDate,
-      slot
-    };
-
-    const existing = await WordGameParticipation.findOne({ where });
-    const payload = {
+    const where = { user_id: userId, game_type: gameType, game_date: targetDate, slot };
+    const defaults = {
       user_id: userId,
       game_type: gameType,
       game_date: targetDate,
@@ -77,32 +70,33 @@ export async function recordGameParticipation({
       response_time: responseTime
     };
 
-    if (existing) {
-      const existingAnswered = existing.answered === true;
-      const nextAnswered = existingAnswered || answered === true;
-      const nextCorrect = existing.correct === true || correct === true;
-      const nextPoints = Math.max(existing.points_earned || 0, pointsEarned || 0);
-      const nextResponseTime = existingAnswered
-        ? existing.response_time
-        : (responseTime ?? existing.response_time);
-
-      await existing.update({
-        word: word || existing.word,
-        answered: nextAnswered,
-        correct: nextCorrect,
-        points_earned: nextPoints,
-        response_time: nextResponseTime
-      });
-    } else {
-      await WordGameParticipation.create(payload);
+    let record, created;
+    try {
+      [record, created] = await WordGameParticipation.findOrCreate({ where, defaults });
+    } catch (createError) {
+      // Гонка двух инстансов: findOrCreate у обоих вернул null, оба пробуют CREATE
+      // → UNIQUE CONSTRAINT violation. Повторяем findOne.
+      console.warn(`[recordGameParticipation] findOrCreate конфликт (${gameType}), повторяем findOne: ${createError.message}`);
+      record = await WordGameParticipation.findOne({ where });
+      if (!record) throw createError;
+      created = false;
     }
 
-    console.log(
-      `Записано участие пользователя ${userId} в игре "${gameType}" для "${word}" (slot=${slot}): ответил=${answered}, правильно=${correct}`
-    );
+    if (!created) {
+      const existingAnswered = record.answered === true;
+      await record.update({
+        word: word || record.word,
+        answered: existingAnswered || answered === true,
+        correct: record.correct === true || correct === true,
+        points_earned: Math.max(record.points_earned || 0, pointsEarned || 0),
+        response_time: existingAnswered ? record.response_time : (responseTime ?? record.response_time)
+      });
+    }
+
+    console.log(`Участие ${userId} в "${gameType}" (${targetDate}, slot=${slot}): ответил=${answered}, верно=${correct}`);
     return true;
   } catch (error) {
-    console.error(`Ошибка записи участия (${gameType}):`, error.message);
+    console.error(`Ошибка записи участия (${gameType}, userId=${userId}):`, error.message);
     return false;
   }
 }

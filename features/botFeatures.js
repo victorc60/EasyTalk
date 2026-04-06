@@ -349,9 +349,11 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
       }
       const savedRecord = await saveDailyWordData(generatedWord, slot);
       if (!savedRecord) {
-        console.warn('⚠️ Не удалось сохранить слово дня в базе');
+        console.error(`❌ saveDailyWordData вернул null для слова "${generatedWord?.word}" (slot=${slot}) — рассылка прервана`);
+        await sendAdminMessage(bot, `‼️ Слово дня (${slot}): не сохранилось в БД — рассылка отменена`);
         return;
       }
+      console.log(`✅ Word session saved: ${savedRecord.word} (slot=${slot})`);
       wordRecord = savedRecord;
     } else {
       console.log(`🔁 Используем сохранённое слово дня (${slot}): ${wordRecord.word}`);
@@ -515,9 +517,12 @@ export async function idiomGameBroadcast(bot, userSessions) {
     });
 
     if (!savedSession) {
-      console.warn('⚠️ Не удалось сохранить идиому дня в базе');
+      console.error('❌ saveDailyGameSession вернул null для idiom — рассылка прервана, участие не записано');
+      await sendAdminMessage(bot, '‼️ Идиома дня: сессия не сохранилась в БД — участие пользователей не будет записано');
       return;
     }
+
+    console.log(`✅ Idiom session saved: ${idiomData.idiom} (sessionId=${sessionId})`);
 
     if (!consumeIdiomFromBank(idiomData.idiom)) {
       console.warn(`⚠️ Не удалось удалить использованную идиому из idiom_bank.json: ${idiomData.idiom}`);
@@ -618,9 +623,12 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
     });
 
     if (!savedSession) {
-      console.warn('⚠️ Не удалось сохранить phrasal verb дня в базе');
+      console.error('❌ saveDailyGameSession вернул null для phrasal_verb — рассылка прервана, участие не записано');
+      await sendAdminMessage(bot, '‼️ Phrasal verb дня: сессия не сохранилась в БД — участие пользователей не будет записано');
       return;
     }
+
+    console.log(`✅ PhrasalVerb session saved: ${phrasalVerbData.phrasalVerb} (sessionId=${sessionId})`);
 
     if (!consumePhrasalVerbFromBank(phrasalVerbData.phrasalVerb)) {
       console.warn(`⚠️ Не удалось удалить использованный phrasal verb из phrasal_verbs_bank.json: ${phrasalVerbData.phrasalVerb}`);
