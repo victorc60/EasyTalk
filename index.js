@@ -54,9 +54,10 @@ const userSessions = {
   factGames: new Map(),
   activeDialogs: new Map(),
   conversationModes: new Map(),
+  chatHistories: new Map(),  // { userId → { messages: [], lastAt: timestamp } }
   pollDrafts: new Map(),
   broadcastPending: false,
-  broadcastContent: { text: null, photo: null } // Для хранения текста и URL картинки
+  broadcastContent: { text: null, photo: null }
 };
 
 if (webhookUrl) {
