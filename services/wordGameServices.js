@@ -621,6 +621,20 @@ export async function saveDailyGameSession({
   }
 }
 
+export async function getUsedIdiomPrompts() {
+  try {
+    const sessions = await DailyGameSession.findAll({
+      where: { game_type: GAME_TYPES.IDIOM },
+      attributes: ['prompt'],
+      raw: true
+    });
+    return sessions.map(s => s.prompt).filter(Boolean);
+  } catch (error) {
+    console.error('Ошибка получения истории идиом из БД:', error.message);
+    return [];
+  }
+}
+
 export async function getSavedDailyGameSession(gameType, sessionId, date = null, slot = null) {
   try {
     const where = {

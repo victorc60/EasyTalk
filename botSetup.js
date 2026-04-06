@@ -8,6 +8,8 @@ import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
+import { getUsedIdiomPrompts } from './services/wordGameServices.js';
+import { seedUsedIdiomsCache } from './content/contentGenerators.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -31,6 +33,11 @@ export async function setupBot(bot, userSessions, openai) {
   runDailyBankAuditAndAutofill(bot).catch((error) => {
     console.error('Ошибка стартового аудита банков:', error.message);
   });
+
+  getUsedIdiomPrompts().then(seedUsedIdiomsCache).catch((error) => {
+    console.error('Ошибка загрузки истории идиом из БД:', error.message);
+  });
+
   console.log('🤖 Бот запущен и готов к работе!');
 }
 
