@@ -231,7 +231,8 @@ async function setupBotCommands(bot) {
       { command: 'mode', description: 'Выбор режима общения' },
       { command: 'mode_free_talk', description: 'Свободное общение на английском' },
       { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
-      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' }
+      { command: 'mode_role_play', description: 'Ролевые игры с персонажами' },
+      { command: 'clear', description: 'Сбросить историю диалога' }
     ];
 
     // Дополнительные команды только для админов
@@ -273,6 +274,11 @@ async function setupBotCommands(bot) {
 
 function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/start/, (msg) => start(bot, msg));
+  bot.onText(/\/clear/, (msg) => {
+    const userId = msg.from.id;
+    userSessions.chatHistories.delete(userId);
+    sendUserMessage(bot, msg.chat.id, '🗑 История диалога сброшена. Начинаем с чистого листа!');
+  });
   bot.onText(/\/game_boss/, (msg) => gameBoss(bot, msg));
   bot.onText(/\/boss/, (msg) => gameBoss(bot, msg));
   bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
@@ -688,7 +694,7 @@ function setupMessageHandler(bot, userSessions, openai) {
       // Основная обработка текстовых сообщений
       if (text) {
         const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
-        await handleRegularMessage(bot, chatId, userId, text, userMode, openai);
+        await handleRegularMessage(bot, chatId, userId, text, userMode, openai, userSessions);
       } else {
         await sendUserMessage(
           bot,
@@ -798,36 +804,61 @@ async function handleActiveDialogs(bot, chatId, userId, text, userSessions, open
   return true;
 }
 
-async function handleRegularMessage(bot, chatId, userId, text, userMode, openai) {
-  await bot.sendChatAction(chatId, 'typing');
-  
-  let systemPrompt = '';
-  switch (userMode) {
-    case 'correction':
-      systemPrompt = `You're an English corrector. Identify and correct any errors in the student's message. 
-      Provide the corrected version first, then briefly explain the mistakes in Russian. 
-      Keep explanations simple and clear.`;
-      break;
-    case 'role_play':
-      await startRolePlay(bot, chatId, userSessions);
-      return;
-    default: // FREE_TALK
-      systemPrompt = `You're a friendly English teacher. Respond naturally to the student, keeping answers under 3 sentences. 
-      If they make mistakes, provide the correct version subtly in your response. 
-      Ask follow-up questions to continue the conversation.`;
+const CHAT_HISTORY_MAX = 6;       // последние 3 обмена (user+assistant × 3)
+const CHAT_HISTORY_TTL = 30 * 60 * 1000; // сброс после 30 мин неактивности
+
+const SYSTEM_PROMPTS = {
+  correction: 'English corrector. Show corrected version first, then briefly explain errors in Russian.',
+  free_talk: 'English teacher. Reply in ≤3 sentences. Subtly fix errors. End with a follow-up question.'
+};
+
+function getChatHistory(userSessions, userId) {
+  const entry = userSessions.chatHistories.get(userId);
+  if (!entry) return [];
+  if (Date.now() - entry.lastAt > CHAT_HISTORY_TTL) {
+    userSessions.chatHistories.delete(userId);
+    return [];
   }
+  return entry.messages;
+}
+
+function saveChatHistory(userSessions, userId, userText, assistantText) {
+  const history = getChatHistory(userSessions, userId);
+  const updated = [
+    ...history,
+    { role: 'user', content: userText },
+    { role: 'assistant', content: assistantText }
+  ].slice(-CHAT_HISTORY_MAX);
+  userSessions.chatHistories.set(userId, { messages: updated, lastAt: Date.now() });
+}
+
+async function handleRegularMessage(bot, chatId, userId, text, userMode, openai, userSessions) {
+  await bot.sendChatAction(chatId, 'typing');
+
+  if (userMode === 'role_play') {
+    await startRolePlay(bot, chatId, userSessions);
+    return;
+  }
+
+  const systemPrompt = SYSTEM_PROMPTS[userMode] || SYSTEM_PROMPTS.free_talk;
+  const history = getChatHistory(userSessions, userId);
 
   const { choices } = await openai.chat.completions.create({
     model: CONFIG.GPT_MODEL,
     messages: [
       { role: 'system', content: systemPrompt },
+      ...history,
       { role: 'user', content: text }
     ],
     temperature: 0.7,
-    max_tokens: 200
+    max_tokens: 150
   });
 
-  await sendUserMessage(bot, chatId, choices[0]?.message?.content);
+  const reply = choices[0]?.message?.content;
+  if (reply) {
+    saveChatHistory(userSessions, userId, text, reply);
+    await sendUserMessage(bot, chatId, reply);
+  }
   await awardPoints(userId, 1);
 }
 
