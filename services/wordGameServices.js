@@ -631,12 +631,11 @@ export async function getUsedIdiomPrompts() {
 
 export async function getUsedWordPrompts() {
   try {
-    const sessions = await DailyGameSession.findAll({
-      where: { game_type: GAME_TYPES.WORD },
-      attributes: ['prompt'],
+    const records = await DailyWordGame.findAll({
+      attributes: ['word'],
       raw: true
     });
-    return sessions.map(s => s.prompt).filter(Boolean);
+    return records.map(r => r.word).filter(Boolean);
   } catch (error) {
     console.error('Ошибка получения истории слов из БД:', error.message);
     return [];
