@@ -808,8 +808,19 @@ const CHAT_HISTORY_MAX = 6;       // последние 3 обмена (user+ass
 const CHAT_HISTORY_TTL = 30 * 60 * 1000; // сброс после 30 мин неактивности
 
 const SYSTEM_PROMPTS = {
-  correction: 'English corrector. Show corrected version first, then briefly explain errors in Russian.',
-  free_talk: 'English teacher. Reply in ≤3 sentences. Subtly fix errors. End with a follow-up question.'
+  correction: `English corrector. Format your reply in HTML for Telegram:
+- First line: ✅ <b>Corrected:</b> [corrected sentence]
+- Then each error on a new line with 🔸 emoji and brief explanation in Russian.
+Keep it concise.`,
+
+  free_talk: `English teacher. Format replies in HTML for Telegram.
+Rules:
+- Use relevant emojis to make it lively
+- For lists or examples, put each item on a new line with a number or emoji bullet
+- Use <b>bold</b> for key words or corrections
+- Reply in ≤3 sentences for simple answers; use structured format for lists
+- Subtly fix errors inline
+- End with a short follow-up question`
 };
 
 function getChatHistory(userSessions, userId) {
@@ -857,7 +868,7 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai,
   const reply = choices[0]?.message?.content;
   if (reply) {
     saveChatHistory(userSessions, userId, text, reply);
-    await sendUserMessage(bot, chatId, reply);
+    await sendUserMessage(bot, chatId, reply, { parse_mode: 'HTML' });
   }
   await awardPoints(userId, 1);
 }
