@@ -2,7 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Op } from 'sequelize';
 import User from '../models/User.js';
+import WordGameParticipation from '../models/WordGameParticipation.js';
+import DailyGameSession from '../models/DailyGameSession.js';
 import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
@@ -1353,6 +1356,71 @@ export async function wordGameStats(bot, msg, userSessions = null) {
     console.error('Ошибка при получении статистики игры:', error);
     console.error('Full error:', error);
     await sendUserMessage(bot, msg.chat.id, `❌ Ошибка получения статистики: ${error.message}`);
+  }
+}
+
+export async function dbCheck(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(bot, msg.chat.id, '❌ Нет прав.');
+      return;
+    }
+
+    const today = getTodayMoscowDateString();
+    await sendUserMessage(bot, msg.chat.id, `🔍 Проверяю БД за ${today}...`);
+
+    // 1. Количество записей по каждому game_type за сегодня
+    const rows = await WordGameParticipation.findAll({
+      where: { game_date: today },
+      attributes: ['game_type', 'answered', 'correct', 'points_earned'],
+      raw: true
+    });
+
+    const summary = {};
+    for (const r of rows) {
+      if (!summary[r.game_type]) summary[r.game_type] = { total: 0, answered: 0, correct: 0, points: 0 };
+      summary[r.game_type].total++;
+      if (r.answered) summary[r.game_type].answered++;
+      if (r.correct) summary[r.game_type].correct++;
+      summary[r.game_type].points += r.points_earned || 0;
+    }
+
+    // 2. Сессии за сегодня
+    const sessions = await DailyGameSession.findAll({
+      where: { game_date: today },
+      attributes: ['game_type', 'slot', 'prompt', 'created_at'],
+      raw: true
+    });
+
+    // 3. Пользователи
+    const userCount = await User.count();
+
+    let msg2 = `<b>📋 DB Check — ${today}</b>\n\n`;
+    msg2 += `👥 Всего пользователей в БД: ${userCount}\n\n`;
+
+    msg2 += `<b>word_game_participation за сегодня:</b>\n`;
+    if (rows.length === 0) {
+      msg2 += `❌ Нет ни одной записи!\n`;
+    } else {
+      for (const [type, s] of Object.entries(summary)) {
+        msg2 += `• ${type}: total=${s.total}, answered=${s.answered}, correct=${s.correct}, pts=${s.points}\n`;
+      }
+    }
+
+    msg2 += `\n<b>daily_game_session за сегодня:</b>\n`;
+    if (sessions.length === 0) {
+      msg2 += `❌ Сессий нет!\n`;
+    } else {
+      for (const s of sessions) {
+        msg2 += `• ${s.game_type} (${s.slot}): "${String(s.prompt).slice(0, 30)}..." [${s.created_at}]\n`;
+      }
+    }
+
+    await sendUserMessage(bot, msg.chat.id, msg2, { parse_mode: 'HTML' });
+  } catch (error) {
+    console.error('Ошибка /db_check:', error);
+    await sendUserMessage(bot, msg.chat.id, `❌ Ошибка: ${error.message}`);
   }
 }
 
