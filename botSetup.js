@@ -5,7 +5,7 @@ import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
 import { getUsedIdiomPrompts, getUsedWordPrompts, getUsedPhrasalVerbPrompts, getUsedQuizPrompts } from './services/wordGameServices.js';
@@ -295,6 +295,7 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/top_users(?:\s+.+)?/, (msg) => topUsers(bot, msg));
   bot.onText(/\/test_admin/, (msg) => testAdmin(bot, msg));
   bot.onText(/\/db_check/, (msg) => dbCheck(bot, msg));
+  bot.onText(/\/words_used/, (msg) => wordsUsed(bot, msg));
   bot.onText(/\/add_word/, (msg) => addWordToHistory(bot, msg));
   bot.onText(/\/poll_results(?:\s+\d+)?/, (msg) => showPollResults(bot, msg));
   bot.onText(/\/poll$/, (msg) => startPollCreation(bot, msg, userSessions));

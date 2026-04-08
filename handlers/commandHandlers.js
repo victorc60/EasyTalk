@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 import User from '../models/User.js';
 import WordGameParticipation from '../models/WordGameParticipation.js';
 import DailyGameSession from '../models/DailyGameSession.js';
+import DailyWordGame from '../models/DailyWordGame.js';
 import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
@@ -1433,6 +1434,42 @@ export async function dbCheck(bot, msg) {
     await sendUserMessage(bot, msg.chat.id, msg2, { parse_mode: 'HTML' });
   } catch (error) {
     console.error('Ошибка /db_check:', error);
+    await sendUserMessage(bot, msg.chat.id, `❌ Ошибка: ${error.message}`);
+  }
+}
+
+export async function wordsUsed(bot, msg) {
+  try {
+    const userId = msg.from.id.toString();
+    if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
+      await sendUserMessage(bot, msg.chat.id, '❌ Нет прав.');
+      return;
+    }
+
+    const rows = await DailyWordGame.findAll({
+      attributes: ['word', 'game_date', 'slot'],
+      order: [['game_date', 'DESC']],
+      raw: true
+    });
+
+    if (rows.length === 0) {
+      await sendUserMessage(bot, msg.chat.id, '📭 В DailyWordGame нет ни одной записи.');
+      return;
+    }
+
+    const words = rows.map(r => r.word).filter(Boolean);
+    const unique = [...new Set(words.map(w => w.toLowerCase()))];
+
+    let msg2 = `<b>📖 Слова из DailyWordGame (${rows.length} записей, ${unique.length} уникальных):</b>\n\n`;
+    msg2 += unique.join(', ');
+    msg2 += `\n\n<b>Последние 10 рассылок:</b>\n`;
+    for (const r of rows.slice(0, 10)) {
+      msg2 += `• ${r.game_date} (${r.slot}): ${r.word}\n`;
+    }
+
+    await sendUserMessage(bot, msg.chat.id, msg2, { parse_mode: 'HTML' });
+  } catch (error) {
+    console.error('Ошибка /words_used:', error);
     await sendUserMessage(bot, msg.chat.id, `❌ Ошибка: ${error.message}`);
   }
 }
