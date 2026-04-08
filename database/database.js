@@ -31,6 +31,7 @@ if (!connectionUrl) {
 
 const sequelize = new Sequelize(connectionUrl, {
   dialect: 'mysql',
+  timezone: '+03:00', // Europe/Chisinau (summer EEST = UTC+3)
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   dialectOptions: {
     ssl: {

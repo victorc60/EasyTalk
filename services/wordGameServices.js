@@ -84,16 +84,19 @@ export async function recordGameParticipation({
 
     if (!created) {
       const existingAnswered = record.answered === true;
+      const newAnswered = existingAnswered || answered === true;
       await record.update({
         word: word || record.word,
-        answered: existingAnswered || answered === true,
+        answered: newAnswered,
         correct: record.correct === true || correct === true,
         points_earned: Math.max(record.points_earned || 0, pointsEarned || 0),
         response_time: existingAnswered ? record.response_time : (responseTime ?? record.response_time)
       });
+      console.log(`[recordGameParticipation] UPDATED ${gameType} userId=${userId} date=${targetDate} slot=${slot}: answered ${existingAnswered}→${newAnswered} correct=${record.correct === true || correct === true}`);
+    } else {
+      console.log(`[recordGameParticipation] CREATED ${gameType} userId=${userId} date=${targetDate} slot=${slot}: answered=${answered} correct=${correct}`);
     }
 
-    console.log(`Участие ${userId} в "${gameType}" (${targetDate}, slot=${slot}): ответил=${answered}, верно=${correct}`);
     return true;
   } catch (error) {
     console.error(`Ошибка записи участия (${gameType}, userId=${userId}):`, error.message);
