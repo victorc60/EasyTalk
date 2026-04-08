@@ -57,10 +57,22 @@ function saveStreaks(streaks) {
   }
 }
 
-function updateStreak(userId, isCorrect, todayKey) {
+function updateStreak(userId, isCorrect, todayKey, gameType = 'word') {
   const streaks = loadStreaks();
   const key = String(userId);
-  const userStreak = streaks[key] || { count: 0, lastDate: null };
+  const userData = streaks[key];
+
+  // Миграция старого формата { count, lastDate } → { word: { count, lastDate }, ... }
+  let gameStreaks;
+  if (!userData) {
+    gameStreaks = {};
+  } else if (typeof userData.count === 'number' || userData.lastDate !== undefined) {
+    gameStreaks = { word: userData };
+  } else {
+    gameStreaks = userData;
+  }
+
+  const userStreak = gameStreaks[gameType] || { count: 0, lastDate: null };
   const yesterday = addIsoCalendarDays(todayKey, -1);
 
   if (isCorrect) {
@@ -77,18 +89,21 @@ function updateStreak(userId, isCorrect, todayKey) {
     userStreak.lastDate = todayKey;
   }
 
-  streaks[key] = userStreak;
+  gameStreaks[gameType] = userStreak;
+  streaks[key] = gameStreaks;
   saveStreaks(streaks);
   return userStreak.count;
 }
 
-function buildStreakLine(streakCount) {
+function buildStreakLine(streakCount, isMilestone = false) {
   const days = streakCount <= 4 ? 'дня' : 'дней';
-  if (streakCount >= 7) return `\n🔥 <b>Серия: ${streakCount} ${days} подряд!</b> Невероятно!`;
-  if (streakCount >= 3) return `\n🔥 <b>Серия: ${streakCount} ${days} подряд!</b> Так держать!`;
-  if (streakCount === 2) return `\n⭐ <b>Серия: 2 дня подряд!</b> Продолжай!`;
-  if (streakCount === 1) return `\n✨ <b>Начало серии!</b> Отвечай правильно каждый день`;
-  return '';
+  let line = '';
+  if (streakCount >= 7) line = `\n🔥 <b>Серия: ${streakCount} ${days} подряд!</b> Невероятно!`;
+  else if (streakCount >= 3) line = `\n🔥 <b>Серия: ${streakCount} ${days} подряд!</b> Так держать!`;
+  else if (streakCount === 2) line = `\n⭐ <b>Серия: 2 дня подряд!</b> Продолжай!`;
+  else if (streakCount === 1) line = `\n✨ <b>Начало серии!</b> Отвечай правильно каждый день`;
+  if (isMilestone) line += `\n🎁 <b>Бонус за серию ${streakCount} подряд:</b> +10 очков!`;
+  return line;
 }
 
 function buildHintText(translation) {
@@ -610,7 +625,11 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
         gameDate
       );
 
-      const streakCount = updateStreak(userId, isCorrect, gameDate);
+      const streakCount = updateStreak(userId, isCorrect, gameDate, 'word');
+      const isStreakMilestone = isCorrect && streakCount > 0 && streakCount % 5 === 0;
+      if (isStreakMilestone) {
+        await awardPoints(userId, 10);
+      }
 
       let resultMessage = isCorrect
         ? `✅ <b>Правильно!</b> +${points} очков\n\n`
@@ -622,7 +641,7 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       resultMessage += `⚠️ Частые ошибки: ${safeMistakes}\n\n`;
       resultMessage += `<b>СОСТАВЬ ПРЕДЛОЖЕНИЕ С ЭТИМ СЛОВОМ И ЗАПОМНИ ЕГО НА ВСЕГДА</b>`;
       if (isCorrect) {
-        resultMessage += buildStreakLine(streakCount);
+        resultMessage += buildStreakLine(streakCount, isStreakMilestone);
       }
 
       await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -833,6 +852,12 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     const safeHint = escapeHtml(gameSession.hint);
     const safeExample = escapeHtml(gameSession.example);
 
+    const idiomStreakCount = updateStreak(userId, isCorrect, gameDate, 'idiom');
+    const isIdiomStreakMilestone = isCorrect && idiomStreakCount > 0 && idiomStreakCount % 5 === 0;
+    if (isIdiomStreakMilestone) {
+      await awardPoints(userId, 10);
+    }
+
     let resultMessage = isCorrect
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
@@ -845,6 +870,9 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     }
     if (gameSession.example) {
       resultMessage += `📝 Пример: ${safeExample}`;
+    }
+    if (isCorrect) {
+      resultMessage += buildStreakLine(idiomStreakCount, isIdiomStreakMilestone);
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -974,6 +1002,12 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
       gameDate
     );
 
+    const factStreakCount = updateStreak(userId, isCorrect, gameDate, 'fact');
+    const isFactStreakMilestone = isCorrect && factStreakCount > 0 && factStreakCount % 5 === 0;
+    if (isFactStreakMilestone) {
+      await awardPoints(userId, 10);
+    }
+
     const truthLabel = gameSession.isTrue ? 'True' : 'False';
     const safeClaim = escapeHtml(gameSession.claim);
     const safeClaimRu = escapeHtml(gameSession.claimRu);
@@ -988,6 +1022,9 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
     resultMessage += `🇷🇺 ${safeClaimRu}\n\n`;
     resultMessage += `🎯 Правильный ответ: <b>${safeTruthLabel}</b>\n\n`;
     resultMessage += `${safeExplanation}`;
+    if (isCorrect) {
+      resultMessage += buildStreakLine(factStreakCount, isFactStreakMilestone);
+    }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
     await bot.answerCallbackQuery(callbackQuery.id, {
@@ -1134,6 +1171,12 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
     const safeHint = escapeHtml(gameSession.hint);
     const safeExample = escapeHtml(gameSession.example);
 
+    const phrasalStreakCount = updateStreak(userId, isCorrect, gameDate, 'phrasal_verb');
+    const isPhrasalStreakMilestone = isCorrect && phrasalStreakCount > 0 && phrasalStreakCount % 5 === 0;
+    if (isPhrasalStreakMilestone) {
+      await awardPoints(userId, 10);
+    }
+
     let resultMessage = isCorrect
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
@@ -1146,6 +1189,9 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
     }
     if (gameSession.example) {
       resultMessage += `📝 Пример: ${safeExample}`;
+    }
+    if (isCorrect) {
+      resultMessage += buildStreakLine(phrasalStreakCount, isPhrasalStreakMilestone);
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -1290,6 +1336,12 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
     const safeHint = escapeHtml(gameSession.hint);
     const safeExplanation = escapeHtml(gameSession.explanation);
 
+    const quizStreakCount = updateStreak(userId, isCorrect, gameDate, 'quiz');
+    const isQuizStreakMilestone = isCorrect && quizStreakCount > 0 && quizStreakCount % 5 === 0;
+    if (isQuizStreakMilestone) {
+      await awardPoints(userId, 10);
+    }
+
     let resultMessage = isCorrect
       ? `✅ <b>Верно!</b> +${points} очков\n\n`
       : `❌ <b>Неправильно.</b>\n\n`;
@@ -1301,6 +1353,9 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
     }
     if (gameSession.explanation) {
       resultMessage += `ℹ️ ${safeExplanation}\n`;
+    }
+    if (isCorrect) {
+      resultMessage += buildStreakLine(quizStreakCount, isQuizStreakMilestone);
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
