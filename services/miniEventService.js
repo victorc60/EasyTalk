@@ -601,7 +601,7 @@ export async function handleMiniEventAnswerCallback(bot, callbackQuery) {
     const correctAnswers = participant.correct_answers + (isCorrect ? 1 : 0);
     const quizPoints = participant.quiz_points + earnedQuizPoints;
     const nextQuestionIndex = participant.current_question_index + 1;
-    const remainingQuestions = day.total_questions - nextQuestionIndex;
+    const remainingQuestions = day.total_questions - nextQuestionIndex + 1;
     const cutoff = getCutoffTime(eventDate);
     const nextInterval = calculateNextIntervalMs(now, cutoff, remainingQuestions);
 

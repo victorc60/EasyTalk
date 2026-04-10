@@ -1,32 +1,212 @@
 [
-  { "phrasalVerb": "figure out", "translation": "разобраться", "meaning": "понять решение проблемы", "example": "We figured out why the app slowed down.", "hint": "найти ответ" },
-  { "phrasalVerb": "carry on", "translation": "продолжать", "meaning": "не останавливаться и двигаться дальше", "example": "After the break, we carried on with practice.", "hint": "продолжить" },
-  { "phrasalVerb": "set aside", "translation": "отложить", "meaning": "выделить время или ресурс для задачи", "example": "Set aside 20 minutes for speaking drills.", "hint": "зарезервировать" },
-  { "phrasalVerb": "bring up", "translation": "поднимать тему", "meaning": "начать обсуждение вопроса", "example": "She brought up a useful idea in the meeting.", "hint": "вынести на обсуждение" },
-  { "phrasalVerb": "look into", "translation": "изучить", "meaning": "внимательно проверить проблему", "example": "I'll look into that bug after lunch.", "hint": "проверить детально" },
-  { "phrasalVerb": "come across", "translation": "наткнуться на", "meaning": "случайно найти что-то", "example": "I came across a great pronunciation podcast.", "hint": "найти случайно" },
-  { "phrasalVerb": "turn down", "translation": "отклонить", "meaning": "отказаться от предложения", "example": "He turned down the offer politely.", "hint": "сказать нет" },
-  { "phrasalVerb": "turn out", "translation": "оказаться", "meaning": "показать итоговый результат", "example": "The task turned out easier than expected.", "hint": "в итоге получилось" },
-  { "phrasalVerb": "run into", "translation": "столкнуться с", "meaning": "встретить проблему или человека неожиданно", "example": "We ran into a payment issue.", "hint": "неожиданно столкнуться" },
-  { "phrasalVerb": "put off", "translation": "откладывать", "meaning": "переносить дело на потом", "example": "Don't put off your speaking practice.", "hint": "отложить" },
-  { "phrasalVerb": "warm up", "translation": "разогреваться", "meaning": "подготовиться перед основной активностью", "example": "Let's warm up with five easy questions.", "hint": "подготовить себя" },
-  { "phrasalVerb": "work out", "translation": "сработать", "meaning": "дать хороший результат", "example": "The new study plan worked out well.", "hint": "получиться успешно" },
-  { "phrasalVerb": "point out", "translation": "указать", "meaning": "обратить внимание на важный факт", "example": "The teacher pointed out a common mistake.", "hint": "подсветить важное" },
-  { "phrasalVerb": "fill in", "translation": "заполнить", "meaning": "внести данные в форму", "example": "Please fill in your profile details.", "hint": "добавить информацию" },
-  { "phrasalVerb": "check in", "translation": "отмечаться", "meaning": "кратко сообщить свой статус", "example": "Team members check in every morning.", "hint": "сообщить, что ты на связи" },
-  { "phrasalVerb": "brush up on", "translation": "освежить знания", "meaning": "повторить и улучшить уже известный материал", "example": "I need to brush up on phrasal verbs.", "hint": "подтянуть навык" },
-  { "phrasalVerb": "cut down on", "translation": "сократить", "meaning": "уменьшить количество чего-либо", "example": "She cut down on screen time at night.", "hint": "сделать меньше" },
-  { "phrasalVerb": "let down", "translation": "подвести", "meaning": "не оправдать ожидания", "example": "I don't want to let my team down.", "hint": "разочаровать" },
-  { "phrasalVerb": "take over", "translation": "перехватить", "meaning": "взять контроль или задачу на себя", "example": "Can you take over this chat while I'm away?", "hint": "взять управление" },
-  { "phrasalVerb": "hold on", "translation": "подождать", "meaning": "сделать короткую паузу", "example": "Hold on, I'll send the file now.", "hint": "подожди немного" },
-  { "phrasalVerb": "drop by", "translation": "заглянуть", "meaning": "зайти ненадолго", "example": "Drop by the call for ten minutes.", "hint": "короткий визит" },
-  { "phrasalVerb": "show off", "translation": "хвастаться", "meaning": "демонстрировать себя, чтобы впечатлить", "example": "He showed off his accent in class.", "hint": "показать себя напоказ" },
-  { "phrasalVerb": "slow down", "translation": "сбавить темп", "meaning": "двигаться медленнее", "example": "Slow down and pronounce each word clearly.", "hint": "не спешить" },
-  { "phrasalVerb": "speed up", "translation": "ускориться", "meaning": "делать что-то быстрее", "example": "Practice can speed up your reading.", "hint": "увеличить скорость" },
-  { "phrasalVerb": "clear up", "translation": "прояснить", "meaning": "устранить непонимание", "example": "Let's clear up this grammar point.", "hint": "сделать понятным" },
-  { "phrasalVerb": "hang out", "translation": "проводить время", "meaning": "общаться неформально", "example": "We hang out in English after class.", "hint": "тусоваться" },
-  { "phrasalVerb": "back down", "translation": "отступить", "meaning": "перестать настаивать на своём", "example": "He backed down after hearing strong arguments.", "hint": "сдать позицию" },
-  { "phrasalVerb": "go over", "translation": "повторить", "meaning": "ещё раз пройти материал", "example": "Let's go over yesterday's mistakes.", "hint": "пересмотреть" },
-  { "phrasalVerb": "stick to", "translation": "придерживаться", "meaning": "следовать плану или правилу", "example": "Stick to your study schedule this week.", "hint": "держаться плана" },
-  { "phrasalVerb": "zone out", "translation": "выпасть из внимания", "meaning": "перестать концентрироваться", "example": "I zoned out during the long lecture.", "hint": "потерять концентрацию" }
+  {
+    "phrasalVerb": "take on",
+    "translation": "взять на себя",
+    "meaning": "принять ответственность или задачу",
+    "example": "She took on three new clients this month.",
+    "hint": "согласиться выполнять"
+  },
+  {
+    "phrasalVerb": "wrap up",
+    "translation": "завершить",
+    "meaning": "закончить дело или встречу",
+    "example": "Let's wrap up the meeting in five minutes.",
+    "hint": "подвести итог и закончить"
+  },
+  {
+    "phrasalVerb": "draw up",
+    "translation": "составить",
+    "meaning": "подготовить документ или план",
+    "example": "The lawyer drew up the contract overnight.",
+    "hint": "подготовить официальный документ"
+  },
+  {
+    "phrasalVerb": "step in",
+    "translation": "вмешаться",
+    "meaning": "включиться в ситуацию, чтобы помочь или решить проблему",
+    "example": "The manager stepped in when the conflict got serious.",
+    "hint": "войти в ситуацию и взять контроль"
+  },
+  {
+    "phrasalVerb": "reach out",
+    "translation": "связаться",
+    "meaning": "написать или позвонить кому-то первым",
+    "example": "Feel free to reach out if you have any questions.",
+    "hint": "первым написать или позвонить"
+  },
+  {
+    "phrasalVerb": "narrow down",
+    "translation": "сузить",
+    "meaning": "уменьшить список вариантов до самых важных",
+    "example": "We narrowed down the candidates to three.",
+    "hint": "оставить только главное"
+  },
+  {
+    "phrasalVerb": "run out of",
+    "translation": "закончиться",
+    "meaning": "израсходовать весь запас чего-либо",
+    "example": "We ran out of time before finishing the review.",
+    "hint": "больше не осталось"
+  },
+  {
+    "phrasalVerb": "stand out",
+    "translation": "выделяться",
+    "meaning": "быть заметным среди других",
+    "example": "Her report stood out because of its clear structure.",
+    "hint": "быть лучше или заметнее других"
+  },
+  {
+    "phrasalVerb": "get back to",
+    "translation": "вернуться с ответом",
+    "meaning": "ответить кому-то позже",
+    "example": "I'll get back to you with the numbers tomorrow.",
+    "hint": "ответить позже"
+  },
+  {
+    "phrasalVerb": "deal with",
+    "translation": "разобраться с",
+    "meaning": "решить проблему или ситуацию",
+    "example": "Who is dealing with the client complaint?",
+    "hint": "взяться за решение проблемы"
+  },
+  {
+    "phrasalVerb": "catch up",
+    "translation": "догнать",
+    "meaning": "наверстать упущенное или узнать новости",
+    "example": "Let's catch up after the weekend — I missed two sessions.",
+    "hint": "наверстать пропущенное"
+  },
+  {
+    "phrasalVerb": "fall behind",
+    "translation": "отставать",
+    "meaning": "не успевать за планом или другими",
+    "example": "The project fell behind after the key developer left.",
+    "hint": "не успевать за расписанием"
+  },
+  {
+    "phrasalVerb": "set up",
+    "translation": "организовать",
+    "meaning": "подготовить и запустить что-то",
+    "example": "Can you set up a call for Thursday afternoon?",
+    "hint": "подготовить и запустить"
+  },
+  {
+    "phrasalVerb": "hand in",
+    "translation": "сдать",
+    "meaning": "передать работу или документ официально",
+    "example": "Please hand in your expense reports by Friday.",
+    "hint": "официально передать кому-то"
+  },
+  {
+    "phrasalVerb": "talk through",
+    "translation": "обсудить подробно",
+    "meaning": "разобрать вопрос шаг за шагом",
+    "example": "Let me talk you through the new onboarding process.",
+    "hint": "объяснить поэтапно"
+  },
+  {
+    "phrasalVerb": "opt out",
+    "translation": "отказаться от участия",
+    "meaning": "принять решение не участвовать",
+    "example": "Employees can opt out of the bonus scheme.",
+    "hint": "выйти из системы или процесса добровольно"
+  },
+  {
+    "phrasalVerb": "scale up",
+    "translation": "масштабировать",
+    "meaning": "увеличить размер или объём",
+    "example": "The pilot worked, so we decided to scale up.",
+    "hint": "расширить до большего уровня"
+  },
+  {
+    "phrasalVerb": "iron out",
+    "translation": "урегулировать",
+    "meaning": "устранить мелкие проблемы или разногласия",
+    "example": "We need to iron out a few details before signing.",
+    "hint": "сгладить шероховатости"
+  },
+  {
+    "phrasalVerb": "push back",
+    "translation": "перенести или возразить",
+    "meaning": "отложить на более поздний срок или не согласиться",
+    "example": "The client pushed back on the delivery date.",
+    "hint": "сопротивляться или перенести срок"
+  },
+  {
+    "phrasalVerb": "phase out",
+    "translation": "постепенно отказаться",
+    "meaning": "убирать что-то поэтапно",
+    "example": "The bank is phasing out paper statements.",
+    "hint": "убрать постепенно, не сразу"
+  },
+  {
+    "phrasalVerb": "sign off on",
+    "translation": "утвердить",
+    "meaning": "официально одобрить документ или решение",
+    "example": "The director needs to sign off on the budget.",
+    "hint": "поставить финальное одобрение"
+  },
+  {
+    "phrasalVerb": "look ahead",
+    "translation": "смотреть вперёд",
+    "meaning": "думать о будущем и планировать",
+    "example": "Looking ahead, we need to hire two more analysts.",
+    "hint": "планировать на будущее"
+  },
+  {
+    "phrasalVerb": "break down",
+    "translation": "разбить на части",
+    "meaning": "разделить сложное на простые элементы",
+    "example": "Can you break down the costs for each department?",
+    "hint": "разделить на понятные части"
+  },
+  {
+    "phrasalVerb": "fill out",
+    "translation": "заполнить форму",
+    "meaning": "внести все необходимые данные в документ",
+    "example": "New clients must fill out a registration form.",
+    "hint": "заполнить все поля"
+  },
+  {
+    "phrasalVerb": "put forward",
+    "translation": "предложить",
+    "meaning": "выдвинуть идею или кандидатуру на рассмотрение",
+    "example": "She put forward a proposal to reduce meeting time.",
+    "hint": "предложить для обсуждения"
+  },
+  {
+    "phrasalVerb": "run through",
+    "translation": "быстро пробежаться по",
+    "meaning": "кратко просмотреть или повторить",
+    "example": "Let me run through the agenda before we start.",
+    "hint": "быстро просмотреть основное"
+  },
+  {
+    "phrasalVerb": "open up",
+    "translation": "открыться",
+    "meaning": "начать говорить откровенно или создать возможности",
+    "example": "The new role opened up a lot of opportunities for her.",
+    "hint": "стать более открытым или доступным"
+  },
+  {
+    "phrasalVerb": "get ahead",
+    "translation": "продвинуться вперёд",
+    "meaning": "добиться успеха или опередить других",
+    "example": "To get ahead in banking, you need strong communication skills.",
+    "hint": "добиться прогресса или успеха"
+  },
+  {
+    "phrasalVerb": "follow through",
+    "translation": "довести до конца",
+    "meaning": "выполнить обещанное или начатое до финала",
+    "example": "He always follows through on his commitments.",
+    "hint": "не бросить на полпути"
+  },
+  {
+    "phrasalVerb": "mark down",
+    "translation": "записать / снизить оценку",
+    "meaning": "зафиксировать или снизить цену или оценку",
+    "example": "The examiner marked him down for poor pronunciation.",
+    "hint": "снизить или зафиксировать"
+  }
 ]

@@ -99,7 +99,8 @@ export async function recordGameParticipation({
 
     return true;
   } catch (error) {
-    console.error(`Ошибка записи участия (${gameType}, userId=${userId}):`, error.message);
+    const sqlMsg = error.original?.message || error.parent?.message || '';
+    console.error(`Ошибка записи участия (${gameType}, userId=${userId}): ${error.message}${sqlMsg ? ` | SQL: ${sqlMsg}` : ''}`);
     return false;
   }
 }

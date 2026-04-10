@@ -393,10 +393,11 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
       }
     }
 
+    let wordDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        await recordWordGameParticipation(
+        const recorded = await recordWordGameParticipation(
           userId,
           broadcastWord.word,
           false,
@@ -405,6 +406,10 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
           null,
           broadcastWord.slot || 'default'
         );
+        if (!recorded && !wordDbWarnSent) {
+          wordDbWarnSent = true;
+          await sendAdminMessage(bot, '‼️ Word: участие не записалось в БД — проверь логи (возможно ошибка SQL/ENUM)');
+        }
 
         const keyboard = {
           inline_keyboard: [
@@ -528,10 +533,11 @@ export async function idiomGameBroadcast(bot, userSessions) {
       console.warn(`⚠️ Не удалось удалить использованную идиому из idiom_bank.json: ${idiomData.idiom}`);
     }
 
+    let idiomDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        await recordIdiomGameParticipation(
+        const recorded = await recordIdiomGameParticipation(
           userId,
           idiomData.idiom,
           false,
@@ -539,6 +545,10 @@ export async function idiomGameBroadcast(bot, userSessions) {
           0,
           null
         );
+        if (!recorded && !idiomDbWarnSent) {
+          idiomDbWarnSent = true;
+          await sendAdminMessage(bot, '‼️ Idiom: участие не записалось в БД — проверь логи (возможно ошибка SQL/ENUM)');
+        }
 
         const keyboard = {
           inline_keyboard: idiomData.options.map((option, index) => [{
@@ -634,10 +644,11 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
       console.warn(`⚠️ Не удалось удалить использованный phrasal verb из phrasal_verbs_bank.json: ${phrasalVerbData.phrasalVerb}`);
     }
 
+    let phrasalDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        await recordPhrasalVerbGameParticipation(
+        const recorded = await recordPhrasalVerbGameParticipation(
           userId,
           phrasalVerbData.phrasalVerb,
           false,
@@ -645,6 +656,10 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
           0,
           null
         );
+        if (!recorded && !phrasalDbWarnSent) {
+          phrasalDbWarnSent = true;
+          await sendAdminMessage(bot, '‼️ Phrasal Verb: участие не записалось в БД — проверь логи (возможно ошибка SQL/ENUM)');
+        }
 
         const keyboard = {
           inline_keyboard: phrasalVerbData.options.map((option, index) => [{
@@ -753,10 +768,11 @@ export async function quizGameBroadcast(bot, userSessions) {
       console.warn(`⚠️ Не удалось удалить использованный вопрос из quiz_bank.json: ${quizData.question}`);
     }
 
+    let quizDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
-        await recordQuizGameParticipation(
+        const recorded = await recordQuizGameParticipation(
           userId,
           quizData.question,
           false,
@@ -764,6 +780,10 @@ export async function quizGameBroadcast(bot, userSessions) {
           0,
           null
         );
+        if (!recorded && !quizDbWarnSent) {
+          quizDbWarnSent = true;
+          await sendAdminMessage(bot, '‼️ Quiz: участие не записалось в БД — проверь логи (возможно ошибка SQL/ENUM)');
+        }
 
         const keyboard = {
           inline_keyboard: quizData.options.map((option, index) => [{

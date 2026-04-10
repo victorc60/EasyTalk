@@ -1,5 +1,14 @@
 [
   {
+    "id": "word_001",
+    "word": "deadline",
+    "partOfSpeech": "noun",
+    "level": "A2",
+    "translations": ["дедлайн", "крайний срок"],
+    "pronunciation": "/ˈdedlaɪn/",
+    "example": "We have a deadline tomorrow, so let's finish the report today."
+  },
+  {
     "id": "word_002",
     "word": "approve",
     "partOfSpeech": "verb",
@@ -105,7 +114,7 @@
     "level": "B1",
     "translations": ["просроченный", "запоздавший"],
     "pronunciation": "/ˌoʊvərˈduː/",
-    "example": "This invoice is overdue - it should have been paid last week."
+    "example": "This invoice is overdue — it should have been paid last week."
   },
   {
     "id": "word_014",

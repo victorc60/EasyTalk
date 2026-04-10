@@ -86,6 +86,28 @@ function getSyncOptions() {
   }
 }
 
+async function runMigrations() {
+  const migrations = [
+    // Удаляем старые индексы которые блокировали запись нескольких игр в один день
+    // (оставлен только правильный uq_wgp_user_date_type_slot)
+    `ALTER TABLE word_game_participation DROP INDEX \`word_game_participation_user_id_game_date\``,
+    `ALTER TABLE word_game_participation DROP INDEX \`word_game_participation_user_id_game_date_game_type\``,
+  ];
+  for (const sql of migrations) {
+    try {
+      await sequelize.query(sql);
+      console.log(`✅ Миграция выполнена: ${sql.slice(0, 60)}...`);
+    } catch (err) {
+      // Индекс уже удалён или не существует — это нормально
+      if (['ER_CANT_DROP_FIELD_OR_KEY', 'ER_DROP_INDEX_FK'].includes(err.original?.code) || err.message?.includes("Can't DROP") || err.message?.includes("check that column/key exists")) {
+        console.log(`ℹ️ Миграция пропущена (уже применена): ${sql.slice(0, 60)}...`);
+      } else {
+        console.error(`⚠️ Ошибка миграции: ${err.message}`);
+      }
+    }
+  }
+}
+
 async function initializeDatabase() {
   for (let attempt = 1; attempt <= DB_RETRY_ATTEMPTS; attempt++) {
     try {
@@ -97,6 +119,7 @@ async function initializeDatabase() {
       } else {
         console.log('🗄️ Синхронизация схемы БД отключена (DB_SYNC_MODE=off)');
       }
+      await runMigrations();
       console.log('✅ База данных подключена');
       return;
     } catch (error) {

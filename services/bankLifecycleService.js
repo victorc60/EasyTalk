@@ -110,7 +110,15 @@ function buildExistingKeySet(spec, bankRows) {
   return keys;
 }
 
-function buildCoverage(spec, bankKey, bankRows, usedRows) {
+function getCoverageForBank(bankKey) {
+  const spec = BANK_SPECS[bankKey];
+  if (!spec) {
+    throw new Error(`Неизвестный бан, который нужно заполнить: ${bankKey}`);
+  }
+
+  const bankRows = readJsonArray(spec.bankFile);
+  const usedRows = readJsonArray(spec.historyFile);
+
   const bankKeySet = buildExistingKeySet(spec, bankRows);
   const usedKeySet = new Set();
 
@@ -140,18 +148,6 @@ function buildCoverage(spec, bankKey, bankRows, usedRows) {
     exhausted: remaining === 0,
     usageRate: total > 0 ? Math.round((usedFromBank / total) * 100) : 0
   };
-}
-
-function getCoverageForBank(bankKey, preloaded = {}) {
-  const spec = BANK_SPECS[bankKey];
-  if (!spec) {
-    throw new Error(`Неизвестный банк: ${bankKey}`);
-  }
-
-  const bankRows = Array.isArray(preloaded.bankRows) ? preloaded.bankRows : readJsonArray(spec.bankFile);
-  const usedRows = Array.isArray(preloaded.usedRows) ? preloaded.usedRows : readJsonArray(spec.historyFile);
-
-  return buildCoverage(spec, bankKey, bankRows, usedRows);
 }
 
 function extractJsonArrayFromText(text) {
@@ -421,8 +417,7 @@ function candidateFilePath(bankKey) {
 
 async function autofillBankIfExhausted(bankKey, count) {
   const spec = BANK_SPECS[bankKey];
-  const existingRows = readJsonArray(spec.bankFile);
-  const coverage = getCoverageForBank(bankKey, { bankRows: existingRows });
+  const coverage = getCoverageForBank(bankKey);
 
   if (!coverage.exhausted) {
     return {
@@ -434,6 +429,7 @@ async function autofillBankIfExhausted(bankKey, count) {
     };
   }
 
+  const existingRows = readJsonArray(spec.bankFile);
   const rawCandidates = await generateCandidateRows(bankKey, count, existingRows);
   if (!rawCandidates.length) {
     return {
