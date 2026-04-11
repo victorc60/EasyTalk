@@ -2,6 +2,7 @@
 import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
+import { sendRandomSticker, saveSticker, getStickerStats } from './utils/stickerUtils.js';
 import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
@@ -296,6 +297,24 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/test_admin/, (msg) => testAdmin(bot, msg));
   bot.onText(/\/db_check/, (msg) => dbCheck(bot, msg));
   bot.onText(/\/words_used/, (msg) => wordsUsed(bot, msg));
+  bot.onText(/\/sticker_correct/, (msg) => {
+    const id = msg.from.id.toString();
+    if (id !== process.env.ADMIN_ID && id !== "340048933") return;
+    userSessions.pendingStickerCategory = 'correct';
+    sendUserMessage(bot, msg.chat.id, '📌 Теперь отправь стикер для категории <b>correct</b> (правильный ответ)', { parse_mode: 'HTML' });
+  });
+  bot.onText(/\/sticker_chat/, (msg) => {
+    const id = msg.from.id.toString();
+    if (id !== process.env.ADMIN_ID && id !== "340048933") return;
+    userSessions.pendingStickerCategory = 'chat';
+    sendUserMessage(bot, msg.chat.id, '📌 Теперь отправь стикер для категории <b>chat</b> (обычная переписка)', { parse_mode: 'HTML' });
+  });
+  bot.onText(/\/sticker_list/, (msg) => {
+    const id = msg.from.id.toString();
+    if (id !== process.env.ADMIN_ID && id !== "340048933") return;
+    const stats = getStickerStats();
+    sendUserMessage(bot, msg.chat.id, `📋 Стикеров: correct=${stats.correct}, chat=${stats.chat}`, { parse_mode: 'HTML' });
+  });
   bot.onText(/\/add_word/, (msg) => addWordToHistory(bot, msg));
   bot.onText(/\/poll_results(?:\s+\d+)?/, (msg) => showPollResults(bot, msg));
   bot.onText(/\/poll$/, (msg) => startPollCreation(bot, msg, userSessions));
@@ -521,6 +540,30 @@ function setupMessageHandler(bot, userSessions, openai) {
     const caption = msg.caption?.trim();
 
     try {
+      // Обработка стикеров
+      if (msg.sticker) {
+        const isAdmin = userId.toString() === process.env.ADMIN_ID || userId.toString() === "340048933";
+        if (isAdmin) {
+          // Режим сохранения: /sticker_correct или /sticker_chat перед отправкой стикера
+          const pending = userSessions.pendingStickerCategory;
+          if (pending) {
+            saveSticker(pending, msg.sticker.file_id);
+            userSessions.pendingStickerCategory = null;
+            const stats = getStickerStats();
+            await sendUserMessage(bot, chatId,
+              `✅ Стикер сохранён в категорию <b>${pending}</b>\nfile_id: <code>${msg.sticker.file_id}</code>\n\nВсего: correct=${stats.correct}, chat=${stats.chat}`,
+              { parse_mode: 'HTML' }
+            );
+          } else {
+            await sendUserMessage(bot, chatId,
+              `🆔 file_id стикера:\n<code>${msg.sticker.file_id}</code>\n\nДля сохранения сначала отправь /sticker_correct или /sticker_chat`,
+              { parse_mode: 'HTML' }
+            );
+          }
+        }
+        return;
+      }
+
       // Проверка, ожидает ли админ контент для рассылки
       if (userSessions.broadcastPending && (userId.toString() === process.env.ADMIN_ID || userId.toString() === "340048933")) {
         console.log('Получено сообщение для рассылки:', { text, caption, hasPhoto: !!photo });
@@ -871,6 +914,8 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai,
   if (reply) {
     saveChatHistory(userSessions, userId, text, reply);
     await sendUserMessage(bot, chatId, reply, { parse_mode: 'HTML' });
+    // Стикер с вероятностью 25% во время переписки
+    await sendRandomSticker(bot, chatId, 'chat', 0.25);
   }
   await awardPoints(userId, 1);
 }

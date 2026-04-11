@@ -8,6 +8,7 @@ import WordGameParticipation from '../models/WordGameParticipation.js';
 import DailyGameSession from '../models/DailyGameSession.js';
 import DailyWordGame from '../models/DailyWordGame.js';
 import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
+import { sendRandomSticker } from '../utils/stickerUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
 import {
@@ -626,6 +627,7 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
       }
 
       await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+      if (isCorrect) await sendRandomSticker(bot, userId, 'correct');
 
       await bot.answerCallbackQuery(callbackQuery.id, {
         text: isCorrect ? '✅ Правильно!' : '❌ Неправильно!',
@@ -848,6 +850,7 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+    if (isCorrect) await sendRandomSticker(bot, userId, 'correct');
 
     await bot.answerCallbackQuery(callbackQuery.id, {
       text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
@@ -1149,6 +1152,7 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+    if (isCorrect) await sendRandomSticker(bot, userId, 'correct');
 
     await bot.answerCallbackQuery(callbackQuery.id, {
       text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
@@ -1304,6 +1308,7 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
+    if (isCorrect) await sendRandomSticker(bot, userId, 'correct');
 
     await bot.answerCallbackQuery(callbackQuery.id, {
       text: isCorrect ? '✅ Верно!' : `Правильный ответ: ${correctAnswer}`,
