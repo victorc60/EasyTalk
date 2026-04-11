@@ -913,7 +913,12 @@ async function handleRegularMessage(bot, chatId, userId, text, userMode, openai,
   const reply = choices[0]?.message?.content;
   if (reply) {
     saveChatHistory(userSessions, userId, text, reply);
-    await sendUserMessage(bot, chatId, reply, { parse_mode: 'HTML' });
+    try {
+      await sendUserMessage(bot, chatId, reply, { parse_mode: 'HTML' });
+    } catch {
+      // HTML parse failed (unescaped <, >, & in GPT reply) — retry as plain text
+      await sendUserMessage(bot, chatId, reply);
+    }
     // Стикер с вероятностью 25% во время переписки
     await sendRandomSticker(bot, chatId, 'chat', 0.25);
   }
