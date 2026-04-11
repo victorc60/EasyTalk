@@ -57,7 +57,8 @@ const userSessions = {
   chatHistories: new Map(),  // { userId → { messages: [], lastAt: timestamp } }
   pollDrafts: new Map(),
   broadcastPending: false,
-  broadcastContent: { text: null, photo: null }
+  broadcastContent: { text: null, photo: null },
+  pendingStickerCategory: null
 };
 
 if (webhookUrl) {
