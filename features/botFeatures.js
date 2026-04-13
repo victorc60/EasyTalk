@@ -271,6 +271,7 @@ export async function dailyFactBroadcast(bot, userSessions) {
     if (!consumeFactFromBank(fact.id)) {
       console.warn(`⚠️ Не удалось удалить использованный факт из facts_bank.json: ${fact.id}`);
     }
+    appendBankHistoryEntry('fact', fact.id);
 
     const { success, fails } = await sendToAllUsers(
       bot,

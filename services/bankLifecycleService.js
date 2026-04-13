@@ -64,6 +64,17 @@ const BANK_SPECS = {
     generatorSchema: {
       required: ['id', 'type', 'question', 'options', 'correctIndex', 'explanation']
     }
+  },
+  fact: {
+    key: 'fact',
+    title: 'Fact Bank',
+    bankFile: path.join(DATA_DIR, 'facts_bank.json'),
+    historyFile: path.join(DATA_DIR, 'fact_history.json'),
+    historySelector: (row) => row,
+    bankSelector: (row) => row?.id,
+    generatorSchema: {
+      required: ['id', 'claim', 'claimRu', 'isTrue', 'explanation']
+    }
   }
 };
 
