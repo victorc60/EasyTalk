@@ -1,6 +1,7 @@
 [deploy]
 healthcheckPath = "/health"
 restartPolicyType = "on_failure"
+drainSeconds = 10
 
 [[mounts]]
 mountPath = "/app/data"

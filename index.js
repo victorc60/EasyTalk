@@ -182,6 +182,28 @@ process.on('unhandledRejection', (error) => {
     } else {
       await sendAdminMessage(bot, `🟢 Бот запущен (polling)\n⏰ Время сервера: ${new Date().toLocaleString()}`);
     }
+
+    const shutdown = async (signal) => {
+      console.log(`${signal} получен, останавливаем бота...`);
+      try {
+        if (usePolling) {
+          await bot.stopPolling();
+          console.log('Polling остановлен');
+        }
+        server.close(() => {
+          console.log('HTTP сервер закрыт');
+          process.exit(0);
+        });
+        setTimeout(() => process.exit(0), 5000);
+      } catch (err) {
+        console.error('Ошибка при остановке:', err.message);
+        process.exit(1);
+      }
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+
   } catch (error) {
     console.error('Ошибка запуска:', error);
     await sendAdminMessage(bot, `‼️ Ошибка запуска бота: ${error.message}`)
