@@ -1,5 +1,5 @@
 [deploy]
-healthcheckPath = "/"
+healthcheckPath = "/health"
 restartPolicyType = "on_failure"
 
 [[mounts]]
