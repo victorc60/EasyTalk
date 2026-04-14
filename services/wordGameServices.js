@@ -298,7 +298,6 @@ async function getDailyGameStats(gameType, date = null, slot = null) {
       participants: stats
     };
     
-    console.log('Stats result:', result);
     return result;
   } catch (error) {
     console.error(`Ошибка получения статистики игры (${gameType}):`, error.message);

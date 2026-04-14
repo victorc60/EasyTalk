@@ -1,0 +1,6 @@
+[deploy]
+healthcheckPath = "/"
+restartPolicyType = "on_failure"
+
+[[mounts]]
+mountPath = "/app/data"

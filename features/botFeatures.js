@@ -1,7 +1,7 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, consumeIdiomFromBank, consumePhrasalVerbFromBank, consumeQuizFromBank, consumeFactFromBank } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, consumeIdiomFromBank, consumePhrasalVerbFromBank, consumeQuizFromBank } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
 import { appendBankHistoryEntry } from '../services/bankLifecycleService.js';
@@ -268,9 +268,6 @@ export async function dailyFactBroadcast(bot, userSessions) {
       return;
     }
 
-    if (!consumeFactFromBank(fact.id)) {
-      console.warn(`⚠️ Не удалось удалить использованный факт из facts_bank.json: ${fact.id}`);
-    }
     appendBankHistoryEntry('fact', fact.id);
 
     const { success, fails } = await sendToAllUsers(

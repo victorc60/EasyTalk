@@ -993,8 +993,8 @@ function pickCuratedFact() {
   if (!bank.length) return null;
 
   const unused = bank.filter((entry) => !usedFactsCache.has(entry.id));
-  const poolSource = unused.length ? unused : bank;
-  const entry = shuffleArray([...poolSource]).pop();
+  const pool = unused.length ? unused : bank;
+  const entry = pool[0];
   if (!entry) return null;
 
   usedFactsCache.add(entry.id);
