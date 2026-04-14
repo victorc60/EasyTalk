@@ -30,4 +30,4 @@ RUN cp -r data data_defaults
 RUN test -f index.js || (echo "ERROR: index.js not found" && exit 1) && \
     test -f config.js || (echo "ERROR: config.js not found" && exit 1)
 
-CMD ["sh", "-c", "node scripts/init-data.js && npm start"]
+CMD ["sh", "-c", "node scripts/init-data.js && node index.js"]

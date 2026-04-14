@@ -19,6 +19,9 @@ import './models/PollResponse.js';
 import './models/MiniEventDay.js';
 import './models/MiniEventParticipant.js';
 import './models/MiniEventResponse.js';
+import './models/ContentQueue.js';
+import './models/DailyLog.js';
+import { initAllQueues } from './init/initQueues.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -158,6 +161,7 @@ process.on('unhandledRejection', (error) => {
 (async () => {
   try {
     await initializeDatabase();
+    await initAllQueues();
     await setupBot(bot, userSessions, openai);
 
     if (webhookUrl) {

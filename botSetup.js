@@ -3,12 +3,14 @@ import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { sendRandomSticker, saveSticker, getStickerStats } from './utils/stickerUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
+import { weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
+import { runDailyContent } from './services/dailyContentService.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
+import { handleAnswerCallback } from './handlers/answerHandler.js';
 import { getUsedIdiomPrompts, getUsedWordPrompts, getUsedPhrasalVerbPrompts, getUsedQuizPrompts } from './services/wordGameServices.js';
 import { seedUsedIdiomsCache, seedUsedWordsCache, seedUsedPhrasalVerbsCache, seedUsedQuizCache } from './content/contentGenerators.js';
 import StoryHandlers from './handlers/storyHandlers.js';
@@ -56,8 +58,8 @@ function setupSchedulers(bot, userSessions) {
     console.log('Текущее время сервера:', new Date().toLocaleString('ru-RU', { timeZone: 'UTC' }));
     console.log('Текущее время Chisinau:', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Chisinau' }));
     schedule.scheduleJob(CONFIG.DAILY_FACT_TIME, () => {
-      console.log('Запуск dailyFactBroadcast');
-      dailyFactBroadcast(bot, userSessions);
+      console.log('[CRON] Запуск Daily Fact (17:30)');
+      runDailyContent(bot, 'fact').catch(err => console.error('[CRON] Ошибка fact:', err.message));
     });
     const buildRule = (time) => {
       const rule = new schedule.RecurrenceRule();
@@ -83,8 +85,8 @@ function setupSchedulers(bot, userSessions) {
       const slotId = time.slot || `slot_${index}_${time.hour ?? '0'}_${time.minute ?? '0'}`;
       const rule = buildRule(time);
       const job = schedule.scheduleJob(`wordGame${index}`, rule, async () => {
-        console.log(`Запуск wordGameBroadcast (${slotId}) в ${time.hour}:${time.minute} ${rule.tz}`);
-        await wordGameBroadcast(bot, userSessions, slotId);
+        console.log(`[CRON] Запуск Word of the Day (${time.hour}:${String(time.minute).padStart(2,'0')})`);
+        await runDailyContent(bot, 'word').catch(err => console.error('[CRON] Ошибка word:', err.message));
       });
 
       if (!job) {
@@ -98,24 +100,24 @@ function setupSchedulers(bot, userSessions) {
     schedule.scheduleJob(
       { hour: CONFIG.IDIOM_GAME_TIME.hour, minute: CONFIG.IDIOM_GAME_TIME.minute, tz: CONFIG.IDIOM_GAME_TIME.tz },
       () => {
-        console.log('Запуск idiomGameBroadcast в 13:00 Europe/Chisinau');
-        idiomGameBroadcast(bot, userSessions);
+        console.log('[CRON] Запуск Daily Idiom (13:00)');
+        runDailyContent(bot, 'idiom').catch(err => console.error('[CRON] Ошибка idiom:', err.message));
       }
     );
     // Phrasal Verb дня в 20:00 по Кишинёву
     schedule.scheduleJob(
       { hour: CONFIG.PHRASAL_VERB_GAME_TIME.hour, minute: CONFIG.PHRASAL_VERB_GAME_TIME.minute, tz: CONFIG.PHRASAL_VERB_GAME_TIME.tz },
       () => {
-        console.log('Запуск phrasalVerbGameBroadcast в 20:00 Europe/Chisinau');
-        phrasalVerbGameBroadcast(bot, userSessions);
+        console.log('[CRON] Запуск Phrasal Verb of the Day (20:00)');
+        runDailyContent(bot, 'phrasal').catch(err => console.error('[CRON] Ошибка phrasal:', err.message));
       }
     );
     // Quiz дня утром (замена гороскопа)
     schedule.scheduleJob(
       { hour: CONFIG.QUIZ_GAME_TIME.hour, minute: CONFIG.QUIZ_GAME_TIME.minute, tz: CONFIG.QUIZ_GAME_TIME.tz },
       () => {
-        console.log('Запуск quizGameBroadcast утром');
-        quizGameBroadcast(bot, userSessions);
+        console.log('[CRON] Запуск Daily Quiz (08:30)');
+        runDailyContent(bot, 'quiz').catch(err => console.error('[CRON] Ошибка quiz:', err.message));
       }
     );
 
@@ -355,6 +357,12 @@ function setupCallbacks(bot, userSessions) {
       const chatId = callbackQuery.message?.chat?.id || callbackQuery.from?.id;
       const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
+
+      // Handle queue answer callbacks (new content queue system)
+      if (data.startsWith('aq_')) {
+        await handleAnswerCallback(bot, callbackQuery);
+        return;
+      }
 
       // Handle word game callbacks
       if (data.startsWith('word_game_')) {

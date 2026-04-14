@@ -1,212 +1,212 @@
 [
   {
-    "id": "fact_001",
-    "claim": "Octopuses have three hearts, and two of them stop beating when they swim.",
-    "claimRu": "У осьминогов три сердца, и два из них перестают биться, когда они плывут.",
+    "id": "fact_031",
+    "claim": "Honey never expires — edible honey has been found in ancient Egyptian tombs.",
+    "claimRu": "Мёд никогда не портится — в древнеегипетских гробницах находили съедобный мёд.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Two branchial hearts pump blood through the gills, and they pause during swimming — which is why octopuses prefer crawling.\n🇷🇺 Правда! Два жаберных сердца останавливаются во время плавания — именно поэтому осьминоги предпочитают ползать.\n💡 Nature solves problems in ways very different from human biology."
+    "explanation": "🇬🇧 True! Archaeologists have found 3,000-year-old honey in Egyptian tombs that was still perfectly edible. Its low moisture and acidic pH prevent bacteria from growing.\n🇷🇺 Правда! Археологи находили в египетских гробницах мёд возрастом 3000 лет, который был полностью пригоден в пищу. Низкая влажность и кислая среда не дают бактериям размножаться.\n💡 Some natural foods are almost perfectly self-preserving."
   },
   {
-    "id": "fact_002",
-    "claim": "A day on Venus is shorter than a day on Earth.",
-    "claimRu": "День на Венере короче, чем день на Земле.",
+    "id": "fact_032",
+    "claim": "The human body contains enough iron to make a nail about 7 cm long.",
+    "claimRu": "В теле человека достаточно железа, чтобы сделать гвоздь длиной около 7 см.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! The average adult body contains 3–4 grams of iron — mostly in blood. That's enough to forge a small nail.\n🇷🇺 Правда! В теле взрослого человека содержится 3–4 грамма железа — в основном в крови. Этого хватит, чтобы сделать небольшой гвоздь.\n💡 Our body is literally built from the same elements as everyday objects around us."
+  },
+  {
+    "id": "fact_033",
+    "claim": "Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.",
+    "claimRu": "Клеопатра жила ближе по времени к высадке на Луну, чем к строительству Великой пирамиды.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! The Great Pyramid was built around 2560 BC. Cleopatra lived around 30 BC — about 2,500 years after the pyramid, but only 2,000 years before the Moon landing in 1969.\n🇷🇺 Правда! Великая пирамида построена около 2560 до н.э. Клеопатра жила около 30 до н.э. — спустя 2500 лет после пирамиды, но лишь за 2000 лет до высадки на Луну в 1969 году.\n💡 History is often much more compressed — or stretched — than we imagine."
+  },
+  {
+    "id": "fact_034",
+    "claim": "Octopuses have three hearts and blue blood.",
+    "claimRu": "У осьминогов три сердца и голубая кровь.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Octopuses have two hearts that pump blood to the gills and one that pumps it to the body. Their blood contains copper-based haemocyanin, which makes it blue.\n🇷🇺 Правда! У осьминогов два сердца, качающих кровь к жабрам, и одно — к телу. Их кровь содержит гемоцианин на основе меди, что делает её голубой.\n💡 Evolution has produced radically different body designs to solve the same problems."
+  },
+  {
+    "id": "fact_035",
+    "claim": "The Great Fire of London in 1666 killed thousands of people.",
+    "claimRu": "Великий лондонский пожар 1666 года унёс тысячи жизней.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! A day on Venus lasts about 243 Earth days — longer than Venus's own year (225 days).\n🇷🇺 Неправда! День на Венере длится около 243 земных дней — дольше, чем целый год на Венере.\n💡 Planetary rotation can be very different from what we expect."
+    "explanation": "🇬🇧 False! Despite destroying over 13,000 houses and 87 churches, the official death toll was only 6. Many people escaped in time, though the real number may be slightly higher.\n🇷🇺 Неправда! Несмотря на то что пожар уничтожил более 13 000 домов и 87 церквей, официально погибло лишь 6 человек. Большинство успело спастись.\n💡 A catastrophic event for buildings can sometimes spare most lives if there is time to flee."
   },
   {
-    "id": "fact_003",
-    "claim": "The first webcam was created to monitor a coffee pot at a university.",
-    "claimRu": "Первая веб-камера была создана для наблюдения за кофейником в университете.",
+    "id": "fact_036",
+    "claim": "A day on Venus is longer than a year on Venus.",
+    "claimRu": "День на Венере длиннее, чем год на Венере.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! In 1991, researchers at Cambridge University set up a camera to check remotely if the coffee pot was full.\n🇷🇺 Правда! В 1991 году учёные Кембриджского университета установили камеру, чтобы дистанционно следить за кофейником.\n💡 Many great technologies started with very small, everyday problems."
+    "explanation": "🇬🇧 True! Venus rotates so slowly that one full rotation (its day) takes 243 Earth days, while it completes an orbit around the Sun (its year) in only 225 Earth days.\n🇷🇺 Правда! Венера вращается так медленно, что один полный оборот вокруг своей оси (день) занимает 243 земных дня, тогда как оборот вокруг Солнца (год) — всего 225 дней.\n💡 'Day' and 'year' can mean very different things depending on the planet."
   },
   {
-    "id": "fact_004",
-    "claim": "Bananas are classified as berries in botany, but strawberries are not.",
-    "claimRu": "С точки зрения ботаники бананы — это ягоды, а клубника — нет.",
+    "id": "fact_037",
+    "claim": "Crows can recognise and remember individual human faces.",
+    "claimRu": "Вороны способны узнавать и запоминать лица конкретных людей.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Botanically, a berry develops from a single flower with one ovary. Bananas qualify; strawberries do not.\n🇷🇺 Правда! Ботаническая ягода развивается из одного цветка с одной завязью. Банан подходит, а клубника — нет.\n💡 Scientific definitions often differ dramatically from everyday language."
+    "explanation": "🇬🇧 True! Studies at the University of Washington showed that crows remember the faces of people who threatened them and even pass this information on to other crows.\n🇷🇺 Правда! Исследования Вашингтонского университета показали, что вороны помнят лица людей, которые угрожали им, и даже передают эту информацию другим воронам.\n💡 Intelligence in animals can appear in completely unexpected species."
   },
   {
-    "id": "fact_005",
-    "claim": "Honey never expires because bacteria cannot survive in it.",
-    "claimRu": "Мёд никогда не портится, потому что в нём не выживают бактерии.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Honey's low moisture and high acidity make it nearly impossible for bacteria to grow. Edible honey has been found in ancient Egyptian tombs.\n🇷🇺 Правда! Низкая влажность и высокая кислотность мёда не дают бактериям размножаться. Съедобный мёд находили в египетских гробницах.\n💡 Food science explains why some natural products outlast almost everything."
-  },
-  {
-    "id": "fact_006",
-    "claim": "The Great Wall of China is visible from the Moon with the naked eye.",
-    "claimRu": "Великую Китайскую стену видно с Луны невооружённым глазом.",
+    "id": "fact_038",
+    "claim": "The inventor of the World Wide Web won a Nobel Prize for it.",
+    "claimRu": "Изобретатель Всемирной паутины получил за это Нобелевскую премию.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! The Wall is too narrow to be seen from the Moon. Even from low Earth orbit it is barely visible and only under perfect conditions.\n🇷🇺 Неправда! Стена слишком узкая, чтобы её было видно с Луны. Даже с низкой орбиты её едва можно разглядеть.\n💡 Some 'facts' we learned in school turn out to be popular myths."
+    "explanation": "🇬🇧 False! Tim Berners-Lee invented the Web in 1989 but has never received a Nobel Prize. He did receive the Turing Award in 2016 and was knighted.\n🇷🇺 Неправда! Тим Бернерс-Ли изобрёл Веб в 1989 году, но Нобелевской премии не получал. Он был удостоен премии Тьюринга в 2016 году и рыцарского звания.\n💡 Many transformative inventions go unrecognised by traditional prize committees."
   },
   {
-    "id": "fact_007",
-    "claim": "Your brain uses about 20% of your body's energy even when you are resting.",
-    "claimRu": "Мозг потребляет около 20% энергии тела даже в состоянии покоя.",
+    "id": "fact_039",
+    "claim": "Hot water can freeze faster than cold water under certain conditions.",
+    "claimRu": "При определённых условиях горячая вода может замёрзнуть быстрее холодной.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Despite being only 2% of body weight, the brain consumes roughly 20% of the body's total energy.\n🇷🇺 Правда! Несмотря на то что мозг составляет лишь 2% массы тела, он потребляет около 20% всей энергии.\n💡 Mental focus is physically expensive — breaks and sleep are not optional."
+    "explanation": "🇬🇧 True! This is called the Mpemba Effect. While not fully explained, experiments have shown that hot water can sometimes freeze faster, possibly due to evaporation, dissolved gases, or convection.\n🇷🇺 Правда! Это явление называется эффектом Мпембы. Хотя полного объяснения нет, эксперименты показали, что горячая вода иногда замерзает быстрее — возможно, из-за испарения, растворённых газов или конвекции.\n💡 Even something as basic as freezing water still holds scientific mysteries."
   },
   {
-    "id": "fact_008",
-    "claim": "Humans and sharks have been on Earth for roughly the same amount of time.",
-    "claimRu": "Люди и акулы существуют на Земле примерно одинаковое время.",
+    "id": "fact_040",
+    "claim": "Babies are born with more bones than adults.",
+    "claimRu": "Младенцы рождаются с большим количеством костей, чем взрослые.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Babies have around 270–300 bones at birth. As they grow, many bones fuse together, leaving adults with 206.\n🇷🇺 Правда! У новорождённых около 270–300 костей. По мере роста многие кости срастаются, и у взрослого человека их остаётся 206.\n💡 The human body is not static — it restructures itself significantly throughout childhood."
+  },
+  {
+    "id": "fact_041",
+    "claim": "The moon has earthquakes — called moonquakes.",
+    "claimRu": "На Луне бывают землетрясения — их называют лунотрясениями.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Apollo missions left seismometers on the Moon, which detected moonquakes caused by tidal forces from Earth's gravity, meteorite impacts, and thermal expansion.\n🇷🇺 Правда! Экспедиции «Аполлон» оставили на Луне сейсмометры, которые зафиксировали лунотрясения, вызванные приливными силами Земли, ударами метеоритов и тепловым расширением.\n💡 Geological activity is not unique to Earth — even our Moon is not completely still."
+  },
+  {
+    "id": "fact_042",
+    "claim": "Glass is technically a liquid — it just moves incredibly slowly.",
+    "claimRu": "Стекло технически является жидкостью — просто оно течёт невероятно медленно.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! Sharks have existed for over 450 million years — long before dinosaurs. Modern humans appeared only about 300,000 years ago.\n🇷🇺 Неправда! Акулы существуют более 450 миллионов лет — ещё до динозавров. Современный человек появился лишь около 300 000 лет назад.\n💡 Life on Earth has a much deeper history than most people imagine."
+    "explanation": "🇬🇧 False! This is a popular myth. Glass is an amorphous solid. Old windows appear thicker at the bottom because of historical manufacturing imperfections, not flow over time.\n🇷🇺 Неправда! Это популярный миф. Стекло является аморфным твёрдым телом. Старые окна кажутся толще внизу из-за погрешностей исторического производства, а не из-за того, что оно течёт.\n💡 A plausible explanation is not always the correct one — even when it seems logical."
   },
   {
-    "id": "fact_009",
-    "claim": "The Eiffel Tower can grow up to 15 cm taller in summer due to heat.",
-    "claimRu": "Летом Эйфелева башня может вырасти до 15 см из-за жары.",
+    "id": "fact_043",
+    "claim": "The total weight of all ants on Earth roughly equals the total weight of all humans.",
+    "claimRu": "Суммарный вес всех муравьёв на Земле примерно равен суммарному весу всех людей.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Metal expands when heated. In summer, the iron structure of the Eiffel Tower can increase in height by up to 15 centimetres.\n🇷🇺 Правда! Металл расширяется при нагреве. Летом железная конструкция Эйфелевой башни может вырасти до 15 сантиметров.\n💡 Physics affects even the largest structures through everyday weather changes."
+    "explanation": "🇬🇧 True! With an estimated 20 quadrillion ants on Earth, their combined biomass is comparable to that of all humans — a remarkable fact about insect dominance on our planet.\n🇷🇺 Правда! По оценкам, на Земле обитает около 20 квадриллионов муравьёв, и их суммарная биомасса сопоставима с биомассой всех людей.\n💡 Humans feel dominant, but insects collectively outweigh us by a significant margin."
   },
   {
-    "id": "fact_010",
-    "claim": "Humans are the only animals that can recognise themselves in a mirror.",
-    "claimRu": "Люди — единственные животные, которые узнают себя в зеркале.",
+    "id": "fact_044",
+    "claim": "You lose most of your body heat through your head.",
+    "claimRu": "Большая часть тепла тела уходит через голову.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! Great apes, dolphins, elephants, and even some birds like magpies can also recognise themselves in mirrors.\n🇷🇺 Неправда! Человекообразные обезьяны, дельфины, слоны и даже некоторые птицы — например, сороки — тоже узнают себя в зеркале.\n💡 Self-awareness is more widespread in the animal kingdom than we once thought."
+    "explanation": "🇬🇧 False! Heat loss is roughly proportional to the surface area exposed. The head accounts for about 10% of body surface area — so it loses about 10% of heat, no more.\n🇷🇺 Неправда! Потеря тепла примерно пропорциональна площади открытой поверхности. Голова составляет около 10% площади тела — значит, через неё теряется около 10% тепла.\n💡 Many health myths survive because they feel intuitively true even when the data says otherwise."
   },
   {
-    "id": "fact_011",
-    "claim": "There are more possible chess games than atoms in the observable universe.",
-    "claimRu": "Возможных шахматных партий больше, чем атомов в наблюдаемой Вселенной.",
+    "id": "fact_045",
+    "claim": "The colour orange was named after the fruit, not the other way around.",
+    "claimRu": "Цвет оранжевый получил название в честь фрукта, а не наоборот.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! The number of possible chess games is estimated at 10^120 — far exceeding the estimated 10^80 atoms in the observable universe.\n🇷🇺 Правда! Число возможных шахматных партий оценивается в 10^120 — намного больше, чем атомов во Вселенной (около 10^80).\n💡 Simple rules can generate almost unlimited complexity."
+    "explanation": "🇬🇧 True! Before oranges arrived in Europe, the colour was simply called 'yellow-red' or 'geoluread' in Old English. The fruit came first, then its colour became a named category.\n🇷🇺 Правда! До появления апельсинов в Европе цвет просто называли «жёлто-красным». Сначала появился фрукт, а затем его цвет стал самостоятельным понятием.\n💡 Language categories are not fixed — new objects constantly reshape how we name the world."
   },
   {
-    "id": "fact_012",
-    "claim": "Lightning is hotter than the surface of the Sun.",
-    "claimRu": "Молния горячее поверхности Солнца.",
+    "id": "fact_046",
+    "claim": "Bananas are technically berries, but strawberries are not.",
+    "claimRu": "С ботанической точки зрения бананы — это ягоды, а клубника — нет.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! A lightning bolt can reach around 30,000 Kelvin — about five times hotter than the Sun's surface (6,000 K).\n🇷🇺 Правда! Молния может разогреваться до 30 000 Кельвинов — примерно в пять раз горячее поверхности Солнца (6 000 К).\n💡 Extreme physical events can happen right next to us in everyday weather."
+    "explanation": "🇬🇧 True! Botanically, a berry develops from a single flower with one ovary. Bananas qualify. Strawberries develop from a flower with multiple ovaries, making them 'accessory fruits'.\n🇷🇺 Правда! С точки зрения ботаники, ягода развивается из одного цветка с одной завязью. Бананы подходят под это определение. Клубника развивается из цветка с несколькими завязями и является «ложным плодом».\n💡 Everyday words and scientific definitions often disagree in surprising ways."
   },
   {
-    "id": "fact_013",
-    "claim": "Goldfish have a memory of only three seconds.",
-    "claimRu": "Память золотой рыбки длится всего три секунды.",
+    "id": "fact_047",
+    "claim": "Albert Einstein failed mathematics at school.",
+    "claimRu": "Альберт Эйнштейн плохо учился по математике в школе.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! Studies show goldfish can remember things for months, learn simple tasks, and even recognise their owners.\n🇷🇺 Неправда! Исследования показывают, что золотые рыбки помнят информацию месяцами, учатся простым задачам и узнают хозяев.\n💡 Many 'animal facts' we grew up with are myths — always worth checking."
+    "explanation": "🇬🇧 False! Einstein excelled at mathematics and physics from an early age. He mastered calculus by 15. The myth may stem from a misreading of the Swiss grading system.\n🇷🇺 Неправда! Эйнштейн с детства отлично справлялся с математикой и физикой. В 15 лет он уже освоил математический анализ. Миф, возможно, возник из-за неверного прочтения швейцарской системы оценок.\n💡 Famous people often acquire false origin stories that make them more relatable or inspirational."
   },
   {
-    "id": "fact_014",
-    "claim": "The word 'robot' comes from a Czech word meaning forced labour.",
-    "claimRu": "Слово «робот» происходит от чешского слова со значением «подневольный труд».",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! The word was introduced in Karel Čapek's 1920 play R.U.R., from the Czech 'robota' meaning drudgery or forced labour.\n🇷🇺 Правда! Слово появилось в пьесе Карела Чапека «R.U.R.» 1920 года — от чешского «robota», означающего «тяжёлый труд».\n💡 Language history often reveals the social fears and ideas behind modern terms."
-  },
-  {
-    "id": "fact_015",
-    "claim": "Saturn is so light that it would float if you put it in water.",
-    "claimRu": "Сатурн такой лёгкий, что плавал бы в воде.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Saturn's average density is about 0.69 g/cm³ — less than water (1 g/cm³), so it would technically float.\n🇷🇺 Правда! Средняя плотность Сатурна около 0,69 г/см³ — меньше плотности воды (1 г/см³), поэтому он бы плавал.\n💡 Planet size does not equal high density — Saturn is mostly gas."
-  },
-  {
-    "id": "fact_016",
-    "claim": "Humans share about 50% of their DNA with bananas.",
-    "claimRu": "У людей и бананов около 50% одинаковой ДНК.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! About 50% of human DNA matches banana DNA because both share basic cellular functions that evolved billions of years ago.\n🇷🇺 Правда! Около 50% ДНК человека совпадает с ДНК банана, потому что обе формы жизни разделяют базовые клеточные функции.\n💡 All life on Earth shares a common evolutionary origin — and DNA proves it."
-  },
-  {
-    "id": "fact_017",
-    "claim": "The Pacific Ocean is wider than the distance from Earth to the Moon.",
-    "claimRu": "Тихий океан шире, чем расстояние от Земли до Луны.",
+    "id": "fact_048",
+    "claim": "The Sahara Desert is the largest desert in the world.",
+    "claimRu": "Сахара — самая большая пустыня в мире.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! The Pacific Ocean is about 20,000 km wide. The distance to the Moon is roughly 384,000 km — almost 20 times greater.\n🇷🇺 Неправда! Тихий океан в ширину около 20 000 км. Расстояние до Луны — примерно 384 000 км, почти в 20 раз больше.\n💡 Space distances are far harder to visualise than we think."
+    "explanation": "🇬🇧 False! Antarctica is the world's largest desert — a desert is defined by low precipitation, not heat. Antarctica receives very little snow or rain, making it a cold desert roughly twice the size of the Sahara.\n🇷🇺 Неправда! Самая большая пустыня — Антарктида. Пустыня определяется малым количеством осадков, а не жарой. Антарктида получает очень мало снега и дождя, что делает её холодной пустыней, вдвое больше Сахары.\n💡 Definitions matter — the scientific meaning of 'desert' is broader than its everyday image."
   },
   {
-    "id": "fact_018",
-    "claim": "People tend to remember unfinished tasks better than completed ones.",
-    "claimRu": "Люди лучше запоминают незавершённые задачи, чем выполненные.",
+    "id": "fact_049",
+    "claim": "Trees can communicate with each other through underground fungal networks.",
+    "claimRu": "Деревья могут общаться друг с другом через подземные грибковые сети.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! This is called the Zeigarnik Effect — our brain keeps unfinished tasks 'active' until they are resolved.\n🇷🇺 Правда! Это называется эффектом Зейгарник — мозг держит незавершённые задачи «активными» до тех пор, пока они не будут решены.\n💡 Closing small open tasks reduces mental load and helps you focus better."
+    "explanation": "🇬🇧 True! Mycorrhizal fungal networks connect tree roots underground, allowing trees to share nutrients and even chemical warning signals when under attack by insects.\n🇷🇺 Правда! Микоризные грибковые сети соединяют корни деревьев под землёй, позволяя обмениваться питательными веществами и химическими сигналами об опасности.\n💡 Forests function more like interconnected communities than collections of separate individuals."
   },
   {
-    "id": "fact_019",
-    "claim": "Penguins have knees — they are just hidden inside their bodies.",
-    "claimRu": "У пингвинов есть колени — они просто спрятаны внутри тела.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Penguins have a full leg structure including knees, but their upper leg is covered by feathers and body fat, making them invisible.\n🇷🇺 Правда! У пингвинов полноценные ноги с коленями, но верхняя часть ноги скрыта перьями и жиром.\n💡 Appearance can hide familiar anatomy in completely unexpected ways."
-  },
-  {
-    "id": "fact_020",
-    "claim": "Reading on paper leads to better memory recall than reading the same text on a screen.",
-    "claimRu": "Чтение с бумаги даёт лучшее запоминание, чем чтение того же текста с экрана.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Multiple studies show that physical reading supports deeper processing and better long-term recall compared to screens.\n🇷🇺 Правда! Многочисленные исследования показывают, что чтение с бумаги обеспечивает более глубокую обработку информации и лучшее долгосрочное запоминание.\n💡 The medium we use to read actually changes how deeply we process the content."
-  },
-  {
-    "id": "fact_021",
-    "claim": "Mount Everest is the closest mountain to outer space.",
-    "claimRu": "Эверест — ближайшая к космосу гора.",
+    "id": "fact_050",
+    "claim": "Your eyes are the same size from birth to death — they never grow.",
+    "claimRu": "Глаза человека одинакового размера с рождения до смерти — они никогда не растут.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! Mount Chimborazo in Ecuador, measured from Earth's centre, is farther from the core and therefore closer to space than Everest.\n🇷🇺 Неправда! Гора Чимборасо в Эквадоре, если мерить от центра Земли, дальше от ядра и поэтому ближе к космосу, чем Эверест.\n💡 'Highest' depends on what you measure from — sea level or the Earth's centre."
+    "explanation": "🇬🇧 False! Eyes do grow, especially during the first two years of life and again during puberty. A newborn's eyes are about 16 mm in diameter; an adult's are roughly 24 mm.\n🇷🇺 Неправда! Глаза растут, особенно в первые два года жизни и в период полового созревания. У новорождённого диаметр глаза около 16 мм, у взрослого — около 24 мм.\n💡 The eyes look proportionally large in babies because the rest of the face grows much more."
   },
   {
-    "id": "fact_022",
-    "claim": "Short walks can improve creative thinking more than sitting at a desk.",
-    "claimRu": "Короткие прогулки улучшают творческое мышление лучше, чем сидение за столом.",
+    "id": "fact_051",
+    "claim": "A group of flamingos is called a flamboyance.",
+    "claimRu": "Стая фламинго называется «фламбойанс» (flamboyance).",
     "isTrue": true,
-    "explanation": "🇬🇧 True! A Stanford study found that walking — even on a treadmill — significantly boosts creative output compared to sitting.\n🇷🇺 Правда! Исследование Стэнфорда показало, что ходьба — даже на беговой дорожке — значительно усиливает творческое мышление по сравнению с сидением.\n💡 Physical movement helps reset attention and generate fresh ideas."
+    "explanation": "🇬🇧 True! A group of flamingos is officially called a flamboyance — a fittingly dramatic name for such a visually striking bird.\n🇷🇺 Правда! Стая фламинго официально называется «flamboyance» — вполне подходящее название для столь эффектной птицы.\n💡 English has dozens of unusual collective nouns — a murder of crows, a parliament of owls, a flamboyance of flamingos."
   },
   {
-    "id": "fact_023",
-    "claim": "Sunlight takes about 8 minutes to reach Earth.",
-    "claimRu": "Солнечный свет достигает Земли примерно за 8 минут.",
+    "id": "fact_052",
+    "claim": "The Great Barrier Reef is the largest living structure on Earth and can be seen from space.",
+    "claimRu": "Большой Барьерный риф — крупнейшая живая структура на Земле, видная из космоса.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Light travels at 300,000 km/s, and the average distance from Earth to the Sun is about 150 million km — that's roughly 8 minutes and 20 seconds.\n🇷🇺 Правда! Свет движется со скоростью 300 000 км/с, а среднее расстояние от Земли до Солнца — около 150 миллионов км, что составляет примерно 8 минут 20 секунд.\n💡 Even the nearest star is so far away that its light-delay is clearly measurable."
+    "explanation": "🇬🇧 True! The Great Barrier Reef stretches over 2,300 km and is the world's largest coral reef system. It is visible from outer space under the right conditions.\n🇷🇺 Правда! Большой Барьерный риф протянулся более чем на 2300 км и является крупнейшей коралловой системой в мире. При определённых условиях его видно из открытого космоса.\n💡 The largest living structure on Earth is not a forest or an animal, but a coral reef."
   },
   {
-    "id": "fact_024",
-    "claim": "Humans have five senses: sight, hearing, smell, taste, and touch.",
-    "claimRu": "У человека пять чувств: зрение, слух, обоняние, вкус и осязание.",
+    "id": "fact_053",
+    "claim": "Humans are the only animals that cook their food.",
+    "claimRu": "Человек — единственное животное, которое готовит пищу.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! No other animal intentionally uses fire or heat to prepare food. Anthropologists believe cooking was a key driver of human brain evolution, as cooked food provides more energy.\n🇷🇺 Правда! Ни одно другое животное намеренно не использует огонь или тепло для приготовления пищи. Антропологи считают, что приготовление еды стало ключевым фактором эволюции мозга человека.\n💡 Something as everyday as cooking may be one of the things that made us distinctly human."
+  },
+  {
+    "id": "fact_054",
+    "claim": "A bolt of lightning contains enough energy to toast about 100,000 slices of bread.",
+    "claimRu": "В одном ударе молнии достаточно энергии, чтобы поджарить около 100 000 тостов.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! Humans have many more senses, including balance (vestibular), body position (proprioception), pain, temperature, and hunger — at least 9 to 21 depending on how you count.\n🇷🇺 Неправда! У человека значительно больше чувств: равновесие, проприоцепция, боль, температура, голод — от 9 до 21 в зависимости от классификации.\n💡 The 'five senses' idea comes from Aristotle and is a huge simplification."
+    "explanation": "🇬🇧 False! A typical lightning bolt carries about 1–5 billion joules of energy, but the discharge lasts only microseconds. The usable energy is actually closer to enough for just 1–2 slices of toast.\n🇷🇺 Неправда! Молния несёт около 1–5 миллиардов джоулей, но разряд длится лишь микросекунды. Реально используемой энергии хватит лишь на 1–2 тоста.\n💡 Raw energy and usable energy are very different things — duration and efficiency matter."
   },
   {
-    "id": "fact_025",
-    "claim": "Writing goals down increases your chances of achieving them.",
-    "claimRu": "Записывая цели, вы повышаете шансы их достичь.",
+    "id": "fact_055",
+    "claim": "There are more stars in the universe than grains of sand on all Earth's beaches.",
+    "claimRu": "Звёзд во Вселенной больше, чем песчинок на всех пляжах Земли.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Research shows that people who write down their goals are significantly more likely to achieve them than those who just think about them.\n🇷🇺 Правда! Исследования показывают: люди, которые записывают цели, достигают их значительно чаще, чем те, кто просто думает о них.\n💡 Externalising your plans makes action more concrete and easier to track."
+    "explanation": "🇬🇧 True! Estimates put the number of stars at around 10^24, while grains of sand on all beaches total roughly 10^19. There are approximately 100,000 times more stars than grains of sand.\n🇷🇺 Правда! По оценкам, число звёзд составляет около 10^24, тогда как песчинок на всех пляжах Земли около 10^19. Звёзд примерно в 100 000 раз больше.\n💡 The scale of the universe is genuinely beyond what human intuition can grasp."
   },
   {
-    "id": "fact_026",
-    "claim": "In many languages, the most common words are the longest ones.",
-    "claimRu": "Во многих языках самые распространённые слова — самые длинные.",
+    "id": "fact_056",
+    "claim": "Sleeping less than 6 hours a night has no measurable effect on daily performance.",
+    "claimRu": "Сон менее 6 часов в сутки не оказывает ощутимого влияния на работоспособность.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! The opposite is true — the most frequent words (like 'I', 'a', 'the', 'go') tend to be the shortest. Frequent use favours efficiency.\n🇷🇺 Неправда! Всё наоборот — самые частые слова, как правило, самые короткие. Частое использование требует эффективности.\n💡 Communication systems naturally evolve to minimise effort for common messages."
+    "explanation": "🇬🇧 False! Research consistently shows that sleeping under 6 hours significantly impairs memory, reaction time, decision-making, and emotional regulation — even when people feel fine.\n🇷🇺 Неправда! Исследования неизменно показывают, что сон менее 6 часов значительно ухудшает память, скорость реакции, принятие решений и эмоциональную регуляцию — даже когда человек чувствует себя нормально.\n💡 People who are sleep-deprived often cannot accurately judge how impaired they actually are."
   },
   {
-    "id": "fact_027",
-    "claim": "Some turtles can breathe through their backside during winter.",
-    "claimRu": "Некоторые черепахи зимой могут «дышать» задней частью тела.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Painted turtles can absorb oxygen through specialised tissue near their tail while resting under ice — a process called cloacal bursae respiration.\n🇷🇺 Правда! Расписные черепахи способны поглощать кислород через специальную ткань вблизи хвоста, лёжа подо льдом — это называется клоакальное дыхание.\n💡 Biology includes adaptive mechanisms far beyond any textbook basics."
-  },
-  {
-    "id": "fact_028",
-    "claim": "Napoleon Bonaparte was unusually short for his time.",
-    "claimRu": "Наполеон Бонапарт был необычно низким для своего времени.",
+    "id": "fact_057",
+    "claim": "The tongue is the strongest muscle in the human body.",
+    "claimRu": "Язык — самая сильная мышца в теле человека.",
     "isTrue": false,
-    "explanation": "🇬🇧 False! Napoleon was around 1.69 m tall — average for a Frenchman of his era. The 'short Napoleon' myth likely came from a misunderstanding of French and English measurement units.\n🇷🇺 Неправда! Рост Наполеона был около 1,69 м — средний для француза того времени. Миф о его низкорослости, скорее всего, возник из-за путаницы французских и английских единиц измерения.\n💡 Historical myths can persist for centuries even when easily disproved."
+    "explanation": "🇬🇧 False! The tongue is a group of muscles, not a single one, and it is not the strongest. The masseter (jaw muscle) can exert the most force. Endurance-wise, the heart works hardest over time.\n🇷🇺 Неправда! Язык — это группа мышц, а не одна. И он не самый сильный: жевательная мышца (masseter) создаёт наибольшее усилие. По выносливости лидирует сердце.\n💡 Superlatives about the body are often wrong — 'strongest' depends entirely on how you measure it."
   },
   {
-    "id": "fact_029",
-    "claim": "The smell of freshly cut grass is a distress signal from the grass itself.",
-    "claimRu": "Запах свежескошенной травы — это сигнал тревоги, который посылает сама трава.",
+    "id": "fact_058",
+    "claim": "An average person walks the equivalent of three times around the Earth in their lifetime.",
+    "claimRu": "За жизнь средний человек проходит расстояние, равное трём оборотам вокруг Земли.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! When grass is cut, it releases chemical compounds called green leaf volatiles — essentially a stress response that may also signal nearby plants.\n🇷🇺 Правда! Когда траву срезают, она выделяет химические соединения — «летучие вещества зелёных листьев» — это стрессовая реакция, которая также может предупреждать соседние растения.\n💡 Even plants communicate — just in a chemical language we rarely notice."
+    "explanation": "🇬🇧 True! The average person walks about 8,000 steps a day. Over 80 years that adds up to roughly 120,000 km — about three times the circumference of the Earth.\n🇷🇺 Правда! Средний человек делает около 8000 шагов в день. За 80 лет это составляет около 120 000 км — примерно три длины экватора Земли.\n💡 Small daily actions accumulate into staggering totals over a lifetime."
   },
   {
-    "id": "fact_030",
-    "claim": "Koala fingerprints are so similar to human ones that they can confuse forensic analysis.",
-    "claimRu": "Отпечатки пальцев коалы настолько похожи на человеческие, что могут запутать криминалистов.",
+    "id": "fact_059",
+    "claim": "The first person to go over Niagara Falls in a barrel and survive was a woman.",
+    "claimRu": "Первым человеком, пережившим спуск по Ниагарскому водопаду в бочке, была женщина.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Koala fingerprints are virtually indistinguishable from human prints under a microscope — a case of convergent evolution between very distant species.\n🇷🇺 Правда! Отпечатки пальцев коалы практически неотличимы от человеческих под микроскопом — пример конвергентной эволюции у очень далёких видов.\n💡 Evolution can independently produce the same solutions in completely unrelated animals."
+    "explanation": "🇬🇧 True! Annie Edson Taylor, a 63-year-old teacher, became the first person to survive a barrel ride over Niagara Falls in 1901 — on her birthday.\n🇷🇺 Правда! Энни Эдсон Тейлор, 63-летняя учительница, стала первым человеком, пережившим спуск по Ниагарскому водопаду в бочке в 1901 году — в день своего рождения.\n💡 History's pioneers are often not the people we might first imagine."
+  },
+  {
+    "id": "fact_060",
+    "claim": "Sound travels faster in water than in air.",
+    "claimRu": "Звук распространяется в воде быстрее, чем в воздухе.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Sound travels at about 343 m/s in air, but approximately 1,480 m/s in water — over four times faster. Denser and less compressible materials transmit sound more efficiently.\n🇷🇺 Правда! Звук распространяется в воздухе со скоростью около 343 м/с, а в воде — примерно 1480 м/с, то есть более чем в четыре раза быстрее. Более плотные и несжимаемые вещества лучше передают звук.\n💡 This is why whales can communicate over thousands of kilometres through the ocean."
   }
 ]
