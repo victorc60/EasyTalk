@@ -3,14 +3,12 @@ import schedule from 'node-schedule';
 import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { sendRandomSticker, saveSticker, getStickerStats } from './utils/stickerUtils.js';
-import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
+import { dailyFactBroadcast, wordGameBroadcast, idiomGameBroadcast, phrasalVerbGameBroadcast, quizGameBroadcast, weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage, adminPreviewWord, adminPreviewIdiom, adminPreviewPhrasal, adminPreviewQuiz, adminPreviewFact } from './features/botFeatures.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
-import { getUsedIdiomPrompts, getUsedWordPrompts, getUsedPhrasalVerbPrompts, getUsedQuizPrompts } from './services/wordGameServices.js';
-import { seedUsedIdiomsCache, seedUsedWordsCache, seedUsedPhrasalVerbsCache, seedUsedQuizCache } from './content/contentGenerators.js';
 import StoryHandlers from './handlers/storyHandlers.js';
 import User from './models/User.js';
 import { OpenAI } from 'openai';
@@ -33,19 +31,6 @@ export async function setupBot(bot, userSessions, openai) {
   setupMessageHandler(bot, userSessions, openai);
   runDailyBankAuditAndAutofill(bot).catch((error) => {
     console.error('Ошибка стартового аудита банков:', error.message);
-  });
-
-  getUsedIdiomPrompts().then(seedUsedIdiomsCache).catch((error) => {
-    console.error('Ошибка загрузки истории идиом из БД:', error.message);
-  });
-  getUsedWordPrompts().then(seedUsedWordsCache).catch((error) => {
-    console.error('Ошибка загрузки истории слов из БД:', error.message);
-  });
-  getUsedPhrasalVerbPrompts().then(seedUsedPhrasalVerbsCache).catch((error) => {
-    console.error('Ошибка загрузки истории phrasal verbs из БД:', error.message);
-  });
-  getUsedQuizPrompts().then(seedUsedQuizCache).catch((error) => {
-    console.error('Ошибка загрузки истории квизов из БД:', error.message);
   });
 
   console.log('🤖 Бот запущен и готов к работе!');
@@ -243,7 +228,12 @@ async function setupBotCommands(bot) {
       { command: 'poll_results', description: 'Результаты опроса (админ)' },
       { command: 'bank_audit', description: 'Аудит/автопополнение банков (админ)' },
       { command: 'mini_event_invite', description: 'Рассылка mini-event (админ)' },
-      { command: 'mini_event_finalize', description: 'Завершить mini-event (админ)' }
+      { command: 'mini_event_finalize', description: 'Завершить mini-event (админ)' },
+      { command: 'admin_word', description: 'Слово дня — только мне (админ)' },
+      { command: 'admin_idiom', description: 'Идиома дня — только мне (админ)' },
+      { command: 'admin_phrasal', description: 'Phrasal verb дня — только мне (админ)' },
+      { command: 'admin_quiz', description: 'Квиз дня — только мне (админ)' },
+      { command: 'admin_fact', description: 'Факт дня — только мне (админ)' }
     ];
 
     // Устанавливаем команды для всех обычных чатов (без админских)
@@ -337,6 +327,31 @@ function setupCommandHandlers(bot, userSessions) {
       await sendUserMessage(bot, msg.chat.id, `⚠️ Ошибка аудита: ${error.message}`);
     }
   });
+  // Админ-превью игр (только для администратора)
+  const ADMIN_IDS = [process.env.ADMIN_ID, '340048933'].filter(Boolean);
+  const isAdmin = (id) => ADMIN_IDS.includes(id.toString());
+
+  bot.onText(/\/admin_word/, async (msg) => {
+    if (!isAdmin(msg.from.id)) return;
+    await adminPreviewWord(bot, msg.chat.id, userSessions);
+  });
+  bot.onText(/\/admin_idiom/, async (msg) => {
+    if (!isAdmin(msg.from.id)) return;
+    await adminPreviewIdiom(bot, msg.chat.id, userSessions);
+  });
+  bot.onText(/\/admin_phrasal/, async (msg) => {
+    if (!isAdmin(msg.from.id)) return;
+    await adminPreviewPhrasal(bot, msg.chat.id, userSessions);
+  });
+  bot.onText(/\/admin_quiz/, async (msg) => {
+    if (!isAdmin(msg.from.id)) return;
+    await adminPreviewQuiz(bot, msg.chat.id, userSessions);
+  });
+  bot.onText(/\/admin_fact/, async (msg) => {
+    if (!isAdmin(msg.from.id)) return;
+    await adminPreviewFact(bot, msg.chat.id, userSessions);
+  });
+
   bot.onText(/\/cancel_broadcast/, async (msg) => {
     const userId = msg.from.id.toString();
     if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
