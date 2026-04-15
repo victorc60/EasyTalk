@@ -38,14 +38,26 @@ function generateOptions(allItems, currentIndex, getTranslation) {
 /**
  * Загружает банк контента в таблицу content_queue строго по порядку.
  * Обогащает элементы question/options/correctIndex для типов без них.
+ * @param {string} type - тип контента
+ * @param {Array} bankData - полный массив банка
+ * @param {Set} [existingKeys] - Set натуральных ключей уже существующих в очереди (для досинхронизации)
  */
-export async function loadBankToQueue(type, bankData) {
+export async function loadBankToQueue(type, bankData, existingKeys = null) {
   try {
-    console.log(`[QUEUE] Загружаем банк "${type}" в очередь (${bankData.length} элементов)...`);
+    const isSync = existingKeys !== null;
+    console.log(`[QUEUE] ${isSync ? 'Синхронизируем' : 'Загружаем'} банк "${type}" (${bankData.length} элементов)...`);
     const records = [];
 
     for (let i = 0; i < bankData.length; i++) {
       const item = bankData[i];
+
+      // При досинхронизации пропускаем уже существующие элементы
+      if (isSync) {
+        const naturalKey = String(
+          item.word || item.idiom || item.phrasalVerb || item.question || item.claim || ''
+        ).trim().toLowerCase();
+        if (naturalKey && existingKeys.has(naturalKey)) continue;
+      }
       let contentId;
       let enriched = { ...item };
 

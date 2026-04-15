@@ -1,9 +1,7 @@
 // handlers/commandHandlers.js
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { Op } from 'sequelize';
 import User from '../models/User.js';
+import Streak from '../models/Streak.js';
 import WordGameParticipation from '../models/WordGameParticipation.js';
 import DailyGameSession from '../models/DailyGameSession.js';
 import DailyWordGame from '../models/DailyWordGame.js';
@@ -36,64 +34,30 @@ import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay 
 import { addIsoCalendarDays } from '../utils/moscowWeek.js';
 
 // ── Streak helpers ──────────────────────────────────────────────
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const STREAKS_FILE = path.resolve(__dirname, '../data/streaks.json');
+async function updateStreak(userId, isCorrect, todayKey, gameType = 'word') {
+  const [row] = await Streak.findOrCreate({
+    where: { user_id: userId, game_type: gameType },
+    defaults: { count: 0, last_date: null }
+  });
 
-function loadStreaks() {
-  try {
-    if (fs.existsSync(STREAKS_FILE)) {
-      return JSON.parse(fs.readFileSync(STREAKS_FILE, 'utf8'));
-    }
-  } catch (e) {
-    console.error('Не удалось загрузить streaks.json:', e.message);
-  }
-  return {};
-}
-
-function saveStreaks(streaks) {
-  try {
-    fs.writeFileSync(STREAKS_FILE, JSON.stringify(streaks, null, 2), 'utf8');
-  } catch (e) {
-    console.error('Не удалось сохранить streaks.json:', e.message);
-  }
-}
-
-function updateStreak(userId, isCorrect, todayKey, gameType = 'word') {
-  const streaks = loadStreaks();
-  const key = String(userId);
-  const userData = streaks[key];
-
-  // Миграция старого формата { count, lastDate } → { word: { count, lastDate }, ... }
-  let gameStreaks;
-  if (!userData) {
-    gameStreaks = {};
-  } else if (typeof userData.count === 'number' || userData.lastDate !== undefined) {
-    gameStreaks = { word: userData };
-  } else {
-    gameStreaks = userData;
-  }
-
-  const userStreak = gameStreaks[gameType] || { count: 0, lastDate: null };
   const yesterday = addIsoCalendarDays(todayKey, -1);
+  let count = row.count;
 
   if (isCorrect) {
-    if (userStreak.lastDate === yesterday) {
-      userStreak.count += 1;
-    } else if (userStreak.lastDate === todayKey) {
-      // уже отвечал сегодня — не меняем
+    if (row.last_date === yesterday) {
+      count += 1;
+    } else if (row.last_date === todayKey) {
+      return count; // уже отвечал сегодня — не меняем
     } else {
-      userStreak.count = 1;
+      count = 1;
     }
-    userStreak.lastDate = todayKey;
+    await row.update({ count, last_date: todayKey });
   } else {
-    userStreak.count = 0;
-    userStreak.lastDate = todayKey;
+    count = 0;
+    await row.update({ count: 0, last_date: todayKey });
   }
 
-  gameStreaks[gameType] = userStreak;
-  streaks[key] = gameStreaks;
-  saveStreaks(streaks);
-  return userStreak.count;
+  return count;
 }
 
 function buildStreakLine(streakCount, isMilestone = false) {
@@ -626,7 +590,7 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
         gameDate
       );
 
-      const streakCount = updateStreak(userId, isCorrect, gameDate, 'word');
+      const streakCount = await updateStreak(userId, isCorrect, gameDate, 'word');
       const isStreakMilestone = isCorrect && streakCount > 0 && streakCount % 5 === 0;
       if (isStreakMilestone) {
         await awardPoints(userId, 10);
@@ -854,7 +818,7 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     const safeHint = escapeHtml(gameSession.hint);
     const safeExample = escapeHtml(gameSession.example);
 
-    const idiomStreakCount = updateStreak(userId, isCorrect, gameDate, 'idiom');
+    const idiomStreakCount = await updateStreak(userId, isCorrect, gameDate, 'idiom');
     const isIdiomStreakMilestone = isCorrect && idiomStreakCount > 0 && idiomStreakCount % 5 === 0;
     if (isIdiomStreakMilestone) {
       await awardPoints(userId, 10);
@@ -1005,7 +969,7 @@ export async function handleFactGameCallback(bot, callbackQuery, userSessions) {
       gameDate
     );
 
-    const factStreakCount = updateStreak(userId, isCorrect, gameDate, 'fact');
+    const factStreakCount = await updateStreak(userId, isCorrect, gameDate, 'fact');
     const isFactStreakMilestone = isCorrect && factStreakCount > 0 && factStreakCount % 5 === 0;
     if (isFactStreakMilestone) {
       await awardPoints(userId, 10);
@@ -1174,7 +1138,7 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
     const safeHint = escapeHtml(gameSession.hint);
     const safeExample = escapeHtml(gameSession.example);
 
-    const phrasalStreakCount = updateStreak(userId, isCorrect, gameDate, 'phrasal_verb');
+    const phrasalStreakCount = await updateStreak(userId, isCorrect, gameDate, 'phrasal_verb');
     const isPhrasalStreakMilestone = isCorrect && phrasalStreakCount > 0 && phrasalStreakCount % 5 === 0;
     if (isPhrasalStreakMilestone) {
       await awardPoints(userId, 10);
@@ -1340,7 +1304,7 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
     const safeHint = escapeHtml(gameSession.hint);
     const safeExplanation = escapeHtml(gameSession.explanation);
 
-    const quizStreakCount = updateStreak(userId, isCorrect, gameDate, 'quiz');
+    const quizStreakCount = await updateStreak(userId, isCorrect, gameDate, 'quiz');
     const isQuizStreakMilestone = isCorrect && quizStreakCount > 0 && quizStreakCount % 5 === 0;
     if (isQuizStreakMilestone) {
       await awardPoints(userId, 10);
