@@ -846,7 +846,7 @@ function rebuildCuratedIdiomPool() {
   }
 
   const poolSource = unused.length ? unused : curatedIdiomBank;
-  availableCuratedIdioms = shuffleArray([...poolSource]);
+  availableCuratedIdioms = [...poolSource];
 }
 
 function rebuildCuratedPhrasalVerbsPool() {
@@ -867,7 +867,7 @@ function rebuildCuratedPhrasalVerbsPool() {
   }
 
   const poolSource = unused.length ? unused : curatedPhrasalVerbsBank;
-  availableCuratedPhrasalVerbs = shuffleArray([...poolSource]);
+  availableCuratedPhrasalVerbs = [...poolSource];
 }
 
 export function getPhrasalVerbUsageStats() {
@@ -928,7 +928,7 @@ function pickCuratedIdiom() {
     rebuildCuratedIdiomPool();
   }
 
-  const entry = availableCuratedIdioms.pop();
+  const entry = availableCuratedIdioms.shift();
   if (!entry) return null;
 
   const normalized = entry.idiom.trim().toLowerCase();
@@ -947,7 +947,7 @@ function pickCuratedPhrasalVerb() {
     rebuildCuratedPhrasalVerbsPool();
   }
 
-  const entry = availableCuratedPhrasalVerbs.pop();
+  const entry = availableCuratedPhrasalVerbs.shift();
   if (!entry) return null;
 
   const normalized = entry.phrasalVerb.trim().toLowerCase();
