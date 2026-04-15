@@ -21,8 +21,10 @@ import './models/MiniEventParticipant.js';
 import './models/MiniEventResponse.js';
 import './models/ContentQueue.js';
 import './models/DailyLog.js';
+import './models/Streak.js';
 import { initAllQueues } from './init/initQueues.js';
 import fs from 'fs';
+import { migrateStreaksFromJson } from './init/migrateStreaks.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -266,6 +268,7 @@ process.on('unhandledRejection', (error) => {
 (async () => {
   try {
     await initializeDatabase();
+    await migrateStreaksFromJson();
     await initAllQueues();
     await runStartupDiagnostics();
     await setupBot(bot, userSessions, openai);
