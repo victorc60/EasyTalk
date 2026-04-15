@@ -157,6 +157,18 @@ process.on('unhandledRejection', (error) => {
 
 (async () => {
   try {
+    // Поднимаем HTTP сервер немедленно, чтобы Railway health check проходил
+    // пока идёт подключение к БД (которое может занимать несколько секунд)
+    const port = Number(process.env.PORT || 3000);
+    let isReady = false;
+    app.get('/health', (req, res) => {
+      // Всегда отвечаем 200 — Railway не должен убивать контейнер пока идёт init БД
+      res.json({ ok: isReady, status: isReady ? 'ready' : 'initializing' });
+    });
+    const server = app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+
     await initializeDatabase();
     await setupBot(bot, userSessions, openai);
 
@@ -167,11 +179,7 @@ process.on('unhandledRejection', (error) => {
 
     startBossGrammarWebhook(bot, app);
 
-    const port = Number(process.env.PORT || 3000);
-    app.get('/health', (req, res) => res.json({ ok: true }));
-    const server = app.listen(port, () => {
-      console.log(`Server listening on port ${port}`);
-    });
+    isReady = true;
 
     if (usePolling) {
       bot.startPolling();
