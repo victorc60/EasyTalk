@@ -46,11 +46,13 @@ function buildIdiomMessage(item) {
 function buildPhrasalMessage(item) {
   const verb = escapeHtml(item.verb || item.phrasalVerb || '');
   const example = escapeHtml(item.example || '');
+  const hint = escapeHtml(item.hint || '');
 
-  let text = `⚡ <b>Phrasal Verb of the Day</b>\n\n`;
-  text += `💬 <b>${verb}</b>\n`;
-  if (example) text += `\n📝 ${example}\n`;
-  text += `\n❓ <b>What does "${verb}" mean?</b>`;
+  let text = `🌿🔤 <b>Phrasal Verb of the Day</b>\n`;
+  text += `${verb}\n\n`;
+  if (example) text += `📝 Пример: ${example}\n`;
+  if (hint) text += `💡 Подсказка: ${hint}\n`;
+  text += `\nВыбери правильный перевод:`;
 
   return text;
 }
@@ -59,9 +61,10 @@ function buildFactMessage(item) {
   const claim = escapeHtml(item.claim || '');
   const claimRu = item.claimRu ? escapeHtml(item.claimRu) : null;
 
-  let text = `🧠 <b>True or False?</b>\n\n`;
-  text += `"${claim}"`;
-  if (claimRu) text += `\n«${claimRu}»`;
+  let text = `🌷✨ <b>Fact of the Day</b>\n\n`;
+  text += `🇬🇧 ${claim}\n`;
+  if (claimRu) text += `${claimRu}\n`;
+  text += `\nВеришь или не веришь?`;
 
   return text;
 }

@@ -90,10 +90,17 @@ function buildResultMessage(type, item, isCorrect, points) {
       if (item.explanation) msg += `ℹ️ ${escapeHtml(item.explanation)}`;
       break;
 
-    case 'fact':
-      msg += `🧠 "${escapeHtml(item.claim || '')}"\n\n`;
+    case 'fact': {
+      const claim = escapeHtml(item.claim || '');
+      const claimRu = item.claimRu ? escapeHtml(item.claimRu) : null;
+      const correctLabel = item.isTrue ? 'True' : 'False';
+      msg += `🌷✨ <b>Fact of the Day</b>\n`;
+      msg += `🇬🇧 ${claim}\n`;
+      if (claimRu) msg += `${claimRu}\n`;
+      msg += `\n🎯 Правильный ответ: <b>${correctLabel}</b>\n\n`;
       if (item.explanation) msg += escapeHtml(item.explanation);
       break;
+    }
   }
 
   return msg;
