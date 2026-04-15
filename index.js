@@ -22,6 +22,7 @@ import './models/MiniEventResponse.js';
 import './models/ContentQueue.js';
 import './models/DailyLog.js';
 import { initAllQueues } from './init/initQueues.js';
+import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -152,6 +153,110 @@ process.on('SIGTERM', async () => {
   }
 });
 
+// ─── STARTUP DIAGNOSTICS ─────────────────────────────────────────────────────
+async function runStartupDiagnostics() {
+  console.log('\n════════════════════════════════════════');
+  console.log('🔍 STARTUP DIAGNOSTICS');
+  console.log('════════════════════════════════════════');
+
+  // 1. Банки контента — какие файлы есть и сколько в них элементов
+  const bankFiles = [
+    { label: 'word_bank.json',          path: path.join(__dirname, 'data/word_bank.json') },
+    { label: 'idiom_bank.json',         path: path.join(__dirname, 'data/idiom_bank.json') },
+    { label: 'phrasal_verbs_bank.json', path: path.join(__dirname, 'data/phrasal_verbs_bank.json') },
+    { label: 'quiz_bank.json',          path: path.join(__dirname, 'data/quiz_bank.json') },
+    { label: 'facts_bank.json',         path: path.join(__dirname, 'data/facts_bank.json') },
+    { label: 'src/words_bank.json',     path: path.join(__dirname, 'src/data/words_bank.json') },
+    { label: 'src/idioms_bank.json',    path: path.join(__dirname, 'src/data/idioms_bank.json') },
+    { label: 'src/quiz_bank.json',      path: path.join(__dirname, 'src/data/quiz_bank.json') },
+    { label: 'src/phrasal_bank.json',   path: path.join(__dirname, 'src/data/phrasal_bank.json') },
+    { label: 'src/facts_bank.json',     path: path.join(__dirname, 'src/data/facts_bank.json') },
+  ];
+
+  console.log('\n📁 БАНКИ КОНТЕНТА:');
+  for (const { label, path: filePath } of bankFiles) {
+    try {
+      const raw = fs.readFileSync(filePath, 'utf8');
+      const data = JSON.parse(raw);
+      const count = Array.isArray(data) ? data.length : Object.keys(data).length;
+      const firstKey = Array.isArray(data) && data[0]
+        ? (data[0].word || data[0].idiom || data[0].phrasalVerb || data[0].verb || data[0].question || data[0].claim || data[0].id || '?')
+        : '?';
+      console.log(`  ✅ ${label}: ${count} элементов | первый: "${firstKey}"`);
+    } catch {
+      console.log(`  ❌ ${label}: файл не найден`);
+    }
+  }
+
+  // 2. Таблица content_queue — что в ней сейчас
+  console.log('\n🗄️  ТАБЛИЦА content_queue:');
+  try {
+    const [rows] = await sequelize.query(
+      `SELECT type,
+              COUNT(*) AS total,
+              SUM(CASE WHEN \`used\` = 1 THEN 1 ELSE 0 END) AS used_count,
+              SUM(CASE WHEN \`used\` = 0 THEN 1 ELSE 0 END) AS pending_count
+       FROM content_queue
+       GROUP BY type
+       ORDER BY type`
+    );
+    if (rows.length === 0) {
+      console.log('  ⚠️  Таблица content_queue пуста');
+    } else {
+      for (const row of rows) {
+        console.log(`  ${row.type}: всего=${row.total} | использовано=${row.used_count} | в очереди=${row.pending_count}`);
+      }
+    }
+
+    // Первый элемент каждого типа который ещё не использован
+    const [nextRows] = await sequelize.query(
+      `SELECT type,
+              content_id,
+              CAST(content AS CHAR) AS content_preview
+       FROM content_queue
+       WHERE \`used\` = 0
+       GROUP BY type
+       ORDER BY type, id ASC`
+    );
+    if (nextRows.length > 0) {
+      console.log('\n  ➡️  Следующие в очереди (used=0):');
+      for (const row of nextRows) {
+        try {
+          const c = JSON.parse(row.content_preview);
+          const label = c.word || c.idiom || c.verb || c.question || c.claim || row.content_id;
+          console.log(`     ${row.type}: "${label}" (content_id: ${row.content_id})`);
+        } catch {
+          console.log(`     ${row.type}: content_id=${row.content_id}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.log(`  ℹ️  Таблица content_queue не существует или недоступна: ${err.message}`);
+  }
+
+  // 3. Индексные файлы
+  console.log('\n📌 ИНДЕКСЫ И ИСТОРИЯ:');
+  const indexFiles = [
+    path.join(__dirname, 'data/word_index.json'),
+    path.join(__dirname, 'data/word_history.json'),
+    path.join(__dirname, 'data/idiom_history.json'),
+  ];
+  for (const filePath of indexFiles) {
+    try {
+      const raw = fs.readFileSync(filePath, 'utf8');
+      const label = path.basename(filePath);
+      const data = JSON.parse(raw);
+      const info = Array.isArray(data) ? `${data.length} записей` : JSON.stringify(data);
+      console.log(`  ✅ ${label}: ${info}`);
+    } catch {
+      console.log(`  ❌ ${path.basename(filePath)}: не найден`);
+    }
+  }
+
+  console.log('\n════════════════════════════════════════\n');
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 process.on('unhandledRejection', (error) => {
   console.error('Необработанная ошибка:', error);
   sendAdminMessage(bot, `‼️ Критическая ошибка: ${error.message}`)
@@ -161,7 +266,11 @@ process.on('unhandledRejection', (error) => {
 (async () => {
   try {
     await initializeDatabase();
+<<<<<<< HEAD
     await initAllQueues();
+=======
+    await runStartupDiagnostics();
+>>>>>>> 3635519 (debug: add startup diagnostics to trace content_queue and bank files)
     await setupBot(bot, userSessions, openai);
 
     if (webhookUrl) {
