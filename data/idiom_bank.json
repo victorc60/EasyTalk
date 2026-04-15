@@ -1,212 +1,101 @@
 [
+
   {
-    "idiom": "bite the bullet",
-    "translation": "стиснуть зубы",
-    "meaning": "сделать что-то неприятное, но необходимое",
-    "example": "We had to bite the bullet and tell the client about the delay.",
-    "hint": "принять трудное решение и действовать"
+    "idiom": "keep your chin up",
+    "translation": "выше нос",
+    "meaning": "сохранять оптимизм в трудной ситуации",
+    "example": "Keep your chin up, I’m sure you’ll find a better job soon.",
+    "hint": "не унывать, когда всё идет не по плану"
   },
   {
-    "idiom": "ahead of the curve",
-    "translation": "впереди остальных",
-    "meaning": "быть на шаг впереди в развитии или знаниях",
-    "example": "Our team stays ahead of the curve by learning new tools early.",
-    "hint": "опережать других в чём-то"
+    "idiom": "burn the midnight oil",
+    "translation": "жечь полночное масло",
+    "meaning": "работать или учиться допоздна",
+    "example": "I had to burn the midnight oil to finish the presentation.",
+    "hint": "работать по ночам"
   },
   {
-    "idiom": "drop the ball",
-    "translation": "упустить мяч",
-    "meaning": "облажаться, не выполнить важное задание",
-    "example": "Someone dropped the ball and the report wasn't sent on time.",
-    "hint": "не справиться с задачей в нужный момент"
+    "idiom": "on the same page",
+    "translation": "на одной волне",
+    "meaning": "иметь одинаковое понимание ситуации или соглашаться",
+    "example": "Let’s have a meeting to make sure we’re all on the same page.",
+    "hint": "быть согласными друг с другом"
   },
   {
-    "idiom": "burning question",
-    "translation": "жгучий вопрос",
-    "meaning": "очень важный или срочный вопрос",
-    "example": "The burning question is: how do we cut costs without losing quality?",
-    "hint": "вопрос, который срочно нужно решить"
+    "idiom": "the elephant in the room",
+    "translation": "слон в комнате",
+    "meaning": "очевидная проблема, которую все игнорируют",
+    "example": "The budget deficit is the elephant in the room that no one mentions.",
+    "hint": "большая проблема, о которой боятся говорить"
   },
   {
-    "idiom": "on the fence",
-    "translation": "сидеть на заборе",
-    "meaning": "не принять чью-либо сторону, быть в нерешительности",
-    "example": "She's still on the fence about the new strategy.",
-    "hint": "не могу решить, что выбрать"
+    "idiom": "barking up the wrong tree",
+    "translation": "лаять не на то дерево",
+    "meaning": "идти по ложному следу, ошибаться в причинах",
+    "example": "If you think I’m responsible for this, you’re barking up the wrong tree.",
+    "hint": "искать решение не там, где нужно"
   },
   {
-    "idiom": "move the goalposts",
-    "translation": "сдвинуть ворота",
-    "meaning": "менять условия или требования в процессе работы",
-    "example": "The client kept moving the goalposts, so the deadline slipped.",
-    "hint": "менять правила игры в последний момент"
+    "idiom": "piece of cake",
+    "translation": "проще простого",
+    "meaning": "очень легкое задание",
+    "example": "The exam was a piece of cake; I finished it in ten minutes.",
+    "hint": "что-то очень простое"
   },
   {
-    "idiom": "take the lead",
-    "translation": "взять на себя инициативу",
-    "meaning": "начать действовать первым или руководить",
-    "example": "Who is going to take the lead on the client presentation?",
-    "hint": "первым взяться за что-то"
+    "idiom": "read between the lines",
+    "translation": "читать между строк",
+    "meaning": "понимать скрытый смысл",
+    "example": "He said he was fine, but reading between the lines, he’s upset.",
+    "hint": "видеть скрытый подтекст"
   },
   {
-    "idiom": "in the loop",
-    "translation": "в курсе событий",
-    "meaning": "быть информированным обо всём происходящем",
-    "example": "Please keep me in the loop about any changes.",
-    "hint": "быть осведомлённым"
+    "idiom": "call it a day",
+    "translation": "закругляться",
+    "meaning": "закончить работу на сегодня",
+    "example": "We’ve been working for ten hours—let’s call it a day.",
+    "hint": "прекратить что-то делать, потому что устал"
   },
   {
-    "idiom": "pass the buck",
-    "translation": "перекладывать ответственность",
-    "meaning": "перекладывать задачу или вину на другого человека",
-    "example": "Don't pass the buck — own your mistakes and fix them.",
-    "hint": "свалить вину или задачу на кого-то другого"
+    "idiom": "break the ice",
+    "translation": "растопить лед",
+    "meaning": "разрядить обстановку при знакомстве",
+    "example": "He told a joke to break the ice at the start of the meeting.",
+    "hint": "сделать общение более непринужденным"
   },
   {
-    "idiom": "go back to basics",
-    "translation": "вернуться к основам",
-    "meaning": "сосредоточиться на простых и фундаментальных вещах",
-    "example": "When the new method failed, we decided to go back to basics.",
-    "hint": "начать с простого и главного"
+    "idiom": "hit the nail on the head",
+    "translation": "попасть не в бровь, а в глаз",
+    "meaning": "сказать или сделать что-то совершенно точно",
+    "example": "You hit the nail on the head when you said we need a new strategy.",
+    "hint": "точно описать суть проблемы"
   },
   {
-    "idiom": "throw in the towel",
-    "translation": "выбросить полотенце",
-    "meaning": "сдаться, прекратить попытки",
-    "example": "After months of delays, the team threw in the towel on the feature.",
-    "hint": "признать поражение и остановиться"
+    "idiom": "miss the boat",
+    "translation": "поезд ушел",
+    "meaning": "упустить возможность",
+    "example": "We missed the boat on that investment—the price is too high now.",
+    "hint": "опоздать и потерять шанс"
   },
   {
-    "idiom": "a grey area",
-    "translation": "серая зона",
-    "meaning": "ситуация без чётких правил или однозначного ответа",
-    "example": "The contract terms are a grey area — we need legal advice.",
-    "hint": "неоднозначная ситуация без ясных правил"
+    "idiom": "see eye to eye",
+    "translation": "сходиться во взглядах",
+    "meaning": "полностью соглашаться с кем-то",
+    "example": "My boss and I don’t always see eye to eye on marketing.",
+    "hint": "иметь одинаковое мнение"
   },
   {
-    "idiom": "at the eleventh hour",
-    "translation": "в последний момент",
-    "meaning": "сделать что-то в самый последний момент",
-    "example": "They submitted the proposal at the eleventh hour.",
-    "hint": "когда времени почти не осталось"
+    "idiom": "costs an arm and a leg",
+    "translation": "стоит целое состояние",
+    "meaning": "что-то очень дорогое",
+    "example": "Repairing the engine cost an arm and a leg.",
+    "hint": "очень высокая цена"
   },
   {
-    "idiom": "step up to the plate",
-    "translation": "взять на себя ответственность",
-    "meaning": "принять вызов и действовать решительно",
-    "example": "When the manager left, she stepped up to the plate and led the team.",
-    "hint": "взяться за трудную задачу добровольно"
-  },
-  {
-    "idiom": "on the right track",
-    "translation": "на верном пути",
-    "meaning": "двигаться в правильном направлении",
-    "example": "The pilot results look good — we're on the right track.",
-    "hint": "идти в нужном направлении"
-  },
-  {
-    "idiom": "a long shot",
-    "translation": "маловероятный шанс",
-    "meaning": "попытка, у которой мало шансов на успех",
-    "example": "Winning that contract is a long shot, but worth trying.",
-    "hint": "что-то с низкой вероятностью успеха"
-  },
-  {
-    "idiom": "clear the air",
-    "translation": "разрядить обстановку",
-    "meaning": "открыто поговорить, чтобы снять напряжение",
-    "example": "Let's have a quick meeting to clear the air after yesterday.",
-    "hint": "устранить недопонимание или конфликт"
-  },
-  {
-    "idiom": "get the green light",
-    "translation": "получить зелёный свет",
-    "meaning": "получить разрешение начать что-то",
-    "example": "We finally got the green light to launch the campaign.",
-    "hint": "получить официальное разрешение"
-  },
-  {
-    "idiom": "take something on board",
-    "translation": "принять к сведению",
-    "meaning": "учесть информацию или критику",
-    "example": "I'll take your feedback on board and revise the draft.",
-    "hint": "учесть и запомнить чьё-то мнение"
-  },
-  {
-    "idiom": "bite off more than you can chew",
-    "translation": "откусить больше, чем можешь проглотить",
-    "meaning": "взять на себя больше, чем реально можешь сделать",
-    "example": "He bit off more than he could chew by managing three projects at once.",
-    "hint": "взять слишком много обязательств"
-  },
-  {
-    "idiom": "by the book",
-    "translation": "по правилам",
-    "meaning": "строго следовать инструкциям и процедурам",
-    "example": "Our compliance team always does everything by the book.",
-    "hint": "действовать строго по инструкции"
-  },
-  {
-    "idiom": "on a tight budget",
-    "translation": "с ограниченным бюджетом",
-    "meaning": "иметь мало денег для работы или проекта",
-    "example": "We delivered a great result even on a tight budget.",
-    "hint": "денег мало, но нужно справиться"
-  },
-  {
-    "idiom": "up in the air",
-    "translation": "в воздухе",
-    "meaning": "неопределённо, без конкретного решения",
-    "example": "The merger plans are still up in the air.",
-    "hint": "ничего не решено, всё неясно"
-  },
-  {
-    "idiom": "face the music",
-    "translation": "принять последствия",
-    "meaning": "смириться с результатами своих действий",
-    "example": "After the project failed, he had to face the music with the board.",
-    "hint": "взять ответственность за последствия"
-  },
-  {
-    "idiom": "the bottom line",
-    "translation": "главный итог",
-    "meaning": "самое важное или итоговый результат",
-    "example": "The bottom line is: we need to reduce costs by 20%.",
-    "hint": "самый главный вывод или факт"
-  },
-  {
-    "idiom": "go the extra mile",
-    "translation": "пройти лишнюю милю",
-    "meaning": "сделать больше, чем ожидается",
-    "example": "She always goes the extra mile for her clients.",
-    "hint": "сделать больше необходимого"
-  },
-  {
-    "idiom": "a shot in the dark",
-    "translation": "выстрел вслепую",
-    "meaning": "попытка без достаточной информации или знаний",
-    "example": "Guessing the budget without data is a shot in the dark.",
-    "hint": "действовать без нужной информации"
-  },
-  {
-    "idiom": "pull strings",
-    "translation": "дёргать за ниточки",
-    "meaning": "использовать связи для получения преимущества",
-    "example": "He pulled some strings to get the meeting with the director.",
-    "hint": "использовать личные связи"
-  },
-  {
-    "idiom": "under the radar",
-    "translation": "вне поля зрения",
-    "meaning": "действовать незаметно, не привлекая внимания",
-    "example": "The small team worked under the radar and launched quietly.",
-    "hint": "незаметно для других"
-  },
-  {
-    "idiom": "talk the talk",
-    "translation": "красиво говорить",
-    "meaning": "говорить уверенно, но не обязательно подтверждать делом",
-    "example": "He talks the talk in meetings, but rarely delivers results.",
-    "hint": "слова без дел"
+    "idiom": "under the weather",
+    "translation": "неважно себя чувствовать",
+    "meaning": "приболеть или быть не в духе",
+    "example": "I'm feeling a bit under the weather, so I'll stay home today.",
+    "hint": "чувствовать легкое недомогание"
   }
 ]
