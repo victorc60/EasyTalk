@@ -266,11 +266,8 @@ process.on('unhandledRejection', (error) => {
 (async () => {
   try {
     await initializeDatabase();
-<<<<<<< HEAD
     await initAllQueues();
-=======
     await runStartupDiagnostics();
->>>>>>> 3635519 (debug: add startup diagnostics to trace content_queue and bank files)
     await setupBot(bot, userSessions, openai);
 
     if (webhookUrl) {
