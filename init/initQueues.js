@@ -1,5 +1,6 @@
 // init/initQueues.js
 import fs from 'fs';
+import { Op } from 'sequelize';
 import ContentQueue from '../models/ContentQueue.js';
 import { loadBankToQueue } from '../services/queueService.js';
 import { bankFilePath } from '../utils/projectPaths.js';
@@ -26,9 +27,39 @@ function readBankFile(filename) {
 }
 
 /**
+ * Удаляет из очереди элементы, которых больше нет в текущем банке.
+ * Это чистит устаревший/мусорный контент после обновления банков.
+ */
+async function removeStaleItems(type, bankKeys) {
+  const allRows = await ContentQueue.findAll({
+    where: { type },
+    attributes: ['id', 'content']
+  });
+
+  const staleIds = [];
+  for (const row of allRows) {
+    // Получаем натуральный ключ из контента
+    const key = String(
+      row.content?.word || row.content?.idiom || row.content?.phrasalVerb ||
+      row.content?.question || row.content?.claim || ''
+    ).trim().toLowerCase();
+
+    if (!key || !bankKeys.has(key)) {
+      staleIds.push(row.id);
+    }
+  }
+
+  if (staleIds.length === 0) return 0;
+
+  await ContentQueue.destroy({ where: { id: { [Op.in]: staleIds } } });
+  console.log(`[QUEUE] 🧹 Удалено ${staleIds.length} устаревших элементов из очереди "${type}"`);
+  return staleIds.length;
+}
+
+/**
  * Инициализирует и синхронизирует очереди контента при старте бота.
  * - Если очередь пуста — загружает весь банк.
- * - Если очередь уже есть — добавляет только новые элементы из банка.
+ * - Если очередь уже есть — удаляет устаревшие и добавляет новые элементы.
  */
 export async function initAllQueues() {
   console.log('[QUEUE] Инициализация очередей контента...');
@@ -41,6 +72,11 @@ export async function initAllQueues() {
         continue;
       }
 
+      // Строим Set актуальных ключей из текущего банка
+      const bankKeys = new Set(
+        bankData.map(item => String(item[idKey] || '').trim().toLowerCase()).filter(Boolean)
+      );
+
       const existingCount = await ContentQueue.count({ where: { type } });
 
       if (existingCount === 0) {
@@ -50,30 +86,34 @@ export async function initAllQueues() {
         continue;
       }
 
-      // Очередь уже есть — проверяем нет ли новых элементов в банке
+      // Удаляем устаревшие элементы (которых нет в текущем банке)
+      await removeStaleItems(type, bankKeys);
+
+      // Проверяем наличие новых элементов
       const existingRows = await ContentQueue.findAll({
         where: { type },
         attributes: ['content_id', 'content']
       });
 
-      // Строим Set существующих натуральных ключей (сам контент, не position-based id)
       const existingKeys = new Set(
         existingRows.map(r => String(r.content?.[idKey] || r.content_id).trim().toLowerCase())
       );
 
-      const newItems = bankData.filter(item => {
+      const hasNew = bankData.some(item => {
         const key = String(item[idKey] || '').trim().toLowerCase();
         return key && !existingKeys.has(key);
       });
 
-      if (newItems.length === 0) {
-        console.log(`[QUEUE] Очередь "${type}" актуальна (${existingCount} элементов)`);
+      if (!hasNew) {
+        const count = await ContentQueue.count({ where: { type } });
+        console.log(`[QUEUE] Очередь "${type}" актуальна (${count} элементов)`);
         continue;
       }
 
-      // Добавляем только новые элементы, передавая полный банк для корректной генерации вариантов
       await loadBankToQueue(type, bankData, existingKeys);
-      console.log(`[QUEUE] ✅ Добавлено ${newItems.length} новых элементов в очередь "${type}" (было ${existingCount})`);
+      const newCount = await ContentQueue.count({ where: { type } });
+      console.log(`[QUEUE] ✅ Очередь "${type}" синхронизирована (${newCount} элементов)`);
+
     } catch (error) {
       console.error(`[QUEUE] Ошибка инициализации очереди "${type}":`, error.message);
     }
