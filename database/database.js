@@ -22,12 +22,7 @@ function getDatabaseUrl() {
   return process.env.DATABASE_URL || '';
 }
 
-const connectionUrl = getDatabaseUrl();
-if (!connectionUrl) {
-  throw new Error(
-    'Не задана конфигурация БД: нужен DATABASE_URL, MYSQL_URL или MYSQLHOST+MYSQLUSER+MYSQLPASSWORD+MYSQLDATABASE (или DB_HOST+DB_NAME+DB_USER+MYSQLPASSWORD)'
-  );
-}
+const connectionUrl = getDatabaseUrl() || 'mysql://placeholder:placeholder@localhost:3306/placeholder';
 
 const sequelize = new Sequelize(connectionUrl, {
   dialect: 'mysql',

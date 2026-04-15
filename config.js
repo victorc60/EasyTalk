@@ -1,10 +1,7 @@
 // config.js
 
-const requiredEnvVars = ['TELEGRAM_BOT_TOKEN', 'OPENAI_API_KEY', 'ADMIN_ID'];
-
-function hasDatabaseConfig() {
+export function hasDatabaseConfig() {
   if (process.env.DATABASE_URL || process.env.MYSQL_URL) return true;
-  // Railway MySQL: MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE
   if (
     process.env.MYSQLHOST &&
     process.env.MYSQLUSER &&
@@ -12,7 +9,6 @@ function hasDatabaseConfig() {
     process.env.MYSQLDATABASE
   )
     return true;
-  // Legacy: DB_HOST, DB_NAME, DB_USER, MYSQLPASSWORD
   if (
     process.env.DB_HOST &&
     process.env.DB_NAME &&
@@ -23,18 +19,18 @@ function hasDatabaseConfig() {
   return false;
 }
 
-requiredEnvVars.forEach((envVar) => {
-  if (!process.env[envVar]) {
-    console.error(`ERROR: ${envVar} не установлен в переменных окружения`);
-    process.exit(1);
+export function validateEnv() {
+  const required = ['TELEGRAM_BOT_TOKEN', 'OPENAI_API_KEY', 'ADMIN_ID'];
+  for (const key of required) {
+    if (!process.env[key]) {
+      throw new Error(`${key} не установлен в переменных окружения`);
+    }
   }
-});
-
-if (!hasDatabaseConfig()) {
-  console.error(
-    'ERROR: Нет конфигурации БД. Нужно: DATABASE_URL или MYSQL_URL, либо (MYSQLHOST+MYSQLUSER+MYSQLPASSWORD+MYSQLDATABASE), либо (DB_HOST+DB_NAME+DB_USER+MYSQLPASSWORD)'
-  );
-  process.exit(1);
+  if (!hasDatabaseConfig()) {
+    throw new Error(
+      'Нет конфигурации БД. Нужно: DATABASE_URL или MYSQL_URL, либо (MYSQLHOST+MYSQLUSER+MYSQLPASSWORD+MYSQLDATABASE), либо (DB_HOST+DB_NAME+DB_USER+MYSQLPASSWORD)'
+    );
+  }
 }
 
 export const CONFIG = {

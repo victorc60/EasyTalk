@@ -8,6 +8,7 @@ import { OpenAI } from 'openai';
 import sequelize from './database/database.js';
 import { sendAdminMessage } from './utils/botUtils.js';
 import { setupBot } from './botSetup.js';
+import { validateEnv } from './config.js';
 import { startBossGrammarWebhook } from './services/bossGrammarWebhook.js';
 import './models/WordGameParticipation.js'; // Import to initialize the model
 import './models/DailyWordGame.js';
@@ -26,11 +27,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const app = express();
 app.use(express.json());
 
-const botToken = process.env.TELEGRAM_BOT_TOKEN;
-if (!botToken) {
-  console.error('TELEGRAM_BOT_TOKEN is not set');
-  process.exit(1);
-}
+const botToken = process.env.TELEGRAM_BOT_TOKEN || '';
 
 const webhookPath = `/telegram/webhook/${botToken}`;
 const webhookBase = process.env.TELEGRAM_WEBHOOK_URL || process.env.WEBHOOK_DOMAIN;
@@ -168,6 +165,9 @@ process.on('unhandledRejection', (error) => {
     const server = app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
     });
+
+    // Валидация env после старта сервера, чтобы healthcheck уже отвечал 200
+    validateEnv();
 
     await initializeDatabase();
     await setupBot(bot, userSessions, openai);
