@@ -3,7 +3,7 @@ import path from 'path';
 import { OpenAI } from 'openai';
 import { CONFIG } from '../config.js';
 import { sendAdminMessage } from '../utils/botUtils.js';
-import { DATA_DIR } from '../utils/projectPaths.js';
+import { DATA_DIR, BANK_DIR } from '../utils/projectPaths.js';
 
 const CANDIDATES_DIR = path.join(DATA_DIR, 'candidates');
 const AUTOFILL_BATCH_SIZE = 30;
@@ -13,7 +13,7 @@ const BANK_SPECS = {
   word: {
     key: 'word',
     title: 'Word Bank',
-    bankFile: path.join(DATA_DIR, 'word_bank.json'),
+    bankFile: path.join(BANK_DIR, 'word_bank.json'),
     historyFile: path.join(DATA_DIR, 'word_history.json'),
     historySelector: (row) => row,
     bankSelector: (row) => row?.word,
@@ -24,7 +24,7 @@ const BANK_SPECS = {
   idiom: {
     key: 'idiom',
     title: 'Idiom Bank',
-    bankFile: path.join(DATA_DIR, 'idiom_bank.json'),
+    bankFile: path.join(BANK_DIR, 'idiom_bank.json'),
     historyFile: path.join(DATA_DIR, 'idiom_history.json'),
     historySelector: (row) => row,
     bankSelector: (row) => row?.idiom,
@@ -35,7 +35,7 @@ const BANK_SPECS = {
   phrasal_verb: {
     key: 'phrasal_verb',
     title: 'Phrasal Verb Bank',
-    bankFile: path.join(DATA_DIR, 'phrasal_verbs_bank.json'),
+    bankFile: path.join(BANK_DIR, 'phrasal_verbs_bank.json'),
     historyFile: path.join(DATA_DIR, 'phrasal_verbs_history.json'),
     historySelector: (row) => row,
     bankSelector: (row) => row?.phrasalVerb,
@@ -46,7 +46,7 @@ const BANK_SPECS = {
   quiz: {
     key: 'quiz',
     title: 'Quiz Bank',
-    bankFile: path.join(DATA_DIR, 'quiz_bank.json'),
+    bankFile: path.join(BANK_DIR, 'quiz_bank.json'),
     historyFile: path.join(DATA_DIR, 'quiz_history.json'),
     historySelector: (row) => row,
     bankSelector: (row) => row?.question,
@@ -57,7 +57,7 @@ const BANK_SPECS = {
   mini_event: {
     key: 'mini_event',
     title: 'Mini Event Bank',
-    bankFile: path.join(DATA_DIR, 'mini_event_questions.json'),
+    bankFile: path.join(BANK_DIR, 'mini_event_questions.json'),
     historyFile: path.join(DATA_DIR, 'mini_event_history.json'),
     historySelector: (row) => row,
     bankSelector: (row) => row?.id,
@@ -68,7 +68,7 @@ const BANK_SPECS = {
   fact: {
     key: 'fact',
     title: 'Fact Bank',
-    bankFile: path.join(DATA_DIR, 'facts_bank.json'),
+    bankFile: path.join(BANK_DIR, 'facts_bank.json'),
     historyFile: path.join(DATA_DIR, 'fact_history.json'),
     historySelector: (row) => row,
     bankSelector: (row) => row?.id,
