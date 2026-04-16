@@ -7,6 +7,39 @@ import { hasCompletedAllGames, BONUS_GAMES, BONUS_POINTS } from './dailyBonusHel
 export { hasCompletedAllGames, BONUS_GAMES, BONUS_POINTS };
 
 /**
+ * Returns which BONUS_GAMES the user has already answered today
+ * and whether the bonus was already awarded.
+ */
+export async function getDailyBonusProgress(userId, gameDate) {
+  try {
+    const existing = await DailyBonus.findOne({
+      where: { user_id: userId, bonus_date: gameDate }
+    });
+    if (existing) {
+      return { alreadyAwarded: true, answeredGames: [...BONUS_GAMES] };
+    }
+
+    const participations = await WordGameParticipation.findAll({
+      where: {
+        user_id: userId,
+        game_date: gameDate,
+        game_type: BONUS_GAMES,
+        answered: true
+      },
+      attributes: ['game_type'],
+      raw: true
+    });
+
+    const answeredGames = [...new Set(participations.map(p => p.game_type))];
+    return { alreadyAwarded: false, answeredGames };
+
+  } catch (err) {
+    console.error(`getDailyBonusProgress error userId=${userId}:`, err.message);
+    return { alreadyAwarded: false, answeredGames: [] };
+  }
+}
+
+/**
  * Checks if the user completed all 4 games today.
  * If yes — awards 20 bonus points (once per day).
  * Returns true if bonus was just awarded, false otherwise.

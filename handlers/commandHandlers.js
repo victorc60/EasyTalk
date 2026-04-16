@@ -34,7 +34,8 @@ import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleW
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
 import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay } from '../services/miniEventService.js';
 import { addIsoCalendarDays } from '../utils/moscowWeek.js';
-import { checkAndAwardDailyBonus } from '../services/dailyBonusService.js';
+import { checkAndAwardDailyBonus, getDailyBonusProgress } from '../services/dailyBonusService.js';
+import { buildBonusProgressLine } from '../services/dailyBonusHelpers.js';
 
 // ── Streak helpers ──────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -648,7 +649,11 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
 
       const wordBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
       if (wordBonusAwarded) {
-        resultMessage += `\n\n🔥 <b>+${20} бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
+        resultMessage += `\n\n🎉 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня. Красавчик!`;
+      } else {
+        const wordProgress = await getDailyBonusProgress(userId, gameDate);
+        const progressLine = buildBonusProgressLine(wordProgress.answeredGames, wordProgress.alreadyAwarded);
+        if (progressLine) resultMessage += progressLine;
       }
 
       await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -885,7 +890,11 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
 
     const idiomBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
     if (idiomBonusAwarded) {
-      resultMessage += `\n\n🔥 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
+      resultMessage += `\n\n🎉 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня. Красавчик!`;
+    } else {
+      const idiomProgress = await getDailyBonusProgress(userId, gameDate);
+      const progressLine = buildBonusProgressLine(idiomProgress.answeredGames, idiomProgress.alreadyAwarded);
+      if (progressLine) resultMessage += progressLine;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -1210,7 +1219,11 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
 
     const pvBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
     if (pvBonusAwarded) {
-      resultMessage += `\n\n🔥 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
+      resultMessage += `\n\n🎉 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня. Красавчик!`;
+    } else {
+      const pvProgress = await getDailyBonusProgress(userId, gameDate);
+      const progressLine = buildBonusProgressLine(pvProgress.answeredGames, pvProgress.alreadyAwarded);
+      if (progressLine) resultMessage += progressLine;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -1380,7 +1393,11 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
 
     const quizBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
     if (quizBonusAwarded) {
-      resultMessage += `\n\n🔥 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
+      resultMessage += `\n\n🎉 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня. Красавчик!`;
+    } else {
+      const quizProgress = await getDailyBonusProgress(userId, gameDate);
+      const progressLine = buildBonusProgressLine(quizProgress.answeredGames, quizProgress.alreadyAwarded);
+      if (progressLine) resultMessage += progressLine;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });

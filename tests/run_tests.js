@@ -23,7 +23,7 @@ try {
 } catch (_) {}
 
 import { pickFromBank, readBankFile, writeJsonArray } from '../utils/bankUtils.js';
-import { hasCompletedAllGames, BONUS_GAMES, BONUS_POINTS } from '../services/dailyBonusHelpers.js';
+import { hasCompletedAllGames, BONUS_GAMES, BONUS_POINTS, buildBonusProgressLine } from '../services/dailyBonusHelpers.js';
 
 // ─── Инфраструктура ──────────────────────────────────────────────────────────
 
@@ -229,6 +229,43 @@ async function runAllTests() {
 
   await test(`BONUS_POINTS равен 20`, () => {
     eq(BONUS_POINTS, 20, 'Бонус должен быть 20 очков');
+  });
+
+  // ── buildBonusProgressLine ────────────────────────────────────────────────
+
+  console.log('\n📊 buildBonusProgressLine (progress messages)\n');
+
+  await test('возвращает null если бонус уже начислен', () => {
+    const line = buildBonusProgressLine(['word', 'idiom', 'phrasal_verb', 'quiz'], true);
+    ok(line === null, 'Если бонус выдан — null');
+  });
+
+  await test('0 из 4 — показывает все 4 оставшихся', () => {
+    const line = buildBonusProgressLine([], false);
+    ok(typeof line === 'string' && line.length > 0, 'Должна быть строка');
+    ok(line.includes('слово дня'), 'Упоминает слово дня');
+    ok(line.includes('идиома'), 'Упоминает идиому');
+    ok(line.includes('phrasal verb'), 'Упоминает phrasal verb');
+    ok(line.includes('квиз'), 'Упоминает квиз');
+  });
+
+  await test('1 из 4 — показывает 3 оставшихся', () => {
+    const line = buildBonusProgressLine(['word'], false);
+    ok(line.includes('1/4'), 'Показывает прогресс 1/4');
+    ok(!line.includes('слово дня'), 'Слово дня уже отвечено — не упоминается');
+    ok(line.includes('идиома'), 'Идиома ещё нужна');
+  });
+
+  await test('3 из 4 — показывает 1 оставшийся (phrasal verb)', () => {
+    const line = buildBonusProgressLine(['word', 'idiom', 'quiz'], false);
+    ok(line.includes('3/4'), 'Показывает прогресс 3/4');
+    ok(line.includes('phrasal verb'), 'Осталась только phrasal verb');
+    ok(line.includes('Последний шаг'), 'Мотивирующий текст для последнего шага');
+  });
+
+  await test('все 4 отвечены, бонус не выдан — возвращает null', () => {
+    const line = buildBonusProgressLine(['word', 'idiom', 'phrasal_verb', 'quiz'], false);
+    ok(line === null, 'Когда всё выполнено — null (бонус обработается отдельно)');
   });
 
   // ─── Итог ────────────────────────────────────────────────────────────────
