@@ -23,6 +23,7 @@ try {
 } catch (_) {}
 
 import { pickFromBank, readBankFile, writeJsonArray } from '../utils/bankUtils.js';
+import { hasCompletedAllGames, BONUS_GAMES, BONUS_POINTS } from '../services/dailyBonusHelpers.js';
 
 // ─── Инфраструктура ──────────────────────────────────────────────────────────
 
@@ -167,6 +168,67 @@ async function runAllTests() {
       eq(back.length, 1, 'Прочитанный массив должен содержать 1 элемент');
       eq(back[0].word, 'test', 'Данные должны совпадать после записи и чтения');
     } finally { cleanUp(f); }
+  });
+
+  // ── hasCompletedAllGames (daily bonus logic) ──────────────────────────────
+
+  console.log('\n🎯 hasCompletedAllGames (daily bonus)\n');
+
+  await test('возвращает false если ни одной игры', () => {
+    ok(hasCompletedAllGames([]) === false, 'Пустой массив → false');
+  });
+
+  await test('возвращает false если ответил только на 3 из 4 игр', () => {
+    const participations = [
+      { game_type: 'word',         answered: true },
+      { game_type: 'idiom',        answered: true },
+      { game_type: 'phrasal_verb', answered: true },
+      // quiz отсутствует
+    ];
+    ok(hasCompletedAllGames(participations) === false, '3 игры → false');
+  });
+
+  await test('возвращает true если ответил на все 4 игры', () => {
+    const participations = [
+      { game_type: 'word',         answered: true },
+      { game_type: 'idiom',        answered: true },
+      { game_type: 'phrasal_verb', answered: true },
+      { game_type: 'quiz',         answered: true },
+    ];
+    ok(hasCompletedAllGames(participations) === true, 'Все 4 игры → true');
+  });
+
+  await test('не считает игры с answered: false', () => {
+    const participations = [
+      { game_type: 'word',         answered: true  },
+      { game_type: 'idiom',        answered: true  },
+      { game_type: 'phrasal_verb', answered: true  },
+      { game_type: 'quiz',         answered: false }, // не ответил
+    ];
+    ok(hasCompletedAllGames(participations) === false, 'answered:false не считается');
+  });
+
+  await test('игнорирует лишние типы игр (fact и др.)', () => {
+    const participations = [
+      { game_type: 'word',         answered: true },
+      { game_type: 'idiom',        answered: true },
+      { game_type: 'phrasal_verb', answered: true },
+      { game_type: 'quiz',         answered: true },
+      { game_type: 'fact',         answered: true }, // не входит в BONUS_GAMES
+    ];
+    ok(hasCompletedAllGames(participations) === true, 'Лишние типы не мешают');
+  });
+
+  await test('BONUS_GAMES содержит ровно 4 нужные игры', () => {
+    eq(BONUS_GAMES.length, 4, 'Должно быть 4 игры');
+    ok(BONUS_GAMES.includes('word'), 'word');
+    ok(BONUS_GAMES.includes('idiom'), 'idiom');
+    ok(BONUS_GAMES.includes('phrasal_verb'), 'phrasal_verb');
+    ok(BONUS_GAMES.includes('quiz'), 'quiz');
+  });
+
+  await test(`BONUS_POINTS равен 20`, () => {
+    eq(BONUS_POINTS, 20, 'Бонус должен быть 20 очков');
   });
 
   // ─── Итог ────────────────────────────────────────────────────────────────

@@ -34,6 +34,7 @@ import { notifySimpleWordGameStats, testAdminMessage } from '../features/simpleW
 import { getPollStats, getLatestPoll } from '../services/pollServices.js';
 import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay } from '../services/miniEventService.js';
 import { addIsoCalendarDays } from '../utils/moscowWeek.js';
+import { checkAndAwardDailyBonus } from '../services/dailyBonusService.js';
 
 // ── Streak helpers ──────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -645,6 +646,11 @@ export async function handleWordGameCallback(bot, callbackQuery, userSessions) {
         resultMessage += buildStreakLine(streakCount, isStreakMilestone);
       }
 
+      const wordBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
+      if (wordBonusAwarded) {
+        resultMessage += `\n\n🔥 <b>+${20} бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
+      }
+
       await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
       if (isCorrect) await sendRandomSticker(bot, userId, 'correct');
 
@@ -875,6 +881,11 @@ export async function handleIdiomGameCallback(bot, callbackQuery, userSessions) 
     }
     if (isCorrect) {
       resultMessage += buildStreakLine(idiomStreakCount, isIdiomStreakMilestone);
+    }
+
+    const idiomBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
+    if (idiomBonusAwarded) {
+      resultMessage += `\n\n🔥 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
@@ -1197,6 +1208,11 @@ export async function handlePhrasalVerbGameCallback(bot, callbackQuery, userSess
       resultMessage += buildStreakLine(phrasalStreakCount, isPhrasalStreakMilestone);
     }
 
+    const pvBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
+    if (pvBonusAwarded) {
+      resultMessage += `\n\n🔥 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
+    }
+
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });
     if (isCorrect) await sendRandomSticker(bot, userId, 'correct');
 
@@ -1360,6 +1376,11 @@ export async function handleQuizGameCallback(bot, callbackQuery, userSessions) {
     }
     if (isCorrect) {
       resultMessage += buildStreakLine(quizStreakCount, isQuizStreakMilestone);
+    }
+
+    const quizBonusAwarded = await checkAndAwardDailyBonus(userId, gameDate);
+    if (quizBonusAwarded) {
+      resultMessage += `\n\n🔥 <b>+20 бонусных очков!</b> Ты ответил на все 4 игры сегодня!`;
     }
 
     await sendUserMessage(bot, userId, resultMessage, { parse_mode: 'HTML' });

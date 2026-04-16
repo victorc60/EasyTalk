@@ -20,6 +20,7 @@ import './models/PollResponse.js';
 import './models/MiniEventDay.js';
 import './models/MiniEventParticipant.js';
 import './models/MiniEventResponse.js';
+import './models/DailyBonus.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
