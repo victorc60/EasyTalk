@@ -451,6 +451,32 @@ function moscowDateTime() {
 }
 
 
+/**
+ * Marks the given IDs as isUsed:true in the specified bank file.
+ * Used by miniEventService to record which questions were used in an event day.
+ */
+export function appendBankHistoryEntries(bankKey, ids) {
+  const spec = BANK_SPECS[bankKey];
+  if (!spec || !Array.isArray(ids) || ids.length === 0) return;
+  try {
+    const items = JSON.parse(fs.readFileSync(spec.bankFile, 'utf8'));
+    const idSet = new Set(ids.map(String));
+    let changed = false;
+    for (const item of items) {
+      const itemId = String(item.id ?? spec.bankSelector(item) ?? '');
+      if (idSet.has(itemId) && !item.isUsed) {
+        item.isUsed = true;
+        changed = true;
+      }
+    }
+    if (changed) {
+      fs.writeFileSync(spec.bankFile, JSON.stringify(items, null, 2), 'utf8');
+    }
+  } catch (err) {
+    console.error(`appendBankHistoryEntries error for ${bankKey}:`, err.message);
+  }
+}
+
 export function getAllBankCoverage() {
   return Object.keys(BANK_SPECS).map((bankKey) => getCoverageForBank(bankKey));
 }
