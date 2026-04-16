@@ -80,8 +80,8 @@ function readBankFile(filePath) {
   }
 }
 
-// Generic: pick random unused entry from bank file.
-// If all are used — resets isUsed and starts over.
+// Pick random unused entry from bank file and immediately mark it as used.
+// If all are used — resets all to false and starts over.
 function pickFromBank(filePath) {
   let rows = readBankFile(filePath);
   if (!rows.length) return null;
@@ -89,27 +89,20 @@ function pickFromBank(filePath) {
   let available = rows.filter(r => !r.isUsed);
   if (!available.length) {
     rows = rows.map(r => ({ ...r, isUsed: false }));
-    writeJsonArray(filePath, rows);
     available = rows;
     console.log(`🔄 Банк ${path.basename(filePath)} сброшен — все элементы снова доступны`);
   }
 
-  return available[Math.floor(Math.random() * available.length)];
-}
+  const chosen = available[Math.floor(Math.random() * available.length)];
 
-// Generic: set isUsed: true for the matched entry in bank file.
-function markAsUsedInBank(filePath, matcher) {
-  try {
-    const rows = readBankFile(filePath);
-    const index = rows.findIndex(matcher);
-    if (index === -1) return false;
-    rows[index] = { ...rows[index], isUsed: true };
-    writeJsonArray(filePath, rows);
-    return true;
-  } catch (err) {
-    console.error(`Не удалось пометить запись как использованную в ${filePath}:`, err.message);
-    return false;
+  // Mark as used immediately (atomic pick + mark)
+  const idx = rows.indexOf(chosen);
+  if (idx !== -1) {
+    rows[idx] = { ...rows[idx], isUsed: true };
   }
+  writeJsonArray(filePath, rows);
+
+  return chosen;
 }
 
 // ---------------------- Bank loaders (for option building) ----------------------
@@ -379,52 +372,6 @@ function pickCuratedFact() {
   return pickFromBank(FACTS_BANK_FILE);
 }
 
-// ---------------------- Mark as used ----------------------
-
-export function markWordAsUsed(word) {
-  const marked = markAsUsedInBank(
-    WORD_BANK_FILE,
-    row => normalizeKey(row?.word) === normalizeKey(word)
-  );
-  if (marked) loadCuratedWordBank();
-  return marked;
-}
-
-export function markIdiomAsUsed(idiom) {
-  const marked = markAsUsedInBank(
-    IDIOM_BANK_FILE,
-    row => normalizeKey(row?.idiom) === normalizeKey(idiom)
-  );
-  if (marked) loadCuratedIdiomBank();
-  return marked;
-}
-
-export function markPhrasalVerbAsUsed(phrasalVerb) {
-  const marked = markAsUsedInBank(
-    PHRASAL_VERBS_BANK_FILE,
-    row => normalizeKey(row?.phrasalVerb) === normalizeKey(phrasalVerb)
-  );
-  if (marked) loadCuratedPhrasalVerbsBank();
-  return marked;
-}
-
-export function markQuizAsUsed(question) {
-  const marked = markAsUsedInBank(
-    QUIZ_BANK_FILE,
-    row => normalizeKey(row?.question) === normalizeKey(question)
-  );
-  if (marked) loadCuratedQuizBank();
-  return marked;
-}
-
-export function markFactAsUsed(id) {
-  const marked = markAsUsedInBank(
-    FACTS_BANK_FILE,
-    row => normalizeKey(row?.id) === normalizeKey(id)
-  );
-  if (marked) loadCuratedFactsBank();
-  return marked;
-}
 
 // ---------------------- Usage stats ----------------------
 

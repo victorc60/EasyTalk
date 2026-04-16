@@ -1,7 +1,7 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, markWordAsUsed, markIdiomAsUsed, markPhrasalVerbAsUsed, markQuizAsUsed, markFactAsUsed } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
@@ -267,8 +267,6 @@ export async function dailyFactBroadcast(bot, userSessions) {
       return;
     }
 
-    markFactAsUsed(fact.id);
-
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
@@ -355,8 +353,6 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
     } else {
       console.log(`🔁 Используем сохранённое слово дня (${slot}): ${wordRecord.word}`);
     }
-
-    markWordAsUsed(wordRecord.word);
 
     const broadcastWord = {
       id: wordRecord.id,
@@ -526,10 +522,6 @@ export async function idiomGameBroadcast(bot, userSessions) {
 
     console.log(`✅ Idiom session saved: ${idiomData.idiom} (sessionId=${sessionId})`);
 
-    if (!markIdiomAsUsed(idiomData.idiom)) {
-      console.warn(`⚠️ Не удалось пометить идиому как использованную: ${idiomData.idiom}`);
-    }
-
     let idiomDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -636,10 +628,6 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
     }
 
     console.log(`✅ PhrasalVerb session saved: ${phrasalVerbData.phrasalVerb} (sessionId=${sessionId})`);
-
-    if (!markPhrasalVerbAsUsed(phrasalVerbData.phrasalVerb)) {
-      console.warn(`⚠️ Не удалось пометить phrasal verb как использованный: ${phrasalVerbData.phrasalVerb}`);
-    }
 
     let phrasalDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
@@ -759,10 +747,6 @@ export async function quizGameBroadcast(bot, userSessions) {
     if (!savedSession) {
       console.warn('⚠️ Не удалось сохранить квиз дня в базе');
       return;
-    }
-
-    if (!markQuizAsUsed(quizData.question)) {
-      console.warn(`⚠️ Не удалось пометить вопрос квиза как использованный: ${quizData.question}`);
     }
 
     let quizDbWarnSent = false;
@@ -897,8 +881,6 @@ export async function adminPreviewWord(bot, adminChatId, userSessions) {
       return;
     }
 
-    markWordAsUsed(savedRecord.word);
-
     const broadcastWord = {
       id: savedRecord.id,
       word: savedRecord.word,
@@ -972,8 +954,6 @@ export async function adminPreviewIdiom(bot, adminChatId, userSessions) {
       return;
     }
 
-    markIdiomAsUsed(idiomData.idiom);
-
     const keyboard = {
       inline_keyboard: idiomData.options.map((option, index) => [{
         text: `${index + 1}. ${option}`,
@@ -1022,8 +1002,6 @@ export async function adminPreviewPhrasal(bot, adminChatId, userSessions) {
       await sendUserMessage(bot, adminChatId, '⚠️ Не удалось сохранить phrasal verb в БД.', { parse_mode: 'HTML' });
       return;
     }
-
-    markPhrasalVerbAsUsed(pvData.phrasalVerb);
 
     const keyboard = {
       inline_keyboard: pvData.options.map((option, index) => [{
@@ -1074,8 +1052,6 @@ export async function adminPreviewQuiz(bot, adminChatId, userSessions) {
       return;
     }
 
-    markQuizAsUsed(quizData.question);
-
     const keyboard = {
       inline_keyboard: quizData.options.map((option, index) => [{
         text: `${index + 1}. ${option}`,
@@ -1124,8 +1100,6 @@ export async function adminPreviewFact(bot, adminChatId, userSessions) {
       await sendUserMessage(bot, adminChatId, '⚠️ Не удалось сохранить факт в БД.', { parse_mode: 'HTML' });
       return;
     }
-
-    markFactAsUsed(fact.id);
 
     const dateKey = getMoscowDateString();
     userSessions.factGames.set(adminChatId, {
