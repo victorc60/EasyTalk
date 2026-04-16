@@ -5,6 +5,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { dataFilePath } from '../utils/projectPaths.js';
+import { readBankFile, writeJsonArray, pickFromBank } from '../utils/bankUtils.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -60,57 +61,6 @@ async function generateEnglishContent(prompt, format = 'text') {
   }
 }
 
-function writeJsonArray(filePath, rows) {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), 'utf8');
-}
-
-function readBankFile(filePath) {
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    const raw = fs.readFileSync(filePath, 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (err) {
-    console.error(`Не удалось прочитать банк ${filePath}:`, err.message);
-    return [];
-  }
-}
-
-// Generic: pick random unused entry from bank file.
-// If all are used — resets isUsed and starts over.
-function pickFromBank(filePath) {
-  let rows = readBankFile(filePath);
-  if (!rows.length) return null;
-
-  let available = rows.filter(r => !r.isUsed);
-  if (!available.length) {
-    rows = rows.map(r => ({ ...r, isUsed: false }));
-    writeJsonArray(filePath, rows);
-    available = rows;
-    console.log(`🔄 Банк ${path.basename(filePath)} сброшен — все элементы снова доступны`);
-  }
-
-  return available[Math.floor(Math.random() * available.length)];
-}
-
-// Generic: set isUsed: true for the matched entry in bank file.
-function markAsUsedInBank(filePath, matcher) {
-  try {
-    const rows = readBankFile(filePath);
-    const index = rows.findIndex(matcher);
-    if (index === -1) return false;
-    rows[index] = { ...rows[index], isUsed: true };
-    writeJsonArray(filePath, rows);
-    return true;
-  } catch (err) {
-    console.error(`Не удалось пометить запись как использованную в ${filePath}:`, err.message);
-    return false;
-  }
-}
 
 // ---------------------- Bank loaders (for option building) ----------------------
 
@@ -379,52 +329,6 @@ function pickCuratedFact() {
   return pickFromBank(FACTS_BANK_FILE);
 }
 
-// ---------------------- Mark as used ----------------------
-
-export function markWordAsUsed(word) {
-  const marked = markAsUsedInBank(
-    WORD_BANK_FILE,
-    row => normalizeKey(row?.word) === normalizeKey(word)
-  );
-  if (marked) loadCuratedWordBank();
-  return marked;
-}
-
-export function markIdiomAsUsed(idiom) {
-  const marked = markAsUsedInBank(
-    IDIOM_BANK_FILE,
-    row => normalizeKey(row?.idiom) === normalizeKey(idiom)
-  );
-  if (marked) loadCuratedIdiomBank();
-  return marked;
-}
-
-export function markPhrasalVerbAsUsed(phrasalVerb) {
-  const marked = markAsUsedInBank(
-    PHRASAL_VERBS_BANK_FILE,
-    row => normalizeKey(row?.phrasalVerb) === normalizeKey(phrasalVerb)
-  );
-  if (marked) loadCuratedPhrasalVerbsBank();
-  return marked;
-}
-
-export function markQuizAsUsed(question) {
-  const marked = markAsUsedInBank(
-    QUIZ_BANK_FILE,
-    row => normalizeKey(row?.question) === normalizeKey(question)
-  );
-  if (marked) loadCuratedQuizBank();
-  return marked;
-}
-
-export function markFactAsUsed(id) {
-  const marked = markAsUsedInBank(
-    FACTS_BANK_FILE,
-    row => normalizeKey(row?.id) === normalizeKey(id)
-  );
-  if (marked) loadCuratedFactsBank();
-  return marked;
-}
 
 // ---------------------- Usage stats ----------------------
 

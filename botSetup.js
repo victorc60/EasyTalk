@@ -352,6 +352,54 @@ function setupCommandHandlers(bot, userSessions) {
     await adminPreviewFact(bot, msg.chat.id, userSessions);
   });
 
+  // ── Turbo test: 5 rounds of all 4 games, 20 min apart ──────────────────
+  bot.onText(/\/turbotest/, async (msg) => {
+    if (!isAdmin(msg.from.id)) return;
+
+    const chatId = msg.chat.id;
+    const TOTAL_ROUNDS = 5;
+    const ROUND_INTERVAL_MS = 20 * 60 * 1000; // 20 minutes
+    const GAME_GAP_MS = 20 * 1000;            // 20 seconds between games
+
+    await sendUserMessage(bot, chatId,
+      `🚀 <b>Турбо-тест запущен!</b>\n\n` +
+      `Будет ${TOTAL_ROUNDS} раундов по 4 игры.\n` +
+      `⏱ Интервал между раундами: 20 минут\n` +
+      `⏱ Пауза между играми в раунде: 20 секунд\n\n` +
+      `Раунд 1 начинается прямо сейчас...`,
+      { parse_mode: 'HTML' }
+    );
+
+    async function runRound(roundNum) {
+      const slot = `turbo_${roundNum}`;
+      await sendUserMessage(bot, chatId,
+        `🔔 <b>Раунд ${roundNum}/${TOTAL_ROUNDS}</b> — отправляю игры...`,
+        { parse_mode: 'HTML' }
+      );
+
+      try { await wordGameBroadcast(bot, userSessions, slot); } catch (e) { console.error(`Turbo word r${roundNum}:`, e.message); }
+      await new Promise(r => setTimeout(r, GAME_GAP_MS));
+
+      try { await idiomGameBroadcast(bot, userSessions, slot); } catch (e) { console.error(`Turbo idiom r${roundNum}:`, e.message); }
+      await new Promise(r => setTimeout(r, GAME_GAP_MS));
+
+      try { await phrasalVerbGameBroadcast(bot, userSessions, slot); } catch (e) { console.error(`Turbo phrasal r${roundNum}:`, e.message); }
+      await new Promise(r => setTimeout(r, GAME_GAP_MS));
+
+      try { await quizGameBroadcast(bot, userSessions, slot); } catch (e) { console.error(`Turbo quiz r${roundNum}:`, e.message); }
+
+      await sendUserMessage(bot, chatId,
+        `✅ <b>Раунд ${roundNum}/${TOTAL_ROUNDS} отправлен.</b>${roundNum < TOTAL_ROUNDS ? `\nСледующий раунд через 20 минут.` : '\n\n🏁 Турбо-тест завершён! Всё работает.'}`,
+        { parse_mode: 'HTML' }
+      );
+    }
+
+    for (let round = 1; round <= TOTAL_ROUNDS; round++) {
+      const delay = (round - 1) * ROUND_INTERVAL_MS;
+      setTimeout(() => runRound(round), delay);
+    }
+  });
+
   bot.onText(/\/cancel_broadcast/, async (msg) => {
     const userId = msg.from.id.toString();
     if (userId !== process.env.ADMIN_ID && userId !== "340048933") {
