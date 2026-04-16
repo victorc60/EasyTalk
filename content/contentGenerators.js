@@ -5,6 +5,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { dataFilePath } from '../utils/projectPaths.js';
+import { readBankFile, writeJsonArray, pickFromBank } from '../utils/bankUtils.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -60,50 +61,6 @@ async function generateEnglishContent(prompt, format = 'text') {
   }
 }
 
-function writeJsonArray(filePath, rows) {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), 'utf8');
-}
-
-function readBankFile(filePath) {
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    const raw = fs.readFileSync(filePath, 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (err) {
-    console.error(`Не удалось прочитать банк ${filePath}:`, err.message);
-    return [];
-  }
-}
-
-// Pick random unused entry from bank file and immediately mark it as used.
-// If all are used — resets all to false and starts over.
-function pickFromBank(filePath) {
-  let rows = readBankFile(filePath);
-  if (!rows.length) return null;
-
-  let available = rows.filter(r => !r.isUsed);
-  if (!available.length) {
-    rows = rows.map(r => ({ ...r, isUsed: false }));
-    available = rows;
-    console.log(`🔄 Банк ${path.basename(filePath)} сброшен — все элементы снова доступны`);
-  }
-
-  const chosen = available[Math.floor(Math.random() * available.length)];
-
-  // Mark as used immediately (atomic pick + mark)
-  const idx = rows.indexOf(chosen);
-  if (idx !== -1) {
-    rows[idx] = { ...rows[idx], isUsed: true };
-  }
-  writeJsonArray(filePath, rows);
-
-  return chosen;
-}
 
 // ---------------------- Bank loaders (for option building) ----------------------
 
