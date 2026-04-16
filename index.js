@@ -163,11 +163,14 @@ process.on('unhandledRejection', (error) => {
       // Всегда отвечаем 200 — Railway не должен убивать контейнер пока идёт init БД
       res.json({ ok: isReady, status: isReady ? 'ready' : 'initializing' });
     });
-    const server = app.listen(port, () => {
-      console.log(`Server listening on port ${port}`);
+    const server = await new Promise((resolve) => {
+      const s = app.listen(port, () => {
+        console.log(`Server listening on port ${port}`);
+        resolve(s);
+      });
     });
 
-    // Валидация env после старта сервера, чтобы healthcheck уже отвечал 200
+    // Валидация env после того как сервер реально начал слушать порт
     validateEnv();
 
     await initializeDatabase();
