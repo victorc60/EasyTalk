@@ -161,18 +161,14 @@ function setupSchedulers(bot, userSessions) {
       await notifyDailyWordGameStats(bot, { isScheduledRun: true });
     });
 
-    // Аудит покрытия банков и автопополнение раз в 15 дней (1, 16, 31 число) в 03:00 по Кишинёву
-    const bankAuditRule = new schedule.RecurrenceRule();
-    bankAuditRule.tz = 'Europe/Chisinau';
-    bankAuditRule.date = new schedule.Range(1, 31, 15);
-    bankAuditRule.hour = 3;
-    bankAuditRule.minute = 0;
-    bankAuditRule.second = 0;
-
-    schedule.scheduleJob(bankAuditRule, async () => {
-      console.log('Запуск аудита банков контента и автопополнения (каждые 15 дней)');
-      await runDailyBankAuditAndAutofill(bot);
-    });
+    // Аудит покрытия банков раз в неделю в 03:00 по Кишинёву (воскресенье)
+    schedule.scheduleJob(
+      { dayOfWeek: 0, hour: 3, minute: 0, tz: 'Europe/Chisinau' },
+      async () => {
+        console.log('Запуск еженедельного аудита банков контента');
+        await runDailyBankAuditAndAutofill(bot);
+      }
+    );
     
     schedule.scheduleJob(CONFIG.CLEANUP_TIME, () => {
       console.log('Запуск cleanupInactiveUsers');
@@ -243,7 +239,7 @@ async function setupBotCommands(bot) {
       { command: 'cancel_broadcast', description: 'Отменить рассылку (админ)' },
       { command: 'poll', description: 'Создать опрос (админ)' },
       { command: 'poll_results', description: 'Результаты опроса (админ)' },
-      { command: 'bank_audit', description: 'Аудит/автопополнение банков (админ)' },
+      { command: 'bank_audit', description: 'Аудит покрытия банков контента (админ)' },
       { command: 'mini_event_invite', description: 'Рассылка mini-event (админ)' },
       { command: 'mini_event_finalize', description: 'Завершить mini-event (админ)' }
     ];
@@ -331,9 +327,9 @@ function setupCommandHandlers(bot, userSessions) {
       return;
     }
 
-    await sendUserMessage(bot, msg.chat.id, '🧠 Запускаю аудит банков и автопополнение.');
+    await sendUserMessage(bot, msg.chat.id, '🧠 Запускаю аудит банков контента.');
     try {
-      await runDailyBankAuditAndAutofill(bot, { batchSize: 30 });
+      await runDailyBankAuditAndAutofill(bot);
       await sendUserMessage(bot, msg.chat.id, '✅ Аудит завершен. Детали отправлены администратору.');
     } catch (error) {
       await sendUserMessage(bot, msg.chat.id, `⚠️ Ошибка аудита: ${error.message}`);
