@@ -14,8 +14,6 @@ const BANK_SPECS = {
     key: 'word',
     title: 'Word Bank',
     bankFile: path.join(DATA_DIR, 'word_bank.json'),
-    historyFile: path.join(DATA_DIR, 'word_history.json'),
-    historySelector: (row) => row,
     bankSelector: (row) => row?.word,
     generatorSchema: {
       required: ['word', 'translation', 'level', 'partOfSpeech', 'topic']
@@ -25,8 +23,6 @@ const BANK_SPECS = {
     key: 'idiom',
     title: 'Idiom Bank',
     bankFile: path.join(DATA_DIR, 'idiom_bank.json'),
-    historyFile: path.join(DATA_DIR, 'idiom_history.json'),
-    historySelector: (row) => row,
     bankSelector: (row) => row?.idiom,
     generatorSchema: {
       required: ['idiom', 'translation', 'meaning', 'example', 'hint']
@@ -36,8 +32,6 @@ const BANK_SPECS = {
     key: 'phrasal_verb',
     title: 'Phrasal Verb Bank',
     bankFile: path.join(DATA_DIR, 'phrasal_verbs_bank.json'),
-    historyFile: path.join(DATA_DIR, 'phrasal_verbs_history.json'),
-    historySelector: (row) => row,
     bankSelector: (row) => row?.phrasalVerb,
     generatorSchema: {
       required: ['phrasalVerb', 'translation', 'meaning', 'example', 'hint', 'topic']
@@ -47,8 +41,6 @@ const BANK_SPECS = {
     key: 'quiz',
     title: 'Quiz Bank',
     bankFile: path.join(DATA_DIR, 'quiz_bank.json'),
-    historyFile: path.join(DATA_DIR, 'quiz_history.json'),
-    historySelector: (row) => row,
     bankSelector: (row) => row?.question,
     generatorSchema: {
       required: ['question', 'options', 'correctIndex', 'hint', 'explanation']
@@ -58,8 +50,6 @@ const BANK_SPECS = {
     key: 'mini_event',
     title: 'Mini Event Bank',
     bankFile: path.join(DATA_DIR, 'mini_event_questions.json'),
-    historyFile: path.join(DATA_DIR, 'mini_event_history.json'),
-    historySelector: (row) => row,
     bankSelector: (row) => row?.id,
     generatorSchema: {
       required: ['id', 'type', 'question', 'options', 'correctIndex', 'explanation']
@@ -69,8 +59,6 @@ const BANK_SPECS = {
     key: 'fact',
     title: 'Fact Bank',
     bankFile: path.join(DATA_DIR, 'facts_bank.json'),
-    historyFile: path.join(DATA_DIR, 'fact_history.json'),
-    historySelector: (row) => row,
     bankSelector: (row) => row?.id,
     generatorSchema: {
       required: ['id', 'claim', 'claimRu', 'isTrue', 'explanation']
@@ -128,36 +116,18 @@ function getCoverageForBank(bankKey) {
   }
 
   const bankRows = readJsonArray(spec.bankFile);
-  const usedRows = readJsonArray(spec.historyFile);
-
-  const bankKeySet = buildExistingKeySet(spec, bankRows);
-  const usedKeySet = new Set();
-
-  for (const row of usedRows) {
-    const key = normalizeKey(spec.historySelector(row));
-    if (key) {
-      usedKeySet.add(key);
-    }
-  }
-
-  let usedFromBank = 0;
-  for (const key of bankKeySet) {
-    if (usedKeySet.has(key)) {
-      usedFromBank += 1;
-    }
-  }
-
-  const total = bankKeySet.size;
-  const remaining = Math.max(total - usedFromBank, 0);
+  const total = bankRows.length;
+  const used = bankRows.filter(row => row.isUsed).length;
+  const remaining = total - used;
 
   return {
     bankKey,
     title: spec.title,
     total,
-    used: usedFromBank,
+    used,
     remaining,
     exhausted: remaining === 0,
-    usageRate: total > 0 ? Math.round((usedFromBank / total) * 100) : 0
+    usageRate: total > 0 ? Math.round((used / total) * 100) : 0
   };
 }
 
@@ -480,55 +450,31 @@ function moscowDateTime() {
   return new Date().toLocaleString('ru-RU', { timeZone: AUDIT_TZ });
 }
 
-export function appendBankHistoryEntry(bankKey, value) {
+
+/**
+ * Marks the given IDs as isUsed:true in the specified bank file.
+ * Used by miniEventService to record which questions were used in an event day.
+ */
+export function appendBankHistoryEntries(bankKey, ids) {
   const spec = BANK_SPECS[bankKey];
-  if (!spec || !value) {
-    return false;
-  }
-
-  const historyRows = readJsonArray(spec.historyFile);
-  const target = normalizeKey(value);
-  if (!target) {
-    return false;
-  }
-
-  const hasValue = historyRows.some((row) => normalizeKey(spec.historySelector(row)) === target);
-  if (hasValue) {
-    return false;
-  }
-
-  historyRows.push(value);
-  writeJsonArray(spec.historyFile, historyRows);
-  return true;
-}
-
-export function appendBankHistoryEntries(bankKey, values = []) {
-  const spec = BANK_SPECS[bankKey];
-  if (!spec || !Array.isArray(values) || values.length === 0) {
-    return 0;
-  }
-
-  const historyRows = readJsonArray(spec.historyFile);
-  const existingKeys = new Set(
-    historyRows.map((row) => normalizeKey(spec.historySelector(row))).filter(Boolean)
-  );
-
-  let appended = 0;
-  for (const value of values) {
-    const target = normalizeKey(value);
-    if (!target || existingKeys.has(target)) {
-      continue;
+  if (!spec || !Array.isArray(ids) || ids.length === 0) return;
+  try {
+    const items = JSON.parse(fs.readFileSync(spec.bankFile, 'utf8'));
+    const idSet = new Set(ids.map(String));
+    let changed = false;
+    for (const item of items) {
+      const itemId = String(item.id ?? spec.bankSelector(item) ?? '');
+      if (idSet.has(itemId) && !item.isUsed) {
+        item.isUsed = true;
+        changed = true;
+      }
     }
-    historyRows.push(value);
-    existingKeys.add(target);
-    appended += 1;
+    if (changed) {
+      fs.writeFileSync(spec.bankFile, JSON.stringify(items, null, 2), 'utf8');
+    }
+  } catch (err) {
+    console.error(`appendBankHistoryEntries error for ${bankKey}:`, err.message);
   }
-
-  if (appended > 0) {
-    writeJsonArray(spec.historyFile, historyRows);
-  }
-
-  return appended;
 }
 
 export function getAllBankCoverage() {

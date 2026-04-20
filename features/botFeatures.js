@@ -1,10 +1,9 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
 import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
-import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay, consumeIdiomFromBank, consumePhrasalVerbFromBank, consumeQuizFromBank } from '../content/contentGenerators.js';
+import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
-import { appendBankHistoryEntry } from '../services/bankLifecycleService.js';
 import { scheduleWordGameStatsNotification } from './wordGameNotifications.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -18,6 +17,19 @@ import { getMoscowWeekRangeKeys } from '../utils/moscowWeek.js';
 
 let phrasalVerbRepeatWarningSent = false;
 const BONUS_BY_PLACE = [100, 75, 50];
+
+/** Builds a 2-column inline keyboard from an options array. */
+function makeTwoColumnKeyboard(options, makeCallback) {
+  const rows = [];
+  for (let i = 0; i < options.length; i += 2) {
+    const row = [{ text: `${i + 1}. ${options[i]}`, callback_data: makeCallback(i) }];
+    if (i + 1 < options.length) {
+      row.push({ text: `${i + 2}. ${options[i + 1]}`, callback_data: makeCallback(i + 1) });
+    }
+    rows.push(row);
+  }
+  return rows;
+}
 
 async function getWeeklyLeaders(weekStartKey, weekEndKey) {
   const [gameRows, miniRewardedRows, miniQuizRows] = await Promise.all([
@@ -268,8 +280,6 @@ export async function dailyFactBroadcast(bot, userSessions) {
       return;
     }
 
-    appendBankHistoryEntry('fact', fact.id);
-
     const { success, fails } = await sendToAllUsers(
       bot,
       async (userId) => {
@@ -357,8 +367,6 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
       console.log(`🔁 Используем сохранённое слово дня (${slot}): ${wordRecord.word}`);
     }
 
-    appendBankHistoryEntry('word', wordRecord.word);
-
     const broadcastWord = {
       id: wordRecord.id,
       word: wordRecord.word,
@@ -411,10 +419,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
 
         const keyboard = {
           inline_keyboard: [
-            ...broadcastWord.options.map((option, index) => [{
-              text: `${index + 1}. ${option}`,
-              callback_data: `word_game_${userId}_${broadcastWord.id}_${index}`
-            }]),
+            ...makeTwoColumnKeyboard(broadcastWord.options, i => `word_game_${userId}_${broadcastWord.id}_${i}`),
             [{ text: '💡 Подсказка', callback_data: `word_hint_${userId}_${broadcastWord.id}` }]
           ]
         };
@@ -476,7 +481,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         const safeFact = escapeHtml(broadcastWord.fact);
 
         return {
-          text: `🌸🎯 <b>Word of the Day</b>\n${safeWord}\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
+          text: `📖 <b>Word of the Day</b>\n\n🔤 <b>${safeWord}</b>\n\n📝 ${safeExample}\n💡 ${safeFact}\n\n👇 Выбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -495,7 +500,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
   }
 }
 
-export async function idiomGameBroadcast(bot, userSessions) {
+export async function idiomGameBroadcast(bot, userSessions, slot = 'default') {
   try {
     const idiomData = await idiomOfTheDay();
     if (!idiomData) {
@@ -508,6 +513,7 @@ export async function idiomGameBroadcast(bot, userSessions) {
     const savedSession = await saveDailyGameSession({
       gameType: GAME_TYPES.IDIOM,
       sessionId,
+      slot,
       prompt: idiomData.idiom,
       translation: idiomData.translation,
       options: idiomData.options,
@@ -527,10 +533,6 @@ export async function idiomGameBroadcast(bot, userSessions) {
 
     console.log(`✅ Idiom session saved: ${idiomData.idiom} (sessionId=${sessionId})`);
 
-    if (!consumeIdiomFromBank(idiomData.idiom)) {
-      console.warn(`⚠️ Не удалось удалить использованную идиому из idiom_bank.json: ${idiomData.idiom}`);
-    }
-
     let idiomDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -541,7 +543,8 @@ export async function idiomGameBroadcast(bot, userSessions) {
           false,
           false,
           0,
-          null
+          null,
+          slot
         );
         if (!recorded && !idiomDbWarnSent) {
           idiomDbWarnSent = true;
@@ -549,10 +552,7 @@ export async function idiomGameBroadcast(bot, userSessions) {
         }
 
         const keyboard = {
-          inline_keyboard: idiomData.options.map((option, index) => [{
-            text: `${index + 1}. ${option}`,
-            callback_data: `idiom_game_${userId}_${sessionId}_${index}`
-          }])
+          inline_keyboard: makeTwoColumnKeyboard(idiomData.options, i => `idiom_game_${userId}_${sessionId}_${i}`)
         };
 
         userSessions.idiomGames.set(userId, {
@@ -572,7 +572,7 @@ export async function idiomGameBroadcast(bot, userSessions) {
         const safeHint = escapeHtml(idiomData.hint || 'Попробуй вспомнить контекст');
 
         return {
-          text: `🌷🧩 <b>Idiom of the Day</b>\n${safeIdiom}\n\n📝 Пример: ${safeExample}\n💡 Подсказка: ${safeHint}\n\nВыбери правильный перевод:`,
+          text: `💬 <b>Idiom of the Day</b>\n\n✨ <b>${safeIdiom}</b>\n\n📝 Пример: ${safeExample}\n🔎 Подсказка: ${safeHint}\n\n👇 Выбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -595,7 +595,7 @@ export async function idiomGameBroadcast(bot, userSessions) {
   }
 }
 
-export async function phrasalVerbGameBroadcast(bot, userSessions) {
+export async function phrasalVerbGameBroadcast(bot, userSessions, slot = 'default') {
   try {
     const phrasalVerbData = await phrasalVerbOfTheDay();
     if (!phrasalVerbData) {
@@ -619,6 +619,7 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
     const savedSession = await saveDailyGameSession({
       gameType: GAME_TYPES.PHRASAL_VERB,
       sessionId,
+      slot,
       prompt: phrasalVerbData.phrasalVerb,
       translation: phrasalVerbData.translation,
       options: phrasalVerbData.options,
@@ -638,10 +639,6 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
 
     console.log(`✅ PhrasalVerb session saved: ${phrasalVerbData.phrasalVerb} (sessionId=${sessionId})`);
 
-    if (!consumePhrasalVerbFromBank(phrasalVerbData.phrasalVerb)) {
-      console.warn(`⚠️ Не удалось удалить использованный phrasal verb из phrasal_verbs_bank.json: ${phrasalVerbData.phrasalVerb}`);
-    }
-
     let phrasalDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -652,7 +649,8 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
           false,
           false,
           0,
-          null
+          null,
+          slot
         );
         if (!recorded && !phrasalDbWarnSent) {
           phrasalDbWarnSent = true;
@@ -660,10 +658,7 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
         }
 
         const keyboard = {
-          inline_keyboard: phrasalVerbData.options.map((option, index) => [{
-            text: `${index + 1}. ${option}`,
-            callback_data: `phrasal_verb_game_${userId}_${sessionId}_${index}`
-          }])
+          inline_keyboard: makeTwoColumnKeyboard(phrasalVerbData.options, i => `phrasal_verb_game_${userId}_${sessionId}_${i}`)
         };
 
         if (!userSessions.phrasalVerbGames) {
@@ -687,7 +682,7 @@ export async function phrasalVerbGameBroadcast(bot, userSessions) {
         const safeHint = escapeHtml(phrasalVerbData.hint || 'Попробуй вспомнить контекст');
 
         return {
-          text: `🌿🔤 <b>Phrasal Verb of the Day</b>\n${safePhrasalVerb}\n\n📝 Пример: ${safeExample}\n💡 Подсказка: ${safeHint}\n\nВыбери правильный перевод:`,
+          text: `🔗 <b>Phrasal Verb of the Day</b>\n\n✨ <b>${safePhrasalVerb}</b>\n\n📝 Пример: ${safeExample}\n🔎 Подсказка: ${safeHint}\n\n👇 Выбери правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -736,7 +731,7 @@ export async function dailyHoroscopeBroadcast(bot) {
   }
 }
 
-export async function quizGameBroadcast(bot, userSessions) {
+export async function quizGameBroadcast(bot, userSessions, slot = 'default') {
   try {
     const quizData = await quizOfTheDay();
     if (!quizData) {
@@ -748,6 +743,7 @@ export async function quizGameBroadcast(bot, userSessions) {
     const savedSession = await saveDailyGameSession({
       gameType: GAME_TYPES.QUIZ,
       sessionId,
+      slot,
       prompt: quizData.question,
       options: quizData.options,
       correctIndex: quizData.correctIndex,
@@ -762,10 +758,6 @@ export async function quizGameBroadcast(bot, userSessions) {
       return;
     }
 
-    if (!consumeQuizFromBank(quizData.question)) {
-      console.warn(`⚠️ Не удалось удалить использованный вопрос из quiz_bank.json: ${quizData.question}`);
-    }
-
     let quizDbWarnSent = false;
     const { success, fails } = await sendToAllUsers(
       bot,
@@ -776,7 +768,8 @@ export async function quizGameBroadcast(bot, userSessions) {
           false,
           false,
           0,
-          null
+          null,
+          slot
         );
         if (!recorded && !quizDbWarnSent) {
           quizDbWarnSent = true;
@@ -784,10 +777,7 @@ export async function quizGameBroadcast(bot, userSessions) {
         }
 
         const keyboard = {
-          inline_keyboard: quizData.options.map((option, index) => [{
-            text: `${index + 1}. ${option}`,
-            callback_data: `quiz_game_${userId}_${sessionId}_${index}`
-          }])
+          inline_keyboard: makeTwoColumnKeyboard(quizData.options, i => `quiz_game_${userId}_${sessionId}_${i}`)
         };
 
         if (!userSessions.quizGames) {
@@ -808,7 +798,7 @@ export async function quizGameBroadcast(bot, userSessions) {
         const safeHint = escapeHtml(quizData.hint || 'Подумай про контекст Международного женского дня');
 
         return {
-          text: `🌼🧠 <b>Quiz of the Day</b>\n${safeQuestion}\n\n💡 Подсказка: ${safeHint}\n\nВыбери правильный ответ:`,
+          text: `🧠 <b>Quiz of the Day</b>\n\n❓ <b>${safeQuestion}</b>\n\n🔎 Подсказка: ${safeHint}\n\n👇 Выбери правильный ответ:`,
           reply_markup: keyboard
         };
       },
@@ -879,6 +869,272 @@ async function getFileSize(url) {
   } catch (error) {
     console.error('Ошибка получения размера файла:', error.message);
     return 0;
+  }
+}
+
+// ─── Функции превью игр для админа (только отправляют игру в чат админа) ───
+
+export async function adminPreviewWord(bot, adminChatId, userSessions) {
+  try {
+    const generatedWord = await wordOfTheDay();
+    if (!generatedWord) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Слово дня: bank пуст или недоступен.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const savedRecord = await saveDailyWordData(generatedWord, 'admin_preview');
+    if (!savedRecord) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось сохранить слово в БД.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const broadcastWord = {
+      id: savedRecord.id,
+      word: savedRecord.word,
+      translation: savedRecord.translation,
+      options: Array.isArray(savedRecord.options) ? [...savedRecord.options] : [],
+      example: savedRecord.example,
+      fact: savedRecord.fact,
+      mistakes: savedRecord.mistakes,
+      correctIndex: typeof savedRecord.correctIndex === 'number' ? savedRecord.correctIndex : savedRecord.correct_index,
+      slot: 'admin_preview'
+    };
+
+    if (!broadcastWord.options.length) {
+      await sendUserMessage(bot, adminChatId, '⚠️ У слова нет вариантов ответа.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const normalizedTranslation = broadcastWord.translation.toLowerCase();
+    if (!Number.isInteger(broadcastWord.correctIndex) || broadcastWord.correctIndex < 0) {
+      broadcastWord.correctIndex = broadcastWord.options.findIndex(o => o?.toLowerCase?.() === normalizedTranslation);
+      if (broadcastWord.correctIndex === -1) broadcastWord.correctIndex = 0;
+    }
+
+    const keyboard = {
+      inline_keyboard: [
+        ...broadcastWord.options.map((option, index) => [{
+          text: `${index + 1}. ${option}`,
+          callback_data: `word_game_${adminChatId}_${broadcastWord.id}_${index}`
+        }]),
+        [{ text: '💡 Подсказка', callback_data: `word_hint_${adminChatId}_${broadcastWord.id}` }]
+      ]
+    };
+
+    let userGameMap = userSessions.wordGames.get(adminChatId);
+    if (!userGameMap) { userGameMap = new Map(); userSessions.wordGames.set(adminChatId, userGameMap); }
+    userGameMap.set(broadcastWord.id.toString(), { ...broadcastWord, normalizedTranslation, startTime: Date.now(), timer: null });
+
+    await recordWordGameParticipation(adminChatId, broadcastWord.word, false, false, 0, null, 'admin_preview');
+
+    const safeWord = escapeHtml(broadcastWord.word);
+    const safeExample = escapeHtml(broadcastWord.example);
+    const safeFact = escapeHtml(broadcastWord.fact);
+
+    await sendUserMessage(bot, adminChatId,
+      `👤 <b>[ADMIN PREVIEW] Word of the Day</b>\n🌸🎯 <b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
+      { parse_mode: 'HTML', reply_markup: keyboard }
+    );
+  } catch (error) {
+    console.error('Ошибка adminPreviewWord:', error.message);
+    await sendUserMessage(bot, adminChatId, `⚠️ Ошибка: ${error.message}`, { parse_mode: 'HTML' });
+  }
+}
+
+export async function adminPreviewIdiom(bot, adminChatId, userSessions) {
+  try {
+    const idiomData = await idiomOfTheDay();
+    if (!idiomData) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось получить идиому дня.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    const savedSession = await saveDailyGameSession({
+      gameType: GAME_TYPES.IDIOM, sessionId,
+      prompt: idiomData.idiom, translation: idiomData.translation,
+      options: idiomData.options, correctIndex: idiomData.correctIndex,
+      meta: { meaning: idiomData.meaning, example: idiomData.example, hint: idiomData.hint }
+    });
+    if (!savedSession) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось сохранить идиому в БД.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const keyboard = {
+      inline_keyboard: idiomData.options.map((option, index) => [{
+        text: `${index + 1}. ${option}`,
+        callback_data: `idiom_game_${adminChatId}_${sessionId}_${index}`
+      }])
+    };
+
+    userSessions.idiomGames.set(adminChatId, {
+      sessionId, idiom: idiomData.idiom, translation: idiomData.translation,
+      meaning: idiomData.meaning, example: idiomData.example, hint: idiomData.hint,
+      options: idiomData.options, correctIndex: idiomData.correctIndex, startTime: Date.now()
+    });
+
+    await recordIdiomGameParticipation(adminChatId, idiomData.idiom, false, false, 0, null);
+
+    const safeIdiom = escapeHtml(idiomData.idiom);
+    const safeExample = escapeHtml(idiomData.example || '—');
+    const safeHint = escapeHtml(idiomData.hint || 'Попробуй вспомнить контекст');
+
+    await sendUserMessage(bot, adminChatId,
+      `👤 <b>[ADMIN PREVIEW] Idiom of the Day</b>\n🌷🧩 <b>${safeIdiom}</b>\n\n📝 Пример: ${safeExample}\n💡 Подсказка: ${safeHint}\n\nВыбери правильный перевод:`,
+      { parse_mode: 'HTML', reply_markup: keyboard }
+    );
+  } catch (error) {
+    console.error('Ошибка adminPreviewIdiom:', error.message);
+    await sendUserMessage(bot, adminChatId, `⚠️ Ошибка: ${error.message}`, { parse_mode: 'HTML' });
+  }
+}
+
+export async function adminPreviewPhrasal(bot, adminChatId, userSessions) {
+  try {
+    const pvData = await phrasalVerbOfTheDay();
+    if (!pvData) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось получить phrasal verb дня.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    const savedSession = await saveDailyGameSession({
+      gameType: GAME_TYPES.PHRASAL_VERB, sessionId,
+      prompt: pvData.phrasalVerb, translation: pvData.translation,
+      options: pvData.options, correctIndex: pvData.correctIndex,
+      meta: { meaning: pvData.meaning, example: pvData.example, hint: pvData.hint }
+    });
+    if (!savedSession) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось сохранить phrasal verb в БД.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const keyboard = {
+      inline_keyboard: pvData.options.map((option, index) => [{
+        text: `${index + 1}. ${option}`,
+        callback_data: `phrasal_verb_game_${adminChatId}_${sessionId}_${index}`
+      }])
+    };
+
+    if (!userSessions.phrasalVerbGames) userSessions.phrasalVerbGames = new Map();
+    userSessions.phrasalVerbGames.set(adminChatId, {
+      sessionId, phrasalVerb: pvData.phrasalVerb, translation: pvData.translation,
+      meaning: pvData.meaning, example: pvData.example, hint: pvData.hint,
+      options: pvData.options, correctIndex: pvData.correctIndex, startTime: Date.now()
+    });
+
+    await recordPhrasalVerbGameParticipation(adminChatId, pvData.phrasalVerb, false, false, 0, null);
+
+    const safePV = escapeHtml(pvData.phrasalVerb);
+    const safeExample = escapeHtml(pvData.example || '—');
+    const safeHint = escapeHtml(pvData.hint || 'Попробуй вспомнить контекст');
+
+    await sendUserMessage(bot, adminChatId,
+      `👤 <b>[ADMIN PREVIEW] Phrasal Verb of the Day</b>\n🌿🔤 <b>${safePV}</b>\n\n📝 Пример: ${safeExample}\n💡 Подсказка: ${safeHint}\n\nВыбери правильный перевод:`,
+      { parse_mode: 'HTML', reply_markup: keyboard }
+    );
+  } catch (error) {
+    console.error('Ошибка adminPreviewPhrasal:', error.message);
+    await sendUserMessage(bot, adminChatId, `⚠️ Ошибка: ${error.message}`, { parse_mode: 'HTML' });
+  }
+}
+
+export async function adminPreviewQuiz(bot, adminChatId, userSessions) {
+  try {
+    const quizData = await quizOfTheDay();
+    if (!quizData) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось получить квиз дня.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    const savedSession = await saveDailyGameSession({
+      gameType: GAME_TYPES.QUIZ, sessionId,
+      prompt: quizData.question, options: quizData.options, correctIndex: quizData.correctIndex,
+      meta: { hint: quizData.hint, explanation: quizData.explanation }
+    });
+    if (!savedSession) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось сохранить квиз в БД.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const keyboard = {
+      inline_keyboard: quizData.options.map((option, index) => [{
+        text: `${index + 1}. ${option}`,
+        callback_data: `quiz_game_${adminChatId}_${sessionId}_${index}`
+      }])
+    };
+
+    if (!userSessions.quizGames) userSessions.quizGames = new Map();
+    userSessions.quizGames.set(adminChatId, {
+      sessionId, question: quizData.question, options: quizData.options,
+      correctIndex: quizData.correctIndex, hint: quizData.hint,
+      explanation: quizData.explanation, startTime: Date.now()
+    });
+
+    await recordQuizGameParticipation(adminChatId, quizData.question, false, false, 0, null);
+
+    const safeQuestion = escapeHtml(quizData.question);
+    const safeHint = escapeHtml(quizData.hint || '');
+
+    await sendUserMessage(bot, adminChatId,
+      `👤 <b>[ADMIN PREVIEW] Quiz of the Day</b>\n🌼🧠 ${safeQuestion}\n\n💡 Подсказка: ${safeHint}\n\nВыбери правильный ответ:`,
+      { parse_mode: 'HTML', reply_markup: keyboard }
+    );
+  } catch (error) {
+    console.error('Ошибка adminPreviewQuiz:', error.message);
+    await sendUserMessage(bot, adminChatId, `⚠️ Ошибка: ${error.message}`, { parse_mode: 'HTML' });
+  }
+}
+
+export async function adminPreviewFact(bot, adminChatId, userSessions) {
+  try {
+    const fact = await dailyFact();
+    if (!fact) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось получить факт дня.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const sessionId = Math.random().toString(36).slice(2, 10);
+    const savedSession = await saveDailyGameSession({
+      gameType: GAME_TYPES.FACT, sessionId,
+      prompt: fact.claim, translation: fact.isTrue ? 'True' : 'False',
+      options: ['True', 'False'], correctIndex: fact.isTrue ? 0 : 1,
+      meta: { claimRu: fact.claimRu, isTrue: fact.isTrue, explanation: fact.explanation }
+    });
+    if (!savedSession) {
+      await sendUserMessage(bot, adminChatId, '⚠️ Не удалось сохранить факт в БД.', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const dateKey = getMoscowDateString();
+    userSessions.factGames.set(adminChatId, {
+      sessionId, factId: fact.id, claim: fact.claim, claimRu: fact.claimRu,
+      isTrue: fact.isTrue, explanation: fact.explanation,
+      startTime: Date.now(), dateKey, expired: false
+    });
+
+    await recordFactGameParticipation(adminChatId, fact.claim, false, false, 0, null);
+
+    const safeClaim = escapeHtml(fact.claim);
+    const safeClaimRu = escapeHtml(fact.claimRu);
+
+    await sendUserMessage(bot, adminChatId,
+      `👤 <b>[ADMIN PREVIEW] Fact of the Day</b>\n🌷✨ <b>Fact of the Day</b>\n\n🇬🇧 ${safeClaim}\n🇷🇺 ${safeClaimRu}\n\nВеришь или не веришь?`,
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '✅ Верю', callback_data: `fact_game_${adminChatId}_${sessionId}_true` }],
+            [{ text: '🤔 Не верю', callback_data: `fact_game_${adminChatId}_${sessionId}_false` }]
+          ]
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Ошибка adminPreviewFact:', error.message);
+    await sendUserMessage(bot, adminChatId, `⚠️ Ошибка: ${error.message}`, { parse_mode: 'HTML' });
   }
 }
 

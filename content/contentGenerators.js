@@ -5,10 +5,22 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { dataFilePath } from '../utils/projectPaths.js';
+import { readBankFile, writeJsonArray, pickFromBank } from '../utils/bankUtils.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const usedFactsCache = new Set();
-const CACHE_LIMIT = 200; // Increased to store more facts and reduce repetition
+
+const WORD_BANK_FILE = dataFilePath('word_bank.json');
+const IDIOM_BANK_FILE = dataFilePath('idiom_bank.json');
+const PHRASAL_VERBS_BANK_FILE = dataFilePath('phrasal_verbs_bank.json');
+const QUIZ_BANK_FILE = dataFilePath('quiz_bank.json');
+const FACTS_BANK_FILE = dataFilePath('facts_bank.json');
+
+// Module-level bank caches (used for building answer options/distractors)
+let curatedWordBank = [];
+let curatedIdiomBank = [];
+let curatedPhrasalVerbsBank = [];
+let curatedQuizBank = [];
+let curatedFactsBank = [];
 
 function normalizeKey(value = '') {
   return String(value ?? '').trim().toLowerCase();
@@ -49,427 +61,42 @@ async function generateEnglishContent(prompt, format = 'text') {
   }
 }
 
-export async function dailyFact() {
-  loadCuratedFactsBank();
-  const factEntry = pickCuratedFact();
-  if (!factEntry) {
-    console.warn('⚠️ Fact of the Day не может быть сформирован: facts_bank.json пуст или недоступен');
-    return null;
-  }
 
-  return {
-    id: factEntry.id,
-    claim: factEntry.claim,
-    claimRu: factEntry.claimRu,
-    isTrue: factEntry.isTrue,
-    explanation: factEntry.explanation
-  };
-}
-
-// Добавляем в начало файла
-const usedWordsCache = new Set();
-const MAX_CACHE_SIZE = 365; // Храним 365 последних слов (около года)
-const WORD_HISTORY_FILE = dataFilePath('word_history.json');
-const WORD_BANK_FILE = dataFilePath('word_bank.json');
-const WORD_INDEX_FILE = dataFilePath('word_index.json');
-const FACTS_BANK_FILE = dataFilePath('facts_bank.json');
-let curatedWordBank = [];
-let curatedFactsBank = [];
-let availableCuratedWords = [];
-const usedIdiomsCache = new Set();
-const IDIOM_HISTORY_FILE = dataFilePath('idiom_history.json');
-const IDIOM_BANK_FILE = dataFilePath('idiom_bank.json');
-let curatedIdiomBank = [];
-let availableCuratedIdioms = [];
-const usedPhrasalVerbsCache = new Set();
-const PHRASAL_VERBS_HISTORY_FILE = dataFilePath('phrasal_verbs_history.json');
-const PHRASAL_VERBS_BANK_FILE = dataFilePath('phrasal_verbs_bank.json');
-let curatedPhrasalVerbsBank = [];
-let availableCuratedPhrasalVerbs = [];
-const usedQuizCache = new Set();
-const QUIZ_HISTORY_FILE = dataFilePath('quiz_history.json');
-const QUIZ_BANK_FILE = dataFilePath('quiz_bank.json');
-const FACT_HISTORY_FILE = dataFilePath('fact_history.json');
-let curatedQuizBank = [];
-
-function loadUsedWordsFromDisk() {
-  try {
-    if (fs.existsSync(WORD_HISTORY_FILE)) {
-      const raw = fs.readFileSync(WORD_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const word of parsed) {
-          if (typeof word === 'string' && word.trim()) {
-            usedWordsCache.add(word.trim().toLowerCase());
-          }
-        }
-        console.log(`📚 Загружено ${usedWordsCache.size} слов из истории`);
-      }
-    } else {
-      console.log('📚 Файл истории слов не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю слов:', error.message);
-  }
-}
-
-function saveUsedWordsToDisk() {
-  try {
-    const dir = path.dirname(WORD_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    // Сохраняем не более MAX_CACHE_SIZE последних слов
-    const wordsArray = Array.from(usedWordsCache);
-    const trimmed = wordsArray.slice(Math.max(0, wordsArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(WORD_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} слов в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю слов:', error.message);
-  }
-}
-
-function loadUsedIdiomsFromDisk() {
-  try {
-    if (fs.existsSync(IDIOM_HISTORY_FILE)) {
-      const raw = fs.readFileSync(IDIOM_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const idiom of parsed) {
-          if (typeof idiom === 'string' && idiom.trim()) {
-            usedIdiomsCache.add(idiom.trim().toLowerCase());
-          }
-        }
-        console.log(`📒 Загружено ${usedIdiomsCache.size} идиом из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории идиом не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю идиом:', error.message);
-  }
-}
-
-export function seedUsedIdiomsCache(idiomList) {
-  for (const idiom of idiomList) {
-    if (typeof idiom === 'string' && idiom.trim()) {
-      usedIdiomsCache.add(idiom.trim().toLowerCase());
-    }
-  }
-  availableCuratedIdioms = [];
-  rebuildCuratedIdiomPool();
-  console.log(`🔄 usedIdiomsCache заполнен из БД: ${usedIdiomsCache.size} идиом`);
-}
-
-export function seedUsedWordsCache(wordList) {
-  for (const word of wordList) {
-    if (typeof word === 'string' && word.trim()) {
-      usedWordsCache.add(word.trim().toLowerCase());
-    }
-  }
-  console.log(`🔄 usedWordsCache заполнен из БД: ${usedWordsCache.size} слов`);
-}
-
-export function seedUsedPhrasalVerbsCache(pvList) {
-  for (const pv of pvList) {
-    if (typeof pv === 'string' && pv.trim()) {
-      usedPhrasalVerbsCache.add(pv.trim().toLowerCase());
-    }
-  }
-  availableCuratedPhrasalVerbs = [];
-  rebuildCuratedPhrasalVerbsPool();
-  console.log(`🔄 usedPhrasalVerbsCache заполнен из БД: ${usedPhrasalVerbsCache.size} phrasal verbs`);
-}
-
-export function seedUsedQuizCache(quizList) {
-  for (const q of quizList) {
-    if (typeof q === 'string' && q.trim()) {
-      usedQuizCache.add(q.trim().toLowerCase());
-    }
-  }
-  console.log(`🔄 usedQuizCache заполнен из БД: ${usedQuizCache.size} квизов`);
-}
-
-function saveUsedIdiomsToDisk() {
-  try {
-    const dir = path.dirname(IDIOM_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const idiomsArray = Array.from(usedIdiomsCache);
-    const trimmed = idiomsArray.slice(Math.max(0, idiomsArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(IDIOM_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} идиом в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю идиом:', error.message);
-  }
-}
-
-// Функции для работы с Phrasal Verbs
-function loadUsedPhrasalVerbsFromDisk() {
-  try {
-    if (fs.existsSync(PHRASAL_VERBS_HISTORY_FILE)) {
-      const raw = fs.readFileSync(PHRASAL_VERBS_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const phrasalVerb of parsed) {
-          if (typeof phrasalVerb === 'string' && phrasalVerb.trim()) {
-            usedPhrasalVerbsCache.add(phrasalVerb.trim().toLowerCase());
-          }
-        }
-        console.log(`📒 Загружено ${usedPhrasalVerbsCache.size} phrasal verbs из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории phrasal verbs не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю phrasal verbs:', error.message);
-  }
-}
-
-function saveUsedPhrasalVerbsToDisk() {
-  try {
-    const dir = path.dirname(PHRASAL_VERBS_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const phrasalVerbsArray = Array.from(usedPhrasalVerbsCache);
-    const trimmed = phrasalVerbsArray.slice(Math.max(0, phrasalVerbsArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(PHRASAL_VERBS_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} phrasal verbs в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю phrasal verbs:', error.message);
-  }
-}
-
-function loadUsedQuizFromDisk() {
-  try {
-    if (fs.existsSync(QUIZ_HISTORY_FILE)) {
-      const raw = fs.readFileSync(QUIZ_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const entry of parsed) {
-          if (typeof entry === 'string' && entry.trim()) {
-            usedQuizCache.add(entry.trim().toLowerCase());
-          }
-        }
-        console.log(`📒 Загружено ${usedQuizCache.size} quiz вопросов из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории квиза не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю квиза:', error.message);
-  }
-}
-
-function saveUsedQuizToDisk() {
-  try {
-    const dir = path.dirname(QUIZ_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const quizArray = Array.from(usedQuizCache);
-    const trimmed = quizArray.slice(Math.max(0, quizArray.length - MAX_CACHE_SIZE));
-    fs.writeFileSync(QUIZ_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} quiz вопросов в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю квиза:', error.message);
-  }
-}
-
-function loadUsedFactsFromDisk() {
-  try {
-    if (fs.existsSync(FACT_HISTORY_FILE)) {
-      const raw = fs.readFileSync(FACT_HISTORY_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        for (const factKey of parsed) {
-          if (typeof factKey === 'string' && factKey.trim()) {
-            usedFactsCache.add(factKey.trim());
-          }
-        }
-        console.log(`📒 Загружено ${usedFactsCache.size} ключей фактов из истории`);
-      }
-    } else {
-      console.log('📒 Файл истории фактов не найден, создаём новый');
-    }
-  } catch (error) {
-    console.error('Не удалось загрузить историю фактов:', error.message);
-  }
-}
-
-function saveUsedFactsToDisk() {
-  try {
-    const dir = path.dirname(FACT_HISTORY_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const factKeys = Array.from(usedFactsCache);
-    const trimmed = factKeys.slice(Math.max(0, factKeys.length - CACHE_LIMIT));
-    fs.writeFileSync(FACT_HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
-    console.log(`💾 Сохранено ${trimmed.length} ключей фактов в историю`);
-  } catch (error) {
-    console.error('Не удалось сохранить историю фактов:', error.message);
-  }
-}
-
-function writeJsonArray(filePath, rows) {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), 'utf8');
-}
-
-function removeEntryFromBankFile(filePath, matcher) {
-  try {
-    if (!fs.existsSync(filePath)) {
-      return false;
-    }
-
-    const raw = fs.readFileSync(filePath, 'utf8');
-    const rows = JSON.parse(raw);
-    if (!Array.isArray(rows)) {
-      return false;
-    }
-
-    const index = rows.findIndex(matcher);
-    if (index === -1) {
-      return false;
-    }
-
-    rows.splice(index, 1);
-    writeJsonArray(filePath, rows);
-    return true;
-  } catch (error) {
-    console.error(`Не удалось удалить запись из ${filePath}:`, error.message);
-    return false;
-  }
-}
-
-function refreshWordBank() {
-  curatedWordBank = [];
-  availableCuratedWords = [];
-  loadCuratedWordBank();
-}
-
-function refreshIdiomBank() {
-  curatedIdiomBank = [];
-  availableCuratedIdioms = [];
-  loadCuratedIdiomBank();
-}
-
-function refreshPhrasalVerbsBank() {
-  curatedPhrasalVerbsBank = [];
-  availableCuratedPhrasalVerbs = [];
-  loadCuratedPhrasalVerbsBank();
-}
-
-function refreshQuizBank() {
-  curatedQuizBank = [];
-  loadCuratedQuizBank();
-}
-
-function refreshFactsBank() {
-  curatedFactsBank = [];
-  loadCuratedFactsBank();
-}
-
-function loadCuratedFactsBank() {
-  try {
-    if (!fs.existsSync(FACTS_BANK_FILE)) {
-      console.warn('📘 Файл фактов не найден');
-      curatedFactsBank = [];
-      return curatedFactsBank;
-    }
-    const raw = fs.readFileSync(FACTS_BANK_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error('формат facts bank должен быть массивом');
-    }
-    const seen = new Set();
-    curatedFactsBank = parsed
-      .filter((entry) =>
-        entry &&
-        typeof entry.id === 'string' &&
-        entry.id.trim() &&
-        typeof entry.claim === 'string' &&
-        entry.claim.trim() &&
-        typeof entry.claimRu === 'string' &&
-        entry.claimRu.trim() &&
-        typeof entry.isTrue === 'boolean' &&
-        typeof entry.explanation === 'string' &&
-        entry.explanation.trim()
-      )
-      .map((entry) => ({
-        id: entry.id.trim(),
-        claim: entry.claim.trim(),
-        claimRu: entry.claimRu.trim(),
-        isTrue: entry.isTrue,
-        explanation: entry.explanation.trim()
-      }))
-      .filter((entry) => {
-        const key = entry.id.toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    console.log(`📘 Загружено ${curatedFactsBank.length} фактов из банка`);
-  } catch (error) {
-    console.error('Не удалось загрузить банк фактов:', error.message);
-    curatedFactsBank = [];
-  }
-  return curatedFactsBank;
-}
+// ---------------------- Bank loaders (for option building) ----------------------
 
 function loadCuratedWordBank() {
   try {
     if (!fs.existsSync(WORD_BANK_FILE)) {
-      console.warn('📘 Файл словаря не найден, продолжим с резервными словами');
       curatedWordBank = [];
-      availableCuratedWords = [];
       return curatedWordBank;
     }
-    const raw = fs.readFileSync(WORD_BANK_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error('формат словаря должен быть массивом');
-    }
-    curatedWordBank = parsed
-      .filter((entry) => {
+    const rows = readBankFile(WORD_BANK_FILE);
+    curatedWordBank = rows
+      .filter(entry => {
         if (!entry?.word) return false;
-        // Поддерживаем оба формата:
-        // - legacy: { translation: "..." }
-        // - current bank: { translations: ["...", "..."] }
         if (typeof entry.translation === 'string' && entry.translation.trim()) return true;
-        if (Array.isArray(entry.translations) && entry.translations.some((t) => typeof t === 'string' && t.trim()))
-          return true;
+        if (Array.isArray(entry.translations) && entry.translations.some(t => typeof t === 'string' && t.trim())) return true;
         return false;
       })
-      .map((entry) => {
+      .map(entry => {
         const fromSingle = typeof entry.translation === 'string' ? entry.translation.trim() : '';
         const fromList = Array.isArray(entry.translations)
-          ? entry.translations.map((t) => (t || '').toString().trim()).filter(Boolean)[0] || ''
+          ? entry.translations.map(t => (t || '').toString().trim()).filter(Boolean)[0] || ''
           : '';
-        const translation = fromSingle || fromList;
-
         return {
           word: entry.word.trim(),
-          translation,
+          translation: fromSingle || fromList,
           level: entry.level || 'B1',
           partOfSpeech: entry.partOfSpeech || 'noun',
           topic: entry.topic || 'general',
-          example: entry.example || '',
+          example: entry.example || ''
         };
       })
-      .filter((entry) => entry.word && entry.translation);
-    availableCuratedWords = [];
+      .filter(entry => entry.word && entry.translation);
     console.log(`📘 Загружено ${curatedWordBank.length} слов из словаря`);
   } catch (error) {
     console.error('Не удалось загрузить словарь слов:', error.message);
     curatedWordBank = [];
-    availableCuratedWords = [];
   }
   return curatedWordBank;
 }
@@ -477,18 +104,12 @@ function loadCuratedWordBank() {
 function loadCuratedIdiomBank() {
   try {
     if (!fs.existsSync(IDIOM_BANK_FILE)) {
-      console.warn('📘 Файл идиом не найден, продолжим с резервными идиомами');
       curatedIdiomBank = [];
-      availableCuratedIdioms = [];
       return curatedIdiomBank;
     }
-    const raw = fs.readFileSync(IDIOM_BANK_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error('формат идиом должен быть массивом');
-    }
+    const rows = readBankFile(IDIOM_BANK_FILE);
     const seen = new Set();
-    curatedIdiomBank = parsed
+    curatedIdiomBank = rows
       .filter(entry => entry?.idiom && entry?.translation)
       .map(entry => ({
         idiom: entry.idiom.trim(),
@@ -504,12 +125,10 @@ function loadCuratedIdiomBank() {
         seen.add(key);
         return true;
       });
-    availableCuratedIdioms = [];
-    console.log(`📘 Загружено ${curatedIdiomBank.length} идиом из словаря (уникальные)`);
+    console.log(`📘 Загружено ${curatedIdiomBank.length} идиом из словаря`);
   } catch (error) {
     console.error('Не удалось загрузить идиомы:', error.message);
     curatedIdiomBank = [];
-    availableCuratedIdioms = [];
   }
   return curatedIdiomBank;
 }
@@ -517,18 +136,12 @@ function loadCuratedIdiomBank() {
 function loadCuratedPhrasalVerbsBank() {
   try {
     if (!fs.existsSync(PHRASAL_VERBS_BANK_FILE)) {
-      console.warn('📘 Файл phrasal verbs не найден, продолжим с резервными');
       curatedPhrasalVerbsBank = [];
-      availableCuratedPhrasalVerbs = [];
       return curatedPhrasalVerbsBank;
     }
-    const raw = fs.readFileSync(PHRASAL_VERBS_BANK_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error('формат phrasal verbs должен быть массивом');
-    }
+    const rows = readBankFile(PHRASAL_VERBS_BANK_FILE);
     const seen = new Set();
-    curatedPhrasalVerbsBank = parsed
+    curatedPhrasalVerbsBank = rows
       .filter(entry => entry?.phrasalVerb && entry?.translation)
       .map(entry => ({
         phrasalVerb: entry.phrasalVerb.trim(),
@@ -544,12 +157,10 @@ function loadCuratedPhrasalVerbsBank() {
         seen.add(key);
         return true;
       });
-    availableCuratedPhrasalVerbs = [];
-    console.log(`📘 Загружено ${curatedPhrasalVerbsBank.length} phrasal verbs из словаря (уникальные)`);
+    console.log(`📘 Загружено ${curatedPhrasalVerbsBank.length} phrasal verbs из словаря`);
   } catch (error) {
     console.error('Не удалось загрузить phrasal verbs:', error.message);
     curatedPhrasalVerbsBank = [];
-    availableCuratedPhrasalVerbs = [];
   }
   return curatedPhrasalVerbsBank;
 }
@@ -557,16 +168,11 @@ function loadCuratedPhrasalVerbsBank() {
 function loadCuratedQuizBank() {
   try {
     if (!fs.existsSync(QUIZ_BANK_FILE)) {
-      console.warn('📘 Файл вопросов квиза не найден, продолжим с резервными');
       curatedQuizBank = [];
       return curatedQuizBank;
     }
-    const raw = fs.readFileSync(QUIZ_BANK_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error('формат квиза должен быть массивом');
-    }
-    curatedQuizBank = parsed
+    const rows = readBankFile(QUIZ_BANK_FILE);
+    curatedQuizBank = rows
       .filter(entry => entry?.question && Array.isArray(entry?.options) && typeof entry?.correctIndex === 'number')
       .map(entry => ({
         question: entry.question.trim(),
@@ -585,219 +191,163 @@ function loadCuratedQuizBank() {
   return curatedQuizBank;
 }
 
-function getCuratedQuizBank() {
-  if (!curatedQuizBank.length) {
-    return loadCuratedQuizBank();
-  }
-  return curatedQuizBank;
-}
-
-function getCuratedIdiomBank() {
-  if (!curatedIdiomBank.length) {
-    return loadCuratedIdiomBank();
-  }
-  return curatedIdiomBank;
-}
-
-function getCuratedPhrasalVerbsBank() {
-  if (!curatedPhrasalVerbsBank.length) {
-    return loadCuratedPhrasalVerbsBank();
-  }
-  return curatedPhrasalVerbsBank;
-}
-
-function getCuratedFactsBank() {
-  if (!curatedFactsBank.length) {
-    return loadCuratedFactsBank();
+function loadCuratedFactsBank() {
+  try {
+    if (!fs.existsSync(FACTS_BANK_FILE)) {
+      curatedFactsBank = [];
+      return curatedFactsBank;
+    }
+    const rows = readBankFile(FACTS_BANK_FILE);
+    const seen = new Set();
+    curatedFactsBank = rows
+      .filter(entry =>
+        entry &&
+        typeof entry.id === 'string' && entry.id.trim() &&
+        typeof entry.claim === 'string' && entry.claim.trim() &&
+        typeof entry.claimRu === 'string' && entry.claimRu.trim() &&
+        typeof entry.isTrue === 'boolean' &&
+        typeof entry.explanation === 'string' && entry.explanation.trim()
+      )
+      .map(entry => ({
+        id: entry.id.trim(),
+        claim: entry.claim.trim(),
+        claimRu: entry.claimRu.trim(),
+        isTrue: entry.isTrue,
+        explanation: entry.explanation.trim()
+      }))
+      .filter(entry => {
+        const key = entry.id.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    console.log(`📘 Загружено ${curatedFactsBank.length} фактов из банка`);
+  } catch (error) {
+    console.error('Не удалось загрузить банк фактов:', error.message);
+    curatedFactsBank = [];
   }
   return curatedFactsBank;
 }
 
 function getCuratedWordBank() {
-  if (!curatedWordBank.length) {
-    return loadCuratedWordBank();
-  }
+  if (!curatedWordBank.length) return loadCuratedWordBank();
   return curatedWordBank;
 }
 
-export function isWordPresentInBank(word) {
-  if (!word) {
-    return false;
-  }
+function getCuratedIdiomBank() {
+  if (!curatedIdiomBank.length) return loadCuratedIdiomBank();
+  return curatedIdiomBank;
+}
 
+function getCuratedPhrasalVerbsBank() {
+  if (!curatedPhrasalVerbsBank.length) return loadCuratedPhrasalVerbsBank();
+  return curatedPhrasalVerbsBank;
+}
+
+
+export function isWordPresentInBank(word) {
+  if (!word) return false;
   const bank = loadCuratedWordBank();
   const normalized = word.trim().toLowerCase();
-  return bank.some((entry) => entry.word.trim().toLowerCase() === normalized);
+  return bank.some(entry => entry.word.trim().toLowerCase() === normalized);
 }
 
 export function isPhrasalVerbPresentInBank(phrasalVerb) {
-  if (!phrasalVerb) {
-    return false;
-  }
-
+  if (!phrasalVerb) return false;
   const bank = loadCuratedPhrasalVerbsBank();
   const normalized = phrasalVerb.trim().toLowerCase();
-  return bank.some((entry) => entry.phrasalVerb.trim().toLowerCase() === normalized);
+  return bank.some(entry => entry.phrasalVerb.trim().toLowerCase() === normalized);
 }
 
-// Инициализируем кэш слов из файла при загрузке модуля
-loadUsedWordsFromDisk();
+// Preload banks on module init (needed for building answer options/distractors)
 loadCuratedWordBank();
-rebuildCuratedWordPool();
-loadUsedIdiomsFromDisk();
 loadCuratedIdiomBank();
-rebuildCuratedIdiomPool();
-loadUsedPhrasalVerbsFromDisk();
 loadCuratedPhrasalVerbsBank();
-rebuildCuratedPhrasalVerbsPool();
-loadUsedQuizFromDisk();
 loadCuratedQuizBank();
-loadUsedFactsFromDisk();
 loadCuratedFactsBank();
 
-// Функция для ручного добавления слова в использованные (для исправления повторов)
-export function addWordToUsedHistory(word) {
-  const wordLower = word.trim().toLowerCase();
-  usedWordsCache.add(wordLower);
-  removeWordFromCuratedPool(wordLower);
-  saveUsedWordsToDisk();
-  console.log(`🔧 Добавлено слово "${word}" в историю использованных слов`);
-}
+// ---------------------- Pick functions ----------------------
 
-function loadWordIndex() {
-  try {
-    if (fs.existsSync(WORD_INDEX_FILE)) {
-      const raw = fs.readFileSync(WORD_INDEX_FILE, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (typeof parsed.index === 'number' && parsed.index >= 0) {
-        return parsed.index;
-      }
-    }
-  } catch (e) {
-    console.error('Не удалось загрузить word_index.json:', e.message);
-  }
-  return 0;
-}
-
-function saveWordIndex(index) {
-  try {
-    fs.writeFileSync(WORD_INDEX_FILE, JSON.stringify({ index }, null, 2), 'utf8');
-  } catch (e) {
-    console.error('Не удалось сохранить word_index.json:', e.message);
-  }
-}
-
-function pickSequentialWord() {
-  loadCuratedWordBank();
-  const bank = getCuratedWordBank();
-
-  if (!bank.length) {
-    return null;
-  }
-
-  // Фильтруем уже использованные слова (история из БД пережила рестарт)
-  const available = bank.filter(e => !usedWordsCache.has(normalizeKey(e.word)));
-  const pool = available.length > 0 ? available : bank;
-
-  const currentIndex = loadWordIndex();
-  const safeIndex = currentIndex % pool.length;
-  const entry = pool[safeIndex];
-
-  // Сдвигаем указатель на следующее слово (циклически)
-  saveWordIndex((safeIndex + 1) % pool.length);
-
-  // Обновляем историю для логов (не влияет на выбор)
-  const normalized = normalizeKey(entry.word);
-  usedWordsCache.add(normalized);
-  if (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
-  }
-  saveUsedWordsToDisk();
-
-  return entry;
-}
-
-export async function wordOfTheDay() {
-  // Слово дня идёт по локальному банку проекта, а использованные записи удаляются после фиксации на день.
-  const wordEntry = pickSequentialWord();
-  
-  if (!wordEntry) {
-    console.warn('⚠️ Word of the Day не может быть сформирован: word_bank.json пуст или недоступен');
-    return null;
-  }
-
-  const { options, correctIndex } = buildAnswerOptions(wordEntry);
-
+function pickCuratedWord() {
+  const raw = pickFromBank(WORD_BANK_FILE);
+  if (!raw) return null;
+  const fromSingle = typeof raw.translation === 'string' ? raw.translation.trim() : '';
+  const fromList = Array.isArray(raw.translations)
+    ? raw.translations.map(t => (t || '').toString().trim()).filter(Boolean)[0] || ''
+    : '';
   return {
-    word: wordEntry.word,
-    translation: wordEntry.translation,
-    level: wordEntry.level,
-    topic: wordEntry.topic,
-    options,
-    correctIndex,
-    example: buildExampleSentence(wordEntry),
-    fact: buildFactLine(wordEntry),
-    mistakes: buildMistakeLine(wordEntry)
+    word: raw.word.trim(),
+    translation: fromSingle || fromList,
+    level: raw.level || 'B1',
+    partOfSpeech: raw.partOfSpeech || 'noun',
+    topic: raw.topic || 'general',
+    example: raw.example || ''
   };
 }
 
-export function consumeWordFromBank(word) {
-  const removed = removeEntryFromBankFile(
-    WORD_BANK_FILE,
-    (row) => normalizeKey(row?.word) === normalizeKey(word)
-  );
-  if (removed) {
-    refreshWordBank();
-  }
-  return removed;
+function pickCuratedIdiom() {
+  const raw = pickFromBank(IDIOM_BANK_FILE);
+  if (!raw) return null;
+  return {
+    idiom: raw.idiom.trim(),
+    translation: raw.translation.trim(),
+    meaning: raw.meaning || raw.translation.trim(),
+    example: raw.example || '',
+    hint: raw.hint || ''
+  };
 }
 
-export function consumeIdiomFromBank(idiom) {
-  const removed = removeEntryFromBankFile(
-    IDIOM_BANK_FILE,
-    (row) => normalizeKey(row?.idiom) === normalizeKey(idiom)
-  );
-  if (removed) {
-    refreshIdiomBank();
-  }
-  return removed;
+function pickCuratedPhrasalVerb() {
+  const raw = pickFromBank(PHRASAL_VERBS_BANK_FILE);
+  if (!raw) return null;
+  return {
+    phrasalVerb: raw.phrasalVerb.trim(),
+    translation: raw.translation.trim(),
+    meaning: raw.meaning || raw.translation.trim(),
+    example: raw.example || '',
+    hint: raw.hint || ''
+  };
 }
 
-export function consumePhrasalVerbFromBank(phrasalVerb) {
-  const removed = removeEntryFromBankFile(
-    PHRASAL_VERBS_BANK_FILE,
-    (row) => normalizeKey(row?.phrasalVerb) === normalizeKey(phrasalVerb)
-  );
-  if (removed) {
-    refreshPhrasalVerbsBank();
-  }
-  return removed;
+function pickQuizQuestion() {
+  const raw = pickFromBank(QUIZ_BANK_FILE);
+  if (!raw) return null;
+  const options = Array.isArray(raw.options)
+    ? raw.options.map(opt => (opt || '').toString().trim()).filter(Boolean)
+    : [];
+  return {
+    question: raw.question.trim(),
+    options,
+    correctIndex: Math.max(0, Math.min(raw.correctIndex, options.length - 1)),
+    explanation: raw.explanation || '',
+    hint: raw.hint || '',
+    topic: raw.topic || 'general'
+  };
 }
 
-export function consumeQuizFromBank(question) {
-  const removed = removeEntryFromBankFile(
-    QUIZ_BANK_FILE,
-    (row) => normalizeKey(row?.question) === normalizeKey(question)
-  );
-  if (removed) {
-    refreshQuizBank();
-  }
-  return removed;
+function pickCuratedFact() {
+  return pickFromBank(FACTS_BANK_FILE);
 }
 
-export function consumeFactFromBank(id) {
-  const removed = removeEntryFromBankFile(
-    FACTS_BANK_FILE,
-    (row) => normalizeKey(row?.id) === normalizeKey(id)
-  );
-  if (removed) {
-    refreshFactsBank();
-  }
-  return removed;
+
+// ---------------------- Usage stats ----------------------
+
+export function getPhrasalVerbUsageStats() {
+  const rows = readBankFile(PHRASAL_VERBS_BANK_FILE);
+  const total = rows.length;
+  const used = rows.filter(r => r.isUsed).length;
+  const remaining = total - used;
+  return {
+    total,
+    used,
+    remaining,
+    nextWillRepeat: total > 0 && remaining <= 1,
+    usageRate: total > 0 ? Math.round((used / total) * 100) : 0
+  };
 }
 
-// Функция для перемешивания массива
+// ---------------------- Helper builders ----------------------
+
 function shuffleArray(array) {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -805,206 +355,6 @@ function shuffleArray(array) {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
-}
-
-function rebuildCuratedWordPool() {
-  if (!curatedWordBank.length) {
-    loadCuratedWordBank();
-  }
-  if (!curatedWordBank.length) {
-    availableCuratedWords = [];
-    return;
-  }
-
-  const unused = [];
-  for (const entry of curatedWordBank) {
-    const normalized = entry.word.trim().toLowerCase();
-    if (!usedWordsCache.has(normalized)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : curatedWordBank;
-  availableCuratedWords = shuffleArray([...poolSource]);
-}
-
-function rebuildCuratedIdiomPool() {
-  if (!curatedIdiomBank.length) {
-    loadCuratedIdiomBank();
-  }
-  if (!curatedIdiomBank.length) {
-    availableCuratedIdioms = [];
-    return;
-  }
-
-  const unused = [];
-  for (const entry of curatedIdiomBank) {
-    const normalized = entry.idiom.trim().toLowerCase();
-    if (!usedIdiomsCache.has(normalized)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : curatedIdiomBank;
-  availableCuratedIdioms = shuffleArray([...poolSource]);
-}
-
-function rebuildCuratedPhrasalVerbsPool() {
-  if (!curatedPhrasalVerbsBank.length) {
-    loadCuratedPhrasalVerbsBank();
-  }
-  if (!curatedPhrasalVerbsBank.length) {
-    availableCuratedPhrasalVerbs = [];
-    return;
-  }
-
-  const unused = [];
-  for (const entry of curatedPhrasalVerbsBank) {
-    const normalized = entry.phrasalVerb.trim().toLowerCase();
-    if (!usedPhrasalVerbsCache.has(normalized)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : curatedPhrasalVerbsBank;
-  availableCuratedPhrasalVerbs = shuffleArray([...poolSource]);
-}
-
-export function getPhrasalVerbUsageStats() {
-  const bank = getCuratedPhrasalVerbsBank();
-  const total = bank.length;
-  let usedFromBank = 0;
-
-  for (const entry of bank) {
-    const key = entry.phrasalVerb.trim().toLowerCase();
-    if (usedPhrasalVerbsCache.has(key)) {
-      usedFromBank += 1;
-    }
-  }
-
-  const remaining = Math.max(total - usedFromBank, 0);
-
-  return {
-    total,
-    used: usedFromBank,
-    remaining,
-    nextWillRepeat: total > 0 && remaining === 0,
-    usageRate: total > 0 ? Math.round((usedFromBank / total) * 100) : 0
-  };
-}
-
-function removeWordFromCuratedPool(wordLower) {
-  if (!availableCuratedWords.length) {
-    return;
-  }
-  availableCuratedWords = availableCuratedWords.filter(
-    (entry) => entry.word.trim().toLowerCase() !== wordLower
-  );
-}
-
-function pickCuratedWord() {
-  if (!availableCuratedWords.length) {
-    rebuildCuratedWordPool();
-  }
-
-  const entry = availableCuratedWords.pop();
-  if (!entry) {
-    return null;
-  }
-
-  const normalizedWord = entry.word.trim().toLowerCase();
-  usedWordsCache.add(normalizedWord);
-  if (usedWordsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedWordsCache.values().next().value;
-    usedWordsCache.delete(oldest);
-  }
-  saveUsedWordsToDisk();
-
-  return entry;
-}
-
-function pickCuratedIdiom() {
-  if (!availableCuratedIdioms.length) {
-    rebuildCuratedIdiomPool();
-  }
-
-  const entry = availableCuratedIdioms.pop();
-  if (!entry) return null;
-
-  const normalized = entry.idiom.trim().toLowerCase();
-  usedIdiomsCache.add(normalized);
-  if (usedIdiomsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedIdiomsCache.values().next().value;
-    usedIdiomsCache.delete(oldest);
-  }
-  saveUsedIdiomsToDisk();
-
-  return entry;
-}
-
-function pickCuratedPhrasalVerb() {
-  if (!availableCuratedPhrasalVerbs.length) {
-    rebuildCuratedPhrasalVerbsPool();
-  }
-
-  const entry = availableCuratedPhrasalVerbs.pop();
-  if (!entry) return null;
-
-  const normalized = entry.phrasalVerb.trim().toLowerCase();
-  usedPhrasalVerbsCache.add(normalized);
-  if (usedPhrasalVerbsCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedPhrasalVerbsCache.values().next().value;
-    usedPhrasalVerbsCache.delete(oldest);
-  }
-  saveUsedPhrasalVerbsToDisk();
-
-  return entry;
-}
-
-function pickQuizQuestion() {
-  const bank = getCuratedQuizBank();
-  if (!bank.length) return null;
-
-  const unused = [];
-  for (const entry of bank) {
-    const key = entry.question.trim().toLowerCase();
-    if (!usedQuizCache.has(key)) {
-      unused.push(entry);
-    }
-  }
-
-  const poolSource = unused.length ? unused : bank;
-  const entry = shuffleArray([...poolSource]).pop();
-  if (!entry) return null;
-
-  const normalized = entry.question.trim().toLowerCase();
-  usedQuizCache.add(normalized);
-  if (usedQuizCache.size > MAX_CACHE_SIZE) {
-    const oldest = usedQuizCache.values().next().value;
-    usedQuizCache.delete(oldest);
-  }
-  saveUsedQuizToDisk();
-
-  return entry;
-}
-
-function pickCuratedFact() {
-  const bank = getCuratedFactsBank();
-  if (!bank.length) return null;
-
-  const unused = bank.filter((entry) => !usedFactsCache.has(entry.id));
-  const pool = unused.length ? unused : bank;
-  const entry = pool[0];
-  if (!entry) return null;
-
-  usedFactsCache.add(entry.id);
-  if (usedFactsCache.size > CACHE_LIMIT) {
-    const oldest = usedFactsCache.values().next().value;
-    usedFactsCache.delete(oldest);
-  }
-  saveUsedFactsToDisk();
-
-  return entry;
 }
 
 function buildAnswerOptions(entry) {
@@ -1070,25 +420,34 @@ function buildMistakeLine(entry) {
   return `Don't confuse "${entry.word}" with other ${partOfSpeech}s — it means "${entry.translation}".`;
 }
 
-export async function idiomOfTheDay() {
-  const idiomEntry = pickCuratedIdiom();
+function buildIdiomOptions(entry) {
+  const bank = getCuratedIdiomBank();
+  const correct = entry.translation.trim();
+  const lowerCorrect = correct.toLowerCase();
+  const seen = new Set([lowerCorrect]);
+  const pool = shuffleArray(
+    bank
+      .filter(item => item.translation && item.idiom !== entry.idiom)
+      .map(item => item.translation.trim())
+  );
+  const uniqueOptions = [correct];
 
-  if (!idiomEntry) {
-    console.warn('⚠️ Idiom of the Day не может быть сформирован: idiom_bank.json пуст или недоступен');
-    return null;
+  for (const option of pool) {
+    const key = option.toLowerCase();
+    if (seen.has(key)) continue;
+    uniqueOptions.push(option);
+    seen.add(key);
+    if (uniqueOptions.length === 4) break;
   }
 
-  const { options, correctIndex } = buildIdiomOptions(idiomEntry);
+  const shuffled = shuffleArray(uniqueOptions);
+  let correctIndex = shuffled.findIndex(option => option.toLowerCase() === lowerCorrect);
+  if (correctIndex === -1) {
+    shuffled[0] = correct;
+    correctIndex = 0;
+  }
 
-  return {
-    idiom: idiomEntry.idiom,
-    translation: idiomEntry.translation,
-    meaning: idiomEntry.meaning || idiomEntry.translation,
-    example: idiomEntry.example,
-    hint: idiomEntry.hint,
-    options,
-    correctIndex
-  };
+  return { options: shuffled, correctIndex };
 }
 
 function buildPhrasalVerbOptions(entry) {
@@ -1121,16 +480,69 @@ function buildPhrasalVerbOptions(entry) {
   return { options: shuffled, correctIndex };
 }
 
-export async function phrasalVerbOfTheDay() {
-  const phrasalVerbEntry = pickCuratedPhrasalVerb();
+// ---------------------- Daily game generators ----------------------
 
-  if (!phrasalVerbEntry) {
-    console.warn('⚠️ Phrasal Verb of the Day не может быть сформирован: phrasal_verbs_bank.json пуст или недоступен');
+export async function dailyFact() {
+  const factEntry = pickCuratedFact();
+  if (!factEntry) {
+    console.warn('⚠️ Fact of the Day не может быть сформирован: facts_bank.json пуст или недоступен');
+    return null;
+  }
+  return {
+    id: factEntry.id,
+    claim: factEntry.claim,
+    claimRu: factEntry.claimRu,
+    isTrue: factEntry.isTrue,
+    explanation: factEntry.explanation
+  };
+}
+
+export async function wordOfTheDay() {
+  const wordEntry = pickCuratedWord();
+  if (!wordEntry) {
+    console.warn('⚠️ Word of the Day не может быть сформирован: word_bank.json пуст или недоступен');
     return null;
   }
 
-  if (!isPhrasalVerbPresentInBank(phrasalVerbEntry.phrasalVerb)) {
-    console.warn(`⚠️ Выбранный phrasal verb отсутствует в текущем phrasal_verbs_bank.json: ${phrasalVerbEntry.phrasalVerb}`);
+  const { options, correctIndex } = buildAnswerOptions(wordEntry);
+
+  return {
+    word: wordEntry.word,
+    translation: wordEntry.translation,
+    level: wordEntry.level,
+    topic: wordEntry.topic,
+    options,
+    correctIndex,
+    example: buildExampleSentence(wordEntry),
+    fact: buildFactLine(wordEntry),
+    mistakes: buildMistakeLine(wordEntry)
+  };
+}
+
+export async function idiomOfTheDay() {
+  const idiomEntry = pickCuratedIdiom();
+  if (!idiomEntry) {
+    console.warn('⚠️ Idiom of the Day не может быть сформирован: idiom_bank.json пуст или недоступен');
+    return null;
+  }
+
+  const { options, correctIndex } = buildIdiomOptions(idiomEntry);
+
+  return {
+    idiom: idiomEntry.idiom,
+    translation: idiomEntry.translation,
+    meaning: idiomEntry.meaning || idiomEntry.translation,
+    example: idiomEntry.example,
+    hint: idiomEntry.hint,
+    options,
+    correctIndex
+  };
+}
+
+export async function phrasalVerbOfTheDay() {
+  const phrasalVerbEntry = pickCuratedPhrasalVerb();
+  if (!phrasalVerbEntry) {
+    console.warn('⚠️ Phrasal Verb of the Day не может быть сформирован: phrasal_verbs_bank.json пуст или недоступен');
     return null;
   }
 
@@ -1167,36 +579,6 @@ export async function quizOfTheDay() {
     explanation: quizEntry.explanation || '',
     hint: quizEntry.hint || ''
   };
-}
-
-function buildIdiomOptions(entry) {
-  const bank = getCuratedIdiomBank();
-  const correct = entry.translation.trim();
-  const lowerCorrect = correct.toLowerCase();
-  const seen = new Set([lowerCorrect]);
-  const pool = shuffleArray(
-    bank
-      .filter(item => item.translation && item.idiom !== entry.idiom)
-      .map(item => item.translation.trim())
-  );
-  const uniqueOptions = [correct];
-
-  for (const option of pool) {
-    const key = option.toLowerCase();
-    if (seen.has(key)) continue;
-    uniqueOptions.push(option);
-    seen.add(key);
-    if (uniqueOptions.length === 4) break;
-  }
-
-  const shuffled = shuffleArray(uniqueOptions);
-  let correctIndex = shuffled.findIndex(option => option.toLowerCase() === lowerCorrect);
-  if (correctIndex === -1) {
-    shuffled[0] = correct;
-    correctIndex = 0;
-  }
-
-  return { options: shuffled, correctIndex };
 }
 
 // ---------------------- Daily Horoscope ----------------------
@@ -1331,7 +713,6 @@ export async function dailyHoroscope() {
 
   const cached = loadCache();
   if (cached?.message) {
-    // Защитимся от повторов даже если не удалось загрузить историю
     usedHoroscopes.add(hashText(cached.message));
   }
   if (cached?.date === todayKey && cached?.message) {
@@ -1419,7 +800,7 @@ export async function conversationTopic() {
   - questions: 3 related questions
   - vocabulary: Array of 5 objects with word and translation
   Return as JSON: {"topic": "", "questions": [], "vocabulary": [{"word": "", "translation": ""}, ...]}`;
-  
+
   const result = await generateEnglishContent(prompt, 'json');
   return result || {
     topic: "Travel experiences",
