@@ -818,3 +818,94 @@ export async function conversationTopic() {
     ]
   };
 }
+
+// ---------------------- Mark as used ----------------------
+
+function markAsUsedInBank(filePath, matchFn) {
+  try {
+    const rows = readBankFile(filePath);
+    let changed = false;
+    const updated = rows.map(row => {
+      if (!row.isUsed && matchFn(row)) {
+        changed = true;
+        return { ...row, isUsed: true };
+      }
+      return row;
+    });
+    if (changed) writeJsonArray(filePath, updated);
+    return changed;
+  } catch (err) {
+    console.error(`Не удалось пометить запись в ${path.basename(filePath)}:`, err.message);
+    return false;
+  }
+}
+
+export function markWordAsUsed(word) {
+  const ok = markAsUsedInBank(WORD_BANK_FILE, r => normalizeKey(r?.word) === normalizeKey(word));
+  if (ok) loadCuratedWordBank();
+  return ok;
+}
+
+export function markIdiomAsUsed(idiom) {
+  const ok = markAsUsedInBank(IDIOM_BANK_FILE, r => normalizeKey(r?.idiom) === normalizeKey(idiom));
+  if (ok) loadCuratedIdiomBank();
+  return ok;
+}
+
+export function markPhrasalVerbAsUsed(phrasalVerb) {
+  const ok = markAsUsedInBank(PHRASAL_VERBS_BANK_FILE, r => normalizeKey(r?.phrasalVerb) === normalizeKey(phrasalVerb));
+  if (ok) loadCuratedPhrasalVerbsBank();
+  return ok;
+}
+
+export function markQuizAsUsed(question) {
+  const ok = markAsUsedInBank(QUIZ_BANK_FILE, r => normalizeKey(r?.question) === normalizeKey(question));
+  if (ok) loadCuratedQuizBank();
+  return ok;
+}
+
+export function markFactAsUsed(id) {
+  const ok = markAsUsedInBank(FACTS_BANK_FILE, r => normalizeKey(r?.id) === normalizeKey(id));
+  if (ok) loadCuratedFactsBank();
+  return ok;
+}
+
+// ---------------------- Seed cache from DB history ----------------------
+
+function seedBankFromPrompts(filePath, prompts, keyFn, reloadFn) {
+  if (!prompts?.length) return;
+  const keys = new Set(prompts.map(p => normalizeKey(p)));
+  try {
+    const rows = readBankFile(filePath);
+    let changed = false;
+    const updated = rows.map(row => {
+      if (!row.isUsed && keys.has(normalizeKey(keyFn(row)))) {
+        changed = true;
+        return { ...row, isUsed: true };
+      }
+      return row;
+    });
+    if (changed) {
+      writeJsonArray(filePath, updated);
+      reloadFn();
+    }
+  } catch (err) {
+    console.error(`Ошибка seed для ${path.basename(filePath)}:`, err.message);
+  }
+}
+
+export function seedUsedWordsCache(words) {
+  seedBankFromPrompts(WORD_BANK_FILE, words, r => r?.word, loadCuratedWordBank);
+}
+
+export function seedUsedIdiomsCache(prompts) {
+  seedBankFromPrompts(IDIOM_BANK_FILE, prompts, r => r?.idiom, loadCuratedIdiomBank);
+}
+
+export function seedUsedPhrasalVerbsCache(prompts) {
+  seedBankFromPrompts(PHRASAL_VERBS_BANK_FILE, prompts, r => r?.phrasalVerb, loadCuratedPhrasalVerbsBank);
+}
+
+export function seedUsedQuizCache(prompts) {
+  seedBankFromPrompts(QUIZ_BANK_FILE, prompts, r => r?.question, loadCuratedQuizBank);
+}
