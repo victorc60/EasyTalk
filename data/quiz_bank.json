@@ -1,1 +1,252 @@
-[]
+[
+  {
+    "question": "If you don't know the word, you can ___ it ___ in a dictionary.",
+    "options": ["look / up", "look / at", "look / for", "look / after"],
+    "correctIndex": 0,
+    "explanation": "Look up = искать информацию (в словаре, в интернете).",
+    "hint": "Искать в словаре",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "I'm really tired. I think I'll ___ early tonight.",
+    "options": ["get up", "wake up", "go to bed", "stand up"],
+    "correctIndex": 2,
+    "explanation": "Go to bed = лечь спать. Get up / wake up — просыпаться.",
+    "hint": "Лечь спать",
+    "topic": "daily routines"
+  },
+  {
+    "question": "___ the TV, please. I want to watch the news.",
+    "options": ["Turn off", "Turn on", "Turn down", "Turn around"],
+    "correctIndex": 1,
+    "explanation": "Turn on = включить. Turn off = выключить. Turn down = сделать тише.",
+    "hint": "Включить",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "My car ___ on the way to work yesterday.",
+    "options": ["broke up", "broke down", "broke in", "broke out"],
+    "correctIndex": 1,
+    "explanation": "Break down = сломаться (о технике). Break up = расстаться.",
+    "hint": "Сломалась (машина)",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "Please ___ your shoes before you come inside.",
+    "options": ["take off", "put on", "take out", "put off"],
+    "correctIndex": 0,
+    "explanation": "Take off = снимать (одежду, обувь). Put on = надевать.",
+    "hint": "Снять обувь",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "What time do you usually ___ in the morning?",
+    "options": ["go to bed", "fall asleep", "wake up", "lie down"],
+    "correctIndex": 2,
+    "explanation": "Wake up = просыпаться. Go to bed = ложиться спать.",
+    "hint": "Просыпаться",
+    "topic": "daily routines"
+  },
+  {
+    "question": "She ___ her grandmother — they have the same eyes.",
+    "options": ["looks after", "looks for", "takes after", "looks like"],
+    "correctIndex": 2,
+    "explanation": "Take after = быть похожим на родственника. Look like = быть похожим внешне.",
+    "hint": "Похожа на (о характере или внешности)",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "I can't hear the music. Can you ___ it ___ a little?",
+    "options": ["turn / up", "turn / down", "turn / on", "turn / off"],
+    "correctIndex": 0,
+    "explanation": "Turn up = сделать громче. Turn down = сделать тише.",
+    "hint": "Сделать громче",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "The meeting was ___ until next Monday.",
+    "options": ["put off", "put on", "put away", "put out"],
+    "correctIndex": 0,
+    "explanation": "Put off = отложить. Put on = надеть. Put away = убрать.",
+    "hint": "Отложили",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "Which sentence is correct?",
+    "options": [
+      "She didn't went to the party.",
+      "She didn't go to the party.",
+      "She doesn't went to the party.",
+      "She didn't goes to the party."
+    ],
+    "correctIndex": 1,
+    "explanation": "В Past Simple после 'did not' (didn't) используйте базовую форму глагола (go, не went).",
+    "hint": "didn't + глагол без окончаний",
+    "topic": "grammar"
+  },
+  {
+    "question": "___ you ever ___ to London?",
+    "options": ["Did / been", "Have / been", "Did / go", "Have / went"],
+    "correctIndex": 1,
+    "explanation": "Present Perfect: Have you ever been to...? Опыт в жизни.",
+    "hint": "Был ли ты когда-нибудь?",
+    "topic": "grammar"
+  },
+  {
+    "question": "This is the film ___ I told you about.",
+    "options": ["who", "which", "where", "what"],
+    "correctIndex": 1,
+    "explanation": "'Which' для вещей. 'Who' для людей.",
+    "hint": "Относительное местоимение для предмета",
+    "topic": "grammar"
+  },
+  {
+    "question": "If it ___ tomorrow, we ___ at home.",
+    "options": ["rains / stay", "rains / will stay", "will rain / stay", "rain / will stay"],
+    "correctIndex": 1,
+    "explanation": "First conditional: if + present simple, will + infinitive.",
+    "hint": "Если пойдёт дождь (реальное условие)",
+    "topic": "grammar"
+  },
+  {
+    "question": "She ___ be at home. Her light is on.",
+    "options": ["can", "must", "should", "would"],
+    "correctIndex": 1,
+    "explanation": "'Must' для логического предположения (уверен на 90%).",
+    "hint": "Должно быть, она дома",
+    "topic": "grammar"
+  },
+  {
+    "question": "This is the restaurant ___ we had our first date.",
+    "options": ["which", "who", "where", "when"],
+    "correctIndex": 2,
+    "explanation": "'Where' для места. 'Which' для предмета.",
+    "hint": "Место",
+    "topic": "grammar"
+  },
+  {
+    "question": "I'm not hungry. I've ___ eaten.",
+    "options": ["just", "yet", "still", "ever"],
+    "correctIndex": 0,
+    "explanation": "Just = только что (Present Perfect). Yet — в вопросах и отрицаниях.",
+    "hint": "Только что",
+    "topic": "grammar"
+  },
+  {
+    "question": "What does 'give up' mean?",
+    "options": ["to stop trying", "to give something away", "to return something", "to start something"],
+    "correctIndex": 0,
+    "explanation": "Give up = сдаться, перестать пытаться.",
+    "hint": "Сдаться",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "He ___ his father. They're both very funny.",
+    "options": ["looks like", "takes after", "looks after", "takes care of"],
+    "correctIndex": 1,
+    "explanation": "Take after = быть похожим по характеру. Look like = внешне.",
+    "hint": "Похож характером",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "I can't ___ this noise anymore. I'm leaving.",
+    "options": ["put up with", "get on with", "come up with", "face up to"],
+    "correctIndex": 0,
+    "explanation": "Put up with = терпеть, мириться с чем-то неприятным.",
+    "hint": "Терпеть (с трудом)",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "___ a moment. I'm not ready yet.",
+    "options": ["Hold on", "Hold up", "Hold back", "Hold out"],
+    "correctIndex": 0,
+    "explanation": "Hold on = подождать (недолго). Также 'держись'.",
+    "hint": "Подожди (секунду)",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "How much does it cost ___ a taxi to the airport?",
+    "options": ["by", "with", "to take", "for take"],
+    "correctIndex": 2,
+    "explanation": "Cost + to take (инфинитив): how much does it cost to take a taxi?",
+    "hint": "Сколько стоит взять такси",
+    "topic": "grammar"
+  },
+  {
+    "question": "I'm looking ___ my keys. Have you seen them?",
+    "options": ["for", "at", "after", "forward to"],
+    "correctIndex": 0,
+    "explanation": "Look for = искать. Look after = заботиться. Look forward to = ждать с нетерпением.",
+    "hint": "Искать",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "She ___ a lot of money on clothes every month.",
+    "options": ["costs", "spends", "takes", "pays"],
+    "correctIndex": 1,
+    "explanation": "Spend money on = тратить деньги на. Cost — стоит (без человека).",
+    "hint": "Тратит деньги",
+    "topic": "vocabulary"
+  },
+  {
+    "question": "I'm not very good ___ sports.",
+    "options": ["in", "on", "at", "for"],
+    "correctIndex": 2,
+    "explanation": "Good at = умелый в чем-то. Good for = полезно для.",
+    "hint": "Хорош в (чем-то)",
+    "topic": "prepositions"
+  },
+  {
+    "question": "We need to ___ a solution to this problem.",
+    "options": ["come up with", "get along with", "put up with", "face up to"],
+    "correctIndex": 0,
+    "explanation": "Come up with = придумать (идею, решение).",
+    "hint": "Придумать",
+    "topic": "phrasal verbs"
+  },
+  {
+    "question": "Which sentence is in Present Perfect?",
+    "options": [
+      "I saw him yesterday.",
+      "I have seen him yesterday.",
+      "I have seen him already.",
+      "I see him now."
+    ],
+    "correctIndex": 2,
+    "explanation": "Present Perfect: have/has + past participle. 'Already' — типичный маркер.",
+    "hint": "have + третья форма",
+    "topic": "grammar"
+  },
+  {
+    "question": "He drives ___ fast. It's dangerous.",
+    "options": ["too", "very", "so", "enough"],
+    "correctIndex": 0,
+    "explanation": "Too = слишком (превышает норму, негатив). Very = очень (нейтрально).",
+    "hint": "Слишком (плохо)",
+    "topic": "grammar"
+  },
+  {
+    "question": "I ___ to the cinema last night.",
+    "options": ["go", "went", "have gone", "was go"],
+    "correctIndex": 1,
+    "explanation": "Last night = Past Simple. Went — правильная форма.",
+    "hint": "Вчера вечером",
+    "topic": "grammar"
+  },
+  {
+    "question": "There aren't ___ eggs left. Can you buy some?",
+    "options": ["some", "any", "no", "much"],
+    "correctIndex": 1,
+    "explanation": "Any — в отрицаниях и вопросах с неисчисляемыми и множественными.",
+    "hint": "Нет (в отрицании)",
+    "topic": "grammar"
+  },
+  {
+    "question": "What does 'get along with' mean?",
+    "options": ["to fight with", "to have a good relationship with", "to move with", "to understand"],
+    "correctIndex": 1,
+    "explanation": "Get along with = ладить, иметь хорошие отношения.",
+    "hint": "Ладить с кем-то",
+    "topic": "phrasal verbs"
+  }
+]

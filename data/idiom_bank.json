@@ -1,1 +1,182 @@
-[]
+[
+  
+  
+  {
+    "idiom": "cost an arm and a leg",
+    "translation": "стоить целое состояние",
+    "meaning": "быть очень дорогим",
+    "example": "Repairing the car cost an arm and a leg.",
+    "hint": "очень дорого"
+  },
+  
+  {
+    "idiom": "under the weather",
+    "translation": "не в своей тарелке",
+    "meaning": "чувствовать себя немного больным или уставшим",
+    "example": "I'm feeling a bit under the weather today.",
+    "hint": "плохо себя чувствовать"
+  },
+  {
+    "idiom": "once in a blue moon",
+    "translation": "раз в сто лет",
+    "meaning": "очень редко",
+    "example": "We go out for dinner once in a blue moon.",
+    "hint": "очень редко"
+  },
+  {
+    "idiom": "spill the beans",
+    "translation": "выдать секрет",
+    "meaning": "рассказать секрет, который нужно было хранить",
+    "example": "She spilled the beans about the surprise party.",
+    "hint": "разболтать тайну"
+  },
+  {
+    "idiom": "let the cat out of the bag",
+    "translation": "выпустить кота из мешка",
+    "meaning": "случайно раскрыть секрет",
+    "example": "I let the cat out of the bag about the promotion.",
+    "hint": "нечаянно выдать секрет"
+  },
+  {
+    "idiom": "when pigs fly",
+    "translation": "когда рак на горе свистнет",
+    "meaning": "никогда",
+    "example": "He'll clean his room when pigs fly.",
+    "hint": "никогда"
+  },
+  {
+    "idiom": "burn the midnight oil",
+    "translation": "работать до полуночи",
+    "meaning": "работать допоздна",
+    "example": "We burned the midnight oil to finish the project.",
+    "hint": "работать поздно ночью"
+  },
+  
+  {
+    "idiom": "get out of hand",
+    "translation": "выйти из-под контроля",
+    "meaning": "стать слишком трудным или хаотичным",
+    "example": "The party got out of hand quickly.",
+    "hint": "перестать контролироваться"
+  },
+  {
+    "idiom": "go the extra mile",
+    "translation": "сделать больше, чем от тебя ждут",
+    "meaning": "приложить дополнительные усилия",
+    "example": "Our team always goes the extra mile for clients.",
+    "hint": "постараться сверх нормы"
+  },
+  {
+    "idiom": "keep an eye on",
+    "translation": "присматривать за",
+    "meaning": "наблюдать или заботиться о ком-то или чём-то",
+    "example": "Can you keep an eye on my bag?",
+    "hint": "присмотреть"
+  },
+  {
+    "idiom": "pull someone's leg",
+    "translation": "разыгрывать кого-то",
+    "meaning": "шутить или дразнить кого-то неправдой",
+    "example": "I'm just pulling your leg — don't worry.",
+    "hint": "пошутить над кем-то"
+  },
+  {
+    "idiom": "sit on the fence",
+    "translation": "сидеть на заборе",
+    "meaning": "не принимать решение, оставаться нейтральным",
+    "example": "You can't sit on the fence forever. Choose!",
+    "hint": "не определиться"
+  },
+  {
+    "idiom": "ring a bell",
+    "translation": "казаться знакомым",
+    "meaning": "вспоминать что-то, но не точно",
+    "example": "That name rings a bell, but I'm not sure.",
+    "hint": "что-то знакомое"
+  },
+  {
+    "idiom": "see eye to eye",
+    "translation": "соглашаться друг с другом",
+    "meaning": "иметь одинаковое мнение",
+    "example": "We don't always see eye to eye, but we respect each other.",
+    "hint": "совпадать во мнениях"
+  },
+  {
+    "idiom": "play it by ear",
+    "translation": "действовать по обстановке",
+    "meaning": "принимать решения постепенно, без плана",
+    "example": "I don't have a plan — let's play it by ear.",
+    "hint": "без плана, как пойдёт"
+  },
+  {
+    "idiom": "hit the sack",
+    "translation": "отправиться спать",
+    "meaning": "лечь спать",
+    "example": "I'm exhausted — time to hit the sack.",
+    "hint": "пойти спать"
+  },
+  {
+    "idiom": "barking up the wrong tree",
+    "translation": "обратиться не по адресу",
+    "meaning": "ошибаться в поиске причины или человека",
+    "example": "If you think I took your pen, you're barking up the wrong tree.",
+    "hint": "обвинять не того"
+  },
+  
+  {
+    "idiom": "get a taste of your own medicine",
+    "translation": "получить по заслугам",
+    "meaning": "столкнуться с тем же плохим обращением, которое ты показывал другим",
+    "example": "She's always rude — now she got a taste of her own medicine.",
+    "hint": "тебе вернули тем же"
+  },
+  {
+    "idiom": "hit the road",
+    "translation": "отправиться в путь",
+    "meaning": "начать путешествие или уйти",
+    "example": "It's late — I should hit the road.",
+    "hint": "поехать или пойти"
+  },
+  {
+    "idiom": "keep your fingers crossed",
+    "translation": "держать кулачки",
+    "meaning": "надеяться на удачный результат",
+    "example": "I'm keeping my fingers crossed for your interview.",
+    "hint": "надеяться на лучшее"
+  },
+  {
+    "idiom": "steal someone's thunder",
+    "translation": "украсть чужой успех",
+    "meaning": "привлечь внимание к себе, когда кто-то другой этого заслуживает",
+    "example": "She announced her engagement at my birthday party — she stole my thunder.",
+    "hint": "перебить чужой успех"
+  },
+  {
+    "idiom": "up in the air",
+    "translation": "висит в воздухе",
+    "meaning": "не решено, неопределённо",
+    "example": "Our vacation plans are still up in the air.",
+    "hint": "неопределённо"
+  },
+  {
+    "idiom": "butter someone up",
+    "translation": "подлизываться",
+    "meaning": "хвалить кого-то, чтобы получить что-то",
+    "example": "He's buttering up the boss for a promotion.",
+    "hint": "льстить ради выгоды"
+  },
+  {
+    "idiom": "cut corners",
+    "translation": "халтурить",
+    "meaning": "делать что-то плохо, чтобы сэкономить время или деньги",
+    "example": "Don't cut corners — do it properly.",
+    "hint": "сделать кое-как"
+  },
+  {
+    "idiom": "straight from the horse's mouth",
+    "translation": "из первых уст",
+    "meaning": "получить информацию от самого надёжного источника",
+    "example": "I heard it straight from the horse's mouth — the manager told me.",
+    "hint": "от самого источника"
+  }
+]

@@ -1,1 +1,200 @@
-[]
+[
+  {
+    "phrasalVerb": "come up with",
+    "translation": "придумать",
+    "meaning": "найти идею или решение",
+    "example": "We need to come up with a new plan.",
+    "hint": "создать идею из головы"
+  },
+  {
+    "phrasalVerb": "get along with",
+    "translation": "ладить с",
+    "meaning": "иметь хорошие отношения",
+    "example": "She gets along with all her colleagues.",
+    "hint": "дружить, не ссориться"
+  },
+  
+  {
+    "phrasalVerb": "put up with",
+    "translation": "мириться с",
+    "meaning": "терпеть что-то неприятное",
+    "example": "I can't put up with this noise anymore.",
+    "hint": "терпеть через силу"
+  },
+  {
+    "phrasalVerb": "cut down on",
+    "translation": "сократить потребление",
+    "meaning": "начать делать или использовать меньше",
+    "example": "He needs to cut down on sugar.",
+    "hint": "уменьшить количество"
+  },
+  {
+    "phrasalVerb": "drop out of",
+    "translation": "бросить (учебу, соревнование)",
+    "meaning": "перестать участвовать",
+    "example": "She dropped out of college at 19.",
+    "hint": "уйти, не закончив"
+  },
+  {
+    "phrasalVerb": "end up with",
+    "translation": "оказаться с (чем-то)",
+    "meaning": "получить неожиданный результат",
+    "example": "We ended up with too much food.",
+    "hint": "финальный итог"
+  },
+  
+  {
+    "phrasalVerb": "fall behind on",
+    "translation": "отставать от графика",
+    "meaning": "не успевать сделать вовремя",
+    "example": "I fell behind on my rent payments.",
+    "hint": "не поспевать"
+  },
+  {
+    "phrasalVerb": "get rid of",
+    "translation": "избавиться от",
+    "meaning": "удалить или выбросить ненужное",
+    "example": "Let's get rid of old clothes.",
+    "hint": "освободиться от"
+  },
+  {
+    "phrasalVerb": "go over",
+    "translation": "повторить / проверить",
+    "meaning": "внимательно просмотреть",
+    "example": "Go over your test before submitting.",
+    "hint": "пройтись по материалу снова"
+  },
+  {
+    "phrasalVerb": "hold on to",
+    "translation": "держаться за",
+    "meaning": "сохранять, не отдавать",
+    "example": "Hold on to your ticket.",
+    "hint": "не отпускать из рук"
+  },
+  {
+    "phrasalVerb": "keep up with",
+    "translation": "успевать за",
+    "meaning": "идти в ногу с кем-то или чем-то",
+    "example": "It's hard to keep up with him.",
+    "hint": "не отставать"
+  },
+  {
+    "phrasalVerb": "look down on",
+    "translation": "смотреть свысока на",
+    "meaning": "считать себя лучше другого",
+    "example": "She looks down on poor people.",
+    "hint": "презирать"
+  },
+  {
+    "phrasalVerb": "look up to",
+    "translation": "уважать, восхищаться",
+    "meaning": "считать кого-то примером",
+    "example": "I've always looked up to my mother.",
+    "hint": "брать пример"
+  },
+  {
+    "phrasalVerb": "make up for",
+    "translation": "компенсировать",
+    "meaning": "возместить ущерб или потерю",
+    "example": "I bought her flowers to make up for being late.",
+    "hint": "загладить вину"
+  },
+  {
+    "phrasalVerb": "pass out",
+    "translation": "потерять сознание",
+    "meaning": "внезапно упасть в обморок",
+    "example": "It was so hot I almost passed out.",
+    "hint": "отключиться"
+  },
+  {
+    "phrasalVerb": "point out",
+    "translation": "указать на",
+    "meaning": "обратить чье-то внимание",
+    "example": "He pointed out my mistake.",
+    "hint": "сказать, чтобы заметили"
+  },
+  {
+    "phrasalVerb": "put off",
+    "translation": "отложить",
+    "meaning": "перенести на позже",
+    "example": "Don't put off until tomorrow.",
+    "hint": "отсрочить"
+  },
+  {
+    "phrasalVerb": "run into",
+    "translation": "случайно встретить",
+    "meaning": "неожиданно увидеть знакомого",
+    "example": "I ran into my ex at the mall.",
+    "hint": "столкнуться нос к носу"
+  },
+  {
+    "phrasalVerb": "set up",
+    "translation": "организовать",
+    "meaning": "создать или начать что-то",
+    "example": "They set up a new company.",
+    "hint": "основать"
+  },
+  {
+    "phrasalVerb": "show up",
+    "translation": "появиться",
+    "meaning": "прийти куда-то (особенно когда ждали)",
+    "example": "He showed up late again.",
+    "hint": "объявиться на месте"
+  },
+  {
+    "phrasalVerb": "stand out",
+    "translation": "выделяться",
+    "meaning": "быть заметным на фоне других",
+    "example": "Her red dress made her stand out.",
+    "hint": "бросаться в глаза"
+  },
+  {
+    "phrasalVerb": "take after",
+    "translation": "пойти в (родителей)",
+    "meaning": "быть похожим по характеру",
+    "example": "He takes after his father.",
+    "hint": "унаследовать черты"
+  },
+  {
+    "phrasalVerb": "talk into",
+    "translation": "уговорить",
+    "meaning": "убедить сделать что-то",
+    "example": "She talked me into buying a new phone.",
+    "hint": "переубедить"
+  },
+  {
+    "phrasalVerb": "turn into",
+    "translation": "превратиться в",
+    "meaning": "изменить состояние или форму",
+    "example": "The caterpillar turned into a butterfly.",
+    "hint": "стать другим"
+  },
+  {
+    "phrasalVerb": "watch out for",
+    "translation": "остерегаться",
+    "meaning": "быть внимательным к опасности",
+    "example": "Watch out for cars!",
+    "hint": "беречься"
+  },
+  {
+    "phrasalVerb": "work out",
+    "translation": "решиться (о проблеме)",
+    "meaning": "дать хороший результат",
+    "example": "I hope everything works out.",
+    "hint": "разрулить ситуацию"
+  },
+  {
+    "phrasalVerb": "write down",
+    "translation": "записать",
+    "meaning": "перенести на бумагу",
+    "example": "Write down your ideas.",
+    "hint": "зафиксировать письменно"
+  },
+  {
+    "phrasalVerb": "zero in on",
+    "translation": "сконцентрироваться на",
+    "meaning": "направить всё внимание на цель",
+    "example": "Let's zero in on the main problem.",
+    "hint": "прицелиться вниманием"
+  }
+]

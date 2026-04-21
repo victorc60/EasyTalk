@@ -6,7 +6,7 @@
     "partOfSpeech": "adjective",
     "topic": "personality",
     "example": "She is an ambitious young entrepreneur who wants to change the world.",
-    "hint": "Pair it with goals or plans: 'ambitious goals', 'ambitious plan'."
+    "hint": "'Ambitious goals', 'ambitious plan'."
   },
   {
     "word": "negotiate",
@@ -15,7 +15,7 @@
     "partOfSpeech": "verb",
     "topic": "business",
     "example": "They had to negotiate the terms of the contract for several weeks.",
-    "hint": "Always between two sides: 'negotiate a deal', 'negotiate a salary'."
+    "hint": "'Negotiate a deal', 'negotiate a salary'."
   },
   {
     "word": "sustainable",
@@ -24,7 +24,7 @@
     "partOfSpeech": "adjective",
     "topic": "environment",
     "example": "The company switched to sustainable packaging to reduce waste.",
-    "hint": "Means long-term without harm: 'sustainable energy', 'sustainable growth'."
+    "hint": "'Sustainable energy', 'sustainable growth'."
   },
   {
     "word": "forecast",
@@ -33,7 +33,7 @@
     "partOfSpeech": "noun",
     "topic": "weather",
     "example": "According to the forecast, it will rain all weekend.",
-    "hint": "Works for weather, economy and sales: 'weather forecast', 'sales forecast'."
+    "hint": "'Weather forecast', 'sales forecast'."
   },
   {
     "word": "grateful",
@@ -42,7 +42,7 @@
     "partOfSpeech": "adjective",
     "topic": "emotions",
     "example": "I am so grateful for all the help you gave me.",
-    "hint": "Stronger than 'thankful'. Say: 'I'm grateful for...' or 'grateful to you for...'."
+    "hint": "Stronger than 'thankful'. Use: 'grateful for' / 'grateful to'."
   },
   {
     "word": "dedicate",
@@ -60,7 +60,7 @@
     "partOfSpeech": "noun",
     "topic": "society",
     "example": "Social media has a huge influence on modern culture.",
-    "hint": "Use 'have influence on' — not 'make influence'."
+    "hint": "'Have influence on' — not 'make influence'."
   },
   {
     "word": "exhausted",
@@ -69,26 +69,10 @@
     "partOfSpeech": "adjective",
     "topic": "emotions",
     "example": "After the long flight, she was completely exhausted.",
-    "hint": "Much stronger than 'tired' — you're completely out of energy."
+    "hint": "Much stronger than 'tired'."
   },
-  {
-    "word": "confirm",
-    "translation": "подтверждать",
-    "level": "B1",
-    "partOfSpeech": "verb",
-    "topic": "communication",
-    "example": "Please confirm your reservation at least 24 hours in advance.",
-    "hint": "Formal and common in emails: 'confirm your booking', 'confirm receipt'."
-  },
-  {
-    "word": "colleague",
-    "translation": "коллега",
-    "level": "B1",
-    "partOfSpeech": "noun",
-    "topic": "work",
-    "example": "My colleague helped me finish the report on time.",
-    "hint": "More formal than 'co-worker' — use it in professional settings."
-  },
+  
+  
   {
     "word": "accomplish",
     "translation": "достигать",
@@ -96,17 +80,9 @@
     "partOfSpeech": "verb",
     "topic": "lifestyle",
     "example": "She accomplished all her goals by the end of the year.",
-    "hint": "Implies effort + success: 'accomplish a goal', 'accomplish a task'."
+    "hint": "'Accomplish a goal', 'accomplish a task'."
   },
-  {
-    "word": "breakthrough",
-    "translation": "прорыв",
-    "level": "B2",
-    "partOfSpeech": "noun",
-    "topic": "science",
-    "example": "Scientists made a major breakthrough in cancer research.",
-    "hint": "Always 'make a breakthrough' — never 'do a breakthrough'."
-  },
+
   {
     "word": "anxious",
     "translation": "тревожный",
@@ -114,7 +90,7 @@
     "partOfSpeech": "adjective",
     "topic": "emotions",
     "example": "He felt anxious before his job interview.",
-    "hint": "'Anxious about' = worried. Can also mean eager: 'anxious to help'."
+    "hint": "'Anxious about' = worried. Or eager: 'anxious to help'."
   },
   {
     "word": "budget",
@@ -123,7 +99,7 @@
     "partOfSpeech": "noun",
     "topic": "finance",
     "example": "We need to stick to our budget this month.",
-    "hint": "Key phrases: 'stick to a budget', 'set a budget', 'exceed the budget'."
+    "hint": "'Stick to', 'set', 'exceed' a budget."
   },
   {
     "word": "perspective",
@@ -132,7 +108,7 @@
     "partOfSpeech": "noun",
     "topic": "communication",
     "example": "Try to look at the problem from a different perspective.",
-    "hint": "'From my perspective' — a polite way to share your opinion."
+    "hint": "'From my perspective' — polite way to share your view."
   },
   {
     "word": "encourage",
@@ -141,7 +117,7 @@
     "partOfSpeech": "verb",
     "topic": "education",
     "example": "Teachers should encourage students to ask questions.",
-    "hint": "Pattern: 'encourage someone to do something'."
+    "hint": "'Encourage someone to do something'."
   },
   {
     "word": "remote",
@@ -150,7 +126,7 @@
     "partOfSpeech": "adjective",
     "topic": "work",
     "example": "Many people now work in remote positions from home.",
-    "hint": "'Remote work' and 'remote job' are standard in modern professional English."
+    "hint": "'Remote work', 'remote job'."
   },
   {
     "word": "invest",
@@ -168,7 +144,7 @@
     "partOfSpeech": "adjective",
     "topic": "personality",
     "example": "You need a reliable car if you drive long distances every day.",
-    "hint": "For people, machines and data. 'Reliable source' is common in academic writing."
+    "hint": "For people, machines and data: 'a reliable source'."
   },
   {
     "word": "outcome",
@@ -177,7 +153,7 @@
     "partOfSpeech": "noun",
     "topic": "business",
     "example": "The outcome of the meeting was better than expected.",
-    "hint": "More formal than 'result' — focuses on the final effect of a process."
+    "hint": "More formal than 'result' — the final effect of a process."
   },
   {
     "word": "collapse",
@@ -186,17 +162,9 @@
     "partOfSpeech": "verb",
     "topic": "general",
     "example": "The old bridge collapsed after years of neglect.",
-    "hint": "Literal (buildings) or figurative: a deal, economy, or relationship can collapse."
+    "hint": "Literal (buildings) or figurative: a deal, economy can collapse."
   },
-  {
-    "word": "adapt",
-    "translation": "адаптироваться",
-    "level": "B1",
-    "partOfSpeech": "verb",
-    "topic": "lifestyle",
-    "example": "It takes time to adapt to a new country and culture.",
-    "hint": "Always 'adapt to' — never 'adapt with'."
-  },
+
   {
     "word": "permanent",
     "translation": "постоянный",
@@ -204,7 +172,7 @@
     "partOfSpeech": "adjective",
     "topic": "work",
     "example": "After six months she was offered a permanent position.",
-    "hint": "Opposite of 'temporary'. Common in job ads: 'permanent position'."
+    "hint": "Opposite of 'temporary': 'permanent position'."
   },
   {
     "word": "shortage",
@@ -213,7 +181,7 @@
     "partOfSpeech": "noun",
     "topic": "society",
     "example": "There is a serious shortage of affordable housing in the city.",
-    "hint": "Pattern: 'a shortage of something' — when supply is less than demand."
+    "hint": "'A shortage of' — supply less than demand."
   },
   {
     "word": "demand",
@@ -222,7 +190,7 @@
     "partOfSpeech": "noun",
     "topic": "business",
     "example": "The demand for electric cars is growing every year.",
-    "hint": "Noun: 'demand for'. Verb: 'demand that' — sounds firm and forceful."
+    "hint": "Noun: 'demand for'. Verb: 'demand that'."
   },
   {
     "word": "hesitate",
@@ -231,7 +199,7 @@
     "partOfSpeech": "verb",
     "topic": "communication",
     "example": "Don't hesitate to call me if you need any help.",
-    "hint": "'Don't hesitate to...' = 'feel free to...' — very common in formal emails."
+    "hint": "'Don't hesitate to...' = 'feel free to...' — common in emails."
   },
   {
     "word": "conscious",
@@ -240,7 +208,7 @@
     "partOfSpeech": "adjective",
     "topic": "lifestyle",
     "example": "She made a conscious decision to eat more healthily.",
-    "hint": "Don't confuse with 'conscience' — that's your moral sense."
+    "hint": "Don't confuse with 'conscience' — your moral sense."
   },
   {
     "word": "launch",
@@ -249,7 +217,7 @@
     "partOfSpeech": "verb",
     "topic": "business",
     "example": "The company plans to launch a new product next spring.",
-    "hint": "For products, campaigns, websites — starting something new publicly."
+    "hint": "For products, campaigns, websites — starting something publicly."
   },
   {
     "word": "genuine",
@@ -258,7 +226,7 @@
     "partOfSpeech": "adjective",
     "topic": "personality",
     "example": "Her smile was genuine, and everyone could feel her warmth.",
-    "hint": "Opposite of fake. Also for objects: 'genuine leather', 'genuine signature'."
+    "hint": "Opposite of fake. Also: 'genuine leather', 'genuine signature'."
   },
   {
     "word": "obstacle",
@@ -267,6 +235,6 @@
     "partOfSpeech": "noun",
     "topic": "lifestyle",
     "example": "Every obstacle is an opportunity to learn something new.",
-    "hint": "Common verbs: 'overcome', 'face', 'remove' an obstacle."
+    "hint": "'Overcome', 'face', or 'remove' an obstacle."
   }
 ]

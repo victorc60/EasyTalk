@@ -1,1 +1,177 @@
-[]
+[
+  {
+    "id": "fact_001",
+    "claim": "The Pacific Ocean is wider than the distance from Earth to the Moon.",
+    "claimRu": "Тихий океан шире, чем расстояние от Земли до Луны.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! The Pacific Ocean is about 20,000 km wide. The distance to the Moon is roughly 384,000 km — almost 20 times greater.\n🇷🇺 Неправда! Тихий океан в ширину около 20 000 км. Расстояние до Луны — примерно 384 000 км, почти в 20 раз больше.\n💡 Space distances are far harder to visualise than we think."
+  },
+  {
+    "id": "fact_002",
+    "claim": "Honey never expires — edible honey has been found in ancient Egyptian tombs.",
+    "claimRu": "Мёд никогда не портится — в египетских гробницах находили съедобный мёд.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Archaeologists have found 3,000-year-old honey in Egyptian tombs that was still perfectly edible. Its low moisture and acidic pH prevent bacteria from growing.\n🇷🇺 Правда! В египетских гробницах был найден мёд возрастом 3000 лет, пригодный в пищу. Низкая влажность и кислая среда не дают бактериям размножаться.\n💡 Some natural foods are almost perfectly self-preserving."
+  },
+  {
+    "id": "fact_003",
+    "claim": "Humans use only 10% of their brain.",
+    "claimRu": "Люди используют лишь 10% своего мозга.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Brain scans show we use virtually all parts of the brain, and most of the brain is active almost all the time.\n🇷🇺 Неправда! Сканирование мозга показывает, что мы используем практически все его части, и большая часть мозга активна почти всё время.\n💡 This myth was likely spread by self-help culture in the early 20th century."
+  },
+  {
+    "id": "fact_004",
+    "claim": "Octopuses have three hearts.",
+    "claimRu": "У осьминогов три сердца.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Two hearts pump blood to the gills, while the third pumps it to the rest of the body. Their blood is also blue because it contains copper.\n🇷🇺 Правда! Два сердца перекачивают кровь к жабрам, а третье — к остальному телу. Их кровь голубая, так как содержит медь.\n💡 When an octopus swims, the main heart actually stops beating."
+  },
+  {
+    "id": "fact_005",
+    "claim": "The Great Wall of China is visible from space with the naked eye.",
+    "claimRu": "Великую Китайскую стену видно из космоса невооружённым глазом.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! The wall is too narrow (about 5–8 metres wide) to be seen from space without aid. Even astronauts have confirmed this.\n🇷🇺 Неправда! Стена слишком узкая (около 5–8 метров) и не видна из космоса без оптики. Это подтвердили сами астронавты.\n💡 The myth became so widespread it even appeared in Chinese school textbooks."
+  },
+  {
+    "id": "fact_006",
+    "claim": "A day on Venus is longer than a year on Venus.",
+    "claimRu": "День на Венере длиннее, чем год на Венере.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Venus rotates so slowly that one full rotation (243 Earth days) takes longer than one orbit around the Sun (225 Earth days).\n🇷🇺 Правда! Венера вращается так медленно, что один оборот вокруг своей оси (243 земных дня) занимает больше времени, чем один оборот вокруг Солнца (225 дней).\n💡 Venus also rotates backwards compared to most planets."
+  },
+  {
+    "id": "fact_007",
+    "claim": "Lightning never strikes the same place twice.",
+    "claimRu": "Молния не бьёт в одно место дважды.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Lightning frequently strikes the same place multiple times. The Empire State Building is struck about 20–25 times per year.\n🇷🇺 Неправда! Молния часто бьёт в одно и то же место. Эмпайр-стейт-билдинг поражается примерно 20–25 раз в год.\n💡 Tall structures are actually designed to attract lightning safely."
+  },
+  {
+    "id": "fact_008",
+    "claim": "Bananas are berries, but strawberries are not.",
+    "claimRu": "Бананы — это ягоды, а клубника — нет.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Botanically, a berry must develop from a single flower with one ovary. Bananas qualify; strawberries do not — they grow from a flower with multiple ovaries.\n🇷🇺 Правда! Ботанически ягода должна развиваться из одного цветка с одной завязью. Банан подходит, а клубника — нет: она вырастает из цветка с множеством завязей.\n💡 Avocados, kiwis, and watermelons are also technically berries."
+  },
+  {
+    "id": "fact_009",
+    "claim": "Mount Everest is the closest mountain to the Moon.",
+    "claimRu": "Эверест — ближайшая к Луне гора.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Mount Chimborazo in Ecuador is actually closest to the Moon (and space) because Earth bulges at the equator. Everest is the highest above sea level, not the furthest from Earth's centre.\n🇷🇺 Неправда! Гора Чимборасо в Эквадоре ближе всего к Луне, потому что Земля выпуклая на экваторе. Эверест — высочайшая над уровнем моря, но не самая дальняя от центра Земли.\n💡 The difference is about 2,168 metres in favour of Chimborazo."
+  },
+  {
+    "id": "fact_010",
+    "claim": "Sharks are older than trees.",
+    "claimRu": "Акулы старше деревьев.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Sharks have existed for about 450 million years, while trees only appeared around 350 million years ago.\n🇷🇺 Правда! Акулы существуют около 450 миллионов лет, тогда как деревья появились лишь около 350 миллионов лет назад.\n💡 Sharks even survived the mass extinction that wiped out the dinosaurs."
+  },
+  {
+    "id": "fact_011",
+    "claim": "Hot water freezes faster than cold water.",
+    "claimRu": "Горячая вода замерзает быстрее холодной.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! This is called the Mpemba effect. It doesn't always happen, but under certain conditions hot water can freeze faster than cold water.\n🇷🇺 Правда! Это называется эффектом Мпембы. Это происходит не всегда, но при определённых условиях горячая вода может замёрзнуть быстрее холодной.\n💡 Scientists still debate exactly why this happens."
+  },
+  {
+    "id": "fact_012",
+    "claim": "Goldfish have a memory of only 3 seconds.",
+    "claimRu": "Память золотой рыбки длится всего 3 секунды.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Goldfish can actually remember things for months. Studies show they can be trained to press levers and navigate mazes.\n🇷🇺 Неправда! Золотые рыбки на самом деле помнят вещи месяцами. Исследования показывают, что их можно обучить нажимать на рычаги и проходить лабиринты.\n💡 This myth probably started because goldfish behaviour seems repetitive in small tanks."
+  },
+  {
+    "id": "fact_013",
+    "claim": "There are more stars in the universe than grains of sand on all Earth's beaches.",
+    "claimRu": "Во вселенной больше звёзд, чем песчинок на всех пляжах Земли.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Estimates suggest there are around 10²⁴ stars in the observable universe — more than all the grains of sand on Earth's beaches.\n🇷🇺 Правда! По оценкам, во вселенной около 10²⁴ звёзд — больше, чем песчинок на всех пляжах Земли.\n💡 The number is so large it's almost impossible to truly comprehend."
+  },
+  {
+    "id": "fact_014",
+    "claim": "Napoleon Bonaparte was unusually short for his era.",
+    "claimRu": "Наполеон Бонапарт был необычно низкого роста для своего времени.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Napoleon was about 1.69 m (5'7\"), which was average for a Frenchman of his time. The myth partly came from British propaganda and a confusion between French and English inches.\n🇷🇺 Неправда! Рост Наполеона составлял около 1,69 м — средний для француза того времени. Миф частично возник из британской пропаганды и путаницы между французскими и английскими дюймами.\n💡 His nickname 'le petit caporal' referred to affection, not his height."
+  },
+  {
+    "id": "fact_015",
+    "claim": "Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.",
+    "claimRu": "Клеопатра жила ближе по времени к высадке на Луну, чем к строительству пирамиды Хеопса.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! The Great Pyramid was built around 2560 BC. Cleopatra lived around 30 BC — that's 2,500 years after the pyramid. The Moon landing was in 1969, only about 2,000 years after Cleopatra.\n🇷🇺 Правда! Пирамида Хеопса построена около 2560 г. до н.э. Клеопатра жила около 30 г. до н.э. — это 2500 лет после пирамиды. Высадка на Луну — 1969 год, всего около 2000 лет после Клеопатры.\n💡 Ancient history is much longer than most people realise."
+  },
+  {
+    "id": "fact_016",
+    "claim": "You can hear a duck's quack echo.",
+    "claimRu": "Кряканье утки имеет эхо.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! A duck's quack does echo — it's just hard to hear because the quack itself fades out gently, making the echo blend with the original sound.\n🇷🇺 Правда! Кряканье утки действительно имеет эхо — его просто сложно услышать, потому что звук затихает плавно, и эхо сливается с оригиналом.\n💡 The myth that it doesn't echo was debunked by acoustic researchers at the University of Salford."
+  },
+  {
+    "id": "fact_017",
+    "claim": "The tongue has specific zones for different tastes (sweet at the tip, bitter at the back).",
+    "claimRu": "На языке есть отдельные зоны для разных вкусов (сладкое — на кончике, горькое — сзади).",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! All taste buds across your tongue can detect all flavours. The 'taste map' was a misinterpretation of a 19th-century German study.\n🇷🇺 Неправда! Все вкусовые рецепторы на языке способны воспринимать все вкусы. «Карта вкусов» — это неверная интерпретация немецкого исследования XIX века.\n💡 This myth was in textbooks for decades before being corrected."
+  },
+  {
+    "id": "fact_018",
+    "claim": "Oxford University is older than the Aztec Empire.",
+    "claimRu": "Оксфордский университет старше империи ацтеков.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Teaching at Oxford began around 1096. The Aztec Empire was founded in 1428 — more than 300 years later.\n🇷🇺 Правда! Обучение в Оксфорде началось около 1096 года. Империя ацтеков была основана в 1428 году — более чем на 300 лет позже.\n💡 Oxford is one of the oldest universities in the world still in operation."
+  },
+  {
+    "id": "fact_019",
+    "claim": "Water conducts electricity well on its own.",
+    "claimRu": "Вода сама по себе хорошо проводит электричество.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Pure water is actually a poor conductor of electricity. It's the dissolved minerals and salts that make water conductive.\n🇷🇺 Неправда! Чистая вода — плохой проводник электричества. Именно растворённые в ней минералы и соли делают её проводящей.\n💡 Distilled water is used in labs precisely because it doesn't conduct electricity well."
+  },
+  {
+    "id": "fact_020",
+    "claim": "A group of flamingos is called a flamboyance.",
+    "claimRu": "Группа фламинго называется «фламбуаянс» (flamboyance).",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! A flock of flamingos is officially called a flamboyance — fitting for such a colourful bird.\n🇷🇺 Правда! Стая фламинго официально называется flamboyance («яркость», «пышность») — подходящее название для такой яркой птицы.\n💡 Other unusual animal group names: a murder of crows, a parliament of owls, a conspiracy of lemurs."
+  },
+  {
+    "id": "fact_021",
+    "claim": "The Eiffel Tower grows taller in summer.",
+    "claimRu": "Эйфелева башня летом становится выше.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Metal expands when heated. In summer, the iron structure of the Eiffel Tower can grow by up to 15 cm due to thermal expansion.\n🇷🇺 Правда! Металл расширяется при нагреве. Летом железная конструкция Эйфелевой башни может вырасти до 15 см из-за теплового расширения.\n💡 This same principle is why bridges have expansion joints."
+  },
+  {
+    "id": "fact_022",
+    "claim": "Humans share 50% of their DNA with bananas.",
+    "claimRu": "У людей и бананов общие 50% ДНК.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! About 50% of human DNA is shared with bananas, because many basic cellular processes are the same across all life on Earth.\n🇷🇺 Правда! Около 50% ДНК человека совпадает с ДНК банана, потому что многие базовые клеточные процессы одинаковы у всех живых существ на Земле.\n💡 We also share about 98.7% of our DNA with chimpanzees."
+  },
+  {
+    "id": "fact_023",
+    "claim": "Glass is a slow-moving liquid.",
+    "claimRu": "Стекло — это медленно текущая жидкость.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Glass is an amorphous solid, not a liquid. Old windows appear thicker at the bottom because of imperfect manufacturing techniques, not because the glass flowed downward over time.\n🇷🇺 Неправда! Стекло — это аморфное твёрдое вещество, а не жидкость. Старые стёкла кажутся толще снизу из-за несовершенства производства, а не потому что стекло стекло вниз.\n💡 At room temperature, it would take billions of years for glass to noticeably flow."
+  },
+  {
+    "id": "fact_024",
+    "claim": "Carrots improve your night vision.",
+    "claimRu": "Морковь улучшает ночное зрение.",
+    "isTrue": false,
+    "explanation": "🇬🇧 False! Carrots contain vitamin A which is essential for eye health, but eating extra carrots won't give you super night vision. This myth was spread by British propaganda in WWII to hide their use of radar.\n🇷🇺 Неправда! Морковь содержит витамин A, необходимый для здоровья глаз, но её употребление не даст вам суперночного зрения. Этот миф распространила британская пропаганда во Второй мировой войне, чтобы скрыть использование радара.\n💡 The UK spread the myth that RAF pilots ate lots of carrots to explain their accurate night bombing."
+  },
+  {
+    "id": "fact_025",
+    "claim": "A sneeze travels faster than a car on a motorway.",
+    "claimRu": "Чихание распространяется быстрее, чем едет автомобиль на трассе.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! A sneeze can travel at up to 160 km/h, which is faster than most speed limits on motorways.\n🇷🇺 Правда! Чихание может распространяться со скоростью до 160 км/ч — быстрее большинства ограничений скорости на трассах.\n💡 That's also why covering your mouth when sneezing is so important for stopping germs."
+  }
+]
