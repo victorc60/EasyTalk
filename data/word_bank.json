@@ -1,1 +1,272 @@
-[]
+[
+  {
+    "word": "ambitious",
+    "translation": "амбициозный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "personality",
+    "example": "She is an ambitious young entrepreneur who wants to change the world.",
+    "hint": "Pair it with goals or plans: 'ambitious goals', 'ambitious plan'."
+  },
+  {
+    "word": "negotiate",
+    "translation": "договариваться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "business",
+    "example": "They had to negotiate the terms of the contract for several weeks.",
+    "hint": "Always between two sides: 'negotiate a deal', 'negotiate a salary'."
+  },
+  {
+    "word": "sustainable",
+    "translation": "устойчивый",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "environment",
+    "example": "The company switched to sustainable packaging to reduce waste.",
+    "hint": "Means long-term without harm: 'sustainable energy', 'sustainable growth'."
+  },
+  {
+    "word": "forecast",
+    "translation": "прогноз",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "weather",
+    "example": "According to the forecast, it will rain all weekend.",
+    "hint": "Works for weather, economy and sales: 'weather forecast', 'sales forecast'."
+  },
+  {
+    "word": "grateful",
+    "translation": "благодарный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "emotions",
+    "example": "I am so grateful for all the help you gave me.",
+    "hint": "Stronger than 'thankful'. Say: 'I'm grateful for...' or 'grateful to you for...'."
+  },
+  {
+    "word": "dedicate",
+    "translation": "посвящать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "lifestyle",
+    "example": "He dedicated his life to helping others in need.",
+    "hint": "Always with 'to': 'dedicate time to', 'dedicate yourself to'."
+  },
+  {
+    "word": "influence",
+    "translation": "влияние",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "society",
+    "example": "Social media has a huge influence on modern culture.",
+    "hint": "Use 'have influence on' — not 'make influence'."
+  },
+  {
+    "word": "exhausted",
+    "translation": "изнурённый",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "emotions",
+    "example": "After the long flight, she was completely exhausted.",
+    "hint": "Much stronger than 'tired' — you're completely out of energy."
+  },
+  {
+    "word": "confirm",
+    "translation": "подтверждать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "communication",
+    "example": "Please confirm your reservation at least 24 hours in advance.",
+    "hint": "Formal and common in emails: 'confirm your booking', 'confirm receipt'."
+  },
+  {
+    "word": "colleague",
+    "translation": "коллега",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "work",
+    "example": "My colleague helped me finish the report on time.",
+    "hint": "More formal than 'co-worker' — use it in professional settings."
+  },
+  {
+    "word": "accomplish",
+    "translation": "достигать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "lifestyle",
+    "example": "She accomplished all her goals by the end of the year.",
+    "hint": "Implies effort + success: 'accomplish a goal', 'accomplish a task'."
+  },
+  {
+    "word": "breakthrough",
+    "translation": "прорыв",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "science",
+    "example": "Scientists made a major breakthrough in cancer research.",
+    "hint": "Always 'make a breakthrough' — never 'do a breakthrough'."
+  },
+  {
+    "word": "anxious",
+    "translation": "тревожный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "emotions",
+    "example": "He felt anxious before his job interview.",
+    "hint": "'Anxious about' = worried. Can also mean eager: 'anxious to help'."
+  },
+  {
+    "word": "budget",
+    "translation": "бюджет",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "finance",
+    "example": "We need to stick to our budget this month.",
+    "hint": "Key phrases: 'stick to a budget', 'set a budget', 'exceed the budget'."
+  },
+  {
+    "word": "perspective",
+    "translation": "точка зрения",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "communication",
+    "example": "Try to look at the problem from a different perspective.",
+    "hint": "'From my perspective' — a polite way to share your opinion."
+  },
+  {
+    "word": "encourage",
+    "translation": "поощрять",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "education",
+    "example": "Teachers should encourage students to ask questions.",
+    "hint": "Pattern: 'encourage someone to do something'."
+  },
+  {
+    "word": "remote",
+    "translation": "удалённый",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "work",
+    "example": "Many people now work in remote positions from home.",
+    "hint": "'Remote work' and 'remote job' are standard in modern professional English."
+  },
+  {
+    "word": "invest",
+    "translation": "инвестировать",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "finance",
+    "example": "It is wise to invest your savings rather than keep them in cash.",
+    "hint": "Always 'invest in': 'invest in stocks', 'invest in yourself'."
+  },
+  {
+    "word": "reliable",
+    "translation": "надёжный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "personality",
+    "example": "You need a reliable car if you drive long distances every day.",
+    "hint": "For people, machines and data. 'Reliable source' is common in academic writing."
+  },
+  {
+    "word": "outcome",
+    "translation": "результат",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "business",
+    "example": "The outcome of the meeting was better than expected.",
+    "hint": "More formal than 'result' — focuses on the final effect of a process."
+  },
+  {
+    "word": "collapse",
+    "translation": "рухнуть",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "general",
+    "example": "The old bridge collapsed after years of neglect.",
+    "hint": "Literal (buildings) or figurative: a deal, economy, or relationship can collapse."
+  },
+  {
+    "word": "adapt",
+    "translation": "адаптироваться",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "lifestyle",
+    "example": "It takes time to adapt to a new country and culture.",
+    "hint": "Always 'adapt to' — never 'adapt with'."
+  },
+  {
+    "word": "permanent",
+    "translation": "постоянный",
+    "level": "B1",
+    "partOfSpeech": "adjective",
+    "topic": "work",
+    "example": "After six months she was offered a permanent position.",
+    "hint": "Opposite of 'temporary'. Common in job ads: 'permanent position'."
+  },
+  {
+    "word": "shortage",
+    "translation": "нехватка",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "society",
+    "example": "There is a serious shortage of affordable housing in the city.",
+    "hint": "Pattern: 'a shortage of something' — when supply is less than demand."
+  },
+  {
+    "word": "demand",
+    "translation": "спрос",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "business",
+    "example": "The demand for electric cars is growing every year.",
+    "hint": "Noun: 'demand for'. Verb: 'demand that' — sounds firm and forceful."
+  },
+  {
+    "word": "hesitate",
+    "translation": "колебаться",
+    "level": "B2",
+    "partOfSpeech": "verb",
+    "topic": "communication",
+    "example": "Don't hesitate to call me if you need any help.",
+    "hint": "'Don't hesitate to...' = 'feel free to...' — very common in formal emails."
+  },
+  {
+    "word": "conscious",
+    "translation": "осознанный",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "lifestyle",
+    "example": "She made a conscious decision to eat more healthily.",
+    "hint": "Don't confuse with 'conscience' — that's your moral sense."
+  },
+  {
+    "word": "launch",
+    "translation": "запускать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "business",
+    "example": "The company plans to launch a new product next spring.",
+    "hint": "For products, campaigns, websites — starting something new publicly."
+  },
+  {
+    "word": "genuine",
+    "translation": "искренний",
+    "level": "B2",
+    "partOfSpeech": "adjective",
+    "topic": "personality",
+    "example": "Her smile was genuine, and everyone could feel her warmth.",
+    "hint": "Opposite of fake. Also for objects: 'genuine leather', 'genuine signature'."
+  },
+  {
+    "word": "obstacle",
+    "translation": "препятствие",
+    "level": "B2",
+    "partOfSpeech": "noun",
+    "topic": "lifestyle",
+    "example": "Every obstacle is an opportunity to learn something new.",
+    "hint": "Common verbs: 'overcome', 'face', 'remove' an obstacle."
+  }
+]

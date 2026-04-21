@@ -410,6 +410,7 @@ function buildExampleSentence(entry) {
 }
 
 function buildFactLine(entry) {
+  if (entry.hint && entry.hint.trim()) return entry.hint.trim();
   const level = entry.level || 'B1';
   const topic = entry.topic || 'daily life';
   return `"${entry.word}" is a ${level} ${entry.partOfSpeech || 'word'} you can use when discussing ${topic}.`;

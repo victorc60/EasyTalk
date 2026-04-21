@@ -20,15 +20,7 @@ const BONUS_BY_PLACE = [100, 75, 50];
 
 /** Builds a 2-column inline keyboard from an options array. */
 function makeTwoColumnKeyboard(options, makeCallback) {
-  const rows = [];
-  for (let i = 0; i < options.length; i += 2) {
-    const row = [{ text: `${i + 1}. ${options[i]}`, callback_data: makeCallback(i) }];
-    if (i + 1 < options.length) {
-      row.push({ text: `${i + 2}. ${options[i + 1]}`, callback_data: makeCallback(i + 1) });
-    }
-    rows.push(row);
-  }
-  return rows;
+  return options.map((option, i) => [{ text: `${i + 1}. ${option}`, callback_data: makeCallback(i) }]);
 }
 
 async function getWeeklyLeaders(weekStartKey, weekEndKey) {
@@ -481,7 +473,7 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         const safeFact = escapeHtml(broadcastWord.fact);
 
         return {
-          text: `📖 <b>Word of the Day</b>\n\n🔤 <b>${safeWord}</b>\n\n📝 ${safeExample}\n💡 ${safeFact}\n\n👇 Выбери правильный перевод:`,
+          text: `🌸🎯 <b>Word of the Day</b>\n<b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
           reply_markup: keyboard
         };
       },
@@ -932,7 +924,7 @@ export async function adminPreviewWord(bot, adminChatId, userSessions) {
     const safeFact = escapeHtml(broadcastWord.fact);
 
     await sendUserMessage(bot, adminChatId,
-      `👤 <b>[ADMIN PREVIEW] Word of the Day</b>\n🌸🎯 <b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
+      `👤 <b>[ADMIN PREVIEW]</b>\n🌸🎯 <b>Word of the Day</b>\n<b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
       { parse_mode: 'HTML', reply_markup: keyboard }
     );
   } catch (error) {
