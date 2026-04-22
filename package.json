@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "bank:audit": "node scripts/bank_audit.js",
+    "queue:sync": "node scripts/sync_content_queue.js",
     "test": "node tests/run_tests.js"
   },
   "dependencies": {

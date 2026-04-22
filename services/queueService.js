@@ -36,75 +36,77 @@ function generateOptions(allItems, currentIndex, getTranslation) {
 }
 
 /**
+ * Обогащает элемент банка question/options/correctIndex и возвращает запись очереди.
+ */
+export function buildQueueRecord(type, item, index, bankData) {
+  let contentId;
+  let enriched = { ...item };
+
+  switch (type) {
+    case 'word': {
+      contentId = item.id || `word_${index + 1}`;
+      // Normalize translation to single string
+      enriched.translation = Array.isArray(item.translations)
+        ? item.translations[0]
+        : (item.translation || '');
+      const getWordTranslation = (it) =>
+        Array.isArray(it.translations) ? it.translations[0] : (it.translation || '');
+      const { options, correctIndex } = generateOptions(bankData, index, getWordTranslation);
+      enriched.question = `What does "${item.word}" mean?`;
+      enriched.options = options;
+      enriched.correctIndex = correctIndex;
+      break;
+    }
+    case 'idiom': {
+      contentId = item.id || `idiom_${index + 1}`;
+      enriched.id = contentId;
+      const { options, correctIndex } = generateOptions(bankData, index, (it) => it.translation || '');
+      enriched.question = `What does "${item.idiom}" mean?`;
+      enriched.options = options;
+      enriched.correctIndex = correctIndex;
+      break;
+    }
+    case 'phrasal': {
+      contentId = item.id || `phrasal_${index + 1}`;
+      enriched.id = contentId;
+      enriched.verb = item.phrasalVerb || item.verb || '';
+      const { options, correctIndex } = generateOptions(bankData, index, (it) => it.translation || '');
+      enriched.question = `What does "${enriched.verb}" mean?`;
+      enriched.options = options;
+      enriched.correctIndex = correctIndex;
+      break;
+    }
+    case 'quiz': {
+      contentId = item.id || `quiz_${index + 1}`;
+      enriched.id = contentId;
+      break;
+    }
+    case 'fact': {
+      contentId = item.id || `fact_${index + 1}`;
+      enriched.id = contentId;
+      break;
+    }
+    default:
+      contentId = `${type}_${index + 1}`;
+  }
+
+  return {
+    type,
+    content_id: contentId,
+    content: enriched,
+    used: false,
+    used_at: null
+  };
+}
+
+/**
  * Загружает банк контента в таблицу content_queue строго по порядку.
  * Обогащает элементы question/options/correctIndex для типов без них.
  */
 export async function loadBankToQueue(type, bankData) {
   try {
     console.log(`[QUEUE] Загружаем банк "${type}" в очередь (${bankData.length} элементов)...`);
-    const records = [];
-
-    for (let i = 0; i < bankData.length; i++) {
-      const item = bankData[i];
-      let contentId;
-      let enriched = { ...item };
-
-      switch (type) {
-        case 'word': {
-          contentId = item.id || `word_${i + 1}`;
-          // Normalize translation to single string
-          enriched.translation = Array.isArray(item.translations)
-            ? item.translations[0]
-            : (item.translation || '');
-          const getWordTranslation = (it) =>
-            Array.isArray(it.translations) ? it.translations[0] : (it.translation || '');
-          const { options, correctIndex } = generateOptions(bankData, i, getWordTranslation);
-          enriched.question = `What does "${item.word}" mean?`;
-          enriched.options = options;
-          enriched.correctIndex = correctIndex;
-          break;
-        }
-        case 'idiom': {
-          contentId = item.id || `idiom_${i + 1}`;
-          enriched.id = contentId;
-          const { options, correctIndex } = generateOptions(bankData, i, (it) => it.translation || '');
-          enriched.question = `What does "${item.idiom}" mean?`;
-          enriched.options = options;
-          enriched.correctIndex = correctIndex;
-          break;
-        }
-        case 'phrasal': {
-          contentId = item.id || `phrasal_${i + 1}`;
-          enriched.id = contentId;
-          enriched.verb = item.phrasalVerb || item.verb || '';
-          const { options, correctIndex } = generateOptions(bankData, i, (it) => it.translation || '');
-          enriched.question = `What does "${enriched.verb}" mean?`;
-          enriched.options = options;
-          enriched.correctIndex = correctIndex;
-          break;
-        }
-        case 'quiz': {
-          contentId = item.id || `quiz_${i + 1}`;
-          enriched.id = contentId;
-          break;
-        }
-        case 'fact': {
-          contentId = item.id || `fact_${i + 1}`;
-          enriched.id = contentId;
-          break;
-        }
-        default:
-          contentId = `${type}_${i + 1}`;
-      }
-
-      records.push({
-        type,
-        content_id: contentId,
-        content: enriched,
-        used: false,
-        used_at: null
-      });
-    }
+    const records = bankData.map((item, index) => buildQueueRecord(type, item, index, bankData));
 
     await ContentQueue.bulkCreate(records);
     console.log(`[QUEUE] ✅ Загружено ${records.length} элементов для типа "${type}"`);
