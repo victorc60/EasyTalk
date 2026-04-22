@@ -23,6 +23,7 @@ try {
 } catch (_) {}
 
 import { pickFromBank, readBankFile, writeJsonArray } from '../utils/bankUtils.js';
+import { maskWordInText } from '../utils/botUtils.js';
 import { hasCompletedAllGames, BONUS_GAMES, BONUS_POINTS, buildBonusProgressLine } from '../services/dailyBonusHelpers.js';
 
 // ─── Инфраструктура ──────────────────────────────────────────────────────────
@@ -168,6 +169,23 @@ async function runAllTests() {
       eq(back.length, 1, 'Прочитанный массив должен содержать 1 элемент');
       eq(back[0].word, 'test', 'Данные должны совпадать после записи и чтения');
     } finally { cleanUp(f); }
+  });
+
+  // ── maskWordInText ─────────────────────────────────────────────
+
+  console.log('\n🙈 maskWordInText\n');
+
+  await test('маскирует слово в примере без учёта регистра', () => {
+    const result = maskWordInText(
+      'Ambitious goals require an ambitious plan.',
+      'ambitious'
+    );
+    eq(result, '___ goals require an ___ plan.', 'Должен скрыть оба вхождения');
+  });
+
+  await test('не маскирует часть другого слова', () => {
+    const result = maskWordInText('A forecast can be useful.', 'cast');
+    eq(result, 'A forecast can be useful.', 'Не должен трогать подстроку внутри слова');
   });
 
   // ── hasCompletedAllGames (daily bonus logic) ──────────────────────────────

@@ -7,7 +7,7 @@ import User from '../models/User.js';
 import WordGameParticipation from '../models/WordGameParticipation.js';
 import DailyGameSession from '../models/DailyGameSession.js';
 import DailyWordGame from '../models/DailyWordGame.js';
-import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
+import { sendUserMessage, sendAdminMessage, escapeHtml, maskWordInText } from '../utils/botUtils.js';
 import { sendRandomSticker } from '../utils/stickerUtils.js';
 import { startRolePlay, showLeaderboard, sendConversationStarter, broadcastMessage } from '../features/botFeatures.js';
 import { awardPoints } from '../services/userServices.js';
@@ -109,13 +109,27 @@ function buildStreakLine(streakCount, isMilestone = false) {
   return line;
 }
 
-function buildHintText(translation) {
-  const words = translation.trim().split(/\s+/);
+function buildTranslationHintText(translation = '') {
+  const words = translation.trim().split(/\s+/).filter(Boolean);
   const masked = words.map(w => {
     if (w.length <= 2) return w;
     return w.slice(0, 2) + '_'.repeat(w.length - 2);
   });
-  return `💡 Подсказка: <b>${masked.join(' ')}</b> (${translation.length} букв)`;
+
+  if (!masked.length) return '💡 Подсказка пока недоступна';
+
+  return `💡 Подсказка: ${masked.join(' ')} (${translation.length} букв)`;
+}
+
+function buildWordHintText(gameSession = {}) {
+  const rawHint = gameSession.fact || gameSession.hint || '';
+  const maskedHint = maskWordInText(rawHint, gameSession.word || '').trim();
+
+  if (maskedHint) {
+    return `💡 Подсказка: ${maskedHint}`;
+  }
+
+  return buildTranslationHintText(gameSession.translation || '');
 }
 // ────────────────────────────────────────────────────────────────
 
@@ -718,19 +732,19 @@ export async function handleWordHintCallback(bot, callbackQuery, userSessions) {
     }
 
     if (gameSession.hintUsed) {
-      const hintText = buildHintText(gameSession.translation);
+      const hintText = buildWordHintText(gameSession);
       await bot.answerCallbackQuery(callbackQuery.id, {
-        text: hintText.replace(/<[^>]+>/g, ''),
+        text: hintText,
         show_alert: true
       });
       return;
     }
 
     gameSession.hintUsed = true;
-    const hintText = buildHintText(gameSession.translation);
+    const hintText = buildWordHintText(gameSession);
 
     await bot.answerCallbackQuery(callbackQuery.id, {
-      text: hintText.replace(/<[^>]+>/g, ''),
+      text: hintText,
       show_alert: true
     });
   } catch (error) {

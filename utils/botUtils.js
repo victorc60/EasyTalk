@@ -8,6 +8,19 @@ export function escapeHtml(value = '') {
     .replace(/'/g, '&#39;');
 }
 
+export function maskWordInText(text = '', word = '', replacement = '___') {
+  const source = String(text ?? '');
+  const target = String(word ?? '').trim();
+
+  if (!source || !target) return source;
+
+  const escapedTarget = target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const wordBoundary = '[^\\p{L}\\p{N}_]';
+  const pattern = new RegExp(`(^|${wordBoundary})(${escapedTarget})(?=$|${wordBoundary})`, 'giu');
+
+  return source.replace(pattern, (_match, prefix) => `${prefix}${replacement}`);
+}
+
 export function formatTelegramError(error) {
   const parts = [];
   const responseBody = error?.response?.body;

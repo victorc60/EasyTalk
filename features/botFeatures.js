@@ -1,6 +1,6 @@
 // features/botFeatures.js
 import { CONFIG } from '../config.js';
-import { sendAdminMessage, sendUserMessage, escapeHtml } from '../utils/botUtils.js';
+import { sendAdminMessage, sendUserMessage, escapeHtml, maskWordInText } from '../utils/botUtils.js';
 import { dailyFact, wordOfTheDay, idiomOfTheDay, phrasalVerbOfTheDay, randomCharacter, conversationTopic, dailyHoroscope, getPhrasalVerbUsageStats, quizOfTheDay } from '../content/contentGenerators.js';
 import { sendToAllUsers, getLeaderboard, awardPoints } from '../services/userServices.js';
 import { GAME_TYPES, recordWordGameParticipation, recordIdiomGameParticipation, recordPhrasalVerbGameParticipation, recordQuizGameParticipation, recordFactGameParticipation, saveDailyWordData, getSavedDailyWordData, saveDailyGameSession } from '../services/wordGameServices.js';
@@ -469,11 +469,10 @@ export async function wordGameBroadcast(bot, userSessions, slot = 'default') {
         });
 
         const safeWord = escapeHtml(broadcastWord.word);
-        const safeExample = escapeHtml(broadcastWord.example);
-        const safeFact = escapeHtml(broadcastWord.fact);
+        const safeExample = escapeHtml(maskWordInText(broadcastWord.example, broadcastWord.word));
 
         return {
-          text: `🌸🎯 <b>Word of the Day</b>\n<b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
+          text: `🌸🎯 <b>Word of the Day</b>\n<b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n\nВыберите правильный перевод слова "${safeWord}":`,
           reply_markup: keyboard
         };
       },
@@ -920,11 +919,10 @@ export async function adminPreviewWord(bot, adminChatId, userSessions) {
     await recordWordGameParticipation(adminChatId, broadcastWord.word, false, false, 0, null, 'admin_preview');
 
     const safeWord = escapeHtml(broadcastWord.word);
-    const safeExample = escapeHtml(broadcastWord.example);
-    const safeFact = escapeHtml(broadcastWord.fact);
+    const safeExample = escapeHtml(maskWordInText(broadcastWord.example, broadcastWord.word));
 
     await sendUserMessage(bot, adminChatId,
-      `👤 <b>[ADMIN PREVIEW]</b>\n🌸🎯 <b>Word of the Day</b>\n<b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n💡 ${safeFact}\n\nВыберите правильный перевод:`,
+      `👤 <b>[ADMIN PREVIEW]</b>\n🌸🎯 <b>Word of the Day</b>\n<b>${safeWord}</b>\n\n📝 Пример: ${safeExample}\n\nВыберите правильный перевод слова "${safeWord}":`,
       { parse_mode: 'HTML', reply_markup: keyboard }
     );
   } catch (error) {

@@ -1,6 +1,6 @@
 // services/dailyContentService.js
 import User from '../models/User.js';
-import { sendUserMessage, escapeHtml } from '../utils/botUtils.js';
+import { sendUserMessage, escapeHtml, maskWordInText } from '../utils/botUtils.js';
 import { getNextItem, markAsUsed, alreadySentToday, logDaily } from './queueService.js';
 
 const LABELS = ['A', 'B', 'C', 'D'];
@@ -9,18 +9,17 @@ const BROADCAST_DELAY_MS = 300;
 // ─── Message builders ────────────────────────────────────────────
 
 function buildWordMessage(item) {
-  const word = escapeHtml(item.word || '');
-  const translation = escapeHtml(item.translation || '');
+  const rawWord = item.word || '';
+  const word = escapeHtml(rawWord);
   const pos = escapeHtml(item.partOfSpeech || '');
   const level = escapeHtml(item.level || '');
-  const example = escapeHtml(item.example || '');
+  const example = escapeHtml(maskWordInText(item.example || '', rawWord));
 
   let text = `📚 <b>Word of the Day</b>\n\n`;
   text += `🔤 <b>${word}</b>\n`;
-  text += `🇷🇺 ${translation}\n`;
   if (pos || level) text += `📝 ${[pos, level].filter(Boolean).join(' | ')}\n`;
   if (example) text += `\n💬 ${example}\n`;
-  text += `\n❓ <b>What does "${word}" mean?</b>`;
+  text += `\n❓ <b>Выберите правильный перевод слова "${word}":</b>`;
 
   return text;
 }
@@ -99,10 +98,10 @@ function buildInlineKeyboard(type, queueId, item) {
     callback_data: `aq_${type}_${queueId}_${idx}`
   }));
 
-  // 2×2 grid
-  const rows = [];
-  for (let i = 0; i < buttons.length; i += 2) {
-    rows.push(buttons.slice(i, i + 2));
+  const rows = buttons.map(button => [button]);
+
+  if (type === 'word' && item.hint) {
+    rows.push([{ text: '💡 Подсказка', callback_data: `aq_hint_word_${queueId}` }]);
   }
 
   return { inline_keyboard: rows };

@@ -11,7 +11,7 @@
 import ContentQueue from '../models/ContentQueue.js';
 import { awardPoints } from '../services/userServices.js';
 import { recordGameParticipation, hasUserAnsweredGame } from '../services/wordGameServices.js';
-import { sendUserMessage, escapeHtml } from '../utils/botUtils.js';
+import { sendUserMessage, escapeHtml, maskWordInText } from '../utils/botUtils.js';
 
 const TZ = 'Europe/Chisinau';
 const VALID_TYPES = new Set(['word', 'quiz', 'idiom', 'phrasal', 'fact']);
@@ -106,6 +106,50 @@ function buildResultMessage(type, item, isCorrect, points) {
   return msg;
 }
 
+function clampCallbackText(text) {
+  const value = String(text || '');
+  return value.length > 190 ? `${value.slice(0, 187)}...` : value;
+}
+
+async function handleQueueHintCallback(bot, callbackQuery) {
+  const parts = callbackQuery.data.split('_');
+  if (parts.length !== 4 || parts[0] !== 'aq' || parts[1] !== 'hint') {
+    return;
+  }
+
+  const type = parts[2];
+  const queueId = parseInt(parts[3], 10);
+
+  if (type !== 'word' || isNaN(queueId)) {
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: 'Подсказка недоступна',
+      show_alert: true
+    });
+    return;
+  }
+
+  const queueRow = await ContentQueue.findByPk(queueId);
+  if (!queueRow || queueRow.type !== 'word') {
+    await bot.answerCallbackQuery(callbackQuery.id, {
+      text: 'Вопрос больше недоступен',
+      show_alert: true
+    });
+    return;
+  }
+
+  const item = queueRow.content || {};
+  const rawHint = item.hint || '';
+  const maskedHint = maskWordInText(rawHint, item.word || '').trim();
+  const hintText = maskedHint
+    ? `💡 Подсказка: ${maskedHint}`
+    : 'Подсказка пока недоступна';
+
+  await bot.answerCallbackQuery(callbackQuery.id, {
+    text: clampCallbackText(hintText),
+    show_alert: true
+  });
+}
+
 /**
  * Обработчик callback_query с prefix "aq_".
  * Вызывается из setupCallbacks в botSetup.js.
@@ -114,6 +158,11 @@ export async function handleAnswerCallback(bot, callbackQuery) {
   try {
     const data = callbackQuery.data;
     const userId = callbackQuery.from.id;
+
+    if (data.startsWith('aq_hint_')) {
+      await handleQueueHintCallback(bot, callbackQuery);
+      return;
+    }
 
     // Parse: aq_{type}_{queueId}_{answer}
     // Split only on first 3 underscores to handle potential underscores in answer
