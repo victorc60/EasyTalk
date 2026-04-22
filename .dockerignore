@@ -48,7 +48,6 @@ tests
 __tests__
 test_api.js
 test-docker-build.sh
-scripts/
 
 # Build artifacts
 dist
