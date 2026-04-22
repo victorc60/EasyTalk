@@ -67,6 +67,22 @@ function sameJson(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+function hasDatabaseConfig() {
+  if (process.env.DATABASE_URL || process.env.MYSQL_URL) return true;
+
+  const hasRailwayMysql =
+    process.env.MYSQLHOST &&
+    process.env.MYSQLUSER &&
+    process.env.MYSQLDATABASE;
+
+  const hasLegacyDb =
+    process.env.DB_HOST &&
+    process.env.DB_USER &&
+    process.env.DB_NAME;
+
+  return Boolean(hasRailwayMysql || hasLegacyDb);
+}
+
 async function syncBank({ bank, ContentQueue, buildQueueRecord, dataDir, dryRun }) {
   const filePath = path.join(dataDir, bank.file);
   const bankData = readJsonArray(filePath);
@@ -157,6 +173,14 @@ async function main() {
 
   if (unknownTypes.length) {
     throw new Error(`Неизвестный тип: ${unknownTypes.join(', ')}. Доступно: ${BANKS.map(bank => bank.type).join(', ')}`);
+  }
+
+  if (!hasDatabaseConfig()) {
+    throw new Error(
+      'Не найдены переменные подключения к БД. ' +
+      'Запусти команду на Railway/сервере или создай локальный .env с DATABASE_URL или MYSQL_URL. ' +
+      'Для диагностики: node scripts/check-db.js'
+    );
   }
 
   const [{ DATA_DIR }, { default: sequelize }, { default: ContentQueue }, { buildQueueRecord }] = await Promise.all([
