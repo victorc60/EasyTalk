@@ -2,30 +2,36 @@ import fs from 'fs';
 import path from 'path';
 import { sendAdminMessage } from '../utils/botUtils.js';
 import { DATA_DIR } from '../utils/projectPaths.js';
+import ContentQueue from '../models/ContentQueue.js';
+import DailyLog from '../models/DailyLog.js';
 
 const AUDIT_TZ = 'Europe/Chisinau';
 
 const BANK_SPECS = {
   word: {
     key: 'word',
+    queueType: 'word',
     title: 'Word Bank',
     bankFile: path.join(DATA_DIR, 'word_bank.json'),
     bankSelector: (row) => row?.word,
   },
   idiom: {
     key: 'idiom',
+    queueType: 'idiom',
     title: 'Idiom Bank',
     bankFile: path.join(DATA_DIR, 'idiom_bank.json'),
     bankSelector: (row) => row?.idiom,
   },
   phrasal_verb: {
     key: 'phrasal_verb',
+    queueType: 'phrasal',
     title: 'Phrasal Verb Bank',
     bankFile: path.join(DATA_DIR, 'phrasal_verbs_bank.json'),
     bankSelector: (row) => row?.phrasalVerb,
   },
   quiz: {
     key: 'quiz',
+    queueType: 'quiz',
     title: 'Quiz Bank',
     bankFile: path.join(DATA_DIR, 'quiz_bank.json'),
     bankSelector: (row) => row?.question,
@@ -38,6 +44,7 @@ const BANK_SPECS = {
   },
   fact: {
     key: 'fact',
+    queueType: 'fact',
     title: 'Fact Bank',
     bankFile: path.join(DATA_DIR, 'facts_bank.json'),
     bankSelector: (row) => row?.id,
@@ -75,12 +82,63 @@ function getCoverageForBank(bankKey) {
   };
 }
 
+async function getQueueCoverageForBank(bankKey) {
+  const spec = BANK_SPECS[bankKey];
+  const source = getCoverageForBank(bankKey);
+
+  if (!spec?.queueType) {
+    return {
+      ...source,
+      source,
+      queue: null,
+      today: null
+    };
+  }
+
+  const [total, used, today] = await Promise.all([
+    ContentQueue.count({ where: { type: spec.queueType } }),
+    ContentQueue.count({ where: { type: spec.queueType, used: true } }),
+    DailyLog.findOne({
+      where: { type: spec.queueType, date: getTodayDate() },
+      attributes: ['content_id']
+    })
+  ]);
+  const remaining = total - used;
+
+  return {
+    ...source,
+    total,
+    used,
+    remaining,
+    exhausted: total > 0 && remaining === 0,
+    usageRate: total > 0 ? Math.round((used / total) * 100) : 0,
+    source,
+    queue: {
+      type: spec.queueType,
+      total,
+      used,
+      remaining,
+      exhausted: total > 0 && remaining === 0,
+      usageRate: total > 0 ? Math.round((used / total) * 100) : 0
+    },
+    today: today?.content_id || null
+  };
+}
+
 function moscowDateTime() {
   return new Date().toLocaleString('ru-RU', { timeZone: AUDIT_TZ });
 }
 
+function getTodayDate() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: AUDIT_TZ });
+}
+
 export function getAllBankCoverage() {
   return Object.keys(BANK_SPECS).map((bankKey) => getCoverageForBank(bankKey));
+}
+
+export async function getAllBankQueueCoverage() {
+  return Promise.all(Object.keys(BANK_SPECS).map((bankKey) => getQueueCoverageForBank(bankKey)));
 }
 
 /**
@@ -110,16 +168,41 @@ export function appendBankHistoryEntries(bankKey, ids) {
 }
 
 export async function runDailyBankAuditAndAutofill(bot) {
-  const coverage = getAllBankCoverage();
+  const coverage = await getAllBankQueueCoverage();
 
   const lines = [];
   lines.push(`🧠 Bank audit ${moscowDateTime()} (${AUDIT_TZ})`);
   lines.push('');
-  lines.push('Coverage:');
+  lines.push('Queue coverage (real daily rotation):');
 
   for (const row of coverage) {
-    const warning = row.exhausted ? ' ⚠️ ПУСТ' : row.remaining <= 3 ? ' ⚠️ мало' : '';
-    lines.push(`• ${row.title}: ${row.used}/${row.total} (${row.usageRate}%), remaining=${row.remaining}${warning}`);
+    if (!row.queue) {
+      const warning = row.exhausted ? ' ⚠️ ПУСТ' : row.remaining <= 3 ? ' ⚠️ мало' : '';
+      lines.push(`• ${row.title}: file ${row.used}/${row.total} (${row.usageRate}%), remaining=${row.remaining}${warning}`);
+      continue;
+    }
+
+    const warning = row.queue.total === 0
+      ? ' ⚠️ queue empty'
+      : row.queue.exhausted
+        ? ' ⚠️ cycle exhausted'
+        : row.queue.remaining <= 3
+          ? ' ⚠️ мало'
+          : '';
+    const todayInfo = row.today ? `, today=${row.today}` : ', today=not sent';
+    const sourceInfo = row.source.total !== row.queue.total
+      ? `, source=${row.source.total}`
+      : '';
+
+    lines.push(
+      `• ${row.title}: queue ${row.queue.used}/${row.queue.total} (${row.queue.usageRate}%), remaining=${row.queue.remaining}${todayInfo}${sourceInfo}${warning}`
+    );
+  }
+
+  lines.push('');
+  lines.push('Legacy JSON isUsed marks:');
+  for (const row of coverage) {
+    lines.push(`• ${row.title}: ${row.source.used}/${row.source.total}`);
   }
 
   if (bot) {
