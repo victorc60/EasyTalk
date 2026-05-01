@@ -1,84 +1,84 @@
 [
   {
     "block": "🟢 МИНИ-ИГРА",
-    "note": "Вопросы 1–10 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
-    "id": "mini_a2_01",
+    "note": "Вопросы 11–20 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
+    "id": "mini_a2_11",
     "type": "preposition",
-    "question": "You write a note to your friend: 'I'll see you ___ Monday morning.' Which preposition is correct?",
+    "question": "You make a plan: 'Let's meet ___ 7 o'clock in the evening.' Which preposition is correct?",
     "options": ["in", "at", "on", "by"],
-    "correctIndex": 2,
-    "explanation": "Use on with days and dates: on Monday, on Friday, on 5th March. Use in for months and years. Use at for times."
+    "correctIndex": 1,
+    "explanation": "Use at for exact times: at 7 o'clock, at noon, at midnight. Use on for days, and in for longer periods like months or years."
   },
   {
-    "id": "mini_a2_02",
+    "id": "mini_a2_12",
     "type": "article",
-    "question": "You're telling a story: 'I saw ___ old man feeding the pigeons in the park.' Which article fits?",
+    "question": "You're describing your house: 'We have ___ small garden behind the house.' Which article fits?",
     "options": ["a", "an", "the", "—"],
-    "correctIndex": 1,
-    "explanation": "Use an before words that start with a vowel sound: an old man, an orange, an interesting idea. 'Old' starts with the vowel sound /ɒ/."
+    "correctIndex": 0,
+    "explanation": "Use a before singular countable nouns when mentioning them for the first time. 'Garden' starts with a consonant sound, so we use a."
   },
   {
-    "id": "mini_a2_03",
+    "id": "mini_a2_13",
     "type": "fill_gap",
-    "question": "You describe your neighbour: 'She ___ her dog every morning before work.' Which form is correct?",
-    "options": ["walk", "walks", "is walks", "walking"],
+    "question": "You talk about a friend: 'He ___ coffee every morning before work.' Which form is correct?",
+    "options": ["drink", "drinks", "is drink", "drinking"],
     "correctIndex": 1,
-    "explanation": "Present Simple with he/she/it always takes -s: she walks, he eats, it starts. It's used for regular habits and routines."
+    "explanation": "In Present Simple, he/she/it takes -s: he drinks, she runs, it works. This tense is used for daily habits."
   },
   {
-    "id": "mini_a2_04",
+    "id": "mini_a2_14",
     "type": "question_form",
-    "question": "You want to know your friend's job: '___ your brother work in an office?' Choose the correct form.",
-    "options": ["Is", "Does", "Do", "Has"],
-    "correctIndex": 1,
-    "explanation": "Use Does for he/she/it in Present Simple questions. Use Do for I/you/we/they. 'Your brother' = third person singular = Does."
-  },
-  {
-    "id": "mini_a2_05",
-    "type": "vocabulary",
-    "question": "Your friend asks how you feel. You say: 'I'm really ___ — I didn't sleep well last night.' Which word fits?",
-    "options": ["hungry", "tired", "bored", "angry"],
-    "correctIndex": 1,
-    "explanation": "Tired means you need rest or sleep. Hungry = you need food. Bored = nothing interesting to do. Angry = you feel upset about something."
-  },
-  {
-    "id": "mini_a2_06",
-    "type": "preposition",
-    "question": "You explain where something is: 'The supermarket is ___ the bank and the pharmacy.' Which preposition?",
-    "options": ["between", "among", "beside", "across"],
-    "correctIndex": 0,
-    "explanation": "Between is used when something is in the middle of two specific things. Among is used for three or more things (or a group). The bank and the pharmacy = two things = between."
-  },
-  {
-    "id": "mini_a2_07",
-    "type": "fill_gap",
-    "question": "You ask a classmate: 'What time ___ the lesson start today?' Which form is correct?",
-    "options": ["do", "does", "is", "has"],
-    "correctIndex": 1,
-    "explanation": "Use Does for questions with he/she/it — and also with things like 'the lesson', 'the film', 'the bus'. The lesson = third person singular."
-  },
-  {
-    "id": "mini_a2_08",
-    "type": "article",
-    "question": "A friend asks: 'Is there ___ bus stop near your house?' Which article fits?",
-    "options": ["a", "an", "the", "—"],
-    "correctIndex": 0,
-    "explanation": "Use a/an when you mention something for the first time or when it's one of many. 'Bus' starts with a consonant sound /b/, so use a — not an."
-  },
-  {
-    "id": "mini_a2_09",
-    "type": "vocabulary",
-    "question": "You're at a restaurant. The waiter asks: 'Are you ready to ___?' Which word completes the sentence?",
-    "options": ["order", "ask", "pay", "choose"],
-    "correctIndex": 0,
-    "explanation": "'Ready to order' is the standard phrase used in restaurants when a customer wants to tell the waiter what they'd like to eat or drink."
-  },
-  {
-    "id": "mini_a2_10",
-    "type": "fill_gap",
-    "question": "You describe your daily routine: 'I usually ___ a shower in the morning.' Which verb collocates correctly?",
-    "options": ["make", "do", "take", "have"],
+    "question": "You ask about hobbies: '___ your parents watch TV every evening?' Choose the correct form.",
+    "options": ["Is", "Does", "Do", "Are"],
     "correctIndex": 2,
-    "explanation": "Take a shower is the standard collocation in American and British English. Have a shower is also correct in British English — but take is the most widely accepted answer here."
+    "explanation": "Use Do for I/you/we/they. 'Your parents' = they → Do. Use Does only for he/she/it."
+  },
+  {
+    "id": "mini_a2_15",
+    "type": "vocabulary",
+    "question": "You describe the weather: 'It's really ___ today — don't forget your jacket.' Which word fits?",
+    "options": ["hot", "cold", "warm", "sunny"],
+    "correctIndex": 1,
+    "explanation": "Cold means low temperature. Hot = high temperature. Warm = comfortable temperature. Sunny describes the presence of sun, not temperature."
+  },
+  {
+    "id": "mini_a2_16",
+    "type": "preposition",
+    "question": "You give directions: 'The café is ___ the corner of the street.' Which preposition?",
+    "options": ["in", "on", "at", "under"],
+    "correctIndex": 2,
+    "explanation": "Use at for specific points or locations: at the corner, at the door, at the bus stop."
+  },
+  {
+    "id": "mini_a2_17",
+    "type": "fill_gap",
+    "question": "You talk about your routine: 'We usually ___ dinner at 8 pm.' Which verb fits?",
+    "options": ["make", "do", "have", "eat"],
+    "correctIndex": 2,
+    "explanation": "Have dinner is the standard collocation. Eat dinner is possible, but have is more natural in everyday English."
+  },
+  {
+    "id": "mini_a2_18",
+    "type": "article",
+    "question": "You tell a story: 'Yesterday, I saw ___ interesting film on TV.' Which article fits?",
+    "options": ["a", "an", "the", "—"],
+    "correctIndex": 1,
+    "explanation": "Use an before vowel sounds. 'Interesting' starts with a vowel sound, so we use an."
+  },
+  {
+    "id": "mini_a2_19",
+    "type": "vocabulary",
+    "question": "Your friend asks about your weekend. You say: 'I stayed at home and ___ a book.' Which word fits?",
+    "options": ["watched", "read", "looked", "saw"],
+    "correctIndex": 1,
+    "explanation": "Read is the correct verb for books. Watched is used for TV or films. Saw is used for people or events."
+  },
+  {
+    "id": "mini_a2_20",
+    "type": "fill_gap",
+    "question": "You describe a habit: 'She always ___ her phone before going to bed.' Which form is correct?",
+    "options": ["check", "checks", "checking", "is check"],
+    "correctIndex": 1,
+    "explanation": "In Present Simple, he/she/it takes -s: she checks. This sentence describes a regular habit."
   }
 ]
