@@ -162,20 +162,7 @@ function cacheNativeLanguage(userSessions, userId, nativeLanguage) {
 }
 
 function buildWelcomeOptions(nativeLanguage) {
-  const webAppUrl = process.env.BOSS_GRAMMAR_WEBAPP_URL;
-  const buttonText = normalizeNativeLanguage(nativeLanguage) === 'ro'
-    ? '🎮 Deschide Boss Grammar'
-    : '🎮 Открыть Boss Grammar';
-  return webAppUrl
-    ? {
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: buttonText, web_app: { url: webAppUrl } }]
-          ]
-        }
-      }
-    : { parse_mode: 'HTML' };
+  return { parse_mode: 'HTML' };
 }
 
 async function sendLocalizedWelcome(bot, chatId, nativeLanguage, rawFirstName) {
@@ -328,41 +315,13 @@ export async function start(bot, msg, userSessions) {
 
     const nativeLanguage = normalizeNativeLanguage(user.native_language);
     cacheNativeLanguage(userSessions, msg.from.id, nativeLanguage);
-
-    if (!nativeLanguage) {
-      await sendUserMessage(
-        bot,
-        msg.chat.id,
-        buildNativeLanguageRequiredText(),
-        { parse_mode: 'HTML' }
-      );
-      await showLanguageSelection(bot, msg.chat.id, msg.from.id, userSessions);
-      return;
-    }
-
-    await sendLocalizedWelcome(bot, msg.chat.id, nativeLanguage, msg.from.first_name);
+    const welcomeLanguage = nativeLanguage || normalizeNativeLanguage(msg.from.language_code) || 'ru';
+    await sendLocalizedWelcome(bot, msg.chat.id, welcomeLanguage, msg.from.first_name);
   } catch (error) {
     console.error('Ошибка при обработке команды /start:', error);
     await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при регистрации. Попробуйте еще раз.');
     await sendAdminMessage(bot, `‼️ Ошибка команды /start: ${error.message}`);
   }
-}
-
-export async function gameBoss(bot, msg) {
-  const url = process.env.BOSS_GRAMMAR_WEBAPP_URL;
-  if (!url) {
-    await sendUserMessage(bot, msg.chat.id, '⚠️ Веб-версия Boss Grammar не настроена. Установите BOSS_GRAMMAR_WEBAPP_URL.');
-    return;
-  }
-
-  const text = '🎮 Boss Grammar — нажми кнопку, чтобы открыть мини-игру в WebApp.';
-  await sendUserMessage(bot, msg.chat.id, text, {
-    reply_markup: {
-      keyboard: [[{ text: '🎮 Boss Grammar', web_app: { url } }]],
-      resize_keyboard: true,
-      one_time_keyboard: false,
-    },
-  });
 }
 
 export async function leaderboard(bot, msg) {

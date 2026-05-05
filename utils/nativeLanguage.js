@@ -91,9 +91,7 @@ export function buildWelcomeMessage(nativeLanguage, safeFirstName) {
 📊 /progress - progresul tau
 🏆 /leaders - clasament
 
-Alege ce iti place si exerseaza engleza!
-
-🎮 <b>Boss Grammar</b> — porneste mini-jocul din butonul de mai jos (WebApp).`;
+Alege ce iti place si exerseaza engleza!`;
   }
 
   return `
@@ -116,8 +114,5 @@ Alege ce iti place si exerseaza engleza!
 📊 /progress - твой прогресс
 🏆 /leaders - таблица лидеров
 
-Выбирай что тебе интересно и практикуй английский!
-
-🎮 <b>Boss Grammar</b> — запускай мини-игру через кнопку ниже (WebApp).`;
+Выбирай что тебе интересно и практикуй английский!`;
 }
-

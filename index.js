@@ -48,6 +48,7 @@ if (!webhookUrl) {
 // и не вызывать getUpdates до готовности приложения (БД, setup). Polling запустим ниже после init.
 const bot = new TelegramBot(botToken, { polling: false });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const ENABLE_BOSS_GRAMMAR = process.env.ENABLE_BOSS_GRAMMAR === 'true';
 
 const userSessions = {
   wordGames: new Map(),
@@ -175,7 +176,11 @@ process.on('unhandledRejection', (error) => {
       console.log(`Webhook set to ${webhookUrl}`);
     }
 
-    startBossGrammarWebhook(bot, app);
+    if (ENABLE_BOSS_GRAMMAR) {
+      startBossGrammarWebhook(bot, app);
+    } else {
+      console.log('Boss Grammar is disabled');
+    }
 
     const port = Number(process.env.PORT || 3000);
     app.get('/health', (req, res) => res.json({ ok: true }));

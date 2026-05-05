@@ -7,7 +7,7 @@ import { weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './f
 import { runDailyContent } from './services/dailyContentService.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, showLanguageSelection, saveNativeLanguage, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, showLanguageSelection, saveNativeLanguage, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
 import { handleAnswerCallback } from './handlers/answerHandler.js';
@@ -221,7 +221,7 @@ async function setupBotCommands(bot) {
 
     console.log('✅ Команды бота очищены (scopes: default/private/group/admin chats; languages: all/ru/en)');
 
-    // Команды для обычных пользователей (без админских и без Boss Grammar в меню)
+    // Команды для обычных пользователей
     const userCommands = [
       { command: 'start', description: 'Главное меню' },
       { command: 'roleplay', description: 'Ролевая игра с персонажем' },
@@ -282,8 +282,6 @@ function setupCommandHandlers(bot, userSessions) {
     userSessions.chatHistories.delete(userId);
     sendUserMessage(bot, msg.chat.id, '🗑 История диалога сброшена. Начинаем с чистого листа!');
   });
-  bot.onText(/\/game_boss/, (msg) => gameBoss(bot, msg));
-  bot.onText(/\/boss/, (msg) => gameBoss(bot, msg));
   bot.onText(/\/leaders/, (msg) => leaderboard(bot, msg));
   bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
