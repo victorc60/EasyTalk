@@ -6,6 +6,7 @@ import { exerciseAgent } from '../agents/exerciseAgent.js';
 import { progressAgent } from '../agents/progressAgent.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const ENABLE_PRACTICE_BLOCK = process.env.ENABLE_AGENT_PRACTICE === 'true';
 const ALLOWED_ROUTES = new Set([
   'correction',
   'explanation',
@@ -160,26 +161,27 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
         userLevel: correction.userLevel,
       });
 
-      const practice = await exerciseAgent.run({
-        userId,
-        topic: correction.errorTopic,
-        userLevel: correction.userLevel,
-        openai,
-      });
-
-      return [
+      const sections = [
         '✅ Correct:',
         correction.correctedText,
         '',
         '🧠 Explanation:',
         correction.explanation,
-        '',
-        '🎯 Practice:',
-        formatExercises(practice),
-        '',
-        '💬 Question:',
-        correction.question,
-      ].join('\n');
+      ];
+
+      if (ENABLE_PRACTICE_BLOCK) {
+        const practice = await exerciseAgent.run({
+          userId,
+          topic: correction.errorTopic,
+          userLevel: correction.userLevel,
+          openai,
+        });
+
+        sections.push('', '🎯 Practice:', formatExercises(practice));
+      }
+
+      sections.push('', '💬 Question:', correction.question);
+      return sections.join('\n');
     }
 
     if (routing.route === 'explanation') {
