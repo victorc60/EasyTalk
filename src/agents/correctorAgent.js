@@ -66,8 +66,83 @@ function normalizeResult(payload, originalMessage) {
   };
 }
 
-async function refineCorrectionDraft({ client, userId, originalMessage, draftResult }) {
+function countCorrectionRiskSignals(text) {
+  const safeText = String(text || '').trim();
+  let score = 0;
+
+  const patterns = [
+    /\bthis photos\b/i,
+    /\bthese photo\b/i,
+    /\b(i|you|we|they)\s+is\b/i,
+    /\b(it|he|she)\s+are\b/i,
+    /\bi\s+goes\b/i,
+    /\bany day\b/i,
+    /\bsince\b.*\b(in \d{4}|last|yesterday|ago|when i was)\b/i,
+    /\s+[,.!?]/,
+  ];
+
+  for (const pattern of patterns) {
+    if (pattern.test(safeText)) {
+      score += 1;
+    }
+  }
+
+  if (/\bi\b/.test(safeText) && !/\bI\b/.test(safeText)) {
+    score += 1;
+  }
+
+  if (/^[a-z]/.test(safeText)) {
+    score += 1;
+  }
+
+  return score;
+}
+
+function shouldRunNaturalnessPass(originalMessage, draftResult) {
   if (!ENABLE_NATURALNESS_PASS) {
+    return false;
+  }
+
+  const safeOriginal = String(originalMessage || '').trim();
+  const correctedText = String(draftResult?.correctedText || '').trim();
+  const originalWordCount = safeOriginal ? safeOriginal.split(/\s+/).length : 0;
+  const riskSignals = countCorrectionRiskSignals(safeOriginal);
+  const suspiciousDraftPatterns = [
+    /\bany day\b/i,
+    /\bthis photos\b/i,
+    /\bthese photo\b/i,
+    /\bsince\b.*\b(in \d{4}|last|yesterday|ago|when i was)\b/i,
+  ];
+
+  if (!correctedText) {
+    return true;
+  }
+
+  if (correctedText.toLowerCase() === safeOriginal.toLowerCase()) {
+    return true;
+  }
+
+  if (suspiciousDraftPatterns.some((pattern) => pattern.test(correctedText))) {
+    return true;
+  }
+
+  if (originalWordCount <= 8 && riskSignals <= 2) {
+    return false;
+  }
+
+  if (riskSignals >= 2) {
+    return true;
+  }
+
+  if (riskSignals >= 1 && originalWordCount >= 10) {
+    return true;
+  }
+
+  return false;
+}
+
+async function refineCorrectionDraft({ client, userId, originalMessage, draftResult }) {
+  if (!shouldRunNaturalnessPass(originalMessage, draftResult)) {
     return draftResult;
   }
 

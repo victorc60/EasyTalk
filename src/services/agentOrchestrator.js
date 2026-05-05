@@ -6,6 +6,13 @@ import { exerciseAgent } from '../agents/exerciseAgent.js';
 import { progressAgent } from '../agents/progressAgent.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const ALLOWED_ROUTES = new Set([
+  'correction',
+  'explanation',
+  'lesson',
+  'quiz',
+  'free_chat',
+]);
 
 const fallbackOpenAI = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -91,6 +98,22 @@ async function generateFreeChatReply({ userId, message, openai }) {
   return response.choices[0]?.message?.content?.trim() || 'Hi! Let’s practice English together. What would you like to talk about?';
 }
 
+async function resolveRoute({ preferredRoute, userId, message, openai }) {
+  if (typeof preferredRoute === 'string' && ALLOWED_ROUTES.has(preferredRoute)) {
+    return {
+      route: preferredRoute,
+      confidence: 1,
+      reason: 'Preferred route was provided by the bot flow.',
+    };
+  }
+
+  return await routerAgent.run({
+    userId,
+    message,
+    openai,
+  });
+}
+
 /**
  * Integration example for the current bot:
  *
@@ -107,7 +130,7 @@ async function generateFreeChatReply({ userId, message, openai }) {
  * Suggested place:
  * inside botSetup.js -> setupMessageHandler() near the current handleRegularMessage(...) call.
  */
-export async function handleUserMessageWithAgents({ userId, message, openai } = {}) {
+export async function handleUserMessageWithAgents({ userId, message, openai, preferredRoute } = {}) {
   const safeMessage = String(message || '').trim();
 
   if (!safeMessage) {
@@ -115,7 +138,8 @@ export async function handleUserMessageWithAgents({ userId, message, openai } = 
   }
 
   try {
-    const routing = await routerAgent.run({
+    const routing = await resolveRoute({
+      preferredRoute,
       userId,
       message: safeMessage,
       openai,

@@ -756,6 +756,7 @@ function setupMessageHandler(bot, userSessions, openai) {
           userId,
           message: text,
           openai,
+          preferredRoute: userMode === 'correction' ? 'correction' : undefined,
         });
 
         await sendUserMessage(bot, chatId, response);
