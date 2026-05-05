@@ -96,6 +96,7 @@ async function runMigrations() {
     // (оставлен только правильный uq_wgp_user_date_type_slot)
     `ALTER TABLE word_game_participation DROP INDEX \`word_game_participation_user_id_game_date\``,
     `ALTER TABLE word_game_participation DROP INDEX \`word_game_participation_user_id_game_date_game_type\``,
+    `ALTER TABLE users ADD COLUMN native_language VARCHAR(8) NULL AFTER last_name`,
   ];
   for (const sql of migrations) {
     try {
@@ -103,7 +104,12 @@ async function runMigrations() {
       console.log(`✅ Миграция выполнена: ${sql.slice(0, 60)}...`);
     } catch (err) {
       // Индекс уже удалён или не существует — это нормально
-      if (['ER_CANT_DROP_FIELD_OR_KEY', 'ER_DROP_INDEX_FK'].includes(err.original?.code) || err.message?.includes("Can't DROP") || err.message?.includes("check that column/key exists")) {
+      if (
+        ['ER_CANT_DROP_FIELD_OR_KEY', 'ER_DROP_INDEX_FK', 'ER_DUP_FIELDNAME'].includes(err.original?.code) ||
+        err.message?.includes("Can't DROP") ||
+        err.message?.includes('check that column/key exists') ||
+        err.message?.includes('Duplicate column name')
+      ) {
         console.log(`ℹ️ Миграция пропущена (уже применена): ${sql.slice(0, 60)}...`);
       } else {
         console.error(`⚠️ Ошибка миграции: ${err.message}`);

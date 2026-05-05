@@ -1,4 +1,5 @@
 import { OpenAI } from 'openai';
+import { getNativeLanguageInstruction } from '../../utils/nativeLanguage.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const VALIDATOR_MODEL = process.env.OPENAI_VALIDATOR_MODEL || MODEL;
@@ -39,8 +40,9 @@ function parseJson(content) {
   }
 }
 
-function normalizeResult(payload, originalMessage) {
+function normalizeResult(payload, originalMessage, nativeLanguage) {
   const safeOriginalMessage = String(originalMessage || '').trim();
+  const isRomanian = getNativeLanguageInstruction(nativeLanguage) === 'Romanian';
 
   return {
     correctedText:
@@ -50,7 +52,9 @@ function normalizeResult(payload, originalMessage) {
     explanation:
       typeof payload?.explanation === 'string' && payload.explanation.trim()
         ? payload.explanation.trim()
-        : 'Я исправил фразу и сохранил смысл. Попробуй обратить внимание на порядок слов и форму глагола.',
+        : isRomanian
+          ? 'Am corectat fraza si am pastrat sensul. Uita-te la ordinea cuvintelor si la forma verbului.'
+          : 'Я исправил фразу и сохранил смысл. Попробуй обратить внимание на порядок слов и форму глагола.',
     errorTopic:
       typeof payload?.errorTopic === 'string' && payload.errorTopic.trim()
         ? payload.errorTopic.trim()
@@ -141,7 +145,7 @@ function shouldRunNaturalnessPass(originalMessage, draftResult) {
   return false;
 }
 
-async function refineCorrectionDraft({ client, userId, originalMessage, draftResult }) {
+async function refineCorrectionDraft({ client, userId, originalMessage, draftResult, explanationLanguage }) {
   if (!shouldRunNaturalnessPass(originalMessage, draftResult)) {
     return draftResult;
   }
@@ -163,7 +167,7 @@ async function refineCorrectionDraft({ client, userId, originalMessage, draftRes
             'Rules:',
             '- correctedText must be fully natural, grammatically correct, and concise.',
             '- preserve the original meaning, but fix tense, word choice, collocations, articles, prepositions, and awkward phrasing.',
-            '- explanation must be in simple Russian and must match the final correctedText.',
+            `- explanation must be in simple ${explanationLanguage} and must match the final correctedText.`,
             '- errorTopic must match the main final mistake.',
             '- question must be one short English follow-up question.',
             '- keep everything concise and Telegram-friendly.',
@@ -182,7 +186,7 @@ async function refineCorrectionDraft({ client, userId, originalMessage, draftRes
 
     const content = response.choices[0]?.message?.content;
     const parsed = parseJson(content);
-    return normalizeResult(parsed, originalMessage);
+    return normalizeResult(parsed, originalMessage, explanationLanguage === 'Romanian' ? 'ro' : 'ru');
   } catch (error) {
     console.error('[Corrector Agent] Naturalness validation failed:', error.message);
     return draftResult;
@@ -192,9 +196,10 @@ async function refineCorrectionDraft({ client, userId, originalMessage, draftRes
 export const correctorAgent = {
   name: 'Corrector Agent',
 
-  async run({ userId, message, openai } = {}) {
+  async run({ userId, message, openai, nativeLanguage } = {}) {
     const client = getOpenAIClient(openai);
     const safeMessage = String(message || '').trim();
+    const explanationLanguage = getNativeLanguageInstruction(nativeLanguage);
 
     try {
       const response = await client.chat.completions.create({
@@ -215,7 +220,7 @@ export const correctorAgent = {
               '- fix grammar, word choice, collocations, articles, prepositions, capitalization, punctuation, and unnatural phrasing.',
               '- do not stop after fixing only one mistake if the sentence still sounds wrong.',
               '- for daily routines prefer natural phrasing like "every day" instead of unnatural options like "any day" when needed.',
-              '- explanation must be in simple Russian.',
+              `- explanation must be in simple ${explanationLanguage}.`,
               '- question must be in English.',
               '- keep output concise and suitable for Telegram.',
               '- preserve the user meaning.',
@@ -232,17 +237,18 @@ export const correctorAgent = {
 
       const content = response.choices[0]?.message?.content;
       const parsed = parseJson(content);
-      const draftResult = normalizeResult(parsed, safeMessage);
+      const draftResult = normalizeResult(parsed, safeMessage, nativeLanguage);
 
       return await refineCorrectionDraft({
         client,
         userId,
         originalMessage: safeMessage,
         draftResult,
+        explanationLanguage,
       });
     } catch (error) {
       console.error('[Corrector Agent] Failed to correct message:', error.message);
-      return normalizeResult(null, safeMessage);
+      return normalizeResult(null, safeMessage, nativeLanguage);
     }
   },
 };

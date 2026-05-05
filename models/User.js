@@ -23,6 +23,13 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  native_language: {
+    type: DataTypes.STRING(8),
+    allowNull: true,
+    validate: {
+      isIn: [['ru', 'ro']]
+    }
+  },
   points: {
     type: DataTypes.INTEGER,
     defaultValue: 0,

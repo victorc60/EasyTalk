@@ -4,6 +4,7 @@ import { correctorAgent } from '../agents/correctorAgent.js';
 import { teacherAgent } from '../agents/teacherAgent.js';
 import { exerciseAgent } from '../agents/exerciseAgent.js';
 import { progressAgent } from '../agents/progressAgent.js';
+import { getNativeLanguageInstruction } from '../../utils/nativeLanguage.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const ENABLE_PRACTICE_BLOCK = process.env.ENABLE_AGENT_PRACTICE === 'true';
@@ -29,11 +30,13 @@ function getOpenAIClient(openai) {
   return client;
 }
 
-function formatExercises(exerciseResult) {
+function formatExercises(exerciseResult, nativeLanguage) {
   const header = exerciseResult?.task ? `${exerciseResult.task}\n` : '';
   const exercises = Array.isArray(exerciseResult?.exercises)
     ? exerciseResult.exercises.slice(0, 1)
     : [];
+  const answerLabel = nativeLanguage === 'ro' ? 'Raspuns' : 'Ответ';
+  const explanationLabel = nativeLanguage === 'ro' ? 'Explicatie' : 'Пояснение';
 
   if (exercises.length === 0) {
     return `${header}1. Write one more sentence on this topic.`;
@@ -44,8 +47,8 @@ function formatExercises(exerciseResult) {
     ...exercises.map((exercise, index) => {
       return [
         `${index + 1}. ${exercise.question}`,
-        `Answer: ${exercise.answer}`,
-        `Пояснение: ${exercise.explanation}`,
+        `${answerLabel}: ${exercise.answer}`,
+        `${explanationLabel}: ${exercise.explanation}`,
       ].join('\n');
     }),
   ]
@@ -53,26 +56,52 @@ function formatExercises(exerciseResult) {
     .join('\n\n');
 }
 
-function formatTeacherReply(result) {
+function getLocalizedSectionLabels(nativeLanguage) {
+  if (nativeLanguage === 'ro') {
+    return {
+      correct: '✅ Varianta corecta:',
+      explanation: '🧠 Explicatie:',
+      practice: '🎯 Exersare:',
+      question: '💬 Intrebare:',
+      topic: '📘 Tema:',
+      examples: 'Exemple:',
+    };
+  }
+
+  return {
+    correct: '✅ Исправленный вариант:',
+    explanation: '🧠 Объяснение:',
+    practice: '🎯 Практика:',
+    question: '💬 Вопрос:',
+    topic: '📘 Тема:',
+    examples: 'Примеры:',
+  };
+}
+
+function formatTeacherReply(result, nativeLanguage) {
+  const labels = getLocalizedSectionLabels(nativeLanguage);
   const examples = Array.isArray(result?.examples) ? result.examples : [];
   const exampleText = examples.length
     ? examples
-        .map((example, index) => `${index + 1}. ${example.en}\n${example.ru}`)
+        .map((example, index) => `${index + 1}. ${example.en}\n${example.nativeText || example.native || example.ru}`)
         .join('\n\n')
-    : '1. I study English every day.\nЯ изучаю английский каждый день.';
+    : nativeLanguage === 'ro'
+      ? '1. I study English every day.\nStudiez engleza in fiecare zi.'
+      : '1. I study English every day.\nЯ изучаю английский каждый день.';
 
   return [
-    `📘 Topic: ${result.topic}`,
+    `${labels.topic} ${result.topic}`,
     '',
     result.explanation,
     '',
-    'Examples:',
+    labels.examples,
     exampleText,
   ].join('\n');
 }
 
-async function generateFreeChatReply({ userId, message, openai }) {
+async function generateFreeChatReply({ userId, message, openai, nativeLanguage }) {
   const client = getOpenAIClient(openai);
+  const supportLanguage = getNativeLanguageInstruction(nativeLanguage);
 
   const response = await client.chat.completions.create({
     model: MODEL,
@@ -85,7 +114,8 @@ async function generateFreeChatReply({ userId, message, openai }) {
           'You are a friendly English tutor inside a Telegram bot.',
           'Reply in a warm, concise, Telegram-friendly style.',
           'If the user makes small English mistakes, gently model better English without being harsh.',
-          'You may use simple Russian when it helps understanding.',
+          `Use ${supportLanguage} for explanations and support text when helpful.`,
+          'The target learning language is English.',
           'End with one short follow-up question when appropriate.',
         ].join(' '),
       },
@@ -131,8 +161,9 @@ async function resolveRoute({ preferredRoute, userId, message, openai }) {
  * Suggested place:
  * inside botSetup.js -> setupMessageHandler() near the current handleRegularMessage(...) call.
  */
-export async function handleUserMessageWithAgents({ userId, message, openai, preferredRoute } = {}) {
+export async function handleUserMessageWithAgents({ userId, message, openai, preferredRoute, nativeLanguage } = {}) {
   const safeMessage = String(message || '').trim();
+  const labels = getLocalizedSectionLabels(nativeLanguage);
 
   if (!safeMessage) {
     return '⚠️ Please send a text message.';
@@ -151,6 +182,7 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
         userId,
         message: safeMessage,
         openai,
+        nativeLanguage,
       });
 
       await progressAgent.saveMistake({
@@ -162,10 +194,10 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
       });
 
       const sections = [
-        '✅ Correct:',
+        labels.correct,
         correction.correctedText,
         '',
-        '🧠 Explanation:',
+        labels.explanation,
         correction.explanation,
       ];
 
@@ -175,12 +207,13 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
           topic: correction.errorTopic,
           userLevel: correction.userLevel,
           openai,
+          nativeLanguage,
         });
 
-        sections.push('', '🎯 Practice:', formatExercises(practice));
+        sections.push('', labels.practice, formatExercises(practice, nativeLanguage));
       }
 
-      sections.push('', '💬 Question:', correction.question);
+      sections.push('', labels.question, correction.question);
       return sections.join('\n');
     }
 
@@ -189,9 +222,10 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
         userId,
         message: safeMessage,
         openai,
+        nativeLanguage,
       });
 
-      return formatTeacherReply(explanation);
+      return formatTeacherReply(explanation, nativeLanguage);
     }
 
     if (routing.route === 'lesson') {
@@ -206,6 +240,7 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
       userId,
       message: safeMessage,
       openai,
+      nativeLanguage,
     });
   } catch (error) {
     console.error('[Agent Orchestrator] Failed to handle user message:', error.message);
@@ -215,6 +250,7 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
         userId,
         message: safeMessage,
         openai,
+        nativeLanguage,
       });
     } catch (fallbackError) {
       console.error('[Agent Orchestrator] Free chat fallback failed:', fallbackError.message);

@@ -1,4 +1,5 @@
 import { OpenAI } from 'openai';
+import { getNativeLanguageInstruction, normalizeNativeLanguage } from '../../utils/nativeLanguage.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
@@ -37,13 +38,15 @@ function parseJson(content) {
   }
 }
 
-function normalizeExercises(exercises, topic) {
+function normalizeExercises(exercises, topic, nativeLanguage) {
   if (!Array.isArray(exercises) || exercises.length === 0) {
     return [
       {
         question: `Make one short sentence with ${topic || 'this grammar topic'}.`,
         answer: 'Any correct short sentence is fine.',
-        explanation: 'Главное использовать правильную форму глагола.',
+        explanation: normalizeNativeLanguage(nativeLanguage) === 'ro'
+          ? 'Important este sa folosesti forma corecta a verbului.'
+          : 'Главное использовать правильную форму глагола.',
       },
     ];
   }
@@ -62,12 +65,14 @@ function normalizeExercises(exercises, topic) {
       explanation:
         typeof item.explanation === 'string' && item.explanation.trim()
           ? item.explanation.trim()
-          : 'Короткое объяснение.',
+          : normalizeNativeLanguage(nativeLanguage) === 'ro'
+            ? 'Explicatie scurta.'
+            : 'Короткое объяснение.',
     }))
     .slice(0, 1);
 }
 
-function normalizeResult(payload, topic) {
+function normalizeResult(payload, topic, nativeLanguage) {
   return {
     topic:
       typeof payload?.topic === 'string' && payload.topic.trim()
@@ -77,17 +82,18 @@ function normalizeResult(payload, topic) {
       typeof payload?.task === 'string' && payload.task.trim()
         ? payload.task.trim()
         : 'Complete this short practice task.',
-    exercises: normalizeExercises(payload?.exercises, topic).slice(0, 1),
+    exercises: normalizeExercises(payload?.exercises, topic, nativeLanguage).slice(0, 1),
   };
 }
 
 export const exerciseAgent = {
   name: 'Exercise Agent',
 
-  async run({ userId, topic, userLevel, openai } = {}) {
+  async run({ userId, topic, userLevel, openai, nativeLanguage } = {}) {
     const client = getOpenAIClient(openai);
     const safeTopic = topic || 'General grammar';
     const safeUserLevel = userLevel || 'A1';
+    const explanationLanguage = getNativeLanguageInstruction(nativeLanguage);
 
     try {
       const response = await client.chat.completions.create({
@@ -107,7 +113,7 @@ export const exerciseAgent = {
               '- return exactly one exercise in the exercises array.',
               '- keep the exercise short and clear.',
               '- answer should be concise.',
-              '- explanation should be simple Russian.',
+              `- explanation should be simple ${explanationLanguage}.`,
               '- output must fit Telegram.',
             ].join(' '),
           },
@@ -120,10 +126,10 @@ export const exerciseAgent = {
 
       const content = response.choices[0]?.message?.content;
       const parsed = parseJson(content);
-      return normalizeResult(parsed, safeTopic);
+      return normalizeResult(parsed, safeTopic, nativeLanguage);
     } catch (error) {
       console.error('[Exercise Agent] Failed to generate exercises:', error.message);
-      return normalizeResult(null, safeTopic);
+      return normalizeResult(null, safeTopic, nativeLanguage);
     }
   },
 };

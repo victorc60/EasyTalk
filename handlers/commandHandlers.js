@@ -36,6 +36,15 @@ import { sendMiniEventEntryPoint, adminTriggerMiniEventInvite, finalizeEventDay 
 import { addIsoCalendarDays } from '../utils/moscowWeek.js';
 import { checkAndAwardDailyBonus, getDailyBonusProgress } from '../services/dailyBonusService.js';
 import { buildBonusProgressLine } from '../services/dailyBonusHelpers.js';
+import {
+  buildNativeLanguageRequiredText,
+  buildNativeLanguageSavedMessage,
+  buildNativeLanguageSelectionMarkup,
+  buildNativeLanguageSelectionText,
+  buildWelcomeMessage,
+  getNativeLanguageLabel,
+  normalizeNativeLanguage,
+} from '../utils/nativeLanguage.js';
 
 // ── Streak helpers ──────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -133,6 +142,48 @@ function buildWordHintText(gameSession = {}) {
 }
 // ────────────────────────────────────────────────────────────────
 
+function getNativeLanguageCache(userSessions) {
+  if (!userSessions.nativeLanguages) {
+    userSessions.nativeLanguages = new Map();
+  }
+
+  return userSessions.nativeLanguages;
+}
+
+function cacheNativeLanguage(userSessions, userId, nativeLanguage) {
+  const cache = getNativeLanguageCache(userSessions);
+  const normalized = normalizeNativeLanguage(nativeLanguage);
+
+  if (normalized) {
+    cache.set(userId, normalized);
+  } else {
+    cache.delete(userId);
+  }
+}
+
+function buildWelcomeOptions(nativeLanguage) {
+  const webAppUrl = process.env.BOSS_GRAMMAR_WEBAPP_URL;
+  const buttonText = normalizeNativeLanguage(nativeLanguage) === 'ro'
+    ? '🎮 Deschide Boss Grammar'
+    : '🎮 Открыть Boss Grammar';
+  return webAppUrl
+    ? {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: buttonText, web_app: { url: webAppUrl } }]
+          ]
+        }
+      }
+    : { parse_mode: 'HTML' };
+}
+
+async function sendLocalizedWelcome(bot, chatId, nativeLanguage, rawFirstName) {
+  const safeFirstName = escapeHtml(rawFirstName || 'friend');
+  const welcomeMessage = buildWelcomeMessage(nativeLanguage, safeFirstName);
+  await sendUserMessage(bot, chatId, welcomeMessage, buildWelcomeOptions(nativeLanguage));
+}
+
 function getPendingGameAnswers(userSessions) {
   if (!userSessions.pendingGameAnswers) {
     userSessions.pendingGameAnswers = new Set();
@@ -172,7 +223,80 @@ async function disableGameKeyboard(bot, callbackQuery) {
   }
 }
 
-export async function start(bot, msg) {
+export async function showLanguageSelection(bot, chatId, userId, userSessions) {
+  const user = await User.findOne({
+    where: { telegram_id: userId },
+    attributes: ['native_language'],
+  });
+
+  const currentLanguage = normalizeNativeLanguage(user?.native_language);
+  await sendUserMessage(
+    bot,
+    chatId,
+    buildNativeLanguageSelectionText(currentLanguage),
+    {
+      parse_mode: 'HTML',
+      reply_markup: buildNativeLanguageSelectionMarkup(currentLanguage),
+    }
+  );
+}
+
+export async function saveNativeLanguage(bot, callbackQuery, userSessions, nativeLanguage) {
+  const normalizedLanguage = normalizeNativeLanguage(nativeLanguage);
+  const chatId = callbackQuery.message?.chat?.id || callbackQuery.from.id;
+  const telegramId = callbackQuery.from.id;
+
+  if (!normalizedLanguage) {
+    await bot.answerCallbackQuery(callbackQuery.id, { text: 'Unsupported language' });
+    return;
+  }
+
+  const [user, created] = await User.findOrCreate({
+    where: { telegram_id: telegramId },
+    defaults: {
+      telegram_id: telegramId,
+      username: callbackQuery.from.username || `${callbackQuery.from.first_name}${callbackQuery.from.last_name ? ` ${callbackQuery.from.last_name}` : ''}`,
+      first_name: callbackQuery.from.first_name,
+      last_name: callbackQuery.from.last_name,
+      native_language: normalizedLanguage,
+      first_activity: new Date(),
+      last_activity: new Date(),
+      points: 0,
+      is_active: true,
+    }
+  });
+
+  const previousLanguage = normalizeNativeLanguage(user.native_language);
+  const isUpdate = Boolean(previousLanguage && previousLanguage !== normalizedLanguage);
+
+  await user.update({
+    username: callbackQuery.from.username || user.username,
+    first_name: callbackQuery.from.first_name || user.first_name,
+    last_name: callbackQuery.from.last_name || user.last_name,
+    native_language: normalizedLanguage,
+    is_active: true,
+    last_activity: new Date(),
+  });
+
+  cacheNativeLanguage(userSessions, telegramId, normalizedLanguage);
+
+  await bot.answerCallbackQuery(callbackQuery.id, {
+    text: normalizedLanguage === 'ro' ? 'Limba a fost salvata' : 'Язык сохранен',
+  });
+
+  await sendUserMessage(
+    bot,
+    chatId,
+    buildNativeLanguageSavedMessage(normalizedLanguage, isUpdate),
+    { parse_mode: 'HTML' }
+  );
+
+  if (created || !previousLanguage) {
+    await sendLocalizedWelcome(bot, chatId, normalizedLanguage, callbackQuery.from.first_name);
+  }
+}
+
+export async function start(bot, msg, userSessions) {
   try {
     const [user, created] = await User.findOrCreate({
       where: { telegram_id: msg.chat.id },
@@ -181,6 +305,7 @@ export async function start(bot, msg) {
         username: msg.from.username || `${msg.from.first_name}${msg.from.last_name ? ` ${msg.from.last_name}` : ''}`,
         first_name: msg.from.first_name,
         last_name: msg.from.last_name,
+        native_language: null,
         first_activity: new Date(),
         last_activity: new Date(),
         points: 0,
@@ -192,46 +317,30 @@ export async function start(bot, msg) {
       console.log(`Создан новый пользователь: ${msg.chat.id}`);
     } else {
       console.log(`Пользователь уже существует: ${msg.chat.id}, обновляем is_active`);
-      await user.update({ is_active: true, last_activity: new Date() });
+      await user.update({
+        is_active: true,
+        last_activity: new Date(),
+        username: msg.from.username || user.username,
+        first_name: msg.from.first_name || user.first_name,
+        last_name: msg.from.last_name || user.last_name,
+      });
     }
 
-    const safeFirstName = escapeHtml(msg.from.first_name || 'друг');
-    const welcomeMessage = `
-👋 <b>Привет, ${safeFirstName}!</b> Я твой помощник в изучении английского.
+    const nativeLanguage = normalizeNativeLanguage(user.native_language);
+    cacheNativeLanguage(userSessions, msg.from.id, nativeLanguage);
 
-📌 <b>Доступные режимы:</b>
-1. <b>Свободное общение</b> - /mode_free_talk
-2. <b>Ролевые игры</b> - /mode_role_play
-3. <b>Проверка ошибок</b> - /mode_correction
-📋 Показать режимы с выбором: /mode
+    if (!nativeLanguage) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        buildNativeLanguageRequiredText(),
+        { parse_mode: 'HTML' }
+      );
+      await showLanguageSelection(bot, msg.chat.id, msg.from.id, userSessions);
+      return;
+    }
 
-🎮 <b>Игры и активность:</b>
-🔤 Слово дня в 18:30
-📚 Интересные факты в 17:30
-💬 /topic - тема для обсуждения
-🎭 /roleplay - ролевая игра
-📚🎧 /story - voice storytelling with audio
-
-📊 /progress - твой прогресс
-🏆 /leaders - таблица лидеров
-
-Выбирай что тебе интересно и практикуй английский!
-
-🎮 <b>Boss Grammar</b> — запускай мини-игру через кнопку ниже (WebApp).`;
-
-    const webAppUrl = process.env.BOSS_GRAMMAR_WEBAPP_URL;
-    const replyMarkup = webAppUrl
-      ? {
-          parse_mode: 'HTML',
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '🎮 Открыть Boss Grammar', web_app: { url: webAppUrl } }]
-            ]
-          }
-        }
-      : { parse_mode: 'HTML' };
-
-    await sendUserMessage(bot, msg.chat.id, welcomeMessage, replyMarkup);
+    await sendLocalizedWelcome(bot, msg.chat.id, nativeLanguage, msg.from.first_name);
   } catch (error) {
     console.error('Ошибка при обработке команды /start:', error);
     await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при регистрации. Попробуйте еще раз.');
@@ -396,6 +505,7 @@ export async function showProgress(bot, msg) {
 🏅 Всего очков: ${user.points}
 📈 За сегодня: ${pointsToday} очков
 📆 За неделю: ${pointsThisWeek} очков
+🌍 Родной язык: ${normalizeNativeLanguage(user.native_language) ? getNativeLanguageLabel(user.native_language) : 'не выбран'}
 
 📅 Первый визит: ${user.first_activity.toLocaleDateString()}
 🔄 Последняя активность: ${user.last_activity.toLocaleDateString()}

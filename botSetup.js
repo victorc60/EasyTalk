@@ -7,7 +7,7 @@ import { weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './f
 import { runDailyContent } from './services/dailyContentService.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
-import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
+import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, showLanguageSelection, saveNativeLanguage, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, gameBoss, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
 import { broadcastMiniEventInvite, processMiniEventQueue, handleMiniEventJoinCallback, handleMiniEventAnswerCallback, finalizeEventDay } from './services/miniEventService.js';
 import { runDailyBankAuditAndAutofill } from './services/bankLifecycleService.js';
 import { handleAnswerCallback } from './handlers/answerHandler.js';
@@ -20,6 +20,7 @@ import axios from 'axios'; // Для проверки URL картинки
 import sharp from 'sharp';
 import { createPoll, sendPollToAllUsers, savePollAnswer } from './services/pollServices.js';
 import { handleUserMessageWithAgents } from './src/services/agentOrchestrator.js';
+import { buildNativeLanguageRequiredText, normalizeNativeLanguage } from './utils/nativeLanguage.js';
 
 // Bot modes are now defined in commandHandlers.js
 
@@ -27,6 +28,7 @@ export async function setupBot(bot, userSessions, openai) {
   // Initialize story handlers
   const storyHandlers = new StoryHandlers(openai);
   userSessions.storyHandlers = storyHandlers;
+  userSessions.nativeLanguages ||= new Map();
   
   setupSchedulers(bot, userSessions);
   await setupBotCommands(bot);
@@ -227,6 +229,7 @@ async function setupBotCommands(bot) {
       { command: 'story', description: 'Voice storytelling with audio' },
       { command: 'mini_game', description: 'Субботняя мини-игра (10 вопросов)' },
       { command: 'progress', description: 'Твой прогресс' },
+      { command: 'language', description: 'Родной язык / Limba nativa' },
       { command: 'leaders', description: 'Таблица лидеров' },
       { command: 'mode', description: 'Выбор режима общения' },
       { command: 'mode_free_talk', description: 'Свободное общение на английском' },
@@ -273,7 +276,7 @@ async function setupBotCommands(bot) {
 }
 
 function setupCommandHandlers(bot, userSessions) {
-  bot.onText(/\/start/, (msg) => start(bot, msg));
+  bot.onText(/\/start/, (msg) => start(bot, msg, userSessions));
   bot.onText(/\/clear/, (msg) => {
     const userId = msg.from.id;
     userSessions.chatHistories.delete(userId);
@@ -285,6 +288,7 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/roleplay/, (msg) => startRolePlayCommand(bot, msg, userSessions));
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
   bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
+  bot.onText(/\/language/, (msg) => showLanguageSelection(bot, msg.chat.id, msg.from.id, userSessions));
   bot.onText(/\/mode$/, (msg) => showModeSelection(bot, msg.chat.id));
   bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
   bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions));
@@ -413,6 +417,12 @@ function setupCallbacks(bot, userSessions) {
         return;
       }
 
+      if (data.startsWith('native_lang_')) {
+        const selectedLanguage = data.slice('native_lang_'.length);
+        await saveNativeLanguage(bot, callbackQuery, userSessions, selectedLanguage);
+        return;
+      }
+
       if (data.startsWith('mode_')) {
         // Extract full mode id after the prefix (handles values with underscores like "free_talk")
         const selectedMode = data.slice('mode_'.length);
@@ -522,6 +532,26 @@ function setupPollAnswerHandler(bot) {
       await sendAdminMessage(bot, `‼️ Ошибка обработки ответа опроса: ${error.message}`);
     }
   });
+}
+
+async function getUserNativeLanguage(userSessions, userId) {
+  userSessions.nativeLanguages ||= new Map();
+
+  if (userSessions.nativeLanguages.has(userId)) {
+    return userSessions.nativeLanguages.get(userId);
+  }
+
+  const user = await User.findOne({
+    where: { telegram_id: userId },
+    attributes: ['native_language'],
+  });
+
+  const nativeLanguage = normalizeNativeLanguage(user?.native_language);
+  if (nativeLanguage) {
+    userSessions.nativeLanguages.set(userId, nativeLanguage);
+  }
+
+  return nativeLanguage;
 }
 
 // Функция для проверки, является ли URL действительным изображением
@@ -744,10 +774,22 @@ function setupMessageHandler(bot, userSessions, openai) {
       // Основная обработка текстовых сообщений
       if (text) {
         const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
+        const nativeLanguage = await getUserNativeLanguage(userSessions, userId);
 
         // Оставляем текущий flow для role play, а обычные сообщения переводим на agent orchestrator.
         if (userMode === 'role_play') {
           await handleRegularMessage(bot, chatId, userId, text, userMode, openai, userSessions);
+          return;
+        }
+
+        if (!nativeLanguage) {
+          await sendUserMessage(
+            bot,
+            chatId,
+            buildNativeLanguageRequiredText(),
+            { parse_mode: 'HTML' }
+          );
+          await showLanguageSelection(bot, chatId, userId, userSessions);
           return;
         }
 
@@ -757,6 +799,7 @@ function setupMessageHandler(bot, userSessions, openai) {
           message: text,
           openai,
           preferredRoute: userMode === 'correction' ? 'correction' : undefined,
+          nativeLanguage,
         });
 
         await sendUserMessage(bot, chatId, response);

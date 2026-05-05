@@ -1,4 +1,5 @@
 import { OpenAI } from 'openai';
+import { getNativeLanguageInstruction, normalizeNativeLanguage } from '../../utils/nativeLanguage.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
@@ -37,16 +38,17 @@ function parseJson(content) {
   }
 }
 
-function normalizeExamples(examples) {
+function normalizeExamples(examples, nativeLanguage) {
+  const fallbackNativeLanguage = normalizeNativeLanguage(nativeLanguage);
   if (!Array.isArray(examples) || examples.length === 0) {
     return [
       {
         en: 'I go to work every day.',
-        ru: 'Я хожу на работу каждый день.',
+        nativeText: fallbackNativeLanguage === 'ro' ? 'Eu merg la serviciu in fiecare zi.' : 'Я хожу на работу каждый день.',
       },
       {
         en: 'She does not like coffee.',
-        ru: 'Она не любит кофе.',
+        nativeText: fallbackNativeLanguage === 'ro' ? 'Ei nu ii place cafeaua.' : 'Она не любит кофе.',
       },
     ];
   }
@@ -55,12 +57,19 @@ function normalizeExamples(examples) {
     .filter((item) => item && typeof item === 'object')
     .map((item) => ({
       en: typeof item.en === 'string' && item.en.trim() ? item.en.trim() : 'Example in English.',
-      ru: typeof item.ru === 'string' && item.ru.trim() ? item.ru.trim() : 'Пример на русском.',
+      nativeText:
+        typeof item.nativeText === 'string' && item.nativeText.trim()
+          ? item.nativeText.trim()
+          : typeof item.native === 'string' && item.native.trim()
+            ? item.native.trim()
+            : typeof item.ru === 'string' && item.ru.trim()
+              ? item.ru.trim()
+              : 'Пример на родном языке.',
     }))
     .slice(0, 3);
 }
 
-function normalizeResult(payload, topic, message) {
+function normalizeResult(payload, topic, message, nativeLanguage) {
   return {
     topic:
       typeof payload?.topic === 'string' && payload.topic.trim()
@@ -69,18 +78,21 @@ function normalizeResult(payload, topic, message) {
     explanation:
       typeof payload?.explanation === 'string' && payload.explanation.trim()
         ? payload.explanation.trim()
-        : 'Это базовая грамматическая тема. Смотри на форму глагола, порядок слов и маленькие сигналы времени в предложении.',
-    examples: normalizeExamples(payload?.examples),
+        : normalizeNativeLanguage(nativeLanguage) === 'ro'
+          ? 'Aceasta este o tema gramaticala de baza. Uita-te la forma verbului, ordinea cuvintelor si la markerii de timp.'
+          : 'Это базовая грамматическая тема. Смотри на форму глагола, порядок слов и маленькие сигналы времени в предложении.',
+    examples: normalizeExamples(payload?.examples, nativeLanguage),
   };
 }
 
 export const teacherAgent = {
   name: 'Teacher Agent',
 
-  async run({ userId, message, topic, openai } = {}) {
+  async run({ userId, message, topic, openai, nativeLanguage } = {}) {
     const client = getOpenAIClient(openai);
     const safeTopic = topic || '';
     const safeMessage = String(message || '').trim();
+    const explanationLanguage = getNativeLanguageInstruction(nativeLanguage);
 
     try {
       const response = await client.chat.completions.create({
@@ -93,12 +105,13 @@ export const teacherAgent = {
             role: 'system',
             content: [
               'You are Teacher Agent for an English-learning Telegram bot.',
-              'Explain grammar or vocabulary simply for a Russian-speaking learner.',
+              `Explain grammar or vocabulary simply for a learner whose native language is ${explanationLanguage}.`,
               'Return only valid JSON with this shape:',
-              '{"topic":"...","explanation":"...","examples":[{"en":"...","ru":"..."}]}',
+              '{"topic":"...","explanation":"...","examples":[{"en":"...","nativeText":"..."}]}',
               'Rules:',
-              '- explanation must be in simple Russian.',
+              `- explanation must be in simple ${explanationLanguage}.`,
               '- examples must be short and clear.',
+              `- each example translation must be in ${explanationLanguage}.`,
               '- keep it concise and friendly.',
               '- provide 2 or 3 examples.',
             ].join(' '),
@@ -112,11 +125,10 @@ export const teacherAgent = {
 
       const content = response.choices[0]?.message?.content;
       const parsed = parseJson(content);
-      return normalizeResult(parsed, safeTopic, safeMessage);
+      return normalizeResult(parsed, safeTopic, safeMessage, nativeLanguage);
     } catch (error) {
       console.error('[Teacher Agent] Failed to explain topic:', error.message);
-      return normalizeResult(null, safeTopic, safeMessage);
+      return normalizeResult(null, safeTopic, safeMessage, nativeLanguage);
     }
   },
 };
-
