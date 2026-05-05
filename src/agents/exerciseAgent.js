@@ -45,16 +45,6 @@ function normalizeExercises(exercises, topic) {
         answer: 'Any correct short sentence is fine.',
         explanation: 'Главное использовать правильную форму глагола.',
       },
-      {
-        question: 'Rewrite the sentence in the correct form.',
-        answer: 'Use the correct tense and word order.',
-        explanation: 'Смотри на время и порядок слов.',
-      },
-      {
-        question: 'Write a negative sentence on the same topic.',
-        answer: 'Use a simple negative form.',
-        explanation: 'Попрактикуй отрицательную форму.',
-      },
     ];
   }
 
@@ -74,7 +64,7 @@ function normalizeExercises(exercises, topic) {
           ? item.explanation.trim()
           : 'Короткое объяснение.',
     }))
-    .slice(0, 3);
+    .slice(0, 1);
 }
 
 function normalizeResult(payload, topic) {
@@ -86,8 +76,8 @@ function normalizeResult(payload, topic) {
     task:
       typeof payload?.task === 'string' && payload.task.trim()
         ? payload.task.trim()
-        : 'Complete the short practice tasks.',
-    exercises: normalizeExercises(payload?.exercises, topic).slice(0, 3),
+        : 'Complete this short practice task.',
+    exercises: normalizeExercises(payload?.exercises, topic).slice(0, 1),
   };
 }
 
@@ -110,11 +100,12 @@ export const exerciseAgent = {
             role: 'system',
             content: [
               'You are Exercise Agent for an English-learning Telegram bot.',
-              'Create exactly 3 short exercises based on the topic and level.',
+              'Create exactly 1 short exercise based on the topic and level.',
               'Return only valid JSON with this shape:',
               '{"topic":"...","task":"...","exercises":[{"question":"...","answer":"...","explanation":"..."}]}',
               'Rules:',
-              '- keep every exercise short and clear.',
+              '- return exactly one exercise in the exercises array.',
+              '- keep the exercise short and clear.',
               '- answer should be concise.',
               '- explanation should be simple Russian.',
               '- output must fit Telegram.',
@@ -136,4 +127,3 @@ export const exerciseAgent = {
     }
   },
 };
-

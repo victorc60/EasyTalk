@@ -1,6 +1,8 @@
 import { OpenAI } from 'openai';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const VALIDATOR_MODEL = process.env.OPENAI_VALIDATOR_MODEL || MODEL;
+const ENABLE_NATURALNESS_PASS = process.env.OPENAI_NATURALNESS_PASS !== 'false';
 
 const fallbackOpenAI = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -64,6 +66,54 @@ function normalizeResult(payload, originalMessage) {
   };
 }
 
+async function refineCorrectionDraft({ client, userId, originalMessage, draftResult }) {
+  if (!ENABLE_NATURALNESS_PASS) {
+    return draftResult;
+  }
+
+  try {
+    const response = await client.chat.completions.create({
+      model: VALIDATOR_MODEL,
+      response_format: { type: 'json_object' },
+      temperature: 0.1,
+      max_tokens: 220,
+      messages: [
+        {
+          role: 'system',
+          content: [
+            'You are Naturalness Validator for an English-learning Telegram bot.',
+            'Review the draft correction package and improve it if needed.',
+            'Return only valid JSON with this shape:',
+            '{"correctedText":"...","explanation":"...","errorTopic":"...","userLevel":"A1","question":"..."}',
+            'Rules:',
+            '- correctedText must be fully natural, grammatically correct, and concise.',
+            '- preserve the original meaning, but fix tense, word choice, collocations, articles, prepositions, and awkward phrasing.',
+            '- explanation must be in simple Russian and must match the final correctedText.',
+            '- errorTopic must match the main final mistake.',
+            '- question must be one short English follow-up question.',
+            '- keep everything concise and Telegram-friendly.',
+          ].join(' '),
+        },
+        {
+          role: 'user',
+          content: [
+            `userId: ${userId ?? 'unknown'}`,
+            `originalMessage: ${originalMessage}`,
+            `draftResult: ${JSON.stringify(draftResult)}`,
+          ].join('\n'),
+        },
+      ],
+    });
+
+    const content = response.choices[0]?.message?.content;
+    const parsed = parseJson(content);
+    return normalizeResult(parsed, originalMessage);
+  } catch (error) {
+    console.error('[Corrector Agent] Naturalness validation failed:', error.message);
+    return draftResult;
+  }
+}
+
 export const correctorAgent = {
   name: 'Corrector Agent',
 
@@ -107,7 +157,14 @@ export const correctorAgent = {
 
       const content = response.choices[0]?.message?.content;
       const parsed = parseJson(content);
-      return normalizeResult(parsed, safeMessage);
+      const draftResult = normalizeResult(parsed, safeMessage);
+
+      return await refineCorrectionDraft({
+        client,
+        userId,
+        originalMessage: safeMessage,
+        draftResult,
+      });
     } catch (error) {
       console.error('[Corrector Agent] Failed to correct message:', error.message);
       return normalizeResult(null, safeMessage);

@@ -23,7 +23,9 @@ function getOpenAIClient(openai) {
 
 function formatExercises(exerciseResult) {
   const header = exerciseResult?.task ? `${exerciseResult.task}\n` : '';
-  const exercises = Array.isArray(exerciseResult?.exercises) ? exerciseResult.exercises : [];
+  const exercises = Array.isArray(exerciseResult?.exercises)
+    ? exerciseResult.exercises.slice(0, 1)
+    : [];
 
   if (exercises.length === 0) {
     return `${header}1. Write one more sentence on this topic.`;
