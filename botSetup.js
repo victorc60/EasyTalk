@@ -19,6 +19,7 @@ import { OpenAI } from 'openai';
 import axios from 'axios'; // Для проверки URL картинки
 import sharp from 'sharp';
 import { createPoll, sendPollToAllUsers, savePollAnswer } from './services/pollServices.js';
+import { handleUserMessageWithAgents } from './src/services/agentOrchestrator.js';
 
 // Bot modes are now defined in commandHandlers.js
 
@@ -743,7 +744,24 @@ function setupMessageHandler(bot, userSessions, openai) {
       // Основная обработка текстовых сообщений
       if (text) {
         const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
-        await handleRegularMessage(bot, chatId, userId, text, userMode, openai, userSessions);
+
+        // Оставляем текущий flow для role play, а обычные сообщения переводим на agent orchestrator.
+        if (userMode === 'role_play') {
+          await handleRegularMessage(bot, chatId, userId, text, userMode, openai, userSessions);
+          return;
+        }
+
+        await bot.sendChatAction(chatId, 'typing');
+        const response = await handleUserMessageWithAgents({
+          userId,
+          message: text,
+          openai,
+        });
+
+        await sendUserMessage(bot, chatId, response);
+        await sendRandomSticker(bot, chatId, 'chat', 0.25);
+        await awardPoints(userId, 1);
+        return;
       } else {
         await sendUserMessage(
           bot,
