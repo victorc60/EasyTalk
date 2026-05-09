@@ -1,84 +1,84 @@
 [
   {
     "block": "🟢 МИНИ-ИГРА",
-    "note": "Вопросы 11–20 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
-    "id": "mini_a2_11",
+    "note": "Вопросы 21–30 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
+    "id": "mini_a2_21",
     "type": "preposition",
-    "question": "You make a plan: 'Let's meet ___ 7 o'clock in the evening.' Which preposition is correct?",
-    "options": ["in", "at", "on", "by"],
-    "correctIndex": 1,
-    "explanation": "Use at for exact times: at 7 o'clock, at noon, at midnight. Use on for days, and in for longer periods like months or years."
+    "question": "You talk about your job: 'I start work ___ 9 am every weekday.' Which preposition is correct?",
+    "options": ["in", "on", "at", "by"],
+    "correctIndex": 2,
+    "explanation": "Use at for exact times: at 9 am, at 6 o'clock, at midnight."
   },
   {
-    "id": "mini_a2_12",
+    "id": "mini_a2_22",
     "type": "article",
-    "question": "You're describing your house: 'We have ___ small garden behind the house.' Which article fits?",
+    "question": "You are in a restaurant: 'Can I see ___ menu, please?' Which article fits?",
     "options": ["a", "an", "the", "—"],
-    "correctIndex": 0,
-    "explanation": "Use a before singular countable nouns when mentioning them for the first time. 'Garden' starts with a consonant sound, so we use a."
+    "correctIndex": 2,
+    "explanation": "Use the when both people know which specific thing you mean. In a restaurant, 'the menu' is specific."
   },
   {
-    "id": "mini_a2_13",
+    "id": "mini_a2_23",
     "type": "fill_gap",
-    "question": "You talk about a friend: 'He ___ coffee every morning before work.' Which form is correct?",
-    "options": ["drink", "drinks", "is drink", "drinking"],
+    "question": "You describe your sister: 'She ___ in a hospital as a nurse.' Which form is correct?",
+    "options": ["work", "works", "working", "is work"],
     "correctIndex": 1,
-    "explanation": "In Present Simple, he/she/it takes -s: he drinks, she runs, it works. This tense is used for daily habits."
+    "explanation": "For he/she/it in Present Simple, add -s: she works, he drives, it runs."
   },
   {
-    "id": "mini_a2_14",
+    "id": "mini_a2_24",
     "type": "question_form",
-    "question": "You ask about hobbies: '___ your parents watch TV every evening?' Choose the correct form.",
-    "options": ["Is", "Does", "Do", "Are"],
-    "correctIndex": 2,
-    "explanation": "Use Do for I/you/we/they. 'Your parents' = they → Do. Use Does only for he/she/it."
-  },
-  {
-    "id": "mini_a2_15",
-    "type": "vocabulary",
-    "question": "You describe the weather: 'It's really ___ today — don't forget your jacket.' Which word fits?",
-    "options": ["hot", "cold", "warm", "sunny"],
+    "question": "You ask a friend: '___ you usually go to the gym after work?' Choose the correct form.",
+    "options": ["Does", "Do", "Are", "Is"],
     "correctIndex": 1,
-    "explanation": "Cold means low temperature. Hot = high temperature. Warm = comfortable temperature. Sunny describes the presence of sun, not temperature."
+    "explanation": "Use Do for I/you/we/they in Present Simple questions."
   },
   {
-    "id": "mini_a2_16",
+    "id": "mini_a2_25",
+    "type": "vocabulary",
+    "question": "Your phone battery is at 1%. You say: 'My phone is ___.' Which word fits?",
+    "options": ["empty", "dead", "broken", "closed"],
+    "correctIndex": 1,
+    "explanation": "'My phone is dead' is the natural everyday English expression when the battery is empty."
+  },
+  {
+    "id": "mini_a2_26",
     "type": "preposition",
-    "question": "You give directions: 'The café is ___ the corner of the street.' Which preposition?",
-    "options": ["in", "on", "at", "under"],
+    "question": "You talk about your country: 'I live ___ Moldova.' Which preposition is correct?",
+    "options": ["on", "at", "in", "to"],
     "correctIndex": 2,
-    "explanation": "Use at for specific points or locations: at the corner, at the door, at the bus stop."
+    "explanation": "Use in with countries, cities, and larger places: in Moldova, in Italy, in London."
   },
   {
-    "id": "mini_a2_17",
+    "id": "mini_a2_27",
     "type": "fill_gap",
-    "question": "You talk about your routine: 'We usually ___ dinner at 8 pm.' Which verb fits?",
-    "options": ["make", "do", "have", "eat"],
-    "correctIndex": 2,
-    "explanation": "Have dinner is the standard collocation. Eat dinner is possible, but have is more natural in everyday English."
+    "question": "You talk about food: 'He doesn't ___ meat.' Which verb fits?",
+    "options": ["eats", "eat", "eating", "to eat"],
+    "correctIndex": 1,
+    "explanation": "After doesn't, use the base form of the verb: doesn't eat, doesn't like, doesn't work."
   },
   {
-    "id": "mini_a2_18",
+    "id": "mini_a2_28",
     "type": "article",
-    "question": "You tell a story: 'Yesterday, I saw ___ interesting film on TV.' Which article fits?",
+    "question": "You tell a story: 'I bought ___ umbrella because it started raining.' Which article fits?",
     "options": ["a", "an", "the", "—"],
     "correctIndex": 1,
-    "explanation": "Use an before vowel sounds. 'Interesting' starts with a vowel sound, so we use an."
+    "explanation": "Use an before words that begin with a vowel sound: an umbrella, an apple, an hour."
   },
   {
-    "id": "mini_a2_19",
+    "id": "mini_a2_29",
     "type": "vocabulary",
-    "question": "Your friend asks about your weekend. You say: 'I stayed at home and ___ a book.' Which word fits?",
-    "options": ["watched", "read", "looked", "saw"],
-    "correctIndex": 1,
-    "explanation": "Read is the correct verb for books. Watched is used for TV or films. Saw is used for people or events."
+    "question": "A friend asks where your dad works. You say: 'He works in an ___.' Which word fits?",
+    "options": ["office", "school", "park", "hotel"],
+    "correctIndex": 0,
+    "explanation": "'Works in an office' is the natural expression here, and 'office' matches the article 'an'."
   },
   {
-    "id": "mini_a2_20",
+    "id": "mini_a2_30",
     "type": "fill_gap",
-    "question": "You describe a habit: 'She always ___ her phone before going to bed.' Which form is correct?",
-    "options": ["check", "checks", "checking", "is check"],
-    "correctIndex": 1,
-    "explanation": "In Present Simple, he/she/it takes -s: she checks. This sentence describes a regular habit."
+    "question": "You describe a habit: 'They always ___ breakfast together on Sundays.' Which verb fits?",
+    "options": ["has", "having", "have", "are have"],
+    "correctIndex": 2,
+    "explanation": "With they/we/you, use the base form in Present Simple: they have, we go, you work."
   }
 ]
