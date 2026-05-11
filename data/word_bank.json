@@ -236,5 +236,277 @@
     "topic": "lifestyle",
     "example": "Every obstacle is an opportunity to learn something new.",
     "hint": "'Overcome', 'face', or 'remove' an obstacle."
-  }
+  }, 
+  [
+    {
+      "word": "resilient",
+      "translation": "стойкий / устойчивый",
+      "level": "B2",
+      "partOfSpeech": "adjective",
+      "topic": "personality",
+      "example": "Resilient people recover quickly after difficult situations.",
+      "hint": "Someone mentally strong who bounces back."
+    },
+    {
+      "word": "convince",
+      "translation": "убеждать",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "communication",
+      "example": "She convinced her friend to join the trip.",
+      "hint": "'Convince someone to do something'."
+    },
+    {
+      "word": "overwhelm",
+      "translation": "перегружать / подавлять",
+      "level": "B2",
+      "partOfSpeech": "verb",
+      "topic": "emotions",
+      "example": "Too much work can overwhelm even experienced people.",
+      "hint": "When something feels like too much."
+    },
+    {
+      "word": "insight",
+      "translation": "понимание / инсайт",
+      "level": "B2",
+      "partOfSpeech": "noun",
+      "topic": "thinking",
+      "example": "The book gave me a useful insight into human behavior.",
+      "hint": "A deep understanding of something."
+    },
+    {
+      "word": "adapt",
+      "translation": "адаптироваться",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "lifestyle",
+      "example": "Animals adapt to changes in their environment.",
+      "hint": "'Adapt to' new situations."
+    },
+    {
+      "word": "regret",
+      "translation": "сожалеть",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "emotions",
+      "example": "He regretted not studying harder for the exam.",
+      "hint": "Feeling bad about a past decision."
+    },
+    {
+      "word": "achievement",
+      "translation": "достижение",
+      "level": "B1",
+      "partOfSpeech": "noun",
+      "topic": "motivation",
+      "example": "Finishing the marathon was a huge achievement.",
+      "hint": "Something you successfully completed."
+    },
+    {
+      "word": "aware",
+      "translation": "осознающий",
+      "level": "B1",
+      "partOfSpeech": "adjective",
+      "topic": "thinking",
+      "example": "Are you aware of the risks involved?",
+      "hint": "'Aware of' = knowing about something."
+    },
+    {
+      "word": "commitment",
+      "translation": "обязательство / преданность",
+      "level": "B2",
+      "partOfSpeech": "noun",
+      "topic": "work",
+      "example": "Success requires commitment and discipline.",
+      "hint": "A serious promise or dedication."
+    },
+    {
+      "word": "estimate",
+      "translation": "оценивать приблизительно",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "business",
+      "example": "Can you estimate how long the project will take?",
+      "hint": "A rough calculation, not exact."
+    },
+    {
+      "word": "struggle",
+      "translation": "испытывать трудности",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "self-development",
+      "example": "Many learners struggle with English grammar.",
+      "hint": "To have difficulty doing something."
+    },
+    {
+      "word": "maintain",
+      "translation": "поддерживать",
+      "level": "B2",
+      "partOfSpeech": "verb",
+      "topic": "lifestyle",
+      "example": "It's important to maintain a healthy routine.",
+      "hint": "To keep something in good condition."
+    },
+    {
+      "word": "approach",
+      "translation": "подход",
+      "level": "B2",
+      "partOfSpeech": "noun",
+      "topic": "education",
+      "example": "Her approach to teaching is very effective.",
+      "hint": "A method or way of doing something."
+    },
+    {
+      "word": "pretend",
+      "translation": "притворяться",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "social life",
+      "example": "He pretended not to hear the question.",
+      "hint": "To act like something is true when it isn't."
+    },
+    {
+      "word": "efficient",
+      "translation": "эффективный",
+      "level": "B2",
+      "partOfSpeech": "adjective",
+      "topic": "work",
+      "example": "This new system is much more efficient.",
+      "hint": "Works well without wasting time."
+    },
+    {
+      "word": "motivate",
+      "translation": "мотивировать",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "motivation",
+      "example": "Music helps motivate me during workouts.",
+      "hint": "To give someone energy to act."
+    },
+    {
+      "word": "expand",
+      "translation": "расширять",
+      "level": "B2",
+      "partOfSpeech": "verb",
+      "topic": "business",
+      "example": "The company plans to expand into Europe.",
+      "hint": "To grow bigger."
+    },
+    {
+      "word": "patience",
+      "translation": "терпение",
+      "level": "B1",
+      "partOfSpeech": "noun",
+      "topic": "personality",
+      "example": "Learning a language takes patience.",
+      "hint": "Staying calm while waiting."
+    },
+    {
+      "word": "assume",
+      "translation": "предполагать",
+      "level": "B2",
+      "partOfSpeech": "verb",
+      "topic": "thinking",
+      "example": "Don't assume everyone agrees with you.",
+      "hint": "To believe something without proof."
+    },
+    {
+      "word": "ignore",
+      "translation": "игнорировать",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "communication",
+      "example": "She ignored his messages all day.",
+      "hint": "To choose not to pay attention."
+    },
+    {
+      "word": "explore",
+      "translation": "исследовать",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "travel",
+      "example": "We spent the weekend exploring the city.",
+      "hint": "To discover something new."
+    },
+    {
+      "word": "awkward",
+      "translation": "неловкий",
+      "level": "B2",
+      "partOfSpeech": "adjective",
+      "topic": "social life",
+      "example": "That silence felt really awkward.",
+      "hint": "Socially uncomfortable."
+    },
+    {
+      "word": "complain",
+      "translation": "жаловаться",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "daily life",
+      "example": "He always complains about traffic.",
+      "hint": "To express dissatisfaction."
+    },
+    {
+      "word": "attempt",
+      "translation": "пытаться",
+      "level": "B2",
+      "partOfSpeech": "verb",
+      "topic": "general",
+      "example": "She attempted to fix the problem herself.",
+      "hint": "A more formal word for 'try'."
+    },
+    {
+      "word": "reward",
+      "translation": "награда",
+      "level": "B1",
+      "partOfSpeech": "noun",
+      "topic": "motivation",
+      "example": "Hard work often brings its own reward.",
+      "hint": "Something good you receive."
+    },
+    {
+      "word": "delay",
+      "translation": "задержка",
+      "level": "B1",
+      "partOfSpeech": "noun",
+      "topic": "travel",
+      "example": "Our flight was delayed by two hours.",
+      "hint": "When something happens later than planned."
+    },
+    {
+      "word": "impress",
+      "translation": "впечатлять",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "social life",
+      "example": "He really impressed everyone with his presentation.",
+      "hint": "To make people admire you."
+    },
+    {
+      "word": "recover",
+      "translation": "восстанавливаться",
+      "level": "B2",
+      "partOfSpeech": "verb",
+      "topic": "health",
+      "example": "She recovered quickly after surgery.",
+      "hint": "To become healthy again."
+    },
+    {
+      "word": "curious",
+      "translation": "любопытный",
+      "level": "B1",
+      "partOfSpeech": "adjective",
+      "topic": "personality",
+      "example": "Children are naturally curious.",
+      "hint": "Wanting to know more."
+    },
+    {
+      "word": "achieve",
+      "translation": "достигать",
+      "level": "B1",
+      "partOfSpeech": "verb",
+      "topic": "motivation",
+      "example": "You can achieve anything with enough effort.",
+      "hint": "'Achieve success', 'achieve a goal'."
+    }
+  ]
 ]

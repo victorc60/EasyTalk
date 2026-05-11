@@ -1,177 +1,161 @@
 [
+  
   {
-    "id": "fact_001",
-    "claim": "The Pacific Ocean is wider than the distance from Earth to the Moon.",
-    "claimRu": "Тихий океан шире, чем расстояние от Земли до Луны.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! The Pacific Ocean is about 20,000 km wide. The distance to the Moon is roughly 384,000 km — almost 20 times greater.\n🇷🇺 Неправда! Тихий океан в ширину около 20 000 км. Расстояние до Луны — примерно 384 000 км, почти в 20 раз больше.\n💡 Space distances are far harder to visualise than we think."
-  },
-  {
-    "id": "fact_002",
-    "claim": "Honey never expires — edible honey has been found in ancient Egyptian tombs.",
-    "claimRu": "Мёд никогда не портится — в египетских гробницах находили съедобный мёд.",
+    "id": "fact_082",
+    "claim": "The human nose can remember over 1 trillion different smells.",
+    "claimRu": "Человеческий нос может различать более 1 триллиона запахов.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Archaeologists have found 3,000-year-old honey in Egyptian tombs that was still perfectly edible. Its low moisture and acidic pH prevent bacteria from growing.\n🇷🇺 Правда! В египетских гробницах был найден мёд возрастом 3000 лет, пригодный в пищу. Низкая влажность и кислая среда не дают бактериям размножаться.\n💡 Some natural foods are almost perfectly self-preserving."
+    "explanation": "🇬🇧 True! Scientists estimate humans can distinguish an astonishing number of smells — far more than we once believed. Your nose is much more powerful than you probably think.\n🇷🇺 Правда! Учёные считают, что человек способен различать невероятное количество запахов — намного больше, чем считалось раньше. Твой нос куда мощнее, чем кажется.\n💡 Basically, your nose is premium detection hardware."
   },
+  
   {
-    "id": "fact_003",
-    "claim": "Humans use only 10% of their brain.",
-    "claimRu": "Люди используют лишь 10% своего мозга.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Brain scans show we use virtually all parts of the brain, and most of the brain is active almost all the time.\n🇷🇺 Неправда! Сканирование мозга показывает, что мы используем практически все его части, и большая часть мозга активна почти всё время.\n💡 This myth was likely spread by self-help culture in the early 20th century."
-  },
-  {
-    "id": "fact_004",
-    "claim": "Octopuses have three hearts.",
-    "claimRu": "У осьминогов три сердца.",
+    "id": "fact_084",
+    "claim": "Johnny Depp was originally considered for Neo in The Matrix.",
+    "claimRu": "Джонни Деппа изначально рассматривали на роль Нео в Матрице.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Two hearts pump blood to the gills, while the third pumps it to the rest of the body. Their blood is also blue because it contains copper.\n🇷🇺 Правда! Два сердца перекачивают кровь к жабрам, а третье — к остальному телу. Их кровь голубая, так как содержит медь.\n💡 When an octopus swims, the main heart actually stops beating."
+    "explanation": "🇬🇧 True! Before Keanu Reeves became Neo, several actors were considered — including Johnny Depp. The Matrix could have looked VERY different.\n🇷🇺 Правда! До того как Киану Ривз стал Нео, рассматривали нескольких актёров, включая Джонни Деппа. Матрица могла выглядеть совсем иначе.\n💡 Alternate universe cinema."
   },
   {
-    "id": "fact_005",
-    "claim": "The Great Wall of China is visible from space with the naked eye.",
-    "claimRu": "Великую Китайскую стену видно из космоса невооружённым глазом.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! The wall is too narrow (about 5–8 metres wide) to be seen from space without aid. Even astronauts have confirmed this.\n🇷🇺 Неправда! Стена слишком узкая (около 5–8 метров) и не видна из космоса без оптики. Это подтвердили сами астронавты.\n💡 The myth became so widespread it even appeared in Chinese school textbooks."
-  },
-  {
-    "id": "fact_006",
-    "claim": "A day on Venus is longer than a year on Venus.",
-    "claimRu": "День на Венере длиннее, чем год на Венере.",
+    "id": "fact_085",
+    "claim": "Your brain sometimes rewrites your memories without you noticing.",
+    "claimRu": "Твой мозг иногда переписывает воспоминания без твоего ведома.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Venus rotates so slowly that one full rotation (243 Earth days) takes longer than one orbit around the Sun (225 Earth days).\n🇷🇺 Правда! Венера вращается так медленно, что один оборот вокруг своей оси (243 земных дня) занимает больше времени, чем один оборот вокруг Солнца (225 дней).\n💡 Venus also rotates backwards compared to most planets."
+    "explanation": "🇬🇧 True! Memory isn't like a video recording. Every time you remember something, your brain partly rebuilds it — and small changes can sneak in.\n🇷🇺 Правда! Память — это не видеозапись. Каждый раз, когда ты что-то вспоминаешь, мозг частично заново собирает воспоминание, и туда могут проникать изменения.\n💡 Some of your memories may be edited versions."
   },
   {
-    "id": "fact_007",
-    "claim": "Lightning never strikes the same place twice.",
-    "claimRu": "Молния не бьёт в одно место дважды.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Lightning frequently strikes the same place multiple times. The Empire State Building is struck about 20–25 times per year.\n🇷🇺 Неправда! Молния часто бьёт в одно и то же место. Эмпайр-стейт-билдинг поражается примерно 20–25 раз в год.\n💡 Tall structures are actually designed to attract lightning safely."
-  },
-  {
-    "id": "fact_008",
-    "claim": "Bananas are berries, but strawberries are not.",
-    "claimRu": "Бананы — это ягоды, а клубника — нет.",
+    "id": "fact_086",
+    "claim": "The longest English word without a vowel is 'rhythms'.",
+    "claimRu": "Самое длинное английское слово без гласных — 'rhythms'.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Botanically, a berry must develop from a single flower with one ovary. Bananas qualify; strawberries do not — they grow from a flower with multiple ovaries.\n🇷🇺 Правда! Ботанически ягода должна развиваться из одного цветка с одной завязью. Банан подходит, а клубника — нет: она вырастает из цветка с множеством завязей.\n💡 Avocados, kiwis, and watermelons are also technically berries."
+    "explanation": "🇬🇧 True! It contains no classic vowels (A, E, I, O, U), yet it's a real English word. English enjoys chaos.\n🇷🇺 Правда! В этом слове нет стандартных гласных букв (A, E, I, O, U), но это настоящее английское слово. Английский любит хаос.\n💡 Grammar teachers survive on pure courage."
   },
+  
   {
-    "id": "fact_009",
-    "claim": "Mount Everest is the closest mountain to the Moon.",
-    "claimRu": "Эверест — ближайшая к Луне гора.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Mount Chimborazo in Ecuador is actually closest to the Moon (and space) because Earth bulges at the equator. Everest is the highest above sea level, not the furthest from Earth's centre.\n🇷🇺 Неправда! Гора Чимборасо в Эквадоре ближе всего к Луне, потому что Земля выпуклая на экваторе. Эверест — высочайшая над уровнем моря, но не самая дальняя от центра Земли.\n💡 The difference is about 2,168 metres in favour of Chimborazo."
-  },
-  {
-    "id": "fact_010",
-    "claim": "Sharks are older than trees.",
-    "claimRu": "Акулы старше деревьев.",
+    "id": "fact_088",
+    "claim": "The sound of the T-Rex in Jurassic Park included dog noises.",
+    "claimRu": "Рык T-Rex в Jurassic Park включал звуки собак.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Sharks have existed for about 450 million years, while trees only appeared around 350 million years ago.\n🇷🇺 Правда! Акулы существуют около 450 миллионов лет, тогда как деревья появились лишь около 350 миллионов лет назад.\n💡 Sharks even survived the mass extinction that wiped out the dinosaurs."
+    "explanation": "🇬🇧 True! Movie sound designers mixed several animal sounds — including dogs, elephants, and even baby animals — to create the terrifying T-Rex roar.\n🇷🇺 Правда! Звукорежиссёры смешали звуки разных животных — включая собак, слонов и даже детёнышей — чтобы создать рык T-Rex.\n💡 Movie monsters are audio engineering magic."
   },
   {
-    "id": "fact_011",
-    "claim": "Hot water freezes faster than cold water.",
-    "claimRu": "Горячая вода замерзает быстрее холодной.",
+    "id": "fact_089",
+    "claim": "Humans make decisions emotionally first, then justify them logically.",
+    "claimRu": "Люди сначала принимают решения эмоционально, а потом логически их оправдывают.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! This is called the Mpemba effect. It doesn't always happen, but under certain conditions hot water can freeze faster than cold water.\n🇷🇺 Правда! Это называется эффектом Мпембы. Это происходит не всегда, но при определённых условиях горячая вода может замёрзнуть быстрее холодной.\n💡 Scientists still debate exactly why this happens."
+    "explanation": "🇬🇧 True! In many cases, emotions make the first call, and logic arrives later to explain why the decision 'made sense.'\n🇷🇺 Правда! Во многих случаях эмоции принимают решение первыми, а логика приходит позже и объясняет, почему это якобы было разумно.\n💡 Your brain has a PR department."
   },
   {
-    "id": "fact_012",
-    "claim": "Goldfish have a memory of only 3 seconds.",
-    "claimRu": "Память золотой рыбки длится всего 3 секунды.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Goldfish can actually remember things for months. Studies show they can be trained to press levers and navigate mazes.\n🇷🇺 Неправда! Золотые рыбки на самом деле помнят вещи месяцами. Исследования показывают, что их можно обучить нажимать на рычаги и проходить лабиринты.\n💡 This myth probably started because goldfish behaviour seems repetitive in small tanks."
-  },
-  {
-    "id": "fact_013",
-    "claim": "There are more stars in the universe than grains of sand on all Earth's beaches.",
-    "claimRu": "Во вселенной больше звёзд, чем песчинок на всех пляжах Земли.",
+    "id": "fact_090",
+    "claim": "The @ symbol existed before email.",
+    "claimRu": "Символ @ существовал ещё до электронной почты.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Estimates suggest there are around 10²⁴ stars in the observable universe — more than all the grains of sand on Earth's beaches.\n🇷🇺 Правда! По оценкам, во вселенной около 10²⁴ звёзд — больше, чем песчинок на всех пляжах Земли.\n💡 The number is so large it's almost impossible to truly comprehend."
+    "explanation": "🇬🇧 True! Long before email, @ was used in trade and accounting to mean 'at the rate of.' Email simply gave it a second life.\n🇷🇺 Правда! Задолго до email символ @ использовался в торговле и бухгалтерии в значении 'по цене'. Электронная почта просто дала ему новую жизнь.\n💡 One symbol. Massive career upgrade."
   },
-  {
-    "id": "fact_014",
-    "claim": "Napoleon Bonaparte was unusually short for his era.",
-    "claimRu": "Наполеон Бонапарт был необычно низкого роста для своего времени.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Napoleon was about 1.69 m (5'7\"), which was average for a Frenchman of his time. The myth partly came from British propaganda and a confusion between French and English inches.\n🇷🇺 Неправда! Рост Наполеона составлял около 1,69 м — средний для француза того времени. Миф частично возник из британской пропаганды и путаницы между французскими и английскими дюймами.\n💡 His nickname 'le petit caporal' referred to affection, not his height."
-  },
-  {
-    "id": "fact_015",
-    "claim": "Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.",
-    "claimRu": "Клеопатра жила ближе по времени к высадке на Луну, чем к строительству пирамиды Хеопса.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! The Great Pyramid was built around 2560 BC. Cleopatra lived around 30 BC — that's 2,500 years after the pyramid. The Moon landing was in 1969, only about 2,000 years after Cleopatra.\n🇷🇺 Правда! Пирамида Хеопса построена около 2560 г. до н.э. Клеопатра жила около 30 г. до н.э. — это 2500 лет после пирамиды. Высадка на Луну — 1969 год, всего около 2000 лет после Клеопатры.\n💡 Ancient history is much longer than most people realise."
-  },
-  {
-    "id": "fact_016",
-    "claim": "You can hear a duck's quack echo.",
-    "claimRu": "Кряканье утки имеет эхо.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! A duck's quack does echo — it's just hard to hear because the quack itself fades out gently, making the echo blend with the original sound.\n🇷🇺 Правда! Кряканье утки действительно имеет эхо — его просто сложно услышать, потому что звук затихает плавно, и эхо сливается с оригиналом.\n💡 The myth that it doesn't echo was debunked by acoustic researchers at the University of Salford."
-  },
-  {
-    "id": "fact_017",
-    "claim": "The tongue has specific zones for different tastes (sweet at the tip, bitter at the back).",
-    "claimRu": "На языке есть отдельные зоны для разных вкусов (сладкое — на кончике, горькое — сзади).",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! All taste buds across your tongue can detect all flavours. The 'taste map' was a misinterpretation of a 19th-century German study.\n🇷🇺 Неправда! Все вкусовые рецепторы на языке способны воспринимать все вкусы. «Карта вкусов» — это неверная интерпретация немецкого исследования XIX века.\n💡 This myth was in textbooks for decades before being corrected."
-  },
-  {
-    "id": "fact_018",
-    "claim": "Oxford University is older than the Aztec Empire.",
-    "claimRu": "Оксфордский университет старше империи ацтеков.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Teaching at Oxford began around 1096. The Aztec Empire was founded in 1428 — more than 300 years later.\n🇷🇺 Правда! Обучение в Оксфорде началось около 1096 года. Империя ацтеков была основана в 1428 году — более чем на 300 лет позже.\n💡 Oxford is one of the oldest universities in the world still in operation."
-  },
-  {
-    "id": "fact_019",
-    "claim": "Water conducts electricity well on its own.",
-    "claimRu": "Вода сама по себе хорошо проводит электричество.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Pure water is actually a poor conductor of electricity. It's the dissolved minerals and salts that make water conductive.\n🇷🇺 Неправда! Чистая вода — плохой проводник электричества. Именно растворённые в ней минералы и соли делают её проводящей.\n💡 Distilled water is used in labs precisely because it doesn't conduct electricity well."
-  },
-  {
-    "id": "fact_020",
-    "claim": "A group of flamingos is called a flamboyance.",
-    "claimRu": "Группа фламинго называется «фламбуаянс» (flamboyance).",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! A flock of flamingos is officially called a flamboyance — fitting for such a colourful bird.\n🇷🇺 Правда! Стая фламинго официально называется flamboyance («яркость», «пышность») — подходящее название для такой яркой птицы.\n💡 Other unusual animal group names: a murder of crows, a parliament of owls, a conspiracy of lemurs."
-  },
-  {
-    "id": "fact_021",
-    "claim": "The Eiffel Tower grows taller in summer.",
-    "claimRu": "Эйфелева башня летом становится выше.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Metal expands when heated. In summer, the iron structure of the Eiffel Tower can grow by up to 15 cm due to thermal expansion.\n🇷🇺 Правда! Металл расширяется при нагреве. Летом железная конструкция Эйфелевой башни может вырасти до 15 см из-за теплового расширения.\n💡 This same principle is why bridges have expansion joints."
-  },
-  {
-    "id": "fact_022",
-    "claim": "Humans share 50% of their DNA with bananas.",
-    "claimRu": "У людей и бананов общие 50% ДНК.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! About 50% of human DNA is shared with bananas, because many basic cellular processes are the same across all life on Earth.\n🇷🇺 Правда! Около 50% ДНК человека совпадает с ДНК банана, потому что многие базовые клеточные процессы одинаковы у всех живых существ на Земле.\n💡 We also share about 98.7% of our DNA with chimpanzees."
-  },
-  {
-    "id": "fact_023",
-    "claim": "Glass is a slow-moving liquid.",
-    "claimRu": "Стекло — это медленно текущая жидкость.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Glass is an amorphous solid, not a liquid. Old windows appear thicker at the bottom because of imperfect manufacturing techniques, not because the glass flowed downward over time.\n🇷🇺 Неправда! Стекло — это аморфное твёрдое вещество, а не жидкость. Старые стёкла кажутся толще снизу из-за несовершенства производства, а не потому что стекло стекло вниз.\n💡 At room temperature, it would take billions of years for glass to noticeably flow."
-  },
-  {
-    "id": "fact_024",
-    "claim": "Carrots improve your night vision.",
-    "claimRu": "Морковь улучшает ночное зрение.",
-    "isTrue": false,
-    "explanation": "🇬🇧 False! Carrots contain vitamin A which is essential for eye health, but eating extra carrots won't give you super night vision. This myth was spread by British propaganda in WWII to hide their use of radar.\n🇷🇺 Неправда! Морковь содержит витамин A, необходимый для здоровья глаз, но её употребление не даст вам суперночного зрения. Этот миф распространила британская пропаганда во Второй мировой войне, чтобы скрыть использование радара.\n💡 The UK spread the myth that RAF pilots ate lots of carrots to explain their accurate night bombing."
-  },
-  {
-    "id": "fact_025",
-    "claim": "A sneeze travels faster than a car on a motorway.",
-    "claimRu": "Чихание распространяется быстрее, чем едет автомобиль на трассе.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! A sneeze can travel at up to 160 km/h, which is faster than most speed limits on motorways.\n🇷🇺 Правда! Чихание может распространяться со скоростью до 160 км/ч — быстрее большинства ограничений скорости на трассах.\n💡 That's also why covering your mouth when sneezing is so important for stopping germs."
-  }
+  [
+    {
+      "id": "fact_091",
+      "claim": "Michael Jackson almost played Jar Jar Binks.",
+      "claimRu": "Майкл Джексон чуть не сыграл Джар-Джар Бинкса.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Michael Jackson reportedly wanted the role and imagined playing Jar Jar with practical effects and makeup, while George Lucas chose CGI instead.\n🇷🇺 Правда! По сообщениям, Майкл Джексон хотел сыграть Джар-Джара с настоящим гримом и костюмом, но Джордж Лукас выбрал CGI.\n💡 Somewhere in another universe, this happened."
+    },
+    {
+      "id": "fact_092",
+      "claim": "The brain processes negative experiences stronger than positive ones.",
+      "claimRu": "Мозг сильнее фиксируется на негативном опыте, чем на позитивном.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! This is called negativity bias. Your brain evolved to notice danger more than comfort, because survival mattered more than happiness.\n🇷🇺 Правда! Это называется негативное смещение. Мозг эволюционировал так, чтобы замечать опасность сильнее, чем комфорт — выживание было важнее счастья.\n💡 One rude comment can beat ten compliments."
+    },
+    {
+      "id": "fact_093",
+      "claim": "The English alphabet once had more letters than today.",
+      "claimRu": "В английском алфавите раньше было больше букв, чем сейчас.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Old English used letters like þ (thorn) and ð (eth), which later disappeared from everyday use.\n🇷🇺 Правда! В древнеанглийском использовались буквы вроде þ (thorn) и ð (eth), которые позже исчезли из обычного использования.\n💡 English deleted characters like software updates."
+    },
+    {
+      "id": "fact_094",
+      "claim": "Arnold Schwarzenegger was almost replaced in Terminator because of his accent.",
+      "claimRu": "Арнольда Шварценеггера чуть не заменили в Терминаторе из-за акцента.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Early producers worried his strong accent might sound strange for a futuristic killing machine. Thankfully, they were very wrong.\n🇷🇺 Правда! Продюсеры переживали, что его сильный акцент будет странно звучать для машины-убийцы из будущего. К счастью, они ошибались.\n💡 Imagine Terminator without THAT voice."
+    },
+    {
+      "id": "fact_095",
+      "claim": "You can dream in languages you don't speak fluently.",
+      "claimRu": "Можно видеть сны на языках, которыми ты не владеешь свободно.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! If you've been learning a language, your brain can use fragments of it in dreams — even if your real-life speaking still feels awkward.\n🇷🇺 Правда! Если ты изучаешь язык, мозг может использовать его кусочки во сне, даже если в реальной жизни ты пока говоришь неуверенно.\n💡 Your sleeping brain may practice harder than you."
+    },
+    {
+      "id": "fact_096",
+      "claim": "Google was originally called Backrub.",
+      "claimRu": "Google изначально назывался Backrub.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Google's founders first called the project 'Backrub' because it analyzed backlinks between websites.\n🇷🇺 Правда! Основатели Google сначала назвали проект 'Backrub', потому что он анализировал ссылки между сайтами.\n💡 Imagine saying: 'Just Backrub it.'"
+    },
+    {
+      "id": "fact_097",
+      "claim": "Some movie audiences once thought trains on screen were real and dangerous.",
+      "claimRu": "Некоторые зрители первых фильмов думали, что поезд на экране настоящий и опасный.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Early cinema audiences weren't used to moving images, so seeing a train rushing toward the camera genuinely shocked some viewers.\n🇷🇺 Правда! Первые зрители кино не привыкли к движущимся изображениям, поэтому поезд, мчащийся на камеру, реально пугал некоторых людей.\n💡 First-gen jump scare."
+    },
+    {
+      "id": "fact_098",
+      "claim": "Your brain ignores part of your vision all the time.",
+      "claimRu": "Твой мозг постоянно игнорирует часть твоего зрения.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Every eye has a blind spot where the optic nerve connects. Your brain quietly fills in the missing information so you don't notice.\n🇷🇺 Правда! У каждого глаза есть слепое пятно там, где подключается зрительный нерв. Мозг незаметно дорисовывает недостающую картинку.\n💡 Reality has live Photoshop."
+    },
+    {
+      "id": "fact_099",
+      "claim": "The hashtag symbol # has an official linguistic name.",
+      "claimRu": "У символа # есть официальное лингвистическое название.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! One formal name for # is 'octothorpe' — a word most people never hear in normal life.\n🇷🇺 Правда! Одно из официальных названий символа # — 'octothorpe'. Большинство людей никогда не слышат это слово в обычной жизни.\n💡 Hashtags got surprisingly aristocratic."
+    },
+    {
+      "id": "fact_100",
+      "claim": "Keanu Reeves gave away millions from Matrix earnings to the special effects team.",
+      "claimRu": "Киану Ривз отдал миллионы из заработка на Матрице команде спецэффектов.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Reports say Keanu shared a significant part of his earnings with crew members who helped make the film possible.\n🇷🇺 Правда! По сообщениям, Киану поделился значительной частью доходов с членами команды, которые помогли создать фильм.\n💡 One more reason people love Keanu."
+    },
+    {
+      "id": "fact_101",
+      "claim": "Humans are naturally bad at understanding exponential growth.",
+      "claimRu": "Люди от природы плохо понимают экспоненциальный рост.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Our brains evolved in mostly linear environments, so doubling growth often feels unintuitive until the numbers suddenly explode.\n🇷🇺 Правда! Наш мозг развивался в основном в линейном мире, поэтому экспоненциальный рост кажется нелогичным, пока цифры внезапно не взрываются.\n💡 That's why compound interest looks like magic."
+    },
+    {
+      "id": "fact_102",
+      "claim": "The first camera exposure took several hours.",
+      "claimRu": "Первая фотографическая экспозиция длилась несколько часов.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Early photography technology was incredibly slow, requiring people and scenes to stay still for extremely long periods.\n🇷🇺 Правда! Ранняя фотография была очень медленной, поэтому людям и объектам приходилось оставаться неподвижными очень долго.\n💡 Selfies would have been unbearable."
+    },
+    {
+      "id": "fact_103",
+      "claim": "The phrase 'OMG' existed over 100 years ago.",
+      "claimRu": "Фраза 'OMG' существовала более 100 лет назад.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! 'OMG' appeared in a 1917 letter, long before texting, memes, or the internet existed.\n🇷🇺 Правда! 'OMG' встречалось в письме 1917 года — задолго до сообщений, мемов и интернета.\n💡 Gen Z accidentally time-traveled."
+    },
+    {
+      "id": "fact_104",
+      "claim": "Some people have no internal voice in their head.",
+      "claimRu": "У некоторых людей вообще нет внутреннего голоса в голове.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! Not everyone experiences a running inner monologue. Human consciousness works in surprisingly different ways.\n🇷🇺 Правда! Не у всех есть постоянный внутренний голос. Человеческое сознание работает удивительно по-разному.\n💡 Imagine silence inside your brain."
+    },
+    {
+      "id": "fact_105",
+      "claim": "Pixar accidentally deleted almost all of Toy Story 2 during production.",
+      "claimRu": "Pixar случайно почти полностью удалила Toy Story 2 во время производства.",
+      "isTrue": true,
+      "explanation": "🇬🇧 True! A mistaken command reportedly deleted huge parts of the movie, and the project was saved only because someone had a backup copy.\n🇷🇺 Правда! Из-за ошибочной команды большая часть фильма была удалена, и проект спасла только резервная копия.\n💡 Ctrl+Z almost failed cinema."
+    }
+  ]
 ]

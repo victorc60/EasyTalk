@@ -196,5 +196,217 @@
     "meaning": "направить всё внимание на цель",
     "example": "Let's zero in on the main problem.",
     "hint": "прицелиться вниманием"
-  }
+  },
+  
+    {
+      "phrasalVerb": "brush up on",
+      "translation": "освежить знания",
+      "meaning": "повторить то, что уже знал",
+      "example": "I need to brush up on my English before the trip.",
+      "hint": "смахнуть пыль со знаний"
+    },
+    {
+      "phrasalVerb": "chip in",
+      "translation": "скинуться / внести вклад",
+      "meaning": "дать деньги или помочь вместе с другими",
+      "example": "Everyone chipped in for the birthday gift.",
+      "hint": "внести свою часть"
+    },
+    {
+      "phrasalVerb": "cross out",
+      "translation": "вычеркнуть",
+      "meaning": "удалить написанное линией",
+      "example": "Cross out the wrong answer.",
+      "hint": "зачеркнуть ошибку"
+    },
+    {
+      "phrasalVerb": "do over",
+      "translation": "переделать",
+      "meaning": "сделать заново",
+      "example": "This design is bad. Let's do it over.",
+      "hint": "вторая попытка"
+    },
+    {
+      "phrasalVerb": "ease into",
+      "translation": "входить постепенно",
+      "meaning": "начинать что-то медленно и комфортно",
+      "example": "He eased into his new job.",
+      "hint": "не с разбега"
+    },
+    {
+      "phrasalVerb": "freak out",
+      "translation": "паниковать",
+      "meaning": "сильно нервничать или терять контроль",
+      "example": "She freaked out before the exam.",
+      "hint": "эмоциональный взрыв"
+    },
+    {
+      "phrasalVerb": "get by",
+      "translation": "справляться",
+      "meaning": "выживать или обходиться имеющимся",
+      "example": "He can get by with basic English.",
+      "hint": "как-то вытянуть"
+    },
+    {
+      "phrasalVerb": "hand in",
+      "translation": "сдать",
+      "meaning": "официально передать работу или документ",
+      "example": "I handed in my report this morning.",
+      "hint": "сдать работу"
+    },
+    {
+      "phrasalVerb": "hold up",
+      "translation": "задерживать",
+      "meaning": "заставить ждать",
+      "example": "Sorry I'm late — traffic held me up.",
+      "hint": "что-то тормозит процесс"
+    },
+    {
+      "phrasalVerb": "iron out",
+      "translation": "уладить",
+      "meaning": "решить мелкие проблемы",
+      "example": "We need to iron out a few issues first.",
+      "hint": "разгладить проблемы"
+    },
+    {
+      "phrasalVerb": "jump in",
+      "translation": "включиться",
+      "meaning": "быстро начать участвовать",
+      "example": "Feel free to jump in if you have ideas.",
+      "hint": "влететь в процесс"
+    },
+    {
+      "phrasalVerb": "kick off",
+      "translation": "запускать / начинать",
+      "meaning": "дать старт событию",
+      "example": "The event kicks off at 8 PM.",
+      "hint": "стартовый свисток"
+    },
+    {
+      "phrasalVerb": "lash out",
+      "translation": "сорваться",
+      "meaning": "резко отреагировать со злостью",
+      "example": "He lashed out at his coworker.",
+      "hint": "удар словами"
+    },
+    {
+      "phrasalVerb": "live up to",
+      "translation": "соответствовать ожиданиям",
+      "meaning": "быть настолько хорошим, как ожидали",
+      "example": "The movie lived up to the hype.",
+      "hint": "оправдать ожидания"
+    },
+    {
+      "phrasalVerb": "narrow down",
+      "translation": "сузить выбор",
+      "meaning": "уменьшить количество вариантов",
+      "example": "We narrowed down the list to five candidates.",
+      "hint": "отсеять лишнее"
+    },
+    {
+      "phrasalVerb": "opt for",
+      "translation": "выбрать",
+      "meaning": "сделать выбор в пользу чего-то",
+      "example": "I opted for the cheaper option.",
+      "hint": "сознательный выбор"
+    },
+    {
+      "phrasalVerb": "pay off",
+      "translation": "окупиться",
+      "meaning": "дать хороший результат после усилий",
+      "example": "All your hard work will pay off.",
+      "hint": "усилия не зря"
+    },
+    {
+      "phrasalVerb": "phase out",
+      "translation": "постепенно убрать",
+      "meaning": "медленно прекратить использование",
+      "example": "The company is phasing out old software.",
+      "hint": "мягкое удаление"
+    },
+    {
+      "phrasalVerb": "rip off",
+      "translation": "обмануть / содрать деньги",
+      "meaning": "взять слишком много денег нечестно",
+      "example": "That taxi driver totally ripped us off.",
+      "hint": "жёстко переплатить"
+    },
+    {
+      "phrasalVerb": "rule out",
+      "translation": "исключить",
+      "meaning": "убрать вариант из рассмотрения",
+      "example": "We can't rule out that possibility.",
+      "hint": "вычеркнуть вариант"
+    },
+    {
+      "phrasalVerb": "see through",
+      "translation": "раскусить",
+      "meaning": "понять обман или истинные намерения",
+      "example": "She saw through his fake smile.",
+      "hint": "увидеть насквозь"
+    },
+    {
+      "phrasalVerb": "sleep on",
+      "translation": "переспать с мыслью",
+      "meaning": "отложить решение до завтра",
+      "example": "Let me sleep on it before deciding.",
+      "hint": "не решать сразу"
+    },
+    {
+      "phrasalVerb": "stick to",
+      "translation": "придерживаться",
+      "meaning": "не отходить от плана",
+      "example": "Stick to your routine.",
+      "hint": "держаться курса"
+    },
+    {
+      "phrasalVerb": "sum up",
+      "translation": "подытожить",
+      "meaning": "коротко сказать главное",
+      "example": "To sum up, we need more time.",
+      "hint": "выжать суть"
+    },
+    {
+      "phrasalVerb": "tear down",
+      "translation": "снести",
+      "meaning": "разрушить физически",
+      "example": "They tore down the old building.",
+      "hint": "демонтаж"
+    },
+    {
+      "phrasalVerb": "think over",
+      "translation": "обдумать",
+      "meaning": "внимательно подумать",
+      "example": "Think it over before answering.",
+      "hint": "прокрутить в голове"
+    },
+    {
+      "phrasalVerb": "track down",
+      "translation": "разыскать",
+      "meaning": "найти после поиска",
+      "example": "I finally tracked down the original file.",
+      "hint": "охота завершена"
+    },
+    {
+      "phrasalVerb": "wear out",
+      "translation": "износить / вымотать",
+      "meaning": "сделать уставшим или изношенным",
+      "example": "That long hike wore me out.",
+      "hint": "минус батарейка"
+    },
+    {
+      "phrasalVerb": "wind down",
+      "translation": "расслабиться",
+      "meaning": "успокоиться после активности",
+      "example": "I like to wind down with music.",
+      "hint": "снизить обороты"
+    },
+    {
+      "phrasalVerb": "zone out",
+      "translation": "зависнуть / отключиться",
+      "meaning": "перестать концентрироваться",
+      "example": "I zoned out during the meeting.",
+      "hint": "мозг ушёл гулять"
+    }
+  
 ]

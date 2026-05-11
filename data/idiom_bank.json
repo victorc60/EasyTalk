@@ -178,5 +178,216 @@
     "meaning": "получить информацию от самого надёжного источника",
     "example": "I heard it straight from the horse's mouth — the manager told me.",
     "hint": "от самого источника"
-  }
+  },[
+    {
+      "idiom": "bend over backwards",
+      "translation": "из кожи вон лезть",
+      "meaning": "очень сильно стараться помочь или угодить",
+      "example": "They bent over backwards to make us feel welcome.",
+      "hint": "стараться на максимум"
+    },
+    {
+      "idiom": "bite off more than you can chew",
+      "translation": "взять на себя слишком много",
+      "meaning": "взяться за большее, чем можешь справиться",
+      "example": "I think I bit off more than I could chew with this project.",
+      "hint": "перегрузить себя"
+    },
+    {
+      "idiom": "by the skin of your teeth",
+      "translation": "еле-еле",
+      "meaning": "с минимальным запасом",
+      "example": "He passed the exam by the skin of his teeth.",
+      "hint": "чудом"
+    },
+    {
+      "idiom": "come rain or shine",
+      "translation": "при любых обстоятельствах",
+      "meaning": "несмотря ни на что",
+      "example": "She goes jogging every morning, come rain or shine.",
+      "hint": "что бы ни случилось"
+    },
+    {
+      "idiom": "draw the line",
+      "translation": "провести черту",
+      "meaning": "установить предел допустимого",
+      "example": "I can tolerate mistakes, but I draw the line at dishonesty.",
+      "hint": "дальше нельзя"
+    },
+    {
+      "idiom": "fall through the cracks",
+      "translation": "быть упущенным",
+      "meaning": "быть забытым или незамеченным системой",
+      "example": "Some important details fell through the cracks.",
+      "hint": "выпасть из внимания"
+    },
+    {
+      "idiom": "get the hang of it",
+      "translation": "врубиться / освоиться",
+      "meaning": "начать понимать, как что-то работает",
+      "example": "It seemed hard at first, but I got the hang of it.",
+      "hint": "нащупать как это работает"
+    },
+    {
+      "idiom": "go down in flames",
+      "translation": "с треском провалиться",
+      "meaning": "очень сильно потерпеть неудачу",
+      "example": "Their startup went down in flames.",
+      "hint": "эпичный провал"
+    },
+    {
+      "idiom": "have bigger fish to fry",
+      "translation": "есть дела поважнее",
+      "meaning": "иметь более важные задачи",
+      "example": "I can't worry about that now — I have bigger fish to fry.",
+      "hint": "приоритеты важнее"
+    },
+    {
+      "idiom": "in the same boat",
+      "translation": "в одной лодке",
+      "meaning": "быть в одинаковой ситуации",
+      "example": "We're all in the same boat here.",
+      "hint": "одни и те же проблемы"
+    },
+    {
+      "idiom": "keep your chin up",
+      "translation": "не вешать нос",
+      "meaning": "оставаться позитивным в трудный момент",
+      "example": "Keep your chin up — things will improve.",
+      "hint": "держись"
+    },
+    {
+      "idiom": "know the ropes",
+      "translation": "знать кухню",
+      "meaning": "хорошо понимать, как всё устроено",
+      "example": "Give her time — she'll learn the ropes.",
+      "hint": "разбираться в системе"
+    },
+    {
+      "idiom": "leave no stone unturned",
+      "translation": "перевернуть каждый камень",
+      "meaning": "сделать всё возможное в поиске решения",
+      "example": "Police left no stone unturned in the investigation.",
+      "hint": "искать везде"
+    },
+    {
+      "idiom": "make a long story short",
+      "translation": "короче говоря",
+      "meaning": "перейти к сути",
+      "example": "To make a long story short, we missed the train.",
+      "hint": "сокращённая версия"
+    },
+    {
+      "idiom": "not hold water",
+      "translation": "не выдерживать критики",
+      "meaning": "быть нелогичным или слабым аргументом",
+      "example": "His excuse doesn't hold water.",
+      "hint": "аргумент дырявый"
+    },
+    {
+      "idiom": "on the same page",
+      "translation": "на одной волне",
+      "meaning": "иметь одинаковое понимание ситуации",
+      "example": "Let's make sure we're on the same page.",
+      "hint": "одинаково понимать"
+    },
+    {
+      "idiom": "out of the blue",
+      "translation": "как гром среди ясного неба",
+      "meaning": "совершенно неожиданно",
+      "example": "She called me out of the blue.",
+      "hint": "совсем внезапно"
+    },
+    {
+      "idiom": "put your foot down",
+      "translation": "жёстко настоять",
+      "meaning": "твёрдо отказать или настоять на своём",
+      "example": "His mother finally put her foot down.",
+      "hint": "твёрдое нет"
+    },
+    {
+      "idiom": "read between the lines",
+      "translation": "читать между строк",
+      "meaning": "понимать скрытый смысл",
+      "example": "If you read between the lines, he's unhappy.",
+      "hint": "уловить намёк"
+    },
+    {
+      "idiom": "rock the boat",
+      "translation": "раскачивать лодку",
+      "meaning": "создавать проблемы в стабильной ситуации",
+      "example": "Don't rock the boat before the deal is done.",
+      "hint": "создавать лишний хаос"
+    },
+    {
+      "idiom": "save for a rainy day",
+      "translation": "откладывать на чёрный день",
+      "meaning": "копить на будущее",
+      "example": "She saves money for a rainy day.",
+      "hint": "финансовая подушка"
+    },
+    {
+      "idiom": "sweep under the rug",
+      "translation": "замести под ковёр",
+      "meaning": "скрыть проблему вместо решения",
+      "example": "They tried to sweep the scandal under the rug.",
+      "hint": "сделать вид что проблемы нет"
+    },
+    {
+      "idiom": "take the edge off",
+      "translation": "смягчить",
+      "meaning": "сделать что-то менее неприятным",
+      "example": "A coffee helped take the edge off my headache.",
+      "hint": "снизить остроту"
+    },
+    {
+      "idiom": "the writing on the wall",
+      "translation": "предупреждающие знаки",
+      "meaning": "очевидные признаки плохого исхода",
+      "example": "The company ignored the writing on the wall.",
+      "hint": "всё было понятно заранее"
+    },
+    {
+      "idiom": "throw someone under the bus",
+      "translation": "подставить кого-то",
+      "meaning": "пожертвовать кем-то ради себя",
+      "example": "He threw his teammate under the bus.",
+      "hint": "спасти себя ценой другого"
+    },
+    {
+      "idiom": "touch base",
+      "translation": "связаться коротко",
+      "meaning": "быстро обсудить что-то",
+      "example": "Let's touch base tomorrow.",
+      "hint": "короткий контакт"
+    },
+    {
+      "idiom": "weather the storm",
+      "translation": "пережить трудности",
+      "meaning": "выстоять в тяжёлой ситуации",
+      "example": "The company weathered the storm.",
+      "hint": "выдержать кризис"
+    },
+    {
+      "idiom": "your guess is as good as mine",
+      "translation": "без понятия",
+      "meaning": "я знаю не больше твоего",
+      "example": "Why is he late? Your guess is as good as mine.",
+      "hint": "никто не знает"
+    },
+    {
+      "idiom": "hit a snag",
+      "translation": "столкнуться с проблемой",
+      "meaning": "встретить неожиданное препятствие",
+      "example": "We hit a snag during development.",
+      "hint": "что-то пошло не так"
+    },
+    {
+      "idiom": "pull the plug",
+      "translation": "прекратить",
+      "meaning": "остановить проект или процесс",
+      "example": "They pulled the plug on the campaign.",
+      "hint": "резко остановить"
+    }
+  ]
 ]
