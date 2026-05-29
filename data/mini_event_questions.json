@@ -1,84 +1,84 @@
 [
   {
     "block": "🟢 МИНИ-ИГРА",
-    "note": "Вопросы 31–40 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
-    "id": "mini_a2_31",
+    "note": "Вопросы 41–50 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
+    "id": "mini_a2_41",
     "type": "preposition",
-    "question": "You talk about a meeting: 'Let's meet ___ Friday evening.' Which preposition is correct?",
+    "question": "You talk about your birthday: 'My birthday is ___ September.' Which preposition is correct?",
+    "options": ["on", "at", "in", "by"],
+    "correctIndex": 2,
+    "explanation": "Use in with months, years, and longer periods: in September, in 2026, in summer."
+  },
+  {
+    "id": "mini_a2_42",
+    "type": "article",
+    "question": "You enter a room and say: 'Could you open ___ window, please?' Which article fits?",
+    "options": ["a", "an", "the", "—"],
+    "correctIndex": 2,
+    "explanation": "Use the when talking about a specific thing both people can identify, like the window in the room."
+  },
+  {
+    "id": "mini_a2_43",
+    "type": "fill_gap",
+    "question": "You describe your routine: 'I usually ___ breakfast before work.' Which verb fits?",
+    "options": ["have", "has", "having", "am have"],
+    "correctIndex": 0,
+    "explanation": "With I/we/you/they in Present Simple, use the base form: have, eat, go."
+  },
+  {
+    "id": "mini_a2_44",
+    "type": "question_form",
+    "question": "You ask a friend: '___ she live near the city center?' Choose the correct form.",
+    "options": ["Do", "Does", "Is", "Are"],
+    "correctIndex": 1,
+    "explanation": "Use Does with he, she, and it in Present Simple questions."
+  },
+  {
+    "id": "mini_a2_45",
+    "type": "vocabulary",
+    "question": "You are very hungry and order food. You say: 'I'd like something to ___.' Which word fits?",
+    "options": ["drink", "eat", "cook", "taste"],
+    "correctIndex": 1,
+    "explanation": "We say 'something to eat' when we want food."
+  },
+  {
+    "id": "mini_a2_46",
+    "type": "preposition",
+    "question": "You tell a tourist: 'The bank is ___ the left.' Which preposition is correct?",
     "options": ["at", "in", "on", "to"],
     "correctIndex": 2,
-    "explanation": "Use on with days and specific dates: on Friday, on Monday morning, on Christmas Day."
+    "explanation": "Use on the left / on the right when giving directions."
   },
   {
-    "id": "mini_a2_32",
+    "id": "mini_a2_47",
+    "type": "fill_gap",
+    "question": "You make a plan: 'Let's ___ a taxi because it's raining.' Which verb fits?",
+    "options": ["take", "takes", "taking", "to take"],
+    "correctIndex": 0,
+    "explanation": "After let's, use the base form of the verb: let's go, let's take, let's meet."
+  },
+  {
+    "id": "mini_a2_48",
     "type": "article",
-    "question": "You arrive home and ask: 'Where is ___ remote control?' Which article fits?",
+    "question": "You are shopping: 'I need ___ new jacket for winter.' Which article fits?",
     "options": ["a", "an", "the", "—"],
-    "correctIndex": 2,
-    "explanation": "Use the for something specific that both people know about, like the TV remote at home."
+    "correctIndex": 0,
+    "explanation": "Use a before singular countable nouns when mentioning them for the first time."
   },
   {
-    "id": "mini_a2_33",
-    "type": "fill_gap",
-    "question": "You describe your brother: 'He ___ coffee every morning before work.' Which form is correct?",
-    "options": ["drink", "drinks", "drinking", "is drink"],
-    "correctIndex": 1,
-    "explanation": "For he/she/it in Present Simple, add -s: he drinks, she likes, it works."
-  },
-  {
-    "id": "mini_a2_34",
-    "type": "question_form",
-    "question": "You ask a classmate: '___ your parents speak English?' Choose the correct form.",
-    "options": ["Does", "Do", "Is", "Are"],
-    "correctIndex": 1,
-    "explanation": "Use Do for plural subjects like parents, they, we, and you."
-  },
-  {
-    "id": "mini_a2_35",
+    "id": "mini_a2_49",
     "type": "vocabulary",
-    "question": "Your friend arrives 45 minutes late. You say: 'Wow, you're really ___.' Which word fits?",
-    "options": ["late", "slow", "delayed", "behind"],
-    "correctIndex": 0,
-    "explanation": "'You're late' is the natural everyday phrase when someone arrives after the expected time."
-  },
-  {
-    "id": "mini_a2_36",
-    "type": "preposition",
-    "question": "You talk about transport: 'I usually go to work ___ bus.' Which preposition is correct?",
-    "options": ["with", "on", "by", "in"],
+    "question": "Your phone battery is at 2%. You say: 'My phone is almost ___.'' Which word fits?",
+    "options": ["empty", "finished", "dead", "closed"],
     "correctIndex": 2,
-    "explanation": "Use by for transport methods: by bus, by car, by train, by plane."
+    "explanation": "'My phone is dead' is the common everyday expression for a phone with no battery."
   },
   {
-    "id": "mini_a2_37",
+    "id": "mini_a2_50",
     "type": "fill_gap",
-    "question": "You talk about your friend: 'She can't ___ tonight because she's busy.' Which verb fits?",
-    "options": ["come", "comes", "coming", "to come"],
-    "correctIndex": 0,
-    "explanation": "After can/can't, always use the base form of the verb: can go, can come, can't stay."
-  },
-  {
-    "id": "mini_a2_38",
-    "type": "article",
-    "question": "You order food: 'I'd like ___ orange juice, please.' Which article fits?",
-    "options": ["a", "an", "the", "—"],
-    "correctIndex": 3,
-    "explanation": "Orange juice is usually uncountable, so we don't use an article here."
-  },
-  {
-    "id": "mini_a2_39",
-    "type": "vocabulary",
-    "question": "Your friend asks how your holiday was. You say: 'It was ___. We had so much fun!' Which word fits?",
-    "options": ["terrible", "amazing", "tired", "busy"],
+    "question": "You talk about your colleague: 'He ___ emails every morning before work.' Which form is correct?",
+    "options": ["send", "sends", "sending", "is send"],
     "correctIndex": 1,
-    "explanation": "'Amazing' is the natural word to describe a very positive experience."
-  },
-  {
-    "id": "mini_a2_40",
-    "type": "fill_gap",
-    "question": "You describe a routine: 'My parents usually ___ TV after dinner.' Which verb fits?",
-    "options": ["watch", "watches", "watching", "are watch"],
-    "correctIndex": 0,
-    "explanation": "With plural subjects like parents/they/we, use the base verb in Present Simple: watch, eat, go."
+    "explanation": "For he/she/it in Present Simple, add -s: sends, works, reads, likes."
   }
 ]
