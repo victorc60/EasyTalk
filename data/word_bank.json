@@ -1,512 +1,272 @@
 [
   {
-    "word": "ambitious",
-    "translation": "амбициозный",
+    "word": "landmark",
+    "translation": "достопримечательность",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "travel",
+    "example": "The Eiffel Tower is one of the world's most famous landmarks.",
+    "hint": "Известное место, которое посещают туристы."
+  },
+  {
+    "word": "explore",
+    "translation": "исследовать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "travel",
+    "example": "We spent the day exploring the old city.",
+    "hint": "'Explore a city', 'explore a country'."
+  },
+  {
+    "word": "journey",
+    "translation": "путешествие",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "travel",
+    "example": "The journey across the mountains took three days.",
+    "hint": "Обычно длинная поездка или путешествие."
+  },
+  {
+    "word": "ancient",
+    "translation": "древний",
     "level": "B1",
     "partOfSpeech": "adjective",
-    "topic": "personality",
-    "example": "She is an ambitious young entrepreneur who wants to change the world.",
-    "hint": "'Ambitious goals', 'ambitious plan'."
+    "topic": "history",
+    "example": "Ancient Egypt is one of the most fascinating civilizations.",
+    "hint": "'Ancient Rome', 'ancient culture'."
   },
   {
-    "word": "negotiate",
-    "translation": "договариваться",
-    "level": "B2",
-    "partOfSpeech": "verb",
-    "topic": "business",
-    "example": "They had to negotiate the terms of the contract for several weeks.",
-    "hint": "'Negotiate a deal', 'negotiate a salary'."
-  },
-  {
-    "word": "sustainable",
-    "translation": "устойчивый",
-    "level": "B2",
-    "partOfSpeech": "adjective",
-    "topic": "environment",
-    "example": "The company switched to sustainable packaging to reduce waste.",
-    "hint": "'Sustainable energy', 'sustainable growth'."
-  },
-  {
-    "word": "forecast",
-    "translation": "прогноз",
+    "word": "civilization",
+    "translation": "цивилизация",
     "level": "B1",
     "partOfSpeech": "noun",
-    "topic": "weather",
-    "example": "According to the forecast, it will rain all weekend.",
-    "hint": "'Weather forecast', 'sales forecast'."
+    "topic": "history",
+    "example": "The Maya civilization developed advanced astronomy.",
+    "hint": "Большое общество с общей культурой и историей."
   },
   {
-    "word": "grateful",
-    "translation": "благодарный",
-    "level": "B1",
-    "partOfSpeech": "adjective",
-    "topic": "emotions",
-    "example": "I am so grateful for all the help you gave me.",
-    "hint": "Stronger than 'thankful'. Use: 'grateful for' / 'grateful to'."
+    "word": "tradition",
+    "translation": "традиция",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "culture",
+    "example": "This tradition has existed for hundreds of years.",
+    "hint": "'Family tradition', 'local tradition'."
   },
   {
-    "word": "dedicate",
-    "translation": "посвящать",
-    "level": "B2",
-    "partOfSpeech": "verb",
-    "topic": "lifestyle",
-    "example": "He dedicated his life to helping others in need.",
-    "hint": "Always with 'to': 'dedicate time to', 'dedicate yourself to'."
-  },
-  {
-    "word": "influence",
-    "translation": "влияние",
+    "word": "heritage",
+    "translation": "наследие",
     "level": "B1",
     "partOfSpeech": "noun",
-    "topic": "society",
-    "example": "Social media has a huge influence on modern culture.",
-    "hint": "'Have influence on' — not 'make influence'."
+    "topic": "culture",
+    "example": "The city is proud of its cultural heritage.",
+    "hint": "Историческое и культурное наследие."
   },
   {
-    "word": "exhausted",
-    "translation": "изнурённый",
-    "level": "B1",
-    "partOfSpeech": "adjective",
-    "topic": "emotions",
-    "example": "After the long flight, she was completely exhausted.",
-    "hint": "Much stronger than 'tired'."
-  },
-  
-  
-  {
-    "word": "accomplish",
-    "translation": "достигать",
-    "level": "B2",
-    "partOfSpeech": "verb",
-    "topic": "lifestyle",
-    "example": "She accomplished all her goals by the end of the year.",
-    "hint": "'Accomplish a goal', 'accomplish a task'."
-  },
-
-  {
-    "word": "anxious",
-    "translation": "тревожный",
-    "level": "B1",
-    "partOfSpeech": "adjective",
-    "topic": "emotions",
-    "example": "He felt anxious before his job interview.",
-    "hint": "'Anxious about' = worried. Or eager: 'anxious to help'."
-  },
-  {
-    "word": "budget",
-    "translation": "бюджет",
+    "word": "empire",
+    "translation": "империя",
     "level": "B1",
     "partOfSpeech": "noun",
-    "topic": "finance",
-    "example": "We need to stick to our budget this month.",
-    "hint": "'Stick to', 'set', 'exceed' a budget."
+    "topic": "history",
+    "example": "The Roman Empire influenced much of Europe.",
+    "hint": "Большое государство, объединяющее разные территории."
   },
   {
-    "word": "perspective",
-    "translation": "точка зрения",
-    "level": "B2",
-    "partOfSpeech": "noun",
-    "topic": "communication",
-    "example": "Try to look at the problem from a different perspective.",
-    "hint": "'From my perspective' — polite way to share your view."
-  },
-  {
-    "word": "encourage",
-    "translation": "поощрять",
-    "level": "B1",
+    "word": "discover",
+    "translation": "открывать",
+    "level": "A2",
     "partOfSpeech": "verb",
-    "topic": "education",
-    "example": "Teachers should encourage students to ask questions.",
-    "hint": "'Encourage someone to do something'."
+    "topic": "exploration",
+    "example": "Many explorers hoped to discover new lands.",
+    "hint": "'Discover a place', 'discover something new'."
   },
   {
-    "word": "remote",
-    "translation": "удалённый",
-    "level": "B1",
-    "partOfSpeech": "adjective",
-    "topic": "work",
-    "example": "Many people now work in remote positions from home.",
-    "hint": "'Remote work', 'remote job'."
-  },
-  {
-    "word": "invest",
-    "translation": "инвестировать",
-    "level": "B2",
-    "partOfSpeech": "verb",
-    "topic": "finance",
-    "example": "It is wise to invest your savings rather than keep them in cash.",
-    "hint": "Always 'invest in': 'invest in stocks', 'invest in yourself'."
-  },
-  {
-    "word": "reliable",
-    "translation": "надёжный",
-    "level": "B1",
-    "partOfSpeech": "adjective",
-    "topic": "personality",
-    "example": "You need a reliable car if you drive long distances every day.",
-    "hint": "For people, machines and data: 'a reliable source'."
-  },
-  {
-    "word": "outcome",
-    "translation": "результат",
-    "level": "B2",
-    "partOfSpeech": "noun",
-    "topic": "business",
-    "example": "The outcome of the meeting was better than expected.",
-    "hint": "More formal than 'result' — the final effect of a process."
-  },
-  {
-    "word": "collapse",
-    "translation": "рухнуть",
-    "level": "B2",
-    "partOfSpeech": "verb",
-    "topic": "general",
-    "example": "The old bridge collapsed after years of neglect.",
-    "hint": "Literal (buildings) or figurative: a deal, economy can collapse."
-  },
-
-  {
-    "word": "permanent",
-    "translation": "постоянный",
-    "level": "B1",
-    "partOfSpeech": "adjective",
-    "topic": "work",
-    "example": "After six months she was offered a permanent position.",
-    "hint": "Opposite of 'temporary': 'permanent position'."
-  },
-  {
-    "word": "shortage",
-    "translation": "нехватка",
-    "level": "B2",
-    "partOfSpeech": "noun",
-    "topic": "society",
-    "example": "There is a serious shortage of affordable housing in the city.",
-    "hint": "'A shortage of' — supply less than demand."
-  },
-  {
-    "word": "demand",
-    "translation": "спрос",
+    "word": "voyage",
+    "translation": "морское путешествие",
     "level": "B1",
     "partOfSpeech": "noun",
-    "topic": "business",
-    "example": "The demand for electric cars is growing every year.",
-    "hint": "Noun: 'demand for'. Verb: 'demand that'."
+    "topic": "history",
+    "example": "Magellan's voyage changed world history.",
+    "hint": "Долгое путешествие по морю."
   },
   {
-    "word": "hesitate",
-    "translation": "колебаться",
-    "level": "B2",
-    "partOfSpeech": "verb",
-    "topic": "communication",
-    "example": "Don't hesitate to call me if you need any help.",
-    "hint": "'Don't hesitate to...' = 'feel free to...' — common in emails."
+    "word": "culture",
+    "translation": "культура",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "culture",
+    "example": "Traveling helps you understand different cultures.",
+    "hint": "Обычаи, традиции и образ жизни людей."
   },
   {
-    "word": "conscious",
-    "translation": "осознанный",
-    "level": "B2",
+    "word": "border",
+    "translation": "граница",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "travel",
+    "example": "We crossed the border early in the morning.",
+    "hint": "Линия между странами."
+  },
+  {
+    "word": "monument",
+    "translation": "памятник",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "history",
+    "example": "The monument was built to honor national heroes.",
+    "hint": "Исторический объект или памятник."
+  },
+  {
+    "word": "adventure",
+    "translation": "приключение",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "travel",
+    "example": "Backpacking across Asia was a great adventure.",
+    "hint": "Интересное и необычное путешествие."
+  },
+  {
+    "word": "pilgrim",
+    "translation": "паломник",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "history",
+    "example": "Thousands of pilgrims visit the city every year.",
+    "hint": "Человек, совершающий религиозное путешествие."
+  },
+  {
+    "word": "festival",
+    "translation": "фестиваль",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "culture",
+    "example": "The festival attracts visitors from around the world.",
+    "hint": "Большой праздник или культурное событие."
+  },
+  {
+    "word": "architecture",
+    "translation": "архитектура",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "culture",
+    "example": "Barcelona is famous for its unique architecture.",
+    "hint": "Стиль и искусство строительства."
+  },
+  {
+    "word": "expedition",
+    "translation": "экспедиция",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "exploration",
+    "example": "The expedition traveled deep into the jungle.",
+    "hint": "Организованное исследовательское путешествие."
+  },
+  {
+    "word": "tribe",
+    "translation": "племя",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "culture",
+    "example": "The tribe has lived in the region for centuries.",
+    "hint": "Традиционная группа людей."
+  },
+  {
+    "word": "route",
+    "translation": "маршрут",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "travel",
+    "example": "The Silk Road was an important trade route.",
+    "hint": "'Travel route', 'trade route'."
+  },
+  {
+    "word": "legend",
+    "translation": "легенда",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "history",
+    "example": "Many legends surround King Arthur.",
+    "hint": "Старая история, часто с элементами мифа."
+  },
+  {
+    "word": "castle",
+    "translation": "замок",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "history",
+    "example": "The medieval castle overlooks the valley.",
+    "hint": "Средневековая крепость."
+  },
+  {
+    "word": "native",
+    "translation": "коренной, местный",
+    "level": "B1",
     "partOfSpeech": "adjective",
-    "topic": "lifestyle",
-    "example": "She made a conscious decision to eat more healthily.",
-    "hint": "Don't confuse with 'conscience' — your moral sense."
+    "topic": "culture",
+    "example": "The guide introduced us to native traditions.",
+    "hint": "'Native people', 'native language'."
   },
   {
-    "word": "launch",
-    "translation": "запускать",
+    "word": "continent",
+    "translation": "континент",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "geography",
+    "example": "Africa is the second-largest continent.",
+    "hint": "Европа, Азия, Африка и т.д."
+  },
+  {
+    "word": "archaeologist",
+    "translation": "археолог",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "history",
+    "example": "The archaeologist discovered an ancient tomb.",
+    "hint": "Изучает прошлое через раскопки."
+  },
+  {
+    "word": "custom",
+    "translation": "обычай",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "culture",
+    "example": "It is a local custom to remove your shoes before entering.",
+    "hint": "Традиционный способ поведения."
+  },
+  {
+    "word": "nomad",
+    "translation": "кочевник",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "history",
+    "example": "Nomads move from place to place with their animals.",
+    "hint": "Не живёт постоянно в одном месте."
+  },
+  {
+    "word": "ruins",
+    "translation": "руины",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "history",
+    "example": "Tourists visited the ruins of the ancient city.",
+    "hint": "Остатки старых зданий."
+  },
+  {
+    "word": "wander",
+    "translation": "бродить, гулять",
     "level": "B1",
     "partOfSpeech": "verb",
-    "topic": "business",
-    "example": "The company plans to launch a new product next spring.",
-    "hint": "For products, campaigns, websites — starting something publicly."
+    "topic": "travel",
+    "example": "We wandered through the narrow streets for hours.",
+    "hint": "Гулять без конкретного маршрута."
   },
   {
-    "word": "genuine",
-    "translation": "искренний",
-    "level": "B2",
-    "partOfSpeech": "adjective",
-    "topic": "personality",
-    "example": "Her smile was genuine, and everyone could feel her warmth.",
-    "hint": "Opposite of fake. Also: 'genuine leather', 'genuine signature'."
-  },
-  {
-    "word": "obstacle",
-    "translation": "препятствие",
-    "level": "B2",
+    "word": "destination",
+    "translation": "место назначения",
+    "level": "A2",
     "partOfSpeech": "noun",
-    "topic": "lifestyle",
-    "example": "Every obstacle is an opportunity to learn something new.",
-    "hint": "'Overcome', 'face', or 'remove' an obstacle."
-  }, 
-  [
-    {
-      "word": "resilient",
-      "translation": "стойкий / устойчивый",
-      "level": "B2",
-      "partOfSpeech": "adjective",
-      "topic": "personality",
-      "example": "Resilient people recover quickly after difficult situations.",
-      "hint": "Someone mentally strong who bounces back."
-    },
-    {
-      "word": "convince",
-      "translation": "убеждать",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "communication",
-      "example": "She convinced her friend to join the trip.",
-      "hint": "'Convince someone to do something'."
-    },
-    {
-      "word": "overwhelm",
-      "translation": "перегружать / подавлять",
-      "level": "B2",
-      "partOfSpeech": "verb",
-      "topic": "emotions",
-      "example": "Too much work can overwhelm even experienced people.",
-      "hint": "When something feels like too much."
-    },
-    {
-      "word": "insight",
-      "translation": "понимание / инсайт",
-      "level": "B2",
-      "partOfSpeech": "noun",
-      "topic": "thinking",
-      "example": "The book gave me a useful insight into human behavior.",
-      "hint": "A deep understanding of something."
-    },
-    {
-      "word": "adapt",
-      "translation": "адаптироваться",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "lifestyle",
-      "example": "Animals adapt to changes in their environment.",
-      "hint": "'Adapt to' new situations."
-    },
-    {
-      "word": "regret",
-      "translation": "сожалеть",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "emotions",
-      "example": "He regretted not studying harder for the exam.",
-      "hint": "Feeling bad about a past decision."
-    },
-    {
-      "word": "achievement",
-      "translation": "достижение",
-      "level": "B1",
-      "partOfSpeech": "noun",
-      "topic": "motivation",
-      "example": "Finishing the marathon was a huge achievement.",
-      "hint": "Something you successfully completed."
-    },
-    {
-      "word": "aware",
-      "translation": "осознающий",
-      "level": "B1",
-      "partOfSpeech": "adjective",
-      "topic": "thinking",
-      "example": "Are you aware of the risks involved?",
-      "hint": "'Aware of' = knowing about something."
-    },
-    {
-      "word": "commitment",
-      "translation": "обязательство / преданность",
-      "level": "B2",
-      "partOfSpeech": "noun",
-      "topic": "work",
-      "example": "Success requires commitment and discipline.",
-      "hint": "A serious promise or dedication."
-    },
-    {
-      "word": "estimate",
-      "translation": "оценивать приблизительно",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "business",
-      "example": "Can you estimate how long the project will take?",
-      "hint": "A rough calculation, not exact."
-    },
-    {
-      "word": "struggle",
-      "translation": "испытывать трудности",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "self-development",
-      "example": "Many learners struggle with English grammar.",
-      "hint": "To have difficulty doing something."
-    },
-    {
-      "word": "maintain",
-      "translation": "поддерживать",
-      "level": "B2",
-      "partOfSpeech": "verb",
-      "topic": "lifestyle",
-      "example": "It's important to maintain a healthy routine.",
-      "hint": "To keep something in good condition."
-    },
-    {
-      "word": "approach",
-      "translation": "подход",
-      "level": "B2",
-      "partOfSpeech": "noun",
-      "topic": "education",
-      "example": "Her approach to teaching is very effective.",
-      "hint": "A method or way of doing something."
-    },
-    {
-      "word": "pretend",
-      "translation": "притворяться",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "social life",
-      "example": "He pretended not to hear the question.",
-      "hint": "To act like something is true when it isn't."
-    },
-    {
-      "word": "efficient",
-      "translation": "эффективный",
-      "level": "B2",
-      "partOfSpeech": "adjective",
-      "topic": "work",
-      "example": "This new system is much more efficient.",
-      "hint": "Works well without wasting time."
-    },
-    {
-      "word": "motivate",
-      "translation": "мотивировать",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "motivation",
-      "example": "Music helps motivate me during workouts.",
-      "hint": "To give someone energy to act."
-    },
-    {
-      "word": "expand",
-      "translation": "расширять",
-      "level": "B2",
-      "partOfSpeech": "verb",
-      "topic": "business",
-      "example": "The company plans to expand into Europe.",
-      "hint": "To grow bigger."
-    },
-    {
-      "word": "patience",
-      "translation": "терпение",
-      "level": "B1",
-      "partOfSpeech": "noun",
-      "topic": "personality",
-      "example": "Learning a language takes patience.",
-      "hint": "Staying calm while waiting."
-    },
-    {
-      "word": "assume",
-      "translation": "предполагать",
-      "level": "B2",
-      "partOfSpeech": "verb",
-      "topic": "thinking",
-      "example": "Don't assume everyone agrees with you.",
-      "hint": "To believe something without proof."
-    },
-    {
-      "word": "ignore",
-      "translation": "игнорировать",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "communication",
-      "example": "She ignored his messages all day.",
-      "hint": "To choose not to pay attention."
-    },
-    {
-      "word": "explore",
-      "translation": "исследовать",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "travel",
-      "example": "We spent the weekend exploring the city.",
-      "hint": "To discover something new."
-    },
-    {
-      "word": "awkward",
-      "translation": "неловкий",
-      "level": "B2",
-      "partOfSpeech": "adjective",
-      "topic": "social life",
-      "example": "That silence felt really awkward.",
-      "hint": "Socially uncomfortable."
-    },
-    {
-      "word": "complain",
-      "translation": "жаловаться",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "daily life",
-      "example": "He always complains about traffic.",
-      "hint": "To express dissatisfaction."
-    },
-    {
-      "word": "attempt",
-      "translation": "пытаться",
-      "level": "B2",
-      "partOfSpeech": "verb",
-      "topic": "general",
-      "example": "She attempted to fix the problem herself.",
-      "hint": "A more formal word for 'try'."
-    },
-    {
-      "word": "reward",
-      "translation": "награда",
-      "level": "B1",
-      "partOfSpeech": "noun",
-      "topic": "motivation",
-      "example": "Hard work often brings its own reward.",
-      "hint": "Something good you receive."
-    },
-    {
-      "word": "delay",
-      "translation": "задержка",
-      "level": "B1",
-      "partOfSpeech": "noun",
-      "topic": "travel",
-      "example": "Our flight was delayed by two hours.",
-      "hint": "When something happens later than planned."
-    },
-    {
-      "word": "impress",
-      "translation": "впечатлять",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "social life",
-      "example": "He really impressed everyone with his presentation.",
-      "hint": "To make people admire you."
-    },
-    {
-      "word": "recover",
-      "translation": "восстанавливаться",
-      "level": "B2",
-      "partOfSpeech": "verb",
-      "topic": "health",
-      "example": "She recovered quickly after surgery.",
-      "hint": "To become healthy again."
-    },
-    {
-      "word": "curious",
-      "translation": "любопытный",
-      "level": "B1",
-      "partOfSpeech": "adjective",
-      "topic": "personality",
-      "example": "Children are naturally curious.",
-      "hint": "Wanting to know more."
-    },
-    {
-      "word": "achieve",
-      "translation": "достигать",
-      "level": "B1",
-      "partOfSpeech": "verb",
-      "topic": "motivation",
-      "example": "You can achieve anything with enough effort.",
-      "hint": "'Achieve success', 'achieve a goal'."
-    }
-  ]
+    "topic": "travel",
+    "example": "Italy is a popular travel destination.",
+    "hint": "Куда ты направляешься."
+  }
 ]

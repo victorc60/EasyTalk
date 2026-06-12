@@ -1,393 +1,212 @@
 [
-  
-  
-  {
-    "idiom": "cost an arm and a leg",
-    "translation": "стоить целое состояние",
-    "meaning": "быть очень дорогим",
-    "example": "Repairing the car cost an arm and a leg.",
-    "hint": "очень дорого"
-  },
-  
-  {
-    "idiom": "under the weather",
-    "translation": "не в своей тарелке",
-    "meaning": "чувствовать себя немного больным или уставшим",
-    "example": "I'm feeling a bit under the weather today.",
-    "hint": "плохо себя чувствовать"
-  },
-  {
-    "idiom": "once in a blue moon",
-    "translation": "раз в сто лет",
-    "meaning": "очень редко",
-    "example": "We go out for dinner once in a blue moon.",
-    "hint": "очень редко"
-  },
-  {
-    "idiom": "spill the beans",
-    "translation": "выдать секрет",
-    "meaning": "рассказать секрет, который нужно было хранить",
-    "example": "She spilled the beans about the surprise party.",
-    "hint": "разболтать тайну"
-  },
-  {
-    "idiom": "let the cat out of the bag",
-    "translation": "выпустить кота из мешка",
-    "meaning": "случайно раскрыть секрет",
-    "example": "I let the cat out of the bag about the promotion.",
-    "hint": "нечаянно выдать секрет"
-  },
-  {
-    "idiom": "when pigs fly",
-    "translation": "когда рак на горе свистнет",
-    "meaning": "никогда",
-    "example": "He'll clean his room when pigs fly.",
-    "hint": "никогда"
-  },
-  {
-    "idiom": "burn the midnight oil",
-    "translation": "работать до полуночи",
-    "meaning": "работать допоздна",
-    "example": "We burned the midnight oil to finish the project.",
-    "hint": "работать поздно ночью"
-  },
-  
-  {
-    "idiom": "get out of hand",
-    "translation": "выйти из-под контроля",
-    "meaning": "стать слишком трудным или хаотичным",
-    "example": "The party got out of hand quickly.",
-    "hint": "перестать контролироваться"
-  },
-  {
-    "idiom": "go the extra mile",
-    "translation": "сделать больше, чем от тебя ждут",
-    "meaning": "приложить дополнительные усилия",
-    "example": "Our team always goes the extra mile for clients.",
-    "hint": "постараться сверх нормы"
-  },
-  {
-    "idiom": "keep an eye on",
-    "translation": "присматривать за",
-    "meaning": "наблюдать или заботиться о ком-то или чём-то",
-    "example": "Can you keep an eye on my bag?",
-    "hint": "присмотреть"
-  },
-  {
-    "idiom": "pull someone's leg",
-    "translation": "разыгрывать кого-то",
-    "meaning": "шутить или дразнить кого-то неправдой",
-    "example": "I'm just pulling your leg — don't worry.",
-    "hint": "пошутить над кем-то"
-  },
-  {
-    "idiom": "sit on the fence",
-    "translation": "сидеть на заборе",
-    "meaning": "не принимать решение, оставаться нейтральным",
-    "example": "You can't sit on the fence forever. Choose!",
-    "hint": "не определиться"
-  },
-  {
-    "idiom": "ring a bell",
-    "translation": "казаться знакомым",
-    "meaning": "вспоминать что-то, но не точно",
-    "example": "That name rings a bell, but I'm not sure.",
-    "hint": "что-то знакомое"
-  },
-  {
-    "idiom": "see eye to eye",
-    "translation": "соглашаться друг с другом",
-    "meaning": "иметь одинаковое мнение",
-    "example": "We don't always see eye to eye, but we respect each other.",
-    "hint": "совпадать во мнениях"
-  },
-  {
-    "idiom": "play it by ear",
-    "translation": "действовать по обстановке",
-    "meaning": "принимать решения постепенно, без плана",
-    "example": "I don't have a plan — let's play it by ear.",
-    "hint": "без плана, как пойдёт"
-  },
-  {
-    "idiom": "hit the sack",
-    "translation": "отправиться спать",
-    "meaning": "лечь спать",
-    "example": "I'm exhausted — time to hit the sack.",
-    "hint": "пойти спать"
-  },
-  {
-    "idiom": "barking up the wrong tree",
-    "translation": "обратиться не по адресу",
-    "meaning": "ошибаться в поиске причины или человека",
-    "example": "If you think I took your pen, you're barking up the wrong tree.",
-    "hint": "обвинять не того"
-  },
-  
-  {
-    "idiom": "get a taste of your own medicine",
-    "translation": "получить по заслугам",
-    "meaning": "столкнуться с тем же плохим обращением, которое ты показывал другим",
-    "example": "She's always rude — now she got a taste of her own medicine.",
-    "hint": "тебе вернули тем же"
-  },
   {
     "idiom": "hit the road",
     "translation": "отправиться в путь",
-    "meaning": "начать путешествие или уйти",
-    "example": "It's late — I should hit the road.",
-    "hint": "поехать или пойти"
+    "meaning": "начать путешествие или поездку",
+    "example": "It's getting late. Let's hit the road.",
+    "hint": "поехать дальше"
   },
   {
-    "idiom": "keep your fingers crossed",
-    "translation": "держать кулачки",
-    "meaning": "надеяться на удачный результат",
-    "example": "I'm keeping my fingers crossed for your interview.",
-    "hint": "надеяться на лучшее"
+    "idiom": "off the beaten path",
+    "translation": "вдали от туристических мест",
+    "meaning": "необычное или малоизвестное место",
+    "example": "We found a beautiful village off the beaten path.",
+    "hint": "не туристическое место"
   },
   {
-    "idiom": "steal someone's thunder",
-    "translation": "украсть чужой успех",
-    "meaning": "привлечь внимание к себе, когда кто-то другой этого заслуживает",
-    "example": "She announced her engagement at my birthday party — she stole my thunder.",
-    "hint": "перебить чужой успех"
+    "idiom": "a stone's throw away",
+    "translation": "в двух шагах",
+    "meaning": "очень близко",
+    "example": "The castle is a stone's throw away from the hotel.",
+    "hint": "очень близко"
   },
   {
-    "idiom": "up in the air",
-    "translation": "висит в воздухе",
-    "meaning": "не решено, неопределённо",
-    "example": "Our vacation plans are still up in the air.",
-    "hint": "неопределённо"
+    "idiom": "cross that bridge when you come to it",
+    "translation": "решать проблемы по мере поступления",
+    "meaning": "не беспокоиться заранее",
+    "example": "We don't know if it will rain. We'll cross that bridge when we come to it.",
+    "hint": "не переживай заранее"
   },
   {
-    "idiom": "butter someone up",
-    "translation": "подлизываться",
-    "meaning": "хвалить кого-то, чтобы получить что-то",
-    "example": "He's buttering up the boss for a promotion.",
-    "hint": "льстить ради выгоды"
+    "idiom": "take the scenic route",
+    "translation": "поехать красивой дорогой",
+    "meaning": "выбрать более живописный путь",
+    "example": "We took the scenic route through the mountains.",
+    "hint": "красивая дорога"
   },
   {
-    "idiom": "cut corners",
-    "translation": "халтурить",
-    "meaning": "делать что-то плохо, чтобы сэкономить время или деньги",
-    "example": "Don't cut corners — do it properly.",
-    "hint": "сделать кое-как"
+    "idiom": "get the ball rolling",
+    "translation": "начать дело",
+    "meaning": "запустить процесс",
+    "example": "Let's get the ball rolling and book our flights.",
+    "hint": "начать"
   },
   {
-    "idiom": "straight from the horse's mouth",
-    "translation": "из первых уст",
-    "meaning": "получить информацию от самого надёжного источника",
-    "example": "I heard it straight from the horse's mouth — the manager told me.",
-    "hint": "от самого источника"
-  },[
-    {
-      "idiom": "bend over backwards",
-      "translation": "из кожи вон лезть",
-      "meaning": "очень сильно стараться помочь или угодить",
-      "example": "They bent over backwards to make us feel welcome.",
-      "hint": "стараться на максимум"
-    },
-    {
-      "idiom": "bite off more than you can chew",
-      "translation": "взять на себя слишком много",
-      "meaning": "взяться за большее, чем можешь справиться",
-      "example": "I think I bit off more than I could chew with this project.",
-      "hint": "перегрузить себя"
-    },
-    {
-      "idiom": "by the skin of your teeth",
-      "translation": "еле-еле",
-      "meaning": "с минимальным запасом",
-      "example": "He passed the exam by the skin of his teeth.",
-      "hint": "чудом"
-    },
-    {
-      "idiom": "come rain or shine",
-      "translation": "при любых обстоятельствах",
-      "meaning": "несмотря ни на что",
-      "example": "She goes jogging every morning, come rain or shine.",
-      "hint": "что бы ни случилось"
-    },
-    {
-      "idiom": "draw the line",
-      "translation": "провести черту",
-      "meaning": "установить предел допустимого",
-      "example": "I can tolerate mistakes, but I draw the line at dishonesty.",
-      "hint": "дальше нельзя"
-    },
-    {
-      "idiom": "fall through the cracks",
-      "translation": "быть упущенным",
-      "meaning": "быть забытым или незамеченным системой",
-      "example": "Some important details fell through the cracks.",
-      "hint": "выпасть из внимания"
-    },
-    {
-      "idiom": "get the hang of it",
-      "translation": "врубиться / освоиться",
-      "meaning": "начать понимать, как что-то работает",
-      "example": "It seemed hard at first, but I got the hang of it.",
-      "hint": "нащупать как это работает"
-    },
-    {
-      "idiom": "go down in flames",
-      "translation": "с треском провалиться",
-      "meaning": "очень сильно потерпеть неудачу",
-      "example": "Their startup went down in flames.",
-      "hint": "эпичный провал"
-    },
-    {
-      "idiom": "have bigger fish to fry",
-      "translation": "есть дела поважнее",
-      "meaning": "иметь более важные задачи",
-      "example": "I can't worry about that now — I have bigger fish to fry.",
-      "hint": "приоритеты важнее"
-    },
-    {
-      "idiom": "in the same boat",
-      "translation": "в одной лодке",
-      "meaning": "быть в одинаковой ситуации",
-      "example": "We're all in the same boat here.",
-      "hint": "одни и те же проблемы"
-    },
-    {
-      "idiom": "keep your chin up",
-      "translation": "не вешать нос",
-      "meaning": "оставаться позитивным в трудный момент",
-      "example": "Keep your chin up — things will improve.",
-      "hint": "держись"
-    },
-    {
-      "idiom": "know the ropes",
-      "translation": "знать кухню",
-      "meaning": "хорошо понимать, как всё устроено",
-      "example": "Give her time — she'll learn the ropes.",
-      "hint": "разбираться в системе"
-    },
-    {
-      "idiom": "leave no stone unturned",
-      "translation": "перевернуть каждый камень",
-      "meaning": "сделать всё возможное в поиске решения",
-      "example": "Police left no stone unturned in the investigation.",
-      "hint": "искать везде"
-    },
-    {
-      "idiom": "make a long story short",
-      "translation": "короче говоря",
-      "meaning": "перейти к сути",
-      "example": "To make a long story short, we missed the train.",
-      "hint": "сокращённая версия"
-    },
-    {
-      "idiom": "not hold water",
-      "translation": "не выдерживать критики",
-      "meaning": "быть нелогичным или слабым аргументом",
-      "example": "His excuse doesn't hold water.",
-      "hint": "аргумент дырявый"
-    },
-    {
-      "idiom": "on the same page",
-      "translation": "на одной волне",
-      "meaning": "иметь одинаковое понимание ситуации",
-      "example": "Let's make sure we're on the same page.",
-      "hint": "одинаково понимать"
-    },
-    {
-      "idiom": "out of the blue",
-      "translation": "как гром среди ясного неба",
-      "meaning": "совершенно неожиданно",
-      "example": "She called me out of the blue.",
-      "hint": "совсем внезапно"
-    },
-    {
-      "idiom": "put your foot down",
-      "translation": "жёстко настоять",
-      "meaning": "твёрдо отказать или настоять на своём",
-      "example": "His mother finally put her foot down.",
-      "hint": "твёрдое нет"
-    },
-    {
-      "idiom": "read between the lines",
-      "translation": "читать между строк",
-      "meaning": "понимать скрытый смысл",
-      "example": "If you read between the lines, he's unhappy.",
-      "hint": "уловить намёк"
-    },
-    {
-      "idiom": "rock the boat",
-      "translation": "раскачивать лодку",
-      "meaning": "создавать проблемы в стабильной ситуации",
-      "example": "Don't rock the boat before the deal is done.",
-      "hint": "создавать лишний хаос"
-    },
-    {
-      "idiom": "save for a rainy day",
-      "translation": "откладывать на чёрный день",
-      "meaning": "копить на будущее",
-      "example": "She saves money for a rainy day.",
-      "hint": "финансовая подушка"
-    },
-    {
-      "idiom": "sweep under the rug",
-      "translation": "замести под ковёр",
-      "meaning": "скрыть проблему вместо решения",
-      "example": "They tried to sweep the scandal under the rug.",
-      "hint": "сделать вид что проблемы нет"
-    },
-    {
-      "idiom": "take the edge off",
-      "translation": "смягчить",
-      "meaning": "сделать что-то менее неприятным",
-      "example": "A coffee helped take the edge off my headache.",
-      "hint": "снизить остроту"
-    },
-    {
-      "idiom": "the writing on the wall",
-      "translation": "предупреждающие знаки",
-      "meaning": "очевидные признаки плохого исхода",
-      "example": "The company ignored the writing on the wall.",
-      "hint": "всё было понятно заранее"
-    },
-    {
-      "idiom": "throw someone under the bus",
-      "translation": "подставить кого-то",
-      "meaning": "пожертвовать кем-то ради себя",
-      "example": "He threw his teammate under the bus.",
-      "hint": "спасти себя ценой другого"
-    },
-    {
-      "idiom": "touch base",
-      "translation": "связаться коротко",
-      "meaning": "быстро обсудить что-то",
-      "example": "Let's touch base tomorrow.",
-      "hint": "короткий контакт"
-    },
-    {
-      "idiom": "weather the storm",
-      "translation": "пережить трудности",
-      "meaning": "выстоять в тяжёлой ситуации",
-      "example": "The company weathered the storm.",
-      "hint": "выдержать кризис"
-    },
-    {
-      "idiom": "your guess is as good as mine",
-      "translation": "без понятия",
-      "meaning": "я знаю не больше твоего",
-      "example": "Why is he late? Your guess is as good as mine.",
-      "hint": "никто не знает"
-    },
-    {
-      "idiom": "hit a snag",
-      "translation": "столкнуться с проблемой",
-      "meaning": "встретить неожиданное препятствие",
-      "example": "We hit a snag during development.",
-      "hint": "что-то пошло не так"
-    },
-    {
-      "idiom": "pull the plug",
-      "translation": "прекратить",
-      "meaning": "остановить проект или процесс",
-      "example": "They pulled the plug on the campaign.",
-      "hint": "резко остановить"
-    }
-  ]
+    "idiom": "go the extra mile",
+    "translation": "сделать больше ожидаемого",
+    "meaning": "приложить дополнительные усилия",
+    "example": "The guide went the extra mile to help tourists.",
+    "hint": "стараться больше"
+  },
+  {
+    "idiom": "break new ground",
+    "translation": "открывать новое",
+    "meaning": "делать что-то впервые",
+    "example": "The explorers broke new ground in the Arctic.",
+    "hint": "первооткрыватели"
+  },
+  {
+    "idiom": "see the big picture",
+    "translation": "видеть общую картину",
+    "meaning": "понимать ситуацию целиком",
+    "example": "History helps us see the big picture.",
+    "hint": "смотреть шире"
+  },
+  {
+    "idiom": "turn back the clock",
+    "translation": "вернуться в прошлое",
+    "meaning": "представить или попытаться вернуть прежние времена",
+    "example": "Walking through the old city feels like turning back the clock.",
+    "hint": "как машина времени"
+  },
+  {
+    "idiom": "follow in someone's footsteps",
+    "translation": "идти по чьим-то стопам",
+    "meaning": "повторять чей-то путь или карьеру",
+    "example": "She followed in her father's footsteps and became an archaeologist.",
+    "hint": "повторить чей-то путь"
+  },
+  {
+    "idiom": "stand the test of time",
+    "translation": "выдержать испытание временем",
+    "meaning": "оставаться важным или полезным долгое время",
+    "example": "The pyramids have stood the test of time.",
+    "hint": "актуально спустя века"
+  },
+  {
+    "idiom": "on the map",
+    "translation": "стать известным",
+    "meaning": "получить признание",
+    "example": "The Olympics put the city on the map.",
+    "hint": "узнали во всем мире"
+  },
+  {
+    "idiom": "a melting pot",
+    "translation": "плавильный котёл культур",
+    "meaning": "место смешения разных культур",
+    "example": "New York is often called a melting pot.",
+    "hint": "много культур вместе"
+  },
+  {
+    "idiom": "when in Rome, do as the Romans do",
+    "translation": "в чужой монастырь со своим уставом не ходят",
+    "meaning": "уважать местные традиции",
+    "example": "I tried local customs because when in Rome, do as the Romans do.",
+    "hint": "уважай культуру страны"
+  },
+  {
+    "idiom": "open a new chapter",
+    "translation": "начать новую главу жизни",
+    "meaning": "начать новый этап",
+    "example": "Moving abroad opened a new chapter in her life.",
+    "hint": "новый этап"
+  },
+  {
+    "idiom": "leave your mark",
+    "translation": "оставить след",
+    "meaning": "оказать заметное влияние",
+    "example": "The ancient civilization left its mark on the region.",
+    "hint": "след в истории"
+  },
+  {
+    "idiom": "make history",
+    "translation": "войти в историю",
+    "meaning": "совершить исторически важное событие",
+    "example": "The astronauts made history.",
+    "hint": "историческое достижение"
+  },
+  {
+    "idiom": "walk in someone's shoes",
+    "translation": "побывать на чьём-то месте",
+    "meaning": "понять чужой опыт",
+    "example": "Travel helps you walk in someone else's shoes.",
+    "hint": "понять других людей"
+  },
+  {
+    "idiom": "the world is your oyster",
+    "translation": "весь мир открыт для тебя",
+    "meaning": "много возможностей впереди",
+    "example": "After graduation, the world is your oyster.",
+    "hint": "много возможностей"
+  },
+  {
+    "idiom": "broaden your horizons",
+    "translation": "расширить кругозор",
+    "meaning": "узнать больше о мире",
+    "example": "Traveling broadens your horizons.",
+    "hint": "узнать новое"
+  },
+  {
+    "idiom": "step into the unknown",
+    "translation": "шагнуть в неизвестность",
+    "meaning": "начать что-то новое и рискованное",
+    "example": "The explorers stepped into the unknown.",
+    "hint": "неизведанное"
+  },
+  {
+    "idiom": "be worlds apart",
+    "translation": "кардинально отличаться",
+    "meaning": "быть очень разными",
+    "example": "The two cultures are worlds apart.",
+    "hint": "совсем разные"
+  },
+  {
+    "idiom": "go down in history",
+    "translation": "войти в историю",
+    "meaning": "стать известным историческим событием",
+    "example": "The speech went down in history.",
+    "hint": "останется в учебниках"
+  },
+  {
+    "idiom": "pave the way",
+    "translation": "проложить путь",
+    "meaning": "создать условия для будущего успеха",
+    "example": "These discoveries paved the way for modern science.",
+    "hint": "подготовить почву"
+  },
+  {
+    "idiom": "turn a blind eye",
+    "translation": "закрывать глаза",
+    "meaning": "намеренно игнорировать что-то",
+    "example": "The king turned a blind eye to the problem.",
+    "hint": "делать вид, что не замечаешь"
+  },
+  {
+    "idiom": "learn the ropes",
+    "translation": "освоиться",
+    "meaning": "изучить основы нового дела",
+    "example": "It took a few weeks to learn the ropes in Japan.",
+    "hint": "разобраться как всё работает"
+  },
+  {
+    "idiom": "from all walks of life",
+    "translation": "из всех слоёв общества",
+    "meaning": "самые разные люди",
+    "example": "The festival attracts visitors from all walks of life.",
+    "hint": "очень разные люди"
+  },
+  {
+    "idiom": "have a lot on your plate",
+    "translation": "иметь много дел",
+    "meaning": "быть очень занятым",
+    "example": "I can't plan another trip. I have a lot on my plate.",
+    "hint": "много задач"
+  },
+  {
+    "idiom": "venture off the beaten track",
+    "translation": "сойти с туристической тропы",
+    "meaning": "исследовать необычные места",
+    "example": "We ventured off the beaten track and found an ancient temple.",
+    "hint": "искать скрытые места"
+  }
 ]

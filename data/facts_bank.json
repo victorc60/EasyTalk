@@ -1,161 +1,212 @@
 [
-  
   {
-    "id": "fact_082",
-    "claim": "The human nose can remember over 1 trillion different smells.",
-    "claimRu": "Человеческий нос может различать более 1 триллиона запахов.",
+    "id": "fact_201",
+    "claim": "The Great Wall of China was not built as a single wall.",
+    "claimRu": "Великая Китайская стена не была построена как единая стена.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Scientists estimate humans can distinguish an astonishing number of smells — far more than we once believed. Your nose is much more powerful than you probably think.\n🇷🇺 Правда! Учёные считают, что человек способен различать невероятное количество запахов — намного больше, чем считалось раньше. Твой нос куда мощнее, чем кажется.\n💡 Basically, your nose is premium detection hardware."
-  },
-  
-  {
-    "id": "fact_084",
-    "claim": "Johnny Depp was originally considered for Neo in The Matrix.",
-    "claimRu": "Джонни Деппа изначально рассматривали на роль Нео в Матрице.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Before Keanu Reeves became Neo, several actors were considered — including Johnny Depp. The Matrix could have looked VERY different.\n🇷🇺 Правда! До того как Киану Ривз стал Нео, рассматривали нескольких актёров, включая Джонни Деппа. Матрица могла выглядеть совсем иначе.\n💡 Alternate universe cinema."
+    "explanation": "🇬🇧 True! The Great Wall is actually a network of walls, forts, and defensive structures built by different Chinese dynasties over many centuries.\n🇷🇺 Правда! Великая Китайская стена — это целая сеть стен, крепостей и оборонительных сооружений, которые строились разными династиями на протяжении многих веков.\n💡 It's more like a giant defense system than one wall."
   },
   {
-    "id": "fact_085",
-    "claim": "Your brain sometimes rewrites your memories without you noticing.",
-    "claimRu": "Твой мозг иногда переписывает воспоминания без твоего ведома.",
+    "id": "fact_202",
+    "claim": "Ancient Romans used volcanic ash to make concrete that still survives today.",
+    "claimRu": "Древние римляне использовали вулканический пепел для создания бетона, который сохранился до наших дней.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Memory isn't like a video recording. Every time you remember something, your brain partly rebuilds it — and small changes can sneak in.\n🇷🇺 Правда! Память — это не видеозапись. Каждый раз, когда ты что-то вспоминаешь, мозг частично заново собирает воспоминание, и туда могут проникать изменения.\n💡 Some of your memories may be edited versions."
+    "explanation": "🇬🇧 True! Roman concrete was incredibly durable thanks to volcanic ash. Some Roman structures have lasted for nearly 2,000 years.\n🇷🇺 Правда! Римский бетон был невероятно прочным благодаря вулканическому пеплу. Некоторые сооружения стоят уже почти 2000 лет.\n💡 Modern engineers still study Roman building techniques."
   },
   {
-    "id": "fact_086",
-    "claim": "The longest English word without a vowel is 'rhythms'.",
-    "claimRu": "Самое длинное английское слово без гласных — 'rhythms'.",
+    "id": "fact_203",
+    "claim": "Iceland has no native mosquitoes.",
+    "claimRu": "В Исландии нет местных комаров.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! It contains no classic vowels (A, E, I, O, U), yet it's a real English word. English enjoys chaos.\n🇷🇺 Правда! В этом слове нет стандартных гласных букв (A, E, I, O, U), но это настоящее английское слово. Английский любит хаос.\n💡 Grammar teachers survive on pure courage."
-  },
-  
-  {
-    "id": "fact_088",
-    "claim": "The sound of the T-Rex in Jurassic Park included dog noises.",
-    "claimRu": "Рык T-Rex в Jurassic Park включал звуки собак.",
-    "isTrue": true,
-    "explanation": "🇬🇧 True! Movie sound designers mixed several animal sounds — including dogs, elephants, and even baby animals — to create the terrifying T-Rex roar.\n🇷🇺 Правда! Звукорежиссёры смешали звуки разных животных — включая собак, слонов и даже детёнышей — чтобы создать рык T-Rex.\n💡 Movie monsters are audio engineering magic."
+    "explanation": "🇬🇧 True! Iceland's climate and ecosystem prevent mosquitoes from establishing permanent populations.\n🇷🇺 Правда! Климат и особенности экосистемы Исландии не позволяют комарам образовать постоянную популяцию.\n💡 One more reason travelers love Iceland."
   },
   {
-    "id": "fact_089",
-    "claim": "Humans make decisions emotionally first, then justify them logically.",
-    "claimRu": "Люди сначала принимают решения эмоционально, а потом логически их оправдывают.",
+    "id": "fact_204",
+    "claim": "The shortest war in history lasted less than one hour.",
+    "claimRu": "Самая короткая война в истории длилась меньше одного часа.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! In many cases, emotions make the first call, and logic arrives later to explain why the decision 'made sense.'\n🇷🇺 Правда! Во многих случаях эмоции принимают решение первыми, а логика приходит позже и объясняет, почему это якобы было разумно.\n💡 Your brain has a PR department."
+    "explanation": "🇬🇧 True! The Anglo-Zanzibar War of 1896 lasted around 38–45 minutes.\n🇷🇺 Правда! Англо-занзибарская война 1896 года длилась примерно 38–45 минут.\n💡 Some people spend longer choosing a movie."
   },
   {
-    "id": "fact_090",
-    "claim": "The @ symbol existed before email.",
-    "claimRu": "Символ @ существовал ещё до электронной почты.",
+    "id": "fact_205",
+    "claim": "Japan has more than 6,000 inhabited islands.",
+    "claimRu": "В Японии более 6000 обитаемых островов.",
     "isTrue": true,
-    "explanation": "🇬🇧 True! Long before email, @ was used in trade and accounting to mean 'at the rate of.' Email simply gave it a second life.\n🇷🇺 Правда! Задолго до email символ @ использовался в торговле и бухгалтерии в значении 'по цене'. Электронная почта просто дала ему новую жизнь.\n💡 One symbol. Massive career upgrade."
+    "explanation": "🇬🇧 True! While most people know only a few major islands, thousands of smaller islands are inhabited.\n🇷🇺 Правда! Хотя большинство знает лишь несколько крупных островов, тысячи небольших островов также населены людьми.\n💡 Japan is much more than Tokyo and Kyoto."
   },
-  [
-    {
-      "id": "fact_091",
-      "claim": "Michael Jackson almost played Jar Jar Binks.",
-      "claimRu": "Майкл Джексон чуть не сыграл Джар-Джар Бинкса.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Michael Jackson reportedly wanted the role and imagined playing Jar Jar with practical effects and makeup, while George Lucas chose CGI instead.\n🇷🇺 Правда! По сообщениям, Майкл Джексон хотел сыграть Джар-Джара с настоящим гримом и костюмом, но Джордж Лукас выбрал CGI.\n💡 Somewhere in another universe, this happened."
-    },
-    {
-      "id": "fact_092",
-      "claim": "The brain processes negative experiences stronger than positive ones.",
-      "claimRu": "Мозг сильнее фиксируется на негативном опыте, чем на позитивном.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! This is called negativity bias. Your brain evolved to notice danger more than comfort, because survival mattered more than happiness.\n🇷🇺 Правда! Это называется негативное смещение. Мозг эволюционировал так, чтобы замечать опасность сильнее, чем комфорт — выживание было важнее счастья.\n💡 One rude comment can beat ten compliments."
-    },
-    {
-      "id": "fact_093",
-      "claim": "The English alphabet once had more letters than today.",
-      "claimRu": "В английском алфавите раньше было больше букв, чем сейчас.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Old English used letters like þ (thorn) and ð (eth), which later disappeared from everyday use.\n🇷🇺 Правда! В древнеанглийском использовались буквы вроде þ (thorn) и ð (eth), которые позже исчезли из обычного использования.\n💡 English deleted characters like software updates."
-    },
-    {
-      "id": "fact_094",
-      "claim": "Arnold Schwarzenegger was almost replaced in Terminator because of his accent.",
-      "claimRu": "Арнольда Шварценеггера чуть не заменили в Терминаторе из-за акцента.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Early producers worried his strong accent might sound strange for a futuristic killing machine. Thankfully, they were very wrong.\n🇷🇺 Правда! Продюсеры переживали, что его сильный акцент будет странно звучать для машины-убийцы из будущего. К счастью, они ошибались.\n💡 Imagine Terminator without THAT voice."
-    },
-    {
-      "id": "fact_095",
-      "claim": "You can dream in languages you don't speak fluently.",
-      "claimRu": "Можно видеть сны на языках, которыми ты не владеешь свободно.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! If you've been learning a language, your brain can use fragments of it in dreams — even if your real-life speaking still feels awkward.\n🇷🇺 Правда! Если ты изучаешь язык, мозг может использовать его кусочки во сне, даже если в реальной жизни ты пока говоришь неуверенно.\n💡 Your sleeping brain may practice harder than you."
-    },
-    {
-      "id": "fact_096",
-      "claim": "Google was originally called Backrub.",
-      "claimRu": "Google изначально назывался Backrub.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Google's founders first called the project 'Backrub' because it analyzed backlinks between websites.\n🇷🇺 Правда! Основатели Google сначала назвали проект 'Backrub', потому что он анализировал ссылки между сайтами.\n💡 Imagine saying: 'Just Backrub it.'"
-    },
-    {
-      "id": "fact_097",
-      "claim": "Some movie audiences once thought trains on screen were real and dangerous.",
-      "claimRu": "Некоторые зрители первых фильмов думали, что поезд на экране настоящий и опасный.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Early cinema audiences weren't used to moving images, so seeing a train rushing toward the camera genuinely shocked some viewers.\n🇷🇺 Правда! Первые зрители кино не привыкли к движущимся изображениям, поэтому поезд, мчащийся на камеру, реально пугал некоторых людей.\n💡 First-gen jump scare."
-    },
-    {
-      "id": "fact_098",
-      "claim": "Your brain ignores part of your vision all the time.",
-      "claimRu": "Твой мозг постоянно игнорирует часть твоего зрения.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Every eye has a blind spot where the optic nerve connects. Your brain quietly fills in the missing information so you don't notice.\n🇷🇺 Правда! У каждого глаза есть слепое пятно там, где подключается зрительный нерв. Мозг незаметно дорисовывает недостающую картинку.\n💡 Reality has live Photoshop."
-    },
-    {
-      "id": "fact_099",
-      "claim": "The hashtag symbol # has an official linguistic name.",
-      "claimRu": "У символа # есть официальное лингвистическое название.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! One formal name for # is 'octothorpe' — a word most people never hear in normal life.\n🇷🇺 Правда! Одно из официальных названий символа # — 'octothorpe'. Большинство людей никогда не слышат это слово в обычной жизни.\n💡 Hashtags got surprisingly aristocratic."
-    },
-    {
-      "id": "fact_100",
-      "claim": "Keanu Reeves gave away millions from Matrix earnings to the special effects team.",
-      "claimRu": "Киану Ривз отдал миллионы из заработка на Матрице команде спецэффектов.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Reports say Keanu shared a significant part of his earnings with crew members who helped make the film possible.\n🇷🇺 Правда! По сообщениям, Киану поделился значительной частью доходов с членами команды, которые помогли создать фильм.\n💡 One more reason people love Keanu."
-    },
-    {
-      "id": "fact_101",
-      "claim": "Humans are naturally bad at understanding exponential growth.",
-      "claimRu": "Люди от природы плохо понимают экспоненциальный рост.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Our brains evolved in mostly linear environments, so doubling growth often feels unintuitive until the numbers suddenly explode.\n🇷🇺 Правда! Наш мозг развивался в основном в линейном мире, поэтому экспоненциальный рост кажется нелогичным, пока цифры внезапно не взрываются.\n💡 That's why compound interest looks like magic."
-    },
-    {
-      "id": "fact_102",
-      "claim": "The first camera exposure took several hours.",
-      "claimRu": "Первая фотографическая экспозиция длилась несколько часов.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Early photography technology was incredibly slow, requiring people and scenes to stay still for extremely long periods.\n🇷🇺 Правда! Ранняя фотография была очень медленной, поэтому людям и объектам приходилось оставаться неподвижными очень долго.\n💡 Selfies would have been unbearable."
-    },
-    {
-      "id": "fact_103",
-      "claim": "The phrase 'OMG' existed over 100 years ago.",
-      "claimRu": "Фраза 'OMG' существовала более 100 лет назад.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! 'OMG' appeared in a 1917 letter, long before texting, memes, or the internet existed.\n🇷🇺 Правда! 'OMG' встречалось в письме 1917 года — задолго до сообщений, мемов и интернета.\n💡 Gen Z accidentally time-traveled."
-    },
-    {
-      "id": "fact_104",
-      "claim": "Some people have no internal voice in their head.",
-      "claimRu": "У некоторых людей вообще нет внутреннего голоса в голове.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! Not everyone experiences a running inner monologue. Human consciousness works in surprisingly different ways.\n🇷🇺 Правда! Не у всех есть постоянный внутренний голос. Человеческое сознание работает удивительно по-разному.\n💡 Imagine silence inside your brain."
-    },
-    {
-      "id": "fact_105",
-      "claim": "Pixar accidentally deleted almost all of Toy Story 2 during production.",
-      "claimRu": "Pixar случайно почти полностью удалила Toy Story 2 во время производства.",
-      "isTrue": true,
-      "explanation": "🇬🇧 True! A mistaken command reportedly deleted huge parts of the movie, and the project was saved only because someone had a backup copy.\n🇷🇺 Правда! Из-за ошибочной команды большая часть фильма была удалена, и проект спасла только резервная копия.\n💡 Ctrl+Z almost failed cinema."
-    }
-  ]
+  {
+    "id": "fact_206",
+    "claim": "The Eiffel Tower can become taller in summer.",
+    "claimRu": "Эйфелева башня летом становится выше.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Heat causes the metal to expand, making the tower grow by up to 15 centimeters.\n🇷🇺 Правда! Из-за жары металл расширяется, и башня может стать выше примерно на 15 сантиметров.\n💡 Even landmarks need room to stretch."
+  },
+  {
+    "id": "fact_207",
+    "claim": "Mongolia is the least densely populated country in the world.",
+    "claimRu": "Монголия — самая малонаселённая страна мира по плотности населения.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Vast steppes and deserts mean there are very few people per square kilometer.\n🇷🇺 Правда! Огромные степи и пустыни приводят к крайне низкой плотности населения.\n💡 Plenty of space for everyone."
+  },
+  {
+    "id": "fact_208",
+    "claim": "The city of Venice stands on millions of wooden piles.",
+    "claimRu": "Город Венеция стоит на миллионах деревянных свай.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Wooden piles driven deep into the lagoon support many of Venice's historic buildings.\n🇷🇺 Правда! Многие здания Венеции стоят на деревянных сваях, забитых глубоко в дно лагуны.\n💡 Water helped preserve the wood for centuries."
+  },
+  {
+    "id": "fact_209",
+    "claim": "The world's oldest continuously operating university is in Morocco.",
+    "claimRu": "Самый старый непрерывно действующий университет мира находится в Марокко.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! The University of Al Quaraouiyine in Fez was founded in 859 AD.\n🇷🇺 Правда! Университет Аль-Карауин в городе Фес был основан в 859 году.\n💡 It is recognized by UNESCO and Guinness World Records."
+  },
+  {
+    "id": "fact_210",
+    "claim": "Norway once gave London a Christmas tree every year as a thank-you gift.",
+    "claimRu": "Норвегия ежегодно дарит Лондону рождественскую ёлку в знак благодарности.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Norway has gifted a Christmas tree to London every year since World War II.\n🇷🇺 Правда! Норвегия дарит Лондону рождественскую ёлку каждый год со времён Второй мировой войны.\n💡 It's a symbol of friendship and gratitude."
+  },
+  {
+    "id": "fact_211",
+    "claim": "There is a desert in Denmark.",
+    "claimRu": "В Дании есть пустыня.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Råbjerg Mile is a huge moving sand dune in northern Denmark.\n🇷🇺 Правда! Рёбьерг-Миле — огромная движущаяся песчаная дюна на севере Дании.\n💡 It slowly moves several meters every year."
+  },
+  {
+    "id": "fact_212",
+    "claim": "Canada has more lakes than all other countries combined.",
+    "claimRu": "В Канаде больше озёр, чем во всех остальных странах мира вместе взятых.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Canada contains millions of lakes and holds a significant share of the world's freshwater.\n🇷🇺 Правда! В Канаде находятся миллионы озёр и огромные запасы пресной воды.\n💡 The map is almost blue."
+  },
+  {
+    "id": "fact_213",
+    "claim": "The pyramids were already ancient when Cleopatra was born.",
+    "claimRu": "Пирамиды были древними уже во времена рождения Клеопатры.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! The Great Pyramid was built about 2,500 years before Cleopatra lived.\n🇷🇺 Правда! Великая пирамида была построена примерно за 2500 лет до рождения Клеопатры.\n💡 Cleopatra is closer to us than to the pyramid builders."
+  },
+  {
+    "id": "fact_214",
+    "claim": "Finland has more saunas than cars.",
+    "claimRu": "В Финляндии саун больше, чем автомобилей.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Finland has over 3 million saunas for a population of about 5.5 million people.\n🇷🇺 Правда! В Финляндии более 3 миллионов саун при населении около 5,5 миллионов человек.\n💡 Sauna is practically a national institution."
+  },
+  {
+    "id": "fact_215",
+    "claim": "The first tourist guidebook appeared more than 180 years ago.",
+    "claimRu": "Первый туристический путеводитель появился более 180 лет назад.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Karl Baedeker's travel guides became famous in the 19th century and helped shape modern tourism.\n🇷🇺 Правда! Путеводители Карла Бедекера в XIX веке заложили основы современного туризма.\n💡 Google Maps had an ancestor."
+  },
+  {
+    "id": "fact_216",
+    "claim": "The Netherlands has more bicycles than people.",
+    "claimRu": "В Нидерландах велосипедов больше, чем людей.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! The country has around 23 million bicycles and about 18 million residents.\n🇷🇺 Правда! В стране около 23 миллионов велосипедов и примерно 18 миллионов жителей.\n💡 Bikes are part of daily life."
+  },
+  {
+    "id": "fact_217",
+    "claim": "Machu Picchu was unknown to the outside world until the 20th century.",
+    "claimRu": "Мачу-Пикчу был неизвестен внешнему миру до XX века.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Although locals knew about it, the site became internationally famous after Hiram Bingham's visit in 1911.\n🇷🇺 Правда! Местные жители знали о нём давно, но мировую известность город получил после экспедиции 1911 года.\n💡 A lost city found again."
+  },
+  {
+    "id": "fact_218",
+    "claim": "The Berlin Wall stood for less than 30 years.",
+    "claimRu": "Берлинская стена просуществовала менее 30 лет.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! It stood from 1961 to 1989 — about 28 years.\n🇷🇺 Правда! Стена существовала с 1961 по 1989 год — около 28 лет.\n💡 Yet it became one of history's most famous symbols."
+  },
+  {
+    "id": "fact_219",
+    "claim": "Bhutan measures national happiness alongside economic growth.",
+    "claimRu": "Бутан измеряет национальное счастье наряду с экономическим ростом.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Bhutan is famous for its Gross National Happiness index.\n🇷🇺 Правда! Бутан известен своим индексом Валового Национального Счастья.\n💡 Not every country focuses only on GDP."
+  },
+  {
+    "id": "fact_220",
+    "claim": "The Statue of Liberty was a gift from France to the United States.",
+    "claimRu": "Статуя Свободы была подарком Франции Соединённым Штатам.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! France gifted the statue in 1886 to celebrate friendship and shared democratic values.\n🇷🇺 Правда! Франция подарила статую в 1886 году в знак дружбы и общих демократических ценностей.\n💡 One of the world's most famous gifts."
+  },
+  {
+    "id": "fact_221",
+    "claim": "The oldest known map is over 4,000 years old.",
+    "claimRu": "Самой древней известной карте более 4000 лет.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Ancient civilizations created maps long before modern geography existed.\n🇷🇺 Правда! Древние цивилизации создавали карты задолго до появления современной географии.\n💡 Humans have always wanted to explore."
+  },
+  {
+    "id": "fact_222",
+    "claim": "There are countries with no rivers at all.",
+    "claimRu": "Существуют страны, в которых вообще нет рек.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Saudi Arabia is one example of a country without permanent rivers.\n🇷🇺 Правда! Например, в Саудовской Аравии нет постоянных рек.\n💡 Geography can be surprising."
+  },
+  {
+    "id": "fact_223",
+    "claim": "The first modern Olympic Games were held in Greece.",
+    "claimRu": "Первые современные Олимпийские игры прошли в Греции.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Athens hosted the first modern Olympics in 1896.\n🇷🇺 Правда! Афины приняли первые современные Олимпийские игры в 1896 году.\n💡 A tradition reborn."
+  },
+  {
+    "id": "fact_224",
+    "claim": "Australia is wider than the Moon.",
+    "claimRu": "Австралия шире Луны.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Australia is about 4,000 km wide, while the Moon's diameter is around 3,474 km.\n🇷🇺 Правда! Ширина Австралии около 4000 км, а диаметр Луны примерно 3474 км.\n💡 Perspective changes everything."
+  },
+  {
+    "id": "fact_225",
+    "claim": "The first passport-like documents appeared hundreds of years before airplanes.",
+    "claimRu": "Первые документы, похожие на паспорта, появились за сотни лет до самолётов.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Travelers used official travel documents centuries before modern transportation existed.\n🇷🇺 Правда! Путешественники использовали официальные документы ещё задолго до появления современного транспорта.\n💡 Bureaucracy travels through time."
+  },
+  {
+    "id": "fact_226",
+    "claim": "Singapore changed from a small fishing village into a global city in about one lifetime.",
+    "claimRu": "Сингапур превратился из небольшой рыбацкой деревни в мировой мегаполис примерно за одну человеческую жизнь.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Singapore's transformation during the 20th century is one of the world's most remarkable development stories.\n🇷🇺 Правда! Превращение Сингапура в один из ведущих городов мира считается одним из самых впечатляющих примеров развития.\n💡 History can move very fast."
+  },
+  {
+    "id": "fact_227",
+    "claim": "The Silk Road was not a single road.",
+    "claimRu": "Шёлковый путь не был одной дорогой.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! It was a vast network of trade routes connecting Asia, the Middle East, and Europe.\n🇷🇺 Правда! Это была огромная сеть торговых маршрутов между Азией, Ближним Востоком и Европой.\n💡 More like an ancient internet of trade."
+  },
+  {
+    "id": "fact_228",
+    "claim": "Some Swiss trains are more punctual than many clocks.",
+    "claimRu": "Некоторые швейцарские поезда точнее многих часов.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Switzerland is famous worldwide for railway punctuality.\n🇷🇺 Правда! Швейцария известна во всём мире невероятной пунктуальностью железных дорог.\n💡 Missing a train there is usually your fault."
+  },
+  {
+    "id": "fact_229",
+    "claim": "The world's largest castle is in Poland.",
+    "claimRu": "Самый большой замок в мире находится в Польше.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Malbork Castle is the largest castle in the world by land area.\n🇷🇺 Правда! Замок Мальборк считается крупнейшим замком мира по занимаемой площади.\n💡 Medieval builders thought big."
+  },
+  {
+    "id": "fact_230",
+    "claim": "The first people to sail around the world completed the journey more than 500 years ago.",
+    "claimRu": "Первое кругосветное путешествие было завершено более 500 лет назад.",
+    "isTrue": true,
+    "explanation": "🇬🇧 True! Magellan's expedition completed the first circumnavigation of Earth in 1522.\n🇷🇺 Правда! Экспедиция Магеллана завершила первое кругосветное путешествие в 1522 году.\n💡 Imagine doing that without GPS."
+  }
 ]

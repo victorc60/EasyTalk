@@ -1,252 +1,242 @@
 [
   {
-    "question": "If you don't know the word, you can ___ it ___ in a dictionary.",
-    "options": ["look / up", "look / at", "look / for", "look / after"],
-    "correctIndex": 0,
-    "explanation": "Look up = искать информацию (в словаре, в интернете).",
-    "hint": "Искать в словаре",
-    "topic": "phrasal verbs"
-  },
-  {
-    "question": "I'm really tired. I think I'll ___ early tonight.",
-    "options": ["get up", "wake up", "go to bed", "stand up"],
+    "question": "We're visiting Paris tomorrow. I can't wait to see the ___ Tower.",
+    "options": ["Liberty", "Big Ben", "Eiffel", "Leaning"],
     "correctIndex": 2,
-    "explanation": "Go to bed = лечь спать. Get up / wake up — просыпаться.",
-    "hint": "Лечь спать",
-    "topic": "daily routines"
+    "explanation": "The Eiffel Tower is the famous landmark in Paris.",
+    "hint": "Париж",
+    "topic": "travel"
   },
   {
-    "question": "___ the TV, please. I want to watch the news.",
-    "options": ["Turn off", "Turn on", "Turn down", "Turn around"],
-    "correctIndex": 1,
-    "explanation": "Turn on = включить. Turn off = выключить. Turn down = сделать тише.",
-    "hint": "Включить",
-    "topic": "phrasal verbs"
-  },
-  {
-    "question": "My car ___ on the way to work yesterday.",
-    "options": ["broke up", "broke down", "broke in", "broke out"],
-    "correctIndex": 1,
-    "explanation": "Break down = сломаться (о технике). Break up = расстаться.",
-    "hint": "Сломалась (машина)",
-    "topic": "phrasal verbs"
-  },
-  {
-    "question": "Please ___ your shoes before you come inside.",
-    "options": ["take off", "put on", "take out", "put off"],
+    "question": "When you travel to another country, it's polite to respect local ___.",
+    "options": ["traditions", "tickets", "maps", "hotels"],
     "correctIndex": 0,
-    "explanation": "Take off = снимать (одежду, обувь). Put on = надевать.",
-    "hint": "Снять обувь",
-    "topic": "phrasal verbs"
+    "explanation": "Traditions are customs and cultural practices.",
+    "hint": "Обычаи и культура",
+    "topic": "culture"
   },
   {
-    "question": "What time do you usually ___ in the morning?",
-    "options": ["go to bed", "fall asleep", "wake up", "lie down"],
+    "question": "Marco Polo is famous for his long ___ to Asia.",
+    "options": ["journey", "lesson", "meeting", "office"],
+    "correctIndex": 0,
+    "explanation": "A journey is a long trip from one place to another.",
+    "hint": "Долгое путешествие",
+    "topic": "history"
+  },
+  {
+    "question": "Before boarding a plane, you need to show your ___.",
+    "options": ["passport", "wallet", "umbrella", "camera"],
+    "correctIndex": 0,
+    "explanation": "A passport is required for international travel.",
+    "hint": "Документ путешественника",
+    "topic": "travel"
+  },
+  {
+    "question": "The Great Wall is one of the most famous landmarks in ___.",
+    "options": ["Japan", "China", "India", "Canada"],
+    "correctIndex": 1,
+    "explanation": "The Great Wall is located in China.",
+    "hint": "Великая стена",
+    "topic": "world landmarks"
+  },
+  {
+    "question": "If you want to know where to go in a new city, you can look at a ___.",
+    "options": ["recipe", "map", "ticket", "menu"],
+    "correctIndex": 1,
+    "explanation": "A map helps you find locations and directions.",
+    "hint": "Ориентирование",
+    "topic": "travel"
+  },
+  {
+    "question": "The pyramids were built in ancient ___.",
+    "options": ["Egypt", "Spain", "Brazil", "Norway"],
+    "correctIndex": 0,
+    "explanation": "The pyramids are one of the symbols of Ancient Egypt.",
+    "hint": "Фараоны",
+    "topic": "history"
+  },
+  {
+    "question": "When visiting a museum, you can learn about the country's ___.",
+    "options": ["history", "weather", "traffic", "salary"],
+    "correctIndex": 0,
+    "explanation": "Museums often teach visitors about history and culture.",
+    "hint": "Прошлое страны",
+    "topic": "culture"
+  },
+  {
+    "question": "A person who travels for pleasure is called a ___.",
+    "options": ["manager", "tourist", "scientist", "pilot"],
+    "correctIndex": 1,
+    "explanation": "A tourist travels to visit places and experience new cultures.",
+    "hint": "Путешественник",
+    "topic": "travel"
+  },
+  {
+    "question": "The first modern Olympic Games were held in ___.",
+    "options": ["Italy", "France", "Greece", "Germany"],
     "correctIndex": 2,
-    "explanation": "Wake up = просыпаться. Go to bed = ложиться спать.",
-    "hint": "Просыпаться",
-    "topic": "daily routines"
+    "explanation": "The first modern Olympics took place in Athens, Greece, in 1896.",
+    "hint": "Афины",
+    "topic": "history"
   },
   {
-    "question": "She ___ her grandmother — they have the same eyes.",
-    "options": ["looks after", "looks for", "takes after", "looks like"],
+    "question": "If a place is very famous, it becomes a popular tourist ___.",
+    "options": ["attraction", "passport", "luggage", "currency"],
+    "correctIndex": 0,
+    "explanation": "A tourist attraction is a place people visit for interest or enjoyment.",
+    "hint": "Достопримечательность",
+    "topic": "travel"
+  },
+  {
+    "question": "The Statue of Liberty was a gift from France to the ___.",
+    "options": ["USA", "Canada", "Mexico", "Australia"],
+    "correctIndex": 0,
+    "explanation": "France gifted the Statue of Liberty to the United States in 1886.",
+    "hint": "Нью-Йорк",
+    "topic": "history"
+  },
+  {
+    "question": "When you visit another country, you often exchange your money for local ___.",
+    "options": ["language", "currency", "history", "culture"],
+    "correctIndex": 1,
+    "explanation": "Currency is the official money used in a country.",
+    "hint": "Деньги страны",
+    "topic": "travel"
+  },
+  {
+    "question": "The Silk Road connected Europe and ___.",
+    "options": ["Africa", "Asia", "Australia", "Antarctica"],
+    "correctIndex": 1,
+    "explanation": "The Silk Road was a network of trade routes linking Europe and Asia.",
+    "hint": "Шёлковый путь",
+    "topic": "history"
+  },
+  {
+    "question": "If you travel abroad, you can experience different ___.",
+    "options": ["cultures", "elevators", "receipts", "projects"],
+    "correctIndex": 0,
+    "explanation": "Traveling helps people discover new cultures and traditions.",
+    "hint": "Традиции народов",
+    "topic": "culture"
+  },
+  {
+    "question": "A building where historical objects are displayed is called a ___.",
+    "options": ["museum", "station", "airport", "factory"],
+    "correctIndex": 0,
+    "explanation": "Museums preserve and display historical and cultural items.",
+    "hint": "Экспонаты",
+    "topic": "culture"
+  },
+  {
+    "question": "Christopher Columbus is famous for his ___ across the Atlantic Ocean.",
+    "options": ["meeting", "journey", "lesson", "speech"],
+    "correctIndex": 1,
+    "explanation": "Columbus is known for his voyages across the Atlantic.",
+    "hint": "Плавание через океан",
+    "topic": "history"
+  },
+  {
+    "question": "Before a flight, you usually check in at the ___.",
+    "options": ["airport", "museum", "castle", "market"],
+    "correctIndex": 0,
+    "explanation": "Passengers check in at the airport before flying.",
+    "hint": "Самолёты",
+    "topic": "travel"
+  },
+  {
+    "question": "People often buy local ___ as reminders of their trip.",
+    "options": ["souvenirs", "bridges", "tickets", "passports"],
+    "correctIndex": 0,
+    "explanation": "Souvenirs help people remember places they visited.",
+    "hint": "Память о поездке",
+    "topic": "travel"
+  },
+  {
+    "question": "Ancient castles were often built for ___.",
+    "options": ["defense", "shopping", "swimming", "parking"],
+    "correctIndex": 0,
+    "explanation": "Castles were designed to protect people from attacks.",
+    "hint": "Защита",
+    "topic": "history"
+  },
+  {
+    "question": "Learning about different countries can broaden your ___.",
+    "options": ["horizons", "luggage", "passport", "schedule"],
+    "correctIndex": 0,
+    "explanation": "Broaden your horizons means expand your knowledge and understanding.",
+    "hint": "Кругозор",
+    "topic": "culture"
+  },
+  {
+    "question": "The capital city of Italy is ___.",
+    "options": ["Milan", "Venice", "Rome", "Naples"],
     "correctIndex": 2,
-    "explanation": "Take after = быть похожим на родственника. Look like = быть похожим внешне.",
-    "hint": "Похожа на (о характере или внешности)",
-    "topic": "phrasal verbs"
+    "explanation": "Rome is the capital of Italy and was once the center of the Roman Empire.",
+    "hint": "Колизей",
+    "topic": "world knowledge"
   },
   {
-    "question": "I can't hear the music. Can you ___ it ___ a little?",
-    "options": ["turn / up", "turn / down", "turn / on", "turn / off"],
+    "question": "A guide can help tourists learn about local ___.",
+    "options": ["history", "passwords", "invoices", "salaries"],
     "correctIndex": 0,
-    "explanation": "Turn up = сделать громче. Turn down = сделать тише.",
-    "hint": "Сделать громче",
-    "topic": "phrasal verbs"
+    "explanation": "Tour guides often explain history and culture.",
+    "hint": "Прошлое места",
+    "topic": "travel"
   },
   {
-    "question": "The meeting was ___ until next Monday.",
-    "options": ["put off", "put on", "put away", "put out"],
+    "question": "The Vikings originally came from ___.",
+    "options": ["Scandinavia", "Africa", "China", "India"],
     "correctIndex": 0,
-    "explanation": "Put off = отложить. Put on = надеть. Put away = убрать.",
-    "hint": "Отложили",
-    "topic": "phrasal verbs"
+    "explanation": "The Vikings came from modern-day Norway, Sweden, and Denmark.",
+    "hint": "Север Европы",
+    "topic": "history"
   },
   {
-    "question": "Which sentence is correct?",
-    "options": [
-      "She didn't went to the party.",
-      "She didn't go to the party.",
-      "She doesn't went to the party.",
-      "She didn't goes to the party."
-    ],
-    "correctIndex": 1,
-    "explanation": "В Past Simple после 'did not' (didn't) используйте базовую форму глагола (go, не went).",
-    "hint": "didn't + глагол без окончаний",
-    "topic": "grammar"
-  },
-  {
-    "question": "___ you ever ___ to London?",
-    "options": ["Did / been", "Have / been", "Did / go", "Have / went"],
-    "correctIndex": 1,
-    "explanation": "Present Perfect: Have you ever been to...? Опыт в жизни.",
-    "hint": "Был ли ты когда-нибудь?",
-    "topic": "grammar"
-  },
-  {
-    "question": "This is the film ___ I told you about.",
-    "options": ["who", "which", "where", "what"],
-    "correctIndex": 1,
-    "explanation": "'Which' для вещей. 'Who' для людей.",
-    "hint": "Относительное местоимение для предмета",
-    "topic": "grammar"
-  },
-  {
-    "question": "If it ___ tomorrow, we ___ at home.",
-    "options": ["rains / stay", "rains / will stay", "will rain / stay", "rain / will stay"],
-    "correctIndex": 1,
-    "explanation": "First conditional: if + present simple, will + infinitive.",
-    "hint": "Если пойдёт дождь (реальное условие)",
-    "topic": "grammar"
-  },
-  {
-    "question": "She ___ be at home. Her light is on.",
-    "options": ["can", "must", "should", "would"],
-    "correctIndex": 1,
-    "explanation": "'Must' для логического предположения (уверен на 90%).",
-    "hint": "Должно быть, она дома",
-    "topic": "grammar"
-  },
-  {
-    "question": "This is the restaurant ___ we had our first date.",
-    "options": ["which", "who", "where", "when"],
-    "correctIndex": 2,
-    "explanation": "'Where' для места. 'Which' для предмета.",
-    "hint": "Место",
-    "topic": "grammar"
-  },
-  {
-    "question": "I'm not hungry. I've ___ eaten.",
-    "options": ["just", "yet", "still", "ever"],
+    "question": "If you don't know the language, a translation app can be very ___.",
+    "options": ["useful", "ancient", "crowded", "expensive"],
     "correctIndex": 0,
-    "explanation": "Just = только что (Present Perfect). Yet — в вопросах и отрицаниях.",
-    "hint": "Только что",
-    "topic": "grammar"
+    "explanation": "Useful means helpful or practical.",
+    "hint": "Полезный",
+    "topic": "travel"
   },
   {
-    "question": "What does 'give up' mean?",
-    "options": ["to stop trying", "to give something away", "to return something", "to start something"],
-    "correctIndex": 0,
-    "explanation": "Give up = сдаться, перестать пытаться.",
-    "hint": "Сдаться",
-    "topic": "phrasal verbs"
-  },
-  {
-    "question": "He ___ his father. They're both very funny.",
-    "options": ["looks like", "takes after", "looks after", "takes care of"],
+    "question": "The Colosseum is a famous landmark in ___.",
+    "options": ["Athens", "Rome", "London", "Berlin"],
     "correctIndex": 1,
-    "explanation": "Take after = быть похожим по характеру. Look like = внешне.",
-    "hint": "Похож характером",
-    "topic": "phrasal verbs"
+    "explanation": "The Colosseum is one of Rome's most famous ancient monuments.",
+    "hint": "Гладиаторы",
+    "topic": "history"
   },
   {
-    "question": "I can't ___ this noise anymore. I'm leaving.",
-    "options": ["put up with", "get on with", "come up with", "face up to"],
+    "question": "When you arrive in a new country, you may need to go through ___.",
+    "options": ["customs", "weather", "history", "traffic"],
     "correctIndex": 0,
-    "explanation": "Put up with = терпеть, мириться с чем-то неприятным.",
-    "hint": "Терпеть (с трудом)",
-    "topic": "phrasal verbs"
+    "explanation": "Customs is the checkpoint for entering a country.",
+    "hint": "Пограничный контроль",
+    "topic": "travel"
   },
   {
-    "question": "___ a moment. I'm not ready yet.",
-    "options": ["Hold on", "Hold up", "Hold back", "Hold out"],
+    "question": "A country's food, traditions, and festivals are part of its ___.",
+    "options": ["culture", "currency", "airport", "geography"],
     "correctIndex": 0,
-    "explanation": "Hold on = подождать (недолго). Также 'держись'.",
-    "hint": "Подожди (секунду)",
-    "topic": "phrasal verbs"
+    "explanation": "Culture includes customs, food, traditions, and ways of life.",
+    "hint": "Традиции народа",
+    "topic": "culture"
   },
   {
-    "question": "How much does it cost ___ a taxi to the airport?",
-    "options": ["by", "with", "to take", "for take"],
-    "correctIndex": 2,
-    "explanation": "Cost + to take (инфинитив): how much does it cost to take a taxi?",
-    "hint": "Сколько стоит взять такси",
-    "topic": "grammar"
-  },
-  {
-    "question": "I'm looking ___ my keys. Have you seen them?",
-    "options": ["for", "at", "after", "forward to"],
+    "question": "Many explorers used stars to ___ before modern GPS existed.",
+    "options": ["navigate", "decorate", "translate", "repair"],
     "correctIndex": 0,
-    "explanation": "Look for = искать. Look after = заботиться. Look forward to = ждать с нетерпением.",
-    "hint": "Искать",
-    "topic": "phrasal verbs"
+    "explanation": "Navigate means find the correct route or direction.",
+    "hint": "Ориентироваться",
+    "topic": "history"
   },
   {
-    "question": "She ___ a lot of money on clothes every month.",
-    "options": ["costs", "spends", "takes", "pays"],
-    "correctIndex": 1,
-    "explanation": "Spend money on = тратить деньги на. Cost — стоит (без человека).",
-    "hint": "Тратит деньги",
-    "topic": "vocabulary"
-  },
-  {
-    "question": "I'm not very good ___ sports.",
-    "options": ["in", "on", "at", "for"],
-    "correctIndex": 2,
-    "explanation": "Good at = умелый в чем-то. Good for = полезно для.",
-    "hint": "Хорош в (чем-то)",
-    "topic": "prepositions"
-  },
-  {
-    "question": "We need to ___ a solution to this problem.",
-    "options": ["come up with", "get along with", "put up with", "face up to"],
+    "question": "Traveling is a great way to learn about the ___ around you.",
+    "options": ["world", "invoice", "keyboard", "deadline"],
     "correctIndex": 0,
-    "explanation": "Come up with = придумать (идею, решение).",
-    "hint": "Придумать",
-    "topic": "phrasal verbs"
-  },
-  {
-    "question": "Which sentence is in Present Perfect?",
-    "options": [
-      "I saw him yesterday.",
-      "I have seen him yesterday.",
-      "I have seen him already.",
-      "I see him now."
-    ],
-    "correctIndex": 2,
-    "explanation": "Present Perfect: have/has + past participle. 'Already' — типичный маркер.",
-    "hint": "have + третья форма",
-    "topic": "grammar"
-  },
-  {
-    "question": "He drives ___ fast. It's dangerous.",
-    "options": ["too", "very", "so", "enough"],
-    "correctIndex": 0,
-    "explanation": "Too = слишком (превышает норму, негатив). Very = очень (нейтрально).",
-    "hint": "Слишком (плохо)",
-    "topic": "grammar"
-  },
-  {
-    "question": "I ___ to the cinema last night.",
-    "options": ["go", "went", "have gone", "was go"],
-    "correctIndex": 1,
-    "explanation": "Last night = Past Simple. Went — правильная форма.",
-    "hint": "Вчера вечером",
-    "topic": "grammar"
-  },
-  {
-    "question": "There aren't ___ eggs left. Can you buy some?",
-    "options": ["some", "any", "no", "much"],
-    "correctIndex": 1,
-    "explanation": "Any — в отрицаниях и вопросах с неисчисляемыми и множественными.",
-    "hint": "Нет (в отрицании)",
-    "topic": "grammar"
-  },
-  {
-    "question": "What does 'get along with' mean?",
-    "options": ["to fight with", "to have a good relationship with", "to move with", "to understand"],
-    "correctIndex": 1,
-    "explanation": "Get along with = ладить, иметь хорошие отношения.",
-    "hint": "Ладить с кем-то",
-    "topic": "phrasal verbs"
+    "explanation": "Travel helps people discover the world and different cultures.",
+    "hint": "Мир вокруг нас",
+    "topic": "travel"
   }
 ]

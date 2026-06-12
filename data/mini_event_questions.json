@@ -1,84 +1,84 @@
 [
   {
     "block": "🟢 МИНИ-ИГРА",
-    "note": "Вопросы 41–50 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
-    "id": "mini_a2_41",
+    "note": "Вопросы 51–60 | Уровень A2 | 1 очко каждый | Артикли, предлоги, Present Simple, глаголы, лексика",
+    "id": "mini_a2_51",
     "type": "preposition",
-    "question": "You talk about your birthday: 'My birthday is ___ September.' Which preposition is correct?",
-    "options": ["on", "at", "in", "by"],
-    "correctIndex": 2,
-    "explanation": "Use in with months, years, and longer periods: in September, in 2026, in summer."
+    "question": "You talk about time: 'The movie starts ___ 7:30.' Which preposition is correct?",
+    "options": ["on", "at", "in", "for"],
+    "correctIndex": 1,
+    "explanation": "Use at for exact times: at 7:30, at noon, at midnight."
   },
   {
-    "id": "mini_a2_42",
-    "type": "article",
-    "question": "You enter a room and say: 'Could you open ___ window, please?' Which article fits?",
-    "options": ["a", "an", "the", "—"],
+    "id": "mini_a2_52",
+    "type": "vocabulary",
+    "question": "You are at a restaurant and want to pay. You say: 'Can I have the ___, please?'",
+    "options": ["menu", "receipt", "bill", "order"],
     "correctIndex": 2,
-    "explanation": "Use the when talking about a specific thing both people can identify, like the window in the room."
+    "explanation": "'The bill, please' is the standard phrase when you want to pay in a restaurant."
   },
   {
-    "id": "mini_a2_43",
+    "id": "mini_a2_53",
     "type": "fill_gap",
-    "question": "You describe your routine: 'I usually ___ breakfast before work.' Which verb fits?",
-    "options": ["have", "has", "having", "am have"],
-    "correctIndex": 0,
-    "explanation": "With I/we/you/they in Present Simple, use the base form: have, eat, go."
+    "question": "You describe your friend: 'She ___ to the gym three times a week.' Which form is correct?",
+    "options": ["go", "goes", "going", "is go"],
+    "correctIndex": 1,
+    "explanation": "For he/she/it in Present Simple, add -es to some verbs: goes, does, watches."
   },
   {
-    "id": "mini_a2_44",
+    "id": "mini_a2_54",
     "type": "question_form",
-    "question": "You ask a friend: '___ she live near the city center?' Choose the correct form.",
-    "options": ["Do", "Does", "Is", "Are"],
+    "question": "You ask a colleague: '___ you usually work on Saturdays?' Choose the correct form.",
+    "options": ["Does", "Do", "Are", "Is"],
     "correctIndex": 1,
-    "explanation": "Use Does with he, she, and it in Present Simple questions."
+    "explanation": "Use Do with you, we, they, and plural subjects."
   },
   {
-    "id": "mini_a2_45",
-    "type": "vocabulary",
-    "question": "You are very hungry and order food. You say: 'I'd like something to ___.' Which word fits?",
-    "options": ["drink", "eat", "cook", "taste"],
-    "correctIndex": 1,
-    "explanation": "We say 'something to eat' when we want food."
-  },
-  {
-    "id": "mini_a2_46",
-    "type": "preposition",
-    "question": "You tell a tourist: 'The bank is ___ the left.' Which preposition is correct?",
-    "options": ["at", "in", "on", "to"],
-    "correctIndex": 2,
-    "explanation": "Use on the left / on the right when giving directions."
-  },
-  {
-    "id": "mini_a2_47",
-    "type": "fill_gap",
-    "question": "You make a plan: 'Let's ___ a taxi because it's raining.' Which verb fits?",
-    "options": ["take", "takes", "taking", "to take"],
-    "correctIndex": 0,
-    "explanation": "After let's, use the base form of the verb: let's go, let's take, let's meet."
-  },
-  {
-    "id": "mini_a2_48",
+    "id": "mini_a2_55",
     "type": "article",
-    "question": "You are shopping: 'I need ___ new jacket for winter.' Which article fits?",
+    "question": "You are at the airport: 'I need ___ passport before check-in.' Which article fits?",
     "options": ["a", "an", "the", "—"],
-    "correctIndex": 0,
-    "explanation": "Use a before singular countable nouns when mentioning them for the first time."
-  },
-  {
-    "id": "mini_a2_49",
-    "type": "vocabulary",
-    "question": "Your phone battery is at 2%. You say: 'My phone is almost ___.'' Which word fits?",
-    "options": ["empty", "finished", "dead", "closed"],
     "correctIndex": 2,
-    "explanation": "'My phone is dead' is the common everyday expression for a phone with no battery."
+    "explanation": "Use the when talking about a specific passport that belongs to you."
   },
   {
-    "id": "mini_a2_50",
-    "type": "fill_gap",
-    "question": "You talk about your colleague: 'He ___ emails every morning before work.' Which form is correct?",
-    "options": ["send", "sends", "sending", "is send"],
+    "id": "mini_a2_56",
+    "type": "vocabulary",
+    "question": "Your friend tells a funny joke. You say: 'That's really ___.''",
+    "options": ["hungry", "funny", "expensive", "busy"],
     "correctIndex": 1,
-    "explanation": "For he/she/it in Present Simple, add -s: sends, works, reads, likes."
+    "explanation": "'Funny' means something makes you laugh."
+  },
+  {
+    "id": "mini_a2_57",
+    "type": "preposition",
+    "question": "You talk about your home: 'I live ___ a small apartment.' Which preposition is correct?",
+    "options": ["at", "on", "in", "to"],
+    "correctIndex": 2,
+    "explanation": "Use in for places where someone lives: in a house, in an apartment, in a city."
+  },
+  {
+    "id": "mini_a2_58",
+    "type": "fill_gap",
+    "question": "You are thirsty and say: 'I need ___ some water.' Which form is correct?",
+    "options": ["drink", "to drink", "drinking", "drinks"],
+    "correctIndex": 1,
+    "explanation": "After need, we often use the infinitive: need to drink, need to go, need to buy."
+  },
+  {
+    "id": "mini_a2_59",
+    "type": "vocabulary",
+    "question": "You miss your bus. You say: 'Oh no, I'm ___.''",
+    "options": ["early", "ready", "late", "open"],
+    "correctIndex": 2,
+    "explanation": "If you miss your bus or arrive after the expected time, you are late."
+  },
+  {
+    "id": "mini_a2_60",
+    "type": "fill_gap",
+    "question": "You talk about your family: 'My parents ___ abroad.' Which form is correct?",
+    "options": ["lives", "live", "living", "is live"],
+    "correctIndex": 1,
+    "explanation": "With plural subjects like parents, they, and we, use the base verb: live, work, travel."
   }
 ]
