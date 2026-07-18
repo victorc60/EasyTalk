@@ -1,5 +1,124 @@
 [
   {
+    "word": "beach",
+    "translation": "пляж",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "coast",
+    "translation": "побережье",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "wave",
+    "translation": "волна",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "shell",
+    "translation": "ракушка",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "towel",
+    "translation": "полотенце",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "sandy",
+    "translation": "песчаный",
+    "level": "A2",
+    "partOfSpeech": "adjective",
+    "topic": "vacation"
+  },
+  {
+    "word": "sunscreen",
+    "translation": "солнцезащитный крем",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "resort",
+    "translation": "курорт",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "luggage",
+    "translation": "багаж",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "suitcase",
+    "translation": "чемодан",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "passport",
+    "translation": "паспорт",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "book",
+    "translation": "бронировать",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "vacation"
+  },
+  {
+    "word": "relax",
+    "translation": "расслабляться",
+    "level": "A2",
+    "partOfSpeech": "verb",
+    "topic": "vacation"
+  },
+  {
+    "word": "sunbathe",
+    "translation": "загорать",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "vacation"
+  },
+  {
+    "word": "snorkel",
+    "translation": "нырять с маской",
+    "level": "B1",
+    "partOfSpeech": "verb",
+    "topic": "vacation"
+  },
+  {
+    "word": "harbor",
+    "translation": "гавань",
+    "level": "B1",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
+    "word": "souvenir",
+    "translation": "сувенир",
+    "level": "A2",
+    "partOfSpeech": "noun",
+    "topic": "vacation"
+  },
+  {
     "word": "landmark",
     "translation": "достопримечательность",
     "level": "A2",

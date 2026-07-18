@@ -1,7 +1,180 @@
 [
   {
+    "question": "Which place is made for tourists to relax on holiday?",
+    "options": [
+      "Harbor",
+      "Resort",
+      "Tunnel",
+      "Border"
+    ],
+    "correctIndex": 1,
+    "explanation": "A resort is a place where people stay for rest and vacation activities.",
+    "topic": "vacation"
+  },
+  {
+    "question": "What do you usually need to travel to another country?",
+    "options": [
+      "Pillow",
+      "Passport",
+      "Lantern",
+      "Blanket"
+    ],
+    "correctIndex": 1,
+    "explanation": "A passport is the main travel document for international trips.",
+    "topic": "vacation"
+  },
+  {
+    "question": "What do people put on their skin before strong sun?",
+    "options": [
+      "Sunscreen",
+      "Soap",
+      "Sugar",
+      "Ink"
+    ],
+    "correctIndex": 0,
+    "explanation": "Sunscreen protects the skin from strong sunlight.",
+    "topic": "vacation"
+  },
+  {
+    "question": "Which adjective describes a beach full of sand?",
+    "options": [
+      "Windy",
+      "Noisy",
+      "Sandy",
+      "Late"
+    ],
+    "correctIndex": 2,
+    "explanation": "A sandy beach has a lot of sand.",
+    "topic": "vacation"
+  },
+  {
+    "question": "What do people usually carry their clothes in on a trip?",
+    "options": [
+      "Drawer",
+      "Suitcase",
+      "Pocket",
+      "Shelf"
+    ],
+    "correctIndex": 1,
+    "explanation": "A suitcase is used to pack clothes and other travel items.",
+    "topic": "vacation"
+  },
+  {
+    "question": "What does 'check in' mean before a flight?",
+    "options": [
+      "Find the beach",
+      "Register for the flight",
+      "Buy a souvenir",
+      "Close the airport"
+    ],
+    "correctIndex": 1,
+    "explanation": "To check in means to register before boarding the plane.",
+    "topic": "vacation"
+  },
+  {
+    "question": "Which activity means swimming with a mask under water?",
+    "options": [
+      "Skating",
+      "Snorkeling",
+      "Painting",
+      "Climbing"
+    ],
+    "correctIndex": 1,
+    "explanation": "Snorkeling is swimming near the surface with a mask and tube.",
+    "topic": "vacation"
+  },
+  {
+    "question": "If you want to 'get away', what do you want to do?",
+    "options": [
+      "Leave your usual place and relax",
+      "Miss the bus",
+      "Wash your clothes",
+      "Stay at work longer"
+    ],
+    "correctIndex": 0,
+    "explanation": "To get away means to leave everyday routine for rest or travel.",
+    "topic": "vacation"
+  },
+  {
+    "question": "What is a souvenir?",
+    "options": [
+      "A travel bag",
+      "A hotel worker",
+      "Something you buy to remember a place",
+      "A type of sunscreen"
+    ],
+    "correctIndex": 2,
+    "explanation": "A souvenir helps you remember a trip or special place.",
+    "topic": "vacation"
+  },
+  {
+    "question": "What does 'hit the road' mean?",
+    "options": [
+      "Lose the map",
+      "Start a journey",
+      "Sleep in the car",
+      "Forget your ticket"
+    ],
+    "correctIndex": 1,
+    "explanation": "To hit the road means to begin a trip or leave for a destination.",
+    "topic": "vacation"
+  },
+  {
+    "question": "Which place is usually right next to the sea?",
+    "options": [
+      "Factory",
+      "Museum",
+      "Beach",
+      "Garage"
+    ],
+    "correctIndex": 2,
+    "explanation": "A beach is the area of sand or stones beside the sea.",
+    "topic": "vacation"
+  },
+  {
+    "question": "If a hotel is fully booked, what does it mean?",
+    "options": [
+      "The hotel is very cheap",
+      "There are no rooms left",
+      "The beach is private",
+      "Breakfast starts early"
+    ],
+    "correctIndex": 1,
+    "explanation": "When a hotel is fully booked, all rooms are already reserved.",
+    "topic": "vacation"
+  },
+  {
+    "question": "Which word means the land next to the sea?",
+    "options": [
+      "Coast",
+      "Forest",
+      "Bridge",
+      "Valley"
+    ],
+    "correctIndex": 0,
+    "explanation": "The coast is the land beside the sea or ocean.",
+    "topic": "vacation"
+  },
+  {
+    "question": "What does 'wind down' mean in the evening on holiday?",
+    "options": [
+      "To relax slowly after a busy day",
+      "To pack very quickly",
+      "To drive to the airport",
+      "To swim far from shore"
+    ],
+    "correctIndex": 0,
+    "explanation": "To wind down means to slowly relax after activity or excitement.",
+    "topic": "vacation"
+  },
+  {
     "question": "We're visiting Paris tomorrow. I can't wait to see the ___ Tower.",
-    "options": ["Liberty", "Big Ben", "Eiffel", "Leaning"],
+    "options": [
+      "Liberty",
+      "Big Ben",
+      "Eiffel",
+      "Leaning"
+    ],
     "correctIndex": 2,
     "explanation": "The Eiffel Tower is the famous landmark in Paris.",
     "hint": "Париж",
@@ -9,7 +182,12 @@
   },
   {
     "question": "When you travel to another country, it's polite to respect local ___.",
-    "options": ["traditions", "tickets", "maps", "hotels"],
+    "options": [
+      "traditions",
+      "tickets",
+      "maps",
+      "hotels"
+    ],
     "correctIndex": 0,
     "explanation": "Traditions are customs and cultural practices.",
     "hint": "Обычаи и культура",
@@ -17,7 +195,12 @@
   },
   {
     "question": "Marco Polo is famous for his long ___ to Asia.",
-    "options": ["journey", "lesson", "meeting", "office"],
+    "options": [
+      "journey",
+      "lesson",
+      "meeting",
+      "office"
+    ],
     "correctIndex": 0,
     "explanation": "A journey is a long trip from one place to another.",
     "hint": "Долгое путешествие",
@@ -25,7 +208,12 @@
   },
   {
     "question": "Before boarding a plane, you need to show your ___.",
-    "options": ["passport", "wallet", "umbrella", "camera"],
+    "options": [
+      "passport",
+      "wallet",
+      "umbrella",
+      "camera"
+    ],
     "correctIndex": 0,
     "explanation": "A passport is required for international travel.",
     "hint": "Документ путешественника",
@@ -33,7 +221,12 @@
   },
   {
     "question": "The Great Wall is one of the most famous landmarks in ___.",
-    "options": ["Japan", "China", "India", "Canada"],
+    "options": [
+      "Japan",
+      "China",
+      "India",
+      "Canada"
+    ],
     "correctIndex": 1,
     "explanation": "The Great Wall is located in China.",
     "hint": "Великая стена",
@@ -41,7 +234,12 @@
   },
   {
     "question": "If you want to know where to go in a new city, you can look at a ___.",
-    "options": ["recipe", "map", "ticket", "menu"],
+    "options": [
+      "recipe",
+      "map",
+      "ticket",
+      "menu"
+    ],
     "correctIndex": 1,
     "explanation": "A map helps you find locations and directions.",
     "hint": "Ориентирование",
@@ -49,7 +247,12 @@
   },
   {
     "question": "The pyramids were built in ancient ___.",
-    "options": ["Egypt", "Spain", "Brazil", "Norway"],
+    "options": [
+      "Egypt",
+      "Spain",
+      "Brazil",
+      "Norway"
+    ],
     "correctIndex": 0,
     "explanation": "The pyramids are one of the symbols of Ancient Egypt.",
     "hint": "Фараоны",
@@ -57,7 +260,12 @@
   },
   {
     "question": "When visiting a museum, you can learn about the country's ___.",
-    "options": ["history", "weather", "traffic", "salary"],
+    "options": [
+      "history",
+      "weather",
+      "traffic",
+      "salary"
+    ],
     "correctIndex": 0,
     "explanation": "Museums often teach visitors about history and culture.",
     "hint": "Прошлое страны",
@@ -65,7 +273,12 @@
   },
   {
     "question": "A person who travels for pleasure is called a ___.",
-    "options": ["manager", "tourist", "scientist", "pilot"],
+    "options": [
+      "manager",
+      "tourist",
+      "scientist",
+      "pilot"
+    ],
     "correctIndex": 1,
     "explanation": "A tourist travels to visit places and experience new cultures.",
     "hint": "Путешественник",
@@ -73,7 +286,12 @@
   },
   {
     "question": "The first modern Olympic Games were held in ___.",
-    "options": ["Italy", "France", "Greece", "Germany"],
+    "options": [
+      "Italy",
+      "France",
+      "Greece",
+      "Germany"
+    ],
     "correctIndex": 2,
     "explanation": "The first modern Olympics took place in Athens, Greece, in 1896.",
     "hint": "Афины",
@@ -81,7 +299,12 @@
   },
   {
     "question": "If a place is very famous, it becomes a popular tourist ___.",
-    "options": ["attraction", "passport", "luggage", "currency"],
+    "options": [
+      "attraction",
+      "passport",
+      "luggage",
+      "currency"
+    ],
     "correctIndex": 0,
     "explanation": "A tourist attraction is a place people visit for interest or enjoyment.",
     "hint": "Достопримечательность",
@@ -89,7 +312,12 @@
   },
   {
     "question": "The Statue of Liberty was a gift from France to the ___.",
-    "options": ["USA", "Canada", "Mexico", "Australia"],
+    "options": [
+      "USA",
+      "Canada",
+      "Mexico",
+      "Australia"
+    ],
     "correctIndex": 0,
     "explanation": "France gifted the Statue of Liberty to the United States in 1886.",
     "hint": "Нью-Йорк",
@@ -97,7 +325,12 @@
   },
   {
     "question": "When you visit another country, you often exchange your money for local ___.",
-    "options": ["language", "currency", "history", "culture"],
+    "options": [
+      "language",
+      "currency",
+      "history",
+      "culture"
+    ],
     "correctIndex": 1,
     "explanation": "Currency is the official money used in a country.",
     "hint": "Деньги страны",
@@ -105,7 +338,12 @@
   },
   {
     "question": "The Silk Road connected Europe and ___.",
-    "options": ["Africa", "Asia", "Australia", "Antarctica"],
+    "options": [
+      "Africa",
+      "Asia",
+      "Australia",
+      "Antarctica"
+    ],
     "correctIndex": 1,
     "explanation": "The Silk Road was a network of trade routes linking Europe and Asia.",
     "hint": "Шёлковый путь",
@@ -113,7 +351,12 @@
   },
   {
     "question": "If you travel abroad, you can experience different ___.",
-    "options": ["cultures", "elevators", "receipts", "projects"],
+    "options": [
+      "cultures",
+      "elevators",
+      "receipts",
+      "projects"
+    ],
     "correctIndex": 0,
     "explanation": "Traveling helps people discover new cultures and traditions.",
     "hint": "Традиции народов",
@@ -121,7 +364,12 @@
   },
   {
     "question": "A building where historical objects are displayed is called a ___.",
-    "options": ["museum", "station", "airport", "factory"],
+    "options": [
+      "museum",
+      "station",
+      "airport",
+      "factory"
+    ],
     "correctIndex": 0,
     "explanation": "Museums preserve and display historical and cultural items.",
     "hint": "Экспонаты",
@@ -129,7 +377,12 @@
   },
   {
     "question": "Christopher Columbus is famous for his ___ across the Atlantic Ocean.",
-    "options": ["meeting", "journey", "lesson", "speech"],
+    "options": [
+      "meeting",
+      "journey",
+      "lesson",
+      "speech"
+    ],
     "correctIndex": 1,
     "explanation": "Columbus is known for his voyages across the Atlantic.",
     "hint": "Плавание через океан",
@@ -137,7 +390,12 @@
   },
   {
     "question": "Before a flight, you usually check in at the ___.",
-    "options": ["airport", "museum", "castle", "market"],
+    "options": [
+      "airport",
+      "museum",
+      "castle",
+      "market"
+    ],
     "correctIndex": 0,
     "explanation": "Passengers check in at the airport before flying.",
     "hint": "Самолёты",
@@ -145,7 +403,12 @@
   },
   {
     "question": "People often buy local ___ as reminders of their trip.",
-    "options": ["souvenirs", "bridges", "tickets", "passports"],
+    "options": [
+      "souvenirs",
+      "bridges",
+      "tickets",
+      "passports"
+    ],
     "correctIndex": 0,
     "explanation": "Souvenirs help people remember places they visited.",
     "hint": "Память о поездке",
@@ -153,7 +416,12 @@
   },
   {
     "question": "Ancient castles were often built for ___.",
-    "options": ["defense", "shopping", "swimming", "parking"],
+    "options": [
+      "defense",
+      "shopping",
+      "swimming",
+      "parking"
+    ],
     "correctIndex": 0,
     "explanation": "Castles were designed to protect people from attacks.",
     "hint": "Защита",
@@ -161,7 +429,12 @@
   },
   {
     "question": "Learning about different countries can broaden your ___.",
-    "options": ["horizons", "luggage", "passport", "schedule"],
+    "options": [
+      "horizons",
+      "luggage",
+      "passport",
+      "schedule"
+    ],
     "correctIndex": 0,
     "explanation": "Broaden your horizons means expand your knowledge and understanding.",
     "hint": "Кругозор",
@@ -169,7 +442,12 @@
   },
   {
     "question": "The capital city of Italy is ___.",
-    "options": ["Milan", "Venice", "Rome", "Naples"],
+    "options": [
+      "Milan",
+      "Venice",
+      "Rome",
+      "Naples"
+    ],
     "correctIndex": 2,
     "explanation": "Rome is the capital of Italy and was once the center of the Roman Empire.",
     "hint": "Колизей",
@@ -177,7 +455,12 @@
   },
   {
     "question": "A guide can help tourists learn about local ___.",
-    "options": ["history", "passwords", "invoices", "salaries"],
+    "options": [
+      "history",
+      "passwords",
+      "invoices",
+      "salaries"
+    ],
     "correctIndex": 0,
     "explanation": "Tour guides often explain history and culture.",
     "hint": "Прошлое места",
@@ -185,7 +468,12 @@
   },
   {
     "question": "The Vikings originally came from ___.",
-    "options": ["Scandinavia", "Africa", "China", "India"],
+    "options": [
+      "Scandinavia",
+      "Africa",
+      "China",
+      "India"
+    ],
     "correctIndex": 0,
     "explanation": "The Vikings came from modern-day Norway, Sweden, and Denmark.",
     "hint": "Север Европы",
@@ -193,7 +481,12 @@
   },
   {
     "question": "If you don't know the language, a translation app can be very ___.",
-    "options": ["useful", "ancient", "crowded", "expensive"],
+    "options": [
+      "useful",
+      "ancient",
+      "crowded",
+      "expensive"
+    ],
     "correctIndex": 0,
     "explanation": "Useful means helpful or practical.",
     "hint": "Полезный",
@@ -201,7 +494,12 @@
   },
   {
     "question": "The Colosseum is a famous landmark in ___.",
-    "options": ["Athens", "Rome", "London", "Berlin"],
+    "options": [
+      "Athens",
+      "Rome",
+      "London",
+      "Berlin"
+    ],
     "correctIndex": 1,
     "explanation": "The Colosseum is one of Rome's most famous ancient monuments.",
     "hint": "Гладиаторы",
@@ -209,7 +507,12 @@
   },
   {
     "question": "When you arrive in a new country, you may need to go through ___.",
-    "options": ["customs", "weather", "history", "traffic"],
+    "options": [
+      "customs",
+      "weather",
+      "history",
+      "traffic"
+    ],
     "correctIndex": 0,
     "explanation": "Customs is the checkpoint for entering a country.",
     "hint": "Пограничный контроль",
@@ -217,7 +520,12 @@
   },
   {
     "question": "A country's food, traditions, and festivals are part of its ___.",
-    "options": ["culture", "currency", "airport", "geography"],
+    "options": [
+      "culture",
+      "currency",
+      "airport",
+      "geography"
+    ],
     "correctIndex": 0,
     "explanation": "Culture includes customs, food, traditions, and ways of life.",
     "hint": "Традиции народа",
@@ -225,7 +533,12 @@
   },
   {
     "question": "Many explorers used stars to ___ before modern GPS existed.",
-    "options": ["navigate", "decorate", "translate", "repair"],
+    "options": [
+      "navigate",
+      "decorate",
+      "translate",
+      "repair"
+    ],
     "correctIndex": 0,
     "explanation": "Navigate means find the correct route or direction.",
     "hint": "Ориентироваться",
@@ -233,7 +546,12 @@
   },
   {
     "question": "Traveling is a great way to learn about the ___ around you.",
-    "options": ["world", "invoice", "keyboard", "deadline"],
+    "options": [
+      "world",
+      "invoice",
+      "keyboard",
+      "deadline"
+    ],
     "correctIndex": 0,
     "explanation": "Travel helps people discover the world and different cultures.",
     "hint": "Мир вокруг нас",
