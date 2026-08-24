@@ -1,0 +1,149 @@
+[
+  {
+    "text": "ciao",
+    "translation": "привет",
+    "level": "A1",
+    "type": "word",
+    "topic": "communication",
+    "example": "Ciao, come stai?",
+    "example_translation": "Привет, как ты?"
+  },
+  {
+    "text": "grazie",
+    "translation": "спасибо",
+    "level": "A1",
+    "type": "word",
+    "topic": "communication",
+    "example": "Grazie per il tuo aiuto.",
+    "example_translation": "Спасибо за твою помощь."
+  },
+  {
+    "text": "per favore",
+    "translation": "пожалуйста",
+    "level": "A1",
+    "type": "expression",
+    "topic": "communication",
+    "example": "Un caffe, per favore.",
+    "example_translation": "Один кофе, пожалуйста."
+  },
+  {
+    "text": "avere bisogno di",
+    "translation": "нуждаться в",
+    "level": "A1",
+    "type": "grammar",
+    "topic": "daily_life",
+    "example": "Ho bisogno di un biglietto.",
+    "example_translation": "Мне нужен билет.",
+    "grammar_metadata": {
+      "category": "essere_avere"
+    }
+  },
+  {
+    "text": "biglietto",
+    "translation": "билет",
+    "level": "A1",
+    "type": "word",
+    "topic": "transport",
+    "example": "Vorrei un biglietto per Roma.",
+    "example_translation": "Я бы хотел билет в Рим."
+  },
+  {
+    "text": "prenotare",
+    "translation": "бронировать",
+    "level": "A1",
+    "type": "word",
+    "topic": "travel",
+    "example": "Vorrei prenotare una camera.",
+    "example_translation": "Я бы хотел забронировать номер."
+  },
+  {
+    "text": "fare una passeggiata",
+    "translation": "гулять",
+    "level": "A1",
+    "type": "collocation",
+    "topic": "daily_life",
+    "example": "Mi piace fare una passeggiata la sera.",
+    "example_translation": "Мне нравится гулять вечером."
+  },
+  {
+    "text": "anche se",
+    "translation": "хотя",
+    "level": "A2",
+    "type": "grammar",
+    "topic": "communication",
+    "example": "Esco anche se piove.",
+    "example_translation": "Я выйду, хотя идет дождь."
+  },
+  {
+    "text": "ordinare",
+    "translation": "заказывать",
+    "level": "A1",
+    "type": "word",
+    "topic": "restaurant",
+    "example": "Vorrei ordinare una pizza.",
+    "example_translation": "Я бы хотел заказать пиццу."
+  },
+  {
+    "text": "conto",
+    "translation": "счет",
+    "level": "A1",
+    "type": "word",
+    "topic": "restaurant",
+    "example": "Possiamo avere il conto?",
+    "example_translation": "Можно нам счет?"
+  },
+  {
+    "text": "pagare",
+    "translation": "платить",
+    "level": "A1",
+    "type": "word",
+    "topic": "restaurant",
+    "example": "Posso pagare con la carta?",
+    "example_translation": "Можно заплатить картой?"
+  },
+  {
+    "text": "mi piace",
+    "translation": "мне нравится",
+    "level": "A1",
+    "type": "grammar",
+    "topic": "preferences",
+    "example": "Mi piace il gelato.",
+    "example_translation": "Мне нравится мороженое."
+  },
+  {
+    "text": "vorrei",
+    "translation": "я бы хотел",
+    "level": "A1",
+    "type": "grammar",
+    "topic": "communication",
+    "example": "Vorrei un tavolo per due.",
+    "example_translation": "Я бы хотел столик на двоих."
+  },
+  {
+    "text": "stazione",
+    "translation": "вокзал",
+    "level": "A1",
+    "type": "word",
+    "topic": "transport",
+    "example": "La stazione e vicino all'hotel.",
+    "example_translation": "Вокзал рядом с отелем."
+  },
+  {
+    "text": "essere in ritardo",
+    "translation": "опаздывать",
+    "level": "A2",
+    "type": "expression",
+    "topic": "plans",
+    "example": "Scusa, sono in ritardo.",
+    "example_translation": "Извини, я опаздываю."
+  },
+  {
+    "text": "prima di",
+    "translation": "до того как",
+    "level": "A2",
+    "type": "grammar",
+    "topic": "plans",
+    "example": "Mangio prima di uscire.",
+    "example_translation": "Я поем перед тем, как выйти."
+  }
+]

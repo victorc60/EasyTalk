@@ -30,6 +30,10 @@ const User = sequelize.define('User', {
       isIn: [['ru', 'ro']]
     }
   },
+  active_target_language: {
+    type: DataTypes.STRING(8),
+    allowNull: true,
+  },
   points: {
     type: DataTypes.INTEGER,
     defaultValue: 0,

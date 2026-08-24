@@ -1,0 +1,149 @@
+[
+  {
+    "text": "hallo",
+    "translation": "привет",
+    "level": "A1",
+    "type": "word",
+    "topic": "communication",
+    "example": "Hallo, wie geht's?",
+    "example_translation": "Привет, как дела?"
+  },
+  {
+    "text": "danke",
+    "translation": "спасибо",
+    "level": "A1",
+    "type": "word",
+    "topic": "communication",
+    "example": "Danke fur deine Hilfe.",
+    "example_translation": "Спасибо за твою помощь."
+  },
+  {
+    "text": "bitte",
+    "translation": "пожалуйста",
+    "level": "A1",
+    "type": "word",
+    "topic": "communication",
+    "example": "Ein Wasser, bitte.",
+    "example_translation": "Один стакан воды, пожалуйста."
+  },
+  {
+    "text": "ich mochte",
+    "translation": "я бы хотел",
+    "level": "A1",
+    "type": "grammar",
+    "topic": "communication",
+    "example": "Ich mochte einen Kaffee.",
+    "example_translation": "Я бы хотел кофе."
+  },
+  {
+    "text": "bestellen",
+    "translation": "заказывать",
+    "level": "A1",
+    "type": "word",
+    "topic": "restaurant",
+    "example": "Ich mochte eine Suppe bestellen.",
+    "example_translation": "Я бы хотел заказать суп."
+  },
+  {
+    "text": "die Rechnung",
+    "translation": "счет",
+    "level": "A1",
+    "type": "phrase",
+    "topic": "restaurant",
+    "example": "Kann ich die Rechnung bekommen?",
+    "example_translation": "Можно мне счет?"
+  },
+  {
+    "text": "bezahlen",
+    "translation": "платить",
+    "level": "A1",
+    "type": "word",
+    "topic": "restaurant",
+    "example": "Ich mochte mit Karte bezahlen.",
+    "example_translation": "Я бы хотел заплатить картой."
+  },
+  {
+    "text": "Bescheid sagen",
+    "translation": "дать знать",
+    "level": "A2",
+    "type": "expression",
+    "topic": "communication",
+    "example": "Sag mir bitte Bescheid.",
+    "example_translation": "Пожалуйста, дай мне знать."
+  },
+  {
+    "text": "Angst haben vor",
+    "translation": "бояться",
+    "level": "A2",
+    "type": "grammar",
+    "topic": "emotions",
+    "example": "Ich habe Angst vor Hunden.",
+    "example_translation": "Я боюсь собак.",
+    "grammar_metadata": {
+      "category": "case"
+    }
+  },
+  {
+    "text": "obwohl",
+    "translation": "хотя",
+    "level": "B1",
+    "type": "grammar",
+    "topic": "communication",
+    "example": "Ich gehe raus, obwohl es regnet.",
+    "example_translation": "Я выхожу, хотя идет дождь."
+  },
+  {
+    "text": "Bahnhof",
+    "translation": "вокзал",
+    "level": "A1",
+    "type": "word",
+    "topic": "transport",
+    "example": "Der Bahnhof ist nicht weit.",
+    "example_translation": "Вокзал недалеко."
+  },
+  {
+    "text": "Fahrkarte",
+    "translation": "билет",
+    "level": "A1",
+    "type": "word",
+    "topic": "transport",
+    "example": "Ich brauche eine Fahrkarte nach Berlin.",
+    "example_translation": "Мне нужен билет до Берлина."
+  },
+  {
+    "text": "brauchen",
+    "translation": "нуждаться",
+    "level": "A1",
+    "type": "word",
+    "topic": "daily_life",
+    "example": "Ich brauche Hilfe.",
+    "example_translation": "Мне нужна помощь."
+  },
+  {
+    "text": "sich verspaten",
+    "translation": "опаздывать",
+    "level": "A2",
+    "type": "expression",
+    "topic": "plans",
+    "example": "Entschuldigung, ich verspate mich.",
+    "example_translation": "Извини, я опаздываю."
+  },
+  {
+    "text": "einen Tisch reservieren",
+    "translation": "забронировать столик",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "restaurant",
+    "example": "Ich mochte einen Tisch fur zwei reservieren.",
+    "example_translation": "Я бы хотел забронировать столик на двоих."
+  },
+  {
+    "text": "mitnehmen",
+    "translation": "взять с собой",
+    "level": "A2",
+    "type": "word",
+    "topic": "shopping",
+    "example": "Kann ich das mitnehmen?",
+    "example_translation": "Можно я возьму это с собой?"
+  }
+]

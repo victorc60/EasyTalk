@@ -21,6 +21,14 @@ import sharp from 'sharp';
 import { createPoll, sendPollToAllUsers, savePollAnswer } from './services/pollServices.js';
 import { handleUserMessageWithAgents } from './src/services/agentOrchestrator.js';
 import { buildNativeLanguageRequiredText, normalizeNativeLanguage } from './utils/nativeLanguage.js';
+import {
+  handleLearningCallback,
+  handleLearningTextMessage,
+  maybeContinueOnboarding,
+  showLanguagesOverview,
+  startDailySessionCommand,
+} from './handlers/learningHandlers.js';
+import { getUserActiveTargetLanguage } from './services/userLanguageProfileService.js';
 
 // Bot modes are now defined in commandHandlers.js
 
@@ -32,8 +40,8 @@ export async function setupBot(bot, userSessions, openai) {
   
   setupSchedulers(bot, userSessions);
   await setupBotCommands(bot);
-  setupCommandHandlers(bot, userSessions);
-  setupCallbacks(bot, userSessions);
+  setupCommandHandlers(bot, userSessions, openai);
+  setupCallbacks(bot, userSessions, openai);
   setupPollAnswerHandler(bot);
   setupMessageHandler(bot, userSessions, openai);
   runDailyBankAuditAndAutofill(bot).catch((error) => {
@@ -230,9 +238,11 @@ async function setupBotCommands(bot) {
       { command: 'mini_game', description: 'Субботняя мини-игра (10 вопросов)' },
       { command: 'progress', description: 'Твой прогресс' },
       { command: 'language', description: 'Родной язык / Limba nativa' },
+      { command: 'languages', description: 'Изучаемые языки' },
+      { command: 'session', description: 'Ежедневная сессия' },
       { command: 'leaders', description: 'Таблица лидеров' },
       { command: 'mode', description: 'Выбор режима общения' },
-      { command: 'mode_free_talk', description: 'Свободное общение на английском' },
+      { command: 'mode_free_talk', description: 'Свободное общение на выбранном языке' },
       { command: 'mode_correction', description: 'Проверка и исправление ошибок' },
       { command: 'mode_role_play', description: 'Ролевые игры с персонажами' },
       { command: 'clear', description: 'Сбросить историю диалога' }
@@ -275,7 +285,7 @@ async function setupBotCommands(bot) {
   }
 }
 
-function setupCommandHandlers(bot, userSessions) {
+function setupCommandHandlers(bot, userSessions, openai) {
   bot.onText(/\/start/, (msg) => start(bot, msg, userSessions));
   bot.onText(/\/clear/, (msg) => {
     const userId = msg.from.id;
@@ -287,6 +297,8 @@ function setupCommandHandlers(bot, userSessions) {
   bot.onText(/\/topic/, (msg) => conversationTopic(bot, msg));
   bot.onText(/\/progress/, (msg) => showProgress(bot, msg));
   bot.onText(/\/language/, (msg) => showLanguageSelection(bot, msg.chat.id, msg.from.id, userSessions));
+  bot.onText(/\/languages/, (msg) => showLanguagesOverview(bot, msg.chat.id, msg.from.id));
+  bot.onText(/\/session/, (msg) => startDailySessionCommand(bot, msg, openai));
   bot.onText(/\/mode$/, (msg) => showModeSelection(bot, msg.chat.id));
   bot.onText(/\/mode_(.+)/, (msg, match) => setMode(bot, msg, userSessions, match[1]));
   bot.onText(/\/broadcast/, (msg) => broadcast(bot, msg, userSessions));
@@ -350,7 +362,7 @@ function setupCommandHandlers(bot, userSessions) {
   });
 }
 
-function setupCallbacks(bot, userSessions) {
+function setupCallbacks(bot, userSessions, openai) {
   bot.on('callback_query', async (callbackQuery) => {
     try {
       const chatId = callbackQuery.message?.chat?.id || callbackQuery.from?.id;
@@ -418,6 +430,10 @@ function setupCallbacks(bot, userSessions) {
       if (data.startsWith('native_lang_')) {
         const selectedLanguage = data.slice('native_lang_'.length);
         await saveNativeLanguage(bot, callbackQuery, userSessions, selectedLanguage);
+        return;
+      }
+
+      if (await handleLearningCallback(bot, callbackQuery, openai)) {
         return;
       }
 
@@ -759,6 +775,10 @@ function setupMessageHandler(bot, userSessions, openai) {
         { where: { telegram_id: userId } }
       );
 
+      if (text && await handleLearningTextMessage(bot, msg, openai)) {
+        return;
+      }
+
       // Обработка игр со словами (только для текстовых сообщений)
       if (text && await handleWordGame(bot, chatId, userId, text, userSessions)) {
         return;
@@ -774,12 +794,6 @@ function setupMessageHandler(bot, userSessions, openai) {
         const userMode = userSessions.conversationModes.get(userId) || 'free_talk';
         const nativeLanguage = await getUserNativeLanguage(userSessions, userId);
 
-        // Оставляем текущий flow для role play, а обычные сообщения переводим на agent orchestrator.
-        if (userMode === 'role_play') {
-          await handleRegularMessage(bot, chatId, userId, text, userMode, openai, userSessions);
-          return;
-        }
-
         if (!nativeLanguage) {
           await sendUserMessage(
             bot,
@@ -791,6 +805,19 @@ function setupMessageHandler(bot, userSessions, openai) {
           return;
         }
 
+        const onboardingComplete = await maybeContinueOnboarding(bot, chatId, userId);
+        if (!onboardingComplete) {
+          return;
+        }
+
+        const activeTargetLanguage = await getUserActiveTargetLanguage(userId);
+
+        // Оставляем текущий flow для role play, а обычные сообщения переводим на agent orchestrator.
+        if (userMode === 'role_play') {
+          await handleRegularMessage(bot, chatId, userId, text, userMode, openai, userSessions);
+          return;
+        }
+
         await bot.sendChatAction(chatId, 'typing');
         const response = await handleUserMessageWithAgents({
           userId,
@@ -798,6 +825,7 @@ function setupMessageHandler(bot, userSessions, openai) {
           openai,
           preferredRoute: userMode === 'correction' ? 'correction' : undefined,
           nativeLanguage,
+          targetLanguage: activeTargetLanguage,
         });
 
         await sendUserMessage(bot, chatId, response);

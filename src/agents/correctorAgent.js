@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
 import { getNativeLanguageInstruction } from '../../utils/nativeLanguage.js';
+import { getLanguageConfig } from '../../services/languageRegistry.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const VALIDATOR_MODEL = process.env.OPENAI_VALIDATOR_MODEL || MODEL;
@@ -196,10 +197,12 @@ async function refineCorrectionDraft({ client, userId, originalMessage, draftRes
 export const correctorAgent = {
   name: 'Corrector Agent',
 
-  async run({ userId, message, openai, nativeLanguage } = {}) {
+  async run({ userId, message, openai, nativeLanguage, targetLanguage = 'en' } = {}) {
     const client = getOpenAIClient(openai);
     const safeMessage = String(message || '').trim();
     const explanationLanguage = getNativeLanguageInstruction(nativeLanguage);
+    const targetConfig = getLanguageConfig(targetLanguage);
+    const targetLanguageName = targetConfig?.ai?.languageName || 'target language';
 
     try {
       const response = await client.chat.completions.create({
@@ -211,17 +214,16 @@ export const correctorAgent = {
           {
             role: 'system',
             content: [
-              'You are Corrector Agent for an English-learning Telegram bot.',
-              'Correct the full user sentence and explain the mistake simply.',
+              'You are Corrector Agent for a language-learning Telegram bot.',
+              `Correct the full user sentence in ${targetLanguageName} and explain the mistake simply.`,
               'Return only valid JSON with this shape:',
               '{"correctedText":"...","explanation":"...","errorTopic":"Present Simple","userLevel":"A1","question":"..."}',
               'Rules:',
-              '- correctedText must be the final natural English version of the whole sentence.',
+              `- correctedText must be the final natural ${targetLanguageName} version of the whole sentence.`,
               '- fix grammar, word choice, collocations, articles, prepositions, capitalization, punctuation, and unnatural phrasing.',
               '- do not stop after fixing only one mistake if the sentence still sounds wrong.',
-              '- for daily routines prefer natural phrasing like "every day" instead of unnatural options like "any day" when needed.',
               `- explanation must be in simple ${explanationLanguage}.`,
-              '- question must be in English.',
+              `- question must be in ${targetLanguageName}.`,
               '- keep output concise and suitable for Telegram.',
               '- preserve the user meaning.',
               '- errorTopic should be short.',
@@ -230,7 +232,7 @@ export const correctorAgent = {
           },
           {
             role: 'user',
-            content: `userId: ${userId ?? 'unknown'}\nmessage: ${safeMessage}`,
+            content: `userId: ${userId ?? 'unknown'}\ntargetLanguage: ${targetLanguageName}\nmessage: ${safeMessage}`,
           },
         ],
       });

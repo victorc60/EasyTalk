@@ -4,6 +4,7 @@ const MAX_LAST_MISTAKES = 10;
 function createDefaultProgress(userId) {
   return {
     userId,
+    targetLanguage: 'en',
     level: 'A1',
     weakTopics: [],
     lastMistakes: [],
@@ -13,18 +14,27 @@ function createDefaultProgress(userId) {
 function cloneProgress(progress) {
   return {
     userId: progress.userId,
+    targetLanguage: progress.targetLanguage,
     level: progress.level,
     weakTopics: [...progress.weakTopics],
     lastMistakes: progress.lastMistakes.map((item) => ({ ...item })),
   };
 }
 
+function buildProgressKey(userId, targetLanguage = 'en') {
+  return `${userId}:${targetLanguage}`;
+}
+
 export const progressAgent = {
   name: 'Progress Agent',
 
-  async saveMistake({ userId, topic, message, correctedText, userLevel } = {}) {
+  async saveMistake({ userId, targetLanguage = 'en', topic, message, correctedText, userLevel } = {}) {
     try {
-      const existing = progressStore.get(userId) || createDefaultProgress(userId);
+      const key = buildProgressKey(userId, targetLanguage);
+      const existing = progressStore.get(key) || {
+        ...createDefaultProgress(userId),
+        targetLanguage,
+      };
       const safeTopic = topic || 'General grammar';
       const safeLevel = userLevel || existing.level || 'A1';
 
@@ -41,7 +51,7 @@ export const progressAgent = {
       });
       existing.lastMistakes = existing.lastMistakes.slice(0, MAX_LAST_MISTAKES);
 
-      progressStore.set(userId, existing);
+      progressStore.set(key, existing);
       return cloneProgress(existing);
     } catch (error) {
       console.error('[Progress Agent] Failed to save mistake:', error.message);
@@ -49,11 +59,15 @@ export const progressAgent = {
     }
   },
 
-  async getProgress({ userId } = {}) {
+  async getProgress({ userId, targetLanguage = 'en' } = {}) {
     try {
-      const progress = progressStore.get(userId) || createDefaultProgress(userId);
-      if (!progressStore.has(userId)) {
-        progressStore.set(userId, progress);
+      const key = buildProgressKey(userId, targetLanguage);
+      const progress = progressStore.get(key) || {
+        ...createDefaultProgress(userId),
+        targetLanguage,
+      };
+      if (!progressStore.has(key)) {
+        progressStore.set(key, progress);
       }
 
       return cloneProgress(progress);
@@ -63,4 +77,3 @@ export const progressAgent = {
     }
   },
 };
-

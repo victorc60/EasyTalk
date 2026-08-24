@@ -24,9 +24,9 @@ export function buildNativeLanguageSelectionText(currentLanguage = null) {
     'Alege limba ta materna',
     'Выбери родной язык',
     currentLine,
-    'I will explain English in your language.',
-    'Iti voi explica engleza in limba ta.',
-    'Я буду объяснять английский на твоем родном языке.',
+    'I will explain the target language in your language.',
+    'Iti voi explica limba pe care o studiezi in limba ta.',
+    'Я буду объяснять изучаемый язык на твоем родном языке.',
   ].join('\n');
 }
 
@@ -50,13 +50,13 @@ export function buildNativeLanguageSavedMessage(nativeLanguage, isUpdate = false
 
   if (normalized === 'ro') {
     return isUpdate
-      ? '✅ Limba ta materna a fost actualizata la <b>romana</b>.\nDe acum iti voi explica engleza in romana.'
-      : '✅ Gata! Limba ta materna este <b>romana</b>.\nDe acum iti voi explica engleza in romana.';
+      ? '✅ Limba ta materna a fost actualizata la <b>romana</b>.\nDe acum iti voi explica limba studiata in romana.'
+      : '✅ Gata! Limba ta materna este <b>romana</b>.\nDe acum iti voi explica limba studiata in romana.';
   }
 
   return isUpdate
-    ? '✅ Родной язык обновлен: <b>русский</b>.\nТеперь я буду объяснять английский на русском.'
-    : '✅ Отлично! Твой родной язык — <b>русский</b>.\nТеперь я буду объяснять английский на русском.';
+    ? '✅ Родной язык обновлен: <b>русский</b>.\nТеперь я буду объяснять изучаемый язык на русском.'
+    : '✅ Отлично! Твой родной язык — <b>русский</b>.\nТеперь я буду объяснять изучаемый язык на русском.';
 }
 
 export function buildNativeLanguageRequiredText() {
@@ -67,12 +67,12 @@ export function buildNativeLanguageRequiredText() {
   ].join('\n');
 }
 
-export function buildWelcomeMessage(nativeLanguage, safeFirstName) {
+export function buildWelcomeMessage(nativeLanguage, safeFirstName, targetLanguageLabel = 'English') {
   const normalized = normalizeNativeLanguage(nativeLanguage) || 'ru';
 
   if (normalized === 'ro') {
     return `
-👋 <b>Salut, ${safeFirstName}!</b> Sunt asistentul tau pentru invatarea limbii engleze.
+👋 <b>Salut, ${safeFirstName}!</b> Sunt asistentul tau pentru invatarea limbii.
 
 📌 <b>Moduri disponibile:</b>
 1. <b>Conversatie libera</b> - /mode_free_talk
@@ -89,13 +89,15 @@ export function buildWelcomeMessage(nativeLanguage, safeFirstName) {
 📚🎧 /story - voice storytelling with audio
 
 📊 /progress - progresul tau
+🌍 /languages - limbile pe care le studiezi
+🧠 /session - sesiunea zilnica
 🏆 /leaders - clasament
 
-Alege ce iti place si exerseaza engleza!`;
+Alege ce iti place si exerseaza ${targetLanguageLabel}!`;
   }
 
   return `
-👋 <b>Привет, ${safeFirstName}!</b> Я твой помощник в изучении английского.
+👋 <b>Привет, ${safeFirstName}!</b> Я твой помощник в изучении языка.
 
 📌 <b>Доступные режимы:</b>
 1. <b>Свободное общение</b> - /mode_free_talk
@@ -112,7 +114,9 @@ Alege ce iti place si exerseaza engleza!`;
 📚🎧 /story - voice storytelling with audio
 
 📊 /progress - твой прогресс
+🌍 /languages - изучаемые языки
+🧠 /session - ежедневная сессия
 🏆 /leaders - таблица лидеров
 
-Выбирай что тебе интересно и практикуй английский!`;
+Выбирай что тебе интересно и практикуй ${targetLanguageLabel}!`;
 }

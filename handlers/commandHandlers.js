@@ -45,6 +45,12 @@ import {
   getNativeLanguageLabel,
   normalizeNativeLanguage,
 } from '../utils/nativeLanguage.js';
+import {
+  buildActiveLanguageProgressMessage,
+  maybeContinueOnboarding,
+} from './learningHandlers.js';
+import { getLanguageLabel } from '../services/languageRegistry.js';
+import { getUserActiveTargetLanguage } from '../services/userLanguageProfileService.js';
 
 // ── Streak helpers ──────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -165,9 +171,9 @@ function buildWelcomeOptions(nativeLanguage) {
   return { parse_mode: 'HTML' };
 }
 
-async function sendLocalizedWelcome(bot, chatId, nativeLanguage, rawFirstName) {
+async function sendLocalizedWelcome(bot, chatId, nativeLanguage, rawFirstName, targetLanguageLabel = 'English') {
   const safeFirstName = escapeHtml(rawFirstName || 'friend');
-  const welcomeMessage = buildWelcomeMessage(nativeLanguage, safeFirstName);
+  const welcomeMessage = buildWelcomeMessage(nativeLanguage, safeFirstName, targetLanguageLabel);
   await sendUserMessage(bot, chatId, welcomeMessage, buildWelcomeOptions(nativeLanguage));
 }
 
@@ -278,8 +284,16 @@ export async function saveNativeLanguage(bot, callbackQuery, userSessions, nativ
     { parse_mode: 'HTML' }
   );
 
-  if (created || !previousLanguage) {
-    await sendLocalizedWelcome(bot, chatId, normalizedLanguage, callbackQuery.from.first_name);
+  const onboardingComplete = await maybeContinueOnboarding(bot, chatId, telegramId);
+  if (onboardingComplete) {
+    const activeTargetLanguage = await getUserActiveTargetLanguage(telegramId);
+    await sendLocalizedWelcome(
+      bot,
+      chatId,
+      normalizedLanguage,
+      callbackQuery.from.first_name,
+      activeTargetLanguage ? getLanguageLabel(activeTargetLanguage) : 'English'
+    );
   }
 }
 
@@ -315,8 +329,30 @@ export async function start(bot, msg, userSessions) {
 
     const nativeLanguage = normalizeNativeLanguage(user.native_language);
     cacheNativeLanguage(userSessions, msg.from.id, nativeLanguage);
-    const welcomeLanguage = nativeLanguage || normalizeNativeLanguage(msg.from.language_code) || 'ru';
-    await sendLocalizedWelcome(bot, msg.chat.id, welcomeLanguage, msg.from.first_name);
+    if (!nativeLanguage) {
+      await sendUserMessage(
+        bot,
+        msg.chat.id,
+        buildNativeLanguageRequiredText(),
+        { parse_mode: 'HTML' }
+      );
+      await showLanguageSelection(bot, msg.chat.id, msg.from.id, userSessions);
+      return;
+    }
+
+    const onboardingComplete = await maybeContinueOnboarding(bot, msg.chat.id, msg.from.id);
+    if (!onboardingComplete) {
+      return;
+    }
+
+    const activeTargetLanguage = await getUserActiveTargetLanguage(msg.from.id);
+    await sendLocalizedWelcome(
+      bot,
+      msg.chat.id,
+      nativeLanguage,
+      msg.from.first_name,
+      activeTargetLanguage ? getLanguageLabel(activeTargetLanguage) : 'English'
+    );
   } catch (error) {
     console.error('Ошибка при обработке команды /start:', error);
     await sendUserMessage(bot, msg.chat.id, '⚠️ Произошла ошибка при регистрации. Попробуйте еще раз.');
@@ -458,18 +494,16 @@ export async function showProgress(bot, msg) {
       getPointsForUserThisWeek(userId)
     ]);
 
-    const progressMessage = `
-📊 <b>Твой прогресс:</b>
+    const learningProgressMessage = await buildActiveLanguageProgressMessage(userId);
+    const progressMessage = `${learningProgressMessage}
 
-🏅 Всего очков: ${user.points}
-📈 За сегодня: ${pointsToday} очков
-📆 За неделю: ${pointsThisWeek} очков
+🏅 XP total: ${user.points}
+📈 XP today: ${pointsToday}
+📆 XP this week: ${pointsThisWeek}
 🌍 Родной язык: ${normalizeNativeLanguage(user.native_language) ? getNativeLanguageLabel(user.native_language) : 'не выбран'}
 
 📅 Первый визит: ${user.first_activity.toLocaleDateString()}
-🔄 Последняя активность: ${user.last_activity.toLocaleDateString()}
-
-Продолжай практиковать английский — участвуй в играх и попадай в топ-5 за неделю!`;
+🔄 Последняя активность: ${user.last_activity.toLocaleDateString()}`;
     
     await sendUserMessage(bot, msg.chat.id, progressMessage, { parse_mode: 'HTML' });
   } catch (error) {

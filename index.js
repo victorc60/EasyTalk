@@ -21,7 +21,15 @@ import './models/MiniEventParticipant.js';
 import './models/MiniEventResponse.js';
 import './models/ContentQueue.js';
 import './models/DailyLog.js';
+import './models/UserLanguageProfile.js';
+import './models/LearningItem.js';
+import './models/UserLearningItem.js';
+import './models/MistakeMemory.js';
+import './models/DailySession.js';
+import './models/SessionExercise.js';
+import './models/ExerciseAttempt.js';
 import { initAllQueues } from './init/initQueues.js';
+import { syncLearningCatalog } from './services/learningCatalogService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -98,6 +106,7 @@ async function runMigrations() {
     `ALTER TABLE word_game_participation DROP INDEX \`word_game_participation_user_id_game_date\``,
     `ALTER TABLE word_game_participation DROP INDEX \`word_game_participation_user_id_game_date_game_type\``,
     `ALTER TABLE users ADD COLUMN native_language VARCHAR(8) NULL AFTER last_name`,
+    `ALTER TABLE users ADD COLUMN active_target_language VARCHAR(8) NULL AFTER native_language`,
   ];
   for (const sql of migrations) {
     try {
@@ -169,6 +178,7 @@ process.on('unhandledRejection', (error) => {
   try {
     await initializeDatabase();
     await initAllQueues();
+    await syncLearningCatalog();
     await setupBot(bot, userSessions, openai);
 
     if (webhookUrl) {

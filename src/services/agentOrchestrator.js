@@ -5,6 +5,8 @@ import { teacherAgent } from '../agents/teacherAgent.js';
 import { exerciseAgent } from '../agents/exerciseAgent.js';
 import { progressAgent } from '../agents/progressAgent.js';
 import { getNativeLanguageInstruction } from '../../utils/nativeLanguage.js';
+import { getLanguageConfig } from '../../services/languageRegistry.js';
+import { rememberMistake } from '../../services/mistakeMemoryService.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const ENABLE_PRACTICE_BLOCK = process.env.ENABLE_AGENT_PRACTICE === 'true';
@@ -83,11 +85,11 @@ function formatTeacherReply(result, nativeLanguage) {
   const examples = Array.isArray(result?.examples) ? result.examples : [];
   const exampleText = examples.length
     ? examples
-        .map((example, index) => `${index + 1}. ${example.en}\n${example.nativeText || example.native || example.ru}`)
+        .map((example, index) => `${index + 1}. ${example.targetText || example.en}\n${example.nativeText || example.native || example.ru}`)
         .join('\n\n')
     : nativeLanguage === 'ro'
-      ? '1. I study English every day.\nStudiez engleza in fiecare zi.'
-      : '1. I study English every day.\nЯ изучаю английский каждый день.';
+      ? '1. Studio ogni giorno.\nStudiez in fiecare zi.'
+      : '1. Ich lerne jeden Tag.\nЯ занимаюсь каждый день.';
 
   return [
     `${labels.topic} ${result.topic}`,
@@ -99,9 +101,11 @@ function formatTeacherReply(result, nativeLanguage) {
   ].join('\n');
 }
 
-async function generateFreeChatReply({ userId, message, openai, nativeLanguage }) {
+async function generateFreeChatReply({ userId, message, openai, nativeLanguage, targetLanguage = 'en' }) {
   const client = getOpenAIClient(openai);
   const supportLanguage = getNativeLanguageInstruction(nativeLanguage);
+  const targetConfig = getLanguageConfig(targetLanguage);
+  const targetLanguageName = targetConfig?.ai?.languageName || 'target language';
 
   const response = await client.chat.completions.create({
     model: MODEL,
@@ -111,11 +115,12 @@ async function generateFreeChatReply({ userId, message, openai, nativeLanguage }
       {
         role: 'system',
         content: [
-          'You are a friendly English tutor inside a Telegram bot.',
+          'You are a friendly language tutor inside a Telegram bot.',
           'Reply in a warm, concise, Telegram-friendly style.',
-          'If the user makes small English mistakes, gently model better English without being harsh.',
+          `The learner is practicing ${targetLanguageName}.`,
+          `Reply primarily in ${targetLanguageName}, unless a short support note in ${supportLanguage} is needed.`,
+          'If the user makes small target-language mistakes, gently model a better version without being harsh.',
           `Use ${supportLanguage} for explanations and support text when helpful.`,
-          'The target learning language is English.',
           'End with one short follow-up question when appropriate.',
         ].join(' '),
       },
@@ -126,7 +131,7 @@ async function generateFreeChatReply({ userId, message, openai, nativeLanguage }
     ],
   });
 
-  return response.choices[0]?.message?.content?.trim() || 'Hi! Let’s practice English together. What would you like to talk about?';
+  return response.choices[0]?.message?.content?.trim() || 'Hi! Let’s practice together. What would you like to talk about?';
 }
 
 async function resolveRoute({ preferredRoute, userId, message, openai }) {
@@ -161,7 +166,7 @@ async function resolveRoute({ preferredRoute, userId, message, openai }) {
  * Suggested place:
  * inside botSetup.js -> setupMessageHandler() near the current handleRegularMessage(...) call.
  */
-export async function handleUserMessageWithAgents({ userId, message, openai, preferredRoute, nativeLanguage } = {}) {
+export async function handleUserMessageWithAgents({ userId, message, openai, preferredRoute, nativeLanguage, targetLanguage = 'en' } = {}) {
   const safeMessage = String(message || '').trim();
   const labels = getLocalizedSectionLabels(nativeLanguage);
 
@@ -183,14 +188,25 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
         message: safeMessage,
         openai,
         nativeLanguage,
+        targetLanguage,
       });
 
       await progressAgent.saveMistake({
         userId,
+        targetLanguage,
         topic: correction.errorTopic,
         message: safeMessage,
         correctedText: correction.correctedText,
         userLevel: correction.userLevel,
+      });
+      await rememberMistake({
+        userId,
+        targetLanguage,
+        category: correction.errorTopic || 'grammar',
+        patternKey: (correction.errorTopic || 'grammar').toLowerCase().replace(/\s+/g, '_'),
+        sourceText: safeMessage,
+        correctedText: correction.correctedText,
+        explanation: correction.explanation,
       });
 
       const sections = [
@@ -208,6 +224,7 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
           userLevel: correction.userLevel,
           openai,
           nativeLanguage,
+          targetLanguage,
         });
 
         sections.push('', labels.practice, formatExercises(practice, nativeLanguage));
@@ -223,6 +240,7 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
         message: safeMessage,
         openai,
         nativeLanguage,
+        targetLanguage,
       });
 
       return formatTeacherReply(explanation, nativeLanguage);
@@ -241,6 +259,7 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
       message: safeMessage,
       openai,
       nativeLanguage,
+      targetLanguage,
     });
   } catch (error) {
     console.error('[Agent Orchestrator] Failed to handle user message:', error.message);
@@ -251,6 +270,7 @@ export async function handleUserMessageWithAgents({ userId, message, openai, pre
         message: safeMessage,
         openai,
         nativeLanguage,
+        targetLanguage,
       });
     } catch (fallbackError) {
       console.error('[Agent Orchestrator] Free chat fallback failed:', fallbackError.message);

@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
 import { getNativeLanguageInstruction, normalizeNativeLanguage } from '../../utils/nativeLanguage.js';
+import { getLanguageConfig } from '../../services/languageRegistry.js';
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
@@ -89,11 +90,13 @@ function normalizeResult(payload, topic, nativeLanguage) {
 export const exerciseAgent = {
   name: 'Exercise Agent',
 
-  async run({ userId, topic, userLevel, openai, nativeLanguage } = {}) {
+  async run({ userId, topic, userLevel, openai, nativeLanguage, targetLanguage = 'en' } = {}) {
     const client = getOpenAIClient(openai);
     const safeTopic = topic || 'General grammar';
     const safeUserLevel = userLevel || 'A1';
     const explanationLanguage = getNativeLanguageInstruction(nativeLanguage);
+    const targetConfig = getLanguageConfig(targetLanguage);
+    const targetLanguageName = targetConfig?.ai?.languageName || 'target language';
 
     try {
       const response = await client.chat.completions.create({
@@ -105,8 +108,8 @@ export const exerciseAgent = {
           {
             role: 'system',
             content: [
-              'You are Exercise Agent for an English-learning Telegram bot.',
-              'Create exactly 1 short exercise based on the topic and level.',
+              'You are Exercise Agent for a language-learning Telegram bot.',
+              `Create exactly 1 short exercise in ${targetLanguageName} based on the topic and level.`,
               'Return only valid JSON with this shape:',
               '{"topic":"...","task":"...","exercises":[{"question":"...","answer":"...","explanation":"..."}]}',
               'Rules:',
@@ -119,7 +122,7 @@ export const exerciseAgent = {
           },
           {
             role: 'user',
-            content: `userId: ${userId ?? 'unknown'}\ntopic: ${safeTopic}\nuserLevel: ${safeUserLevel}`,
+            content: `userId: ${userId ?? 'unknown'}\ntargetLanguage: ${targetLanguageName}\ntopic: ${safeTopic}\nuserLevel: ${safeUserLevel}`,
           },
         ],
       });

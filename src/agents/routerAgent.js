@@ -133,12 +133,12 @@ export const routerAgent = {
           {
             role: 'system',
             content: [
-              'You are Router Agent for an English-learning Telegram bot.',
+              'You are Router Agent for a language-learning Telegram bot.',
               'Classify the user message into exactly one route:',
               'correction, explanation, lesson, quiz, free_chat.',
               'Return only valid JSON with this shape:',
               '{"route":"correction","confidence":0.9,"reason":"..."}',
-              'Use correction when the user sends an English sentence for review.',
+              'Use correction when the user sends a sentence in the target language for review.',
               'Use explanation when the user asks to explain grammar or vocabulary.',
               'Use lesson when the user asks to start a lesson.',
               'Use quiz when the user asks for a test or quiz.',
