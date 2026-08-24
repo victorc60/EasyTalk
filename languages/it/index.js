@@ -1,3 +1,15 @@
+function normalizeEuropeanText(value = '') {
+  return String(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[’']/g, ' ')
+    .toLowerCase()
+    .replace(/[.,!?;:()[\]"]/g, ' ')
+    .replace(/[-/]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 const italianConfig = {
   code: 'it',
   name: 'Italian',
@@ -31,11 +43,7 @@ const italianConfig = {
     tutorInstruction: 'The target language is Italian.',
   },
   normalizeText(value = '') {
-    return String(value)
-      .toLowerCase()
-      .replace(/[.,!?;:()[\]"]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return normalizeEuropeanText(value);
   },
 };
 

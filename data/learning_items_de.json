@@ -1,5 +1,6 @@
 [
   {
+    "sourceKey": "hallo",
     "text": "hallo",
     "translation": "привет",
     "level": "A1",
@@ -9,15 +10,17 @@
     "example_translation": "Привет, как дела?"
   },
   {
+    "sourceKey": "danke",
     "text": "danke",
     "translation": "спасибо",
     "level": "A1",
     "type": "word",
     "topic": "communication",
-    "example": "Danke fur deine Hilfe.",
+    "example": "Danke für deine Hilfe.",
     "example_translation": "Спасибо за твою помощь."
   },
   {
+    "sourceKey": "bitte",
     "text": "bitte",
     "translation": "пожалуйста",
     "level": "A1",
@@ -27,24 +30,27 @@
     "example_translation": "Один стакан воды, пожалуйста."
   },
   {
-    "text": "ich mochte",
+    "sourceKey": "ich mochte",
+    "text": "ich möchte",
     "translation": "я бы хотел",
     "level": "A1",
     "type": "grammar",
     "topic": "communication",
-    "example": "Ich mochte einen Kaffee.",
+    "example": "Ich möchte einen Kaffee.",
     "example_translation": "Я бы хотел кофе."
   },
   {
+    "sourceKey": "bestellen",
     "text": "bestellen",
     "translation": "заказывать",
     "level": "A1",
     "type": "word",
     "topic": "restaurant",
-    "example": "Ich mochte eine Suppe bestellen.",
+    "example": "Ich möchte eine Suppe bestellen.",
     "example_translation": "Я бы хотел заказать суп."
   },
   {
+    "sourceKey": "die rechnung",
     "text": "die Rechnung",
     "translation": "счет",
     "level": "A1",
@@ -54,45 +60,50 @@
     "example_translation": "Можно мне счет?"
   },
   {
+    "sourceKey": "bezahlen",
     "text": "bezahlen",
     "translation": "платить",
     "level": "A1",
     "type": "word",
     "topic": "restaurant",
-    "example": "Ich mochte mit Karte bezahlen.",
+    "example": "Ich möchte mit Karte bezahlen.",
     "example_translation": "Я бы хотел заплатить картой."
   },
   {
+    "sourceKey": "bescheid sagen",
     "text": "Bescheid sagen",
     "translation": "дать знать",
     "level": "A2",
     "type": "expression",
     "topic": "communication",
-    "example": "Sag mir bitte Bescheid.",
-    "example_translation": "Пожалуйста, дай мне знать."
+    "example": "Sag mir bitte Bescheid, wenn du ankommst.",
+    "example_translation": "Пожалуйста, дай мне знать, когда приедешь."
   },
   {
+    "sourceKey": "angst haben vor",
     "text": "Angst haben vor",
     "translation": "бояться",
     "level": "A2",
     "type": "grammar",
     "topic": "emotions",
-    "example": "Ich habe Angst vor Hunden.",
-    "example_translation": "Я боюсь собак.",
+    "example": "Ich habe Angst vor tiefem Wasser.",
+    "example_translation": "Я боюсь глубокой воды.",
     "grammar_metadata": {
       "category": "case"
     }
   },
   {
+    "sourceKey": "obwohl",
     "text": "obwohl",
     "translation": "хотя",
     "level": "B1",
     "type": "grammar",
     "topic": "communication",
-    "example": "Ich gehe raus, obwohl es regnet.",
-    "example_translation": "Я выхожу, хотя идет дождь."
+    "example": "Ich gehe schwimmen, obwohl das Wasser kalt ist.",
+    "example_translation": "Я иду плавать, хотя вода холодная."
   },
   {
+    "sourceKey": "bahnhof",
     "text": "Bahnhof",
     "translation": "вокзал",
     "level": "A1",
@@ -102,6 +113,7 @@
     "example_translation": "Вокзал недалеко."
   },
   {
+    "sourceKey": "fahrkarte",
     "text": "Fahrkarte",
     "translation": "билет",
     "level": "A1",
@@ -111,6 +123,7 @@
     "example_translation": "Мне нужен билет до Берлина."
   },
   {
+    "sourceKey": "brauchen",
     "text": "brauchen",
     "translation": "нуждаться",
     "level": "A1",
@@ -120,24 +133,27 @@
     "example_translation": "Мне нужна помощь."
   },
   {
-    "text": "sich verspaten",
+    "sourceKey": "sich verspaten",
+    "text": "sich verspäten",
     "translation": "опаздывать",
     "level": "A2",
     "type": "expression",
     "topic": "plans",
-    "example": "Entschuldigung, ich verspate mich.",
-    "example_translation": "Извини, я опаздываю."
+    "example": "Entschuldigung, ich verspäte mich um zehn Minuten.",
+    "example_translation": "Извини, я опоздаю на десять минут."
   },
   {
+    "sourceKey": "einen tisch reservieren",
     "text": "einen Tisch reservieren",
     "translation": "забронировать столик",
     "level": "A2",
     "type": "collocation",
     "topic": "restaurant",
-    "example": "Ich mochte einen Tisch fur zwei reservieren.",
+    "example": "Ich möchte einen Tisch für zwei reservieren.",
     "example_translation": "Я бы хотел забронировать столик на двоих."
   },
   {
+    "sourceKey": "mitnehmen",
     "text": "mitnehmen",
     "translation": "взять с собой",
     "level": "A2",
@@ -145,5 +161,255 @@
     "topic": "shopping",
     "example": "Kann ich das mitnehmen?",
     "example_translation": "Можно я возьму это с собой?"
+  },
+  {
+    "sourceKey": "der urlaub",
+    "text": "der Urlaub",
+    "translation": "отпуск",
+    "level": "A2",
+    "type": "word",
+    "topic": "vacation",
+    "example": "Im Urlaub möchte ich nur schlafen und schwimmen.",
+    "example_translation": "В отпуске я хочу только спать и плавать."
+  },
+  {
+    "sourceKey": "der strand",
+    "text": "der Strand",
+    "translation": "пляж",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Am Strand ist es heute ruhig und warm.",
+    "example_translation": "На пляже сегодня спокойно и тепло."
+  },
+  {
+    "sourceKey": "das meer",
+    "text": "das Meer",
+    "translation": "море",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Das Meer sieht am Morgen wunderschön aus.",
+    "example_translation": "Море утром выглядит прекрасно."
+  },
+  {
+    "sourceKey": "der koffer",
+    "text": "der Koffer",
+    "translation": "чемодан",
+    "level": "A2",
+    "type": "word",
+    "topic": "travel",
+    "example": "Mein Koffer ist schon fertig gepackt.",
+    "example_translation": "Мой чемодан уже собран."
+  },
+  {
+    "sourceKey": "die sonnencreme",
+    "text": "die Sonnencreme",
+    "translation": "солнцезащитный крем",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Vergiss die Sonnencreme nicht.",
+    "example_translation": "Не забудь солнцезащитный крем."
+  },
+  {
+    "sourceKey": "das handtuch",
+    "text": "das Handtuch",
+    "translation": "полотенце",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Ich trockne mich mit einem großen Handtuch ab.",
+    "example_translation": "Я вытираюсь большим полотенцем."
+  },
+  {
+    "sourceKey": "einchecken",
+    "text": "einchecken",
+    "translation": "заселиться",
+    "level": "A2",
+    "type": "word",
+    "topic": "hotel",
+    "example": "Wir können erst ab drei Uhr einchecken.",
+    "example_translation": "Мы можем заселиться только после трех часов."
+  },
+  {
+    "sourceKey": "eine unterkunft buchen",
+    "text": "eine Unterkunft buchen",
+    "translation": "забронировать жилье",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "hotel",
+    "example": "Wir haben eine kleine Unterkunft am Meer gebucht.",
+    "example_translation": "Мы забронировали небольшое жилье у моря."
+  },
+  {
+    "sourceKey": "baden gehen",
+    "text": "baden gehen",
+    "translation": "идти купаться",
+    "level": "A2",
+    "type": "expression",
+    "topic": "sea",
+    "example": "Nach dem Frühstück gehen wir baden.",
+    "example_translation": "После завтрака мы идем купаться."
+  },
+  {
+    "sourceKey": "sich sonnen",
+    "text": "sich sonnen",
+    "translation": "загорать",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Ich sonne mich lieber im Schatten.",
+    "example_translation": "Я предпочитаю загорать в тени."
+  },
+  {
+    "sourceKey": "am meer spazieren gehen",
+    "text": "am Meer spazieren gehen",
+    "translation": "гулять у моря",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "sea",
+    "example": "Abends gehen wir gern am Meer spazieren.",
+    "example_translation": "Вечером мы любим гулять у моря."
+  },
+  {
+    "sourceKey": "eine postkarte schicken",
+    "text": "eine Postkarte schicken",
+    "translation": "отправить открытку",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "vacation",
+    "example": "Ich schicke meiner Oma eine Postkarte aus Italien.",
+    "example_translation": "Я отправляю бабушке открытку из Италии."
+  },
+  {
+    "sourceKey": "der sonnenuntergang",
+    "text": "der Sonnenuntergang",
+    "translation": "закат",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Der Sonnenuntergang am Strand war unglaublich schön.",
+    "example_translation": "Закат на пляже был невероятно красивым."
+  },
+  {
+    "sourceKey": "die kuste",
+    "text": "die Küste",
+    "translation": "побережье",
+    "level": "B1",
+    "type": "word",
+    "topic": "sea",
+    "example": "An dieser Küste gibt es viele kleine Buchten.",
+    "example_translation": "На этом побережье много маленьких бухт."
+  },
+  {
+    "sourceKey": "die wellen",
+    "text": "die Wellen",
+    "translation": "волны",
+    "level": "B1",
+    "type": "word",
+    "topic": "sea",
+    "example": "Die Wellen waren heute Morgen ziemlich stark.",
+    "example_translation": "Волны сегодня утром были довольно сильными."
+  },
+  {
+    "sourceKey": "sich erholen",
+    "text": "sich erholen",
+    "translation": "восстанавливаться, отдыхать",
+    "level": "B1",
+    "type": "expression",
+    "topic": "vacation",
+    "example": "Ich fahre ans Meer, um mich richtig zu erholen.",
+    "example_translation": "Я еду к морю, чтобы по-настоящему отдохнуть."
+  },
+  {
+    "sourceKey": "abschalten",
+    "text": "abschalten",
+    "translation": "отключиться от забот",
+    "level": "B1",
+    "type": "word",
+    "topic": "vacation",
+    "example": "Im Urlaub kann ich endlich abschalten.",
+    "example_translation": "В отпуске я наконец могу отключиться от забот."
+  },
+  {
+    "sourceKey": "das reiseziel",
+    "text": "das Reiseziel",
+    "translation": "место назначения, цель поездки",
+    "level": "B1",
+    "type": "word",
+    "topic": "travel",
+    "example": "Unser Reiseziel dieses Jahr ist Sardinien.",
+    "example_translation": "Наше место назначения в этом году — Сардиния."
+  },
+  {
+    "sourceKey": "die nebensaison",
+    "text": "die Nebensaison",
+    "translation": "низкий сезон",
+    "level": "B1",
+    "type": "word",
+    "topic": "travel",
+    "example": "In der Nebensaison ist es am Meer viel ruhiger.",
+    "example_translation": "В низкий сезон у моря гораздо спокойнее."
+  },
+  {
+    "sourceKey": "die hochsaison",
+    "text": "die Hochsaison",
+    "translation": "высокий сезон",
+    "level": "B1",
+    "type": "word",
+    "topic": "travel",
+    "example": "In der Hochsaison sind die Hotels oft teuer.",
+    "example_translation": "В высокий сезон отели часто дорогие."
+  },
+  {
+    "sourceKey": "eine bootsfahrt machen",
+    "text": "eine Bootsfahrt machen",
+    "translation": "совершить прогулку на лодке",
+    "level": "B1",
+    "type": "collocation",
+    "topic": "sea",
+    "example": "Morgen machen wir eine Bootsfahrt entlang der Küste.",
+    "example_translation": "Завтра мы отправимся на прогулку на лодке вдоль побережья."
+  },
+  {
+    "sourceKey": "schnorcheln gehen",
+    "text": "schnorcheln gehen",
+    "translation": "идти снорклить",
+    "level": "B1",
+    "type": "expression",
+    "topic": "sea",
+    "example": "Wenn das Wasser klar ist, gehen wir schnorcheln.",
+    "example_translation": "Если вода прозрачная, мы идем снорклить."
+  },
+  {
+    "sourceKey": "die seeluft geniessen",
+    "text": "die Seeluft genießen",
+    "translation": "наслаждаться морским воздухом",
+    "level": "B1",
+    "type": "collocation",
+    "topic": "sea",
+    "example": "Ich sitze früh auf dem Balkon und genieße die Seeluft.",
+    "example_translation": "Я сижу рано утром на балконе и наслаждаюсь морским воздухом."
+  },
+  {
+    "sourceKey": "eine auszeit brauchen",
+    "text": "eine Auszeit brauchen",
+    "translation": "нуждаться в передышке",
+    "level": "B1",
+    "type": "collocation",
+    "topic": "vacation",
+    "example": "Nach diesem Monat brauche ich wirklich eine Auszeit.",
+    "example_translation": "После этого месяца мне действительно нужна передышка."
+  },
+  {
+    "sourceKey": "ausgebucht sein",
+    "text": "ausgebucht sein",
+    "translation": "быть полностью забронированным",
+    "level": "B1",
+    "type": "expression",
+    "topic": "hotel",
+    "example": "Das Hotel war im August schon komplett ausgebucht.",
+    "example_translation": "В августе этот отель уже был полностью забронирован."
   }
 ]

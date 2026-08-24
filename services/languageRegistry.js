@@ -60,10 +60,11 @@ export function buildTargetLanguageSelectionText(currentLanguage = null) {
     : '\n';
 
   return [
-    '🌍 <b>Which language do you want to study?</b>',
-    'Какой язык ты хочешь изучать?',
+    '🌍 <b>Choose the language you want to study</b>',
+    'Выбери язык, который хочешь изучать.',
     currentLine,
-    'Choose one language. You can add or switch later.',
+    'Available now: English, German, Italian.',
+    'После выбора языка открой /session и начни мини-урок на сегодня.',
   ].join('\n');
 }
 
@@ -85,8 +86,8 @@ export function buildTargetLevelSelectionText(languageCode, currentLevel = UNKNO
     '',
     `Current level: <b>${levelLabel}</b>`,
     '',
-    'Choose your level or decide later with a placement test.',
-    'Выбери свой уровень или отметь, что пока не знаешь его.',
+    'Choose your level now. You can switch languages later in /languages.',
+    'Выбери свой уровень сейчас. Потом можно в любой момент вернуться в /languages.',
   ].join('\n');
 }
 

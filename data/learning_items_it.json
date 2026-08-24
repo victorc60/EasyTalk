@@ -23,7 +23,7 @@
     "level": "A1",
     "type": "expression",
     "topic": "communication",
-    "example": "Un caffe, per favore.",
+    "example": "Un caffè, per favore.",
     "example_translation": "Один кофе, пожалуйста."
   },
   {
@@ -125,7 +125,7 @@
     "level": "A1",
     "type": "word",
     "topic": "transport",
-    "example": "La stazione e vicino all'hotel.",
+    "example": "La stazione è vicino all'hotel.",
     "example_translation": "Вокзал рядом с отелем."
   },
   {
@@ -145,5 +145,230 @@
     "topic": "plans",
     "example": "Mangio prima di uscire.",
     "example_translation": "Я поем перед тем, как выйти."
+  },
+  {
+    "text": "la vacanza",
+    "translation": "отпуск, каникулы",
+    "level": "A2",
+    "type": "word",
+    "topic": "vacation",
+    "example": "Quest'anno voglio una vacanza tranquilla sul mare.",
+    "example_translation": "В этом году я хочу спокойный отпуск у моря."
+  },
+  {
+    "text": "la spiaggia",
+    "translation": "пляж",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "La spiaggia qui è pulita e molto lunga.",
+    "example_translation": "Пляж здесь чистый и очень длинный."
+  },
+  {
+    "text": "il mare",
+    "translation": "море",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Il mare al mattino è calmo e luminoso.",
+    "example_translation": "Море утром спокойное и яркое."
+  },
+  {
+    "text": "la crema solare",
+    "translation": "солнцезащитный крем",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Metti sempre la crema solare prima di uscire.",
+    "example_translation": "Всегда наноси солнцезащитный крем перед выходом."
+  },
+  {
+    "text": "il costume da bagno",
+    "translation": "купальник, плавки",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Ho dimenticato il costume da bagno in hotel.",
+    "example_translation": "Я забыл купальник в отеле."
+  },
+  {
+    "text": "fare il check-in",
+    "translation": "заселиться, пройти check-in",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "hotel",
+    "example": "Possiamo fare il check-in dopo le due.",
+    "example_translation": "Мы можем заселиться после двух."
+  },
+  {
+    "text": "prenotare una camera",
+    "translation": "забронировать номер",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "hotel",
+    "example": "Vorrei prenotare una camera con vista mare.",
+    "example_translation": "Я бы хотел забронировать номер с видом на море."
+  },
+  {
+    "text": "fare il bagno",
+    "translation": "купаться",
+    "level": "A2",
+    "type": "expression",
+    "topic": "sea",
+    "example": "Nel pomeriggio facciamo il bagno tutti insieme.",
+    "example_translation": "Днем мы все вместе идем купаться."
+  },
+  {
+    "text": "prendere il sole",
+    "translation": "загорать",
+    "level": "A2",
+    "type": "expression",
+    "topic": "sea",
+    "example": "Lei preferisce prendere il sole sotto l'ombrellone.",
+    "example_translation": "Она предпочитает загорать под зонтом."
+  },
+  {
+    "text": "mandare una cartolina",
+    "translation": "отправить открытку",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "vacation",
+    "example": "Voglio mandare una cartolina ai miei amici.",
+    "example_translation": "Я хочу отправить открытку своим друзьям."
+  },
+  {
+    "text": "camminare sul lungomare",
+    "translation": "гулять по набережной",
+    "level": "A2",
+    "type": "collocation",
+    "topic": "sea",
+    "example": "La sera ci piace camminare sul lungomare.",
+    "example_translation": "Вечером нам нравится гулять по набережной."
+  },
+  {
+    "text": "rilassarsi",
+    "translation": "расслабляться",
+    "level": "A2",
+    "type": "word",
+    "topic": "vacation",
+    "example": "Finalmente posso rilassarmi per qualche giorno.",
+    "example_translation": "Наконец я могу расслабиться на несколько дней."
+  },
+  {
+    "text": "il tramonto",
+    "translation": "закат",
+    "level": "A2",
+    "type": "word",
+    "topic": "sea",
+    "example": "Il tramonto sul mare è stato stupendo.",
+    "example_translation": "Закат над морем был великолепным."
+  },
+  {
+    "text": "la costa",
+    "translation": "побережье",
+    "level": "B1",
+    "type": "word",
+    "topic": "sea",
+    "example": "Questa costa è famosa per le sue acque chiare.",
+    "example_translation": "Это побережье известно своей прозрачной водой."
+  },
+  {
+    "text": "le onde",
+    "translation": "волны",
+    "level": "B1",
+    "type": "word",
+    "topic": "sea",
+    "example": "Di notte sentivamo le onde dalla finestra.",
+    "example_translation": "Ночью мы слышали волны из окна."
+  },
+  {
+    "text": "staccare la spina",
+    "translation": "отключиться от забот",
+    "level": "B1",
+    "type": "expression",
+    "topic": "vacation",
+    "example": "Ho bisogno di una settimana per staccare la spina.",
+    "example_translation": "Мне нужна неделя, чтобы отключиться от забот."
+  },
+  {
+    "text": "godersi la brezza marina",
+    "translation": "наслаждаться морским бризом",
+    "level": "B1",
+    "type": "collocation",
+    "topic": "sea",
+    "example": "Ci siamo seduti in terrazza a goderci la brezza marina.",
+    "example_translation": "Мы сели на террасе наслаждаться морским бризом."
+  },
+  {
+    "text": "essere tutto esaurito",
+    "translation": "быть полностью забронированным",
+    "level": "B1",
+    "type": "expression",
+    "topic": "hotel",
+    "example": "Ad agosto gli hotel sul mare sono quasi sempre tutti esauriti.",
+    "example_translation": "В августе морские отели почти всегда полностью забронированы."
+  },
+  {
+    "text": "l'alta stagione",
+    "translation": "высокий сезон",
+    "level": "B1",
+    "type": "word",
+    "topic": "travel",
+    "example": "In alta stagione tutto costa di più.",
+    "example_translation": "В высокий сезон все стоит дороже."
+  },
+  {
+    "text": "la bassa stagione",
+    "translation": "низкий сезон",
+    "level": "B1",
+    "type": "word",
+    "topic": "travel",
+    "example": "Preferisco viaggiare in bassa stagione.",
+    "example_translation": "Я предпочитаю путешествовать в низкий сезон."
+  },
+  {
+    "text": "aver bisogno di una pausa",
+    "translation": "нуждаться в передышке",
+    "level": "B1",
+    "type": "grammar",
+    "topic": "vacation",
+    "example": "Dopo questi mesi ho bisogno di una vera pausa.",
+    "example_translation": "После этих месяцев мне нужна настоящая передышка."
+  },
+  {
+    "text": "la meta del viaggio",
+    "translation": "место назначения",
+    "level": "B1",
+    "type": "phrase",
+    "topic": "travel",
+    "example": "La meta del viaggio quest'anno è la Sicilia.",
+    "example_translation": "Место назначения в этом году — Сицилия."
+  },
+  {
+    "text": "fare una gita in barca",
+    "translation": "поехать на прогулку на лодке",
+    "level": "B1",
+    "type": "collocation",
+    "topic": "sea",
+    "example": "Domani vogliamo fare una gita in barca al tramonto.",
+    "example_translation": "Завтра мы хотим поехать на прогулку на лодке на закате."
+  },
+  {
+    "text": "prenotare all'ultimo momento",
+    "translation": "бронировать в последний момент",
+    "level": "B1",
+    "type": "expression",
+    "topic": "travel",
+    "example": "Prenotare all'ultimo momento in estate è rischioso.",
+    "example_translation": "Бронировать в последний момент летом рискованно."
+  },
+  {
+    "text": "svegliarsi con vista sul mare",
+    "translation": "просыпаться с видом на море",
+    "level": "B1",
+    "type": "collocation",
+    "topic": "sea",
+    "example": "Il sogno della mia vacanza è svegliarmi con vista sul mare.",
+    "example_translation": "Мечта моего отпуска — просыпаться с видом на море."
   }
 ]
