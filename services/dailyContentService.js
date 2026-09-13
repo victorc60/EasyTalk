@@ -1,10 +1,9 @@
 // services/dailyContentService.js
-import User from '../models/User.js';
-import { sendUserMessage, escapeHtml, maskWordInText } from '../utils/botUtils.js';
-import { getNextItem, markAsUsed, alreadySentToday, logDaily } from './queueService.js';
+import DailyLog from '../models/DailyLog.js';
+import { escapeHtml, maskWordInText } from '../utils/botUtils.js';
+import { prepareContentDelivery, deliverPendingContent } from './contentDeliveryService.js';
 
 const LABELS = ['A', 'B', 'C', 'D'];
-const BROADCAST_DELAY_MS = 300;
 
 // ─── Message builders ────────────────────────────────────────────
 
@@ -114,66 +113,26 @@ function buildInlineKeyboard(type, queueId, item) {
  * @param {TelegramBot} bot
  * @param {'word'|'quiz'|'idiom'|'phrasal'|'fact'} type
  */
+async function deliverPublication(bot, publication) {
+  await deliverPendingContent(bot, publication, queue => ({
+    text: buildMessageText(publication.type, queue.content),
+    reply_markup: buildInlineKeyboard(publication.type, queue.id, queue.content),
+  }));
+}
+
 export async function runDailyContent(bot, type) {
   try {
-    console.log(`[CRON] Запуск рассылки контента типа "${type}"...`);
-
-    // 1. Защита от двойного запуска
-    if (await alreadySentToday(type)) {
-      console.log(`[CRON] "${type}" уже отправлен сегодня, пропускаем`);
-      return;
-    }
-
-    // 2. Получить следующий элемент очереди
-    const result = await getNextItem(type);
-    if (!result) {
-      console.error(`[CRON] Нет доступного контента для типа "${type}"`);
-      return;
-    }
-
-    const { item, queueId, contentId } = result;
-
-    // 3. Сформировать сообщение и кнопки
-    const text = buildMessageText(type, item);
-    const replyMarkup = buildInlineKeyboard(type, queueId, item);
-
-    // 4. Разослать всем активным пользователям
-    const users = await User.findAll({
-      where: { is_active: true },
-      attributes: ['telegram_id']
-    });
-
-    console.log(`[CRON] Рассылка "${type}" для ${users.length} активных пользователей...`);
-    let sent = 0;
-    let failed = 0;
-
-    for (const user of users) {
-      try {
-        await sendUserMessage(bot, user.telegram_id, text, {
-          parse_mode: 'HTML',
-          reply_markup: replyMarkup
-        });
-        sent++;
-        await new Promise(r => setTimeout(r, BROADCAST_DELAY_MS));
-      } catch (err) {
-        failed++;
-        if (err.response?.statusCode === 403) {
-          await user.update({ is_active: false });
-          console.log(`[CRON] Пользователь ${user.telegram_id} заблокировал бота — деактивирован`);
-        }
-      }
-    }
-
-    console.log(`[CRON] Рассылка "${type}" завершена: ${sent} успешно, ${failed} ошибок`);
-
-    // 5. Пометить как использованный
-    await markAsUsed(queueId);
-
-    // 6. Записать в daily_log
-    await logDaily(type, contentId);
-
-    console.log(`[CRON] ✅ "${type}" успешно отправлен (queueId=${queueId}, contentId=${contentId})`);
+    const date = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Chisinau' });
+    const publication = await prepareContentDelivery(type, date);
+    if (publication) await deliverPublication(bot, publication);
   } catch (error) {
-    console.error(`[CRON] Критическая ошибка рассылки "${type}":`, error.message);
+    console.error('[DELIVERY] Broadcast failed:', error.message);
+    throw error;
   }
+}
+
+export async function resumeDailyContent(bot) {
+  const date = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Chisinau' });
+  const publications = await DailyLog.findAll({ where: { date } });
+  for (const publication of publications) await deliverPublication(bot, publication);
 }

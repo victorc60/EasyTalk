@@ -4,6 +4,10 @@
 export const BONUS_GAMES = ['word', 'idiom', 'phrasal_verb', 'quiz'];
 export const BONUS_POINTS = 20;
 
+export function normalizeBonusGame(type) {
+  return ({ q_word: 'word', q_idiom: 'idiom', q_phrasal: 'phrasal_verb', q_quiz: 'quiz' })[type] || type;
+}
+
 const GAME_LABELS = {
   word:         '📖 слово дня',
   idiom:        '💬 идиома',
@@ -20,7 +24,7 @@ export function hasCompletedAllGames(participations) {
   const answeredTypes = new Set(
     participations
       .filter(p => p.answered === true || p.answered === 1)
-      .map(p => p.game_type)
+      .map(p => normalizeBonusGame(p.game_type))
   );
   return BONUS_GAMES.every(g => answeredTypes.has(g));
 }
@@ -36,7 +40,7 @@ export function hasCompletedAllGames(participations) {
 export function buildBonusProgressLine(answeredGames, bonusAlreadyAwarded) {
   if (bonusAlreadyAwarded) return null;
 
-  const answered = new Set(answeredGames);
+  const answered = new Set(answeredGames.map(normalizeBonusGame));
   const remaining = BONUS_GAMES.filter(g => !answered.has(g));
   const done = BONUS_GAMES.length - remaining.length;
 

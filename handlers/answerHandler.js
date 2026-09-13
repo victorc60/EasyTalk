@@ -9,15 +9,11 @@
 //     aq_fact_5_false    — тип fact, id очереди 5, ответ false
 
 import ContentQueue from '../models/ContentQueue.js';
-import { awardPoints } from '../services/userServices.js';
-import { recordGameParticipation, hasUserAnsweredGame } from '../services/wordGameServices.js';
+import { submitQueueAnswer } from '../services/queueAnswerService.js';
+import { acknowledgeCallback } from '../utils/callbackUtils.js';
 import { sendUserMessage, escapeHtml, maskWordInText } from '../utils/botUtils.js';
 
 const TZ = 'Europe/Chisinau';
-const VALID_TYPES = new Set(['word', 'quiz', 'idiom', 'phrasal', 'fact']);
-
-// In-memory set against race conditions (double tap)
-const pendingAnswers = new Set();
 
 function getTodayDate() {
   return new Date().toLocaleDateString('en-CA', { timeZone: TZ });
@@ -42,20 +38,6 @@ async function disableKeyboard(bot, callbackQuery) {
       console.warn(`[ANSWER] Не удалось убрать кнопки: ${desc}`);
     }
   }
-}
-
-function getPoints(type, item, isCorrect) {
-  if (type === 'fact') {
-    return isCorrect ? 10 : 2;
-  }
-  if (!isCorrect) return 0;
-  if (type === 'quiz') {
-    const level = item?.level;
-    if (level === 'A2') return 1;
-    if (level === 'B2') return 3;
-    return 2; // B1 or default
-  }
-  return 5; // word, idiom, phrasal
 }
 
 function buildResultMessage(type, item, isCorrect, points) {
@@ -121,7 +103,7 @@ async function handleQueueHintCallback(bot, callbackQuery) {
   const queueId = parseInt(parts[3], 10);
 
   if (type !== 'word' || isNaN(queueId)) {
-    await bot.answerCallbackQuery(callbackQuery.id, {
+    await acknowledgeCallback(bot, callbackQuery.id, {
       text: 'Подсказка недоступна',
       show_alert: true
     });
@@ -130,7 +112,7 @@ async function handleQueueHintCallback(bot, callbackQuery) {
 
   const queueRow = await ContentQueue.findByPk(queueId);
   if (!queueRow || queueRow.type !== 'word') {
-    await bot.answerCallbackQuery(callbackQuery.id, {
+    await acknowledgeCallback(bot, callbackQuery.id, {
       text: 'Вопрос больше недоступен',
       show_alert: true
     });
@@ -144,7 +126,7 @@ async function handleQueueHintCallback(bot, callbackQuery) {
     ? `💡 Подсказка: ${maskedHint}`
     : 'Подсказка пока недоступна';
 
-  await bot.answerCallbackQuery(callbackQuery.id, {
+  await acknowledgeCallback(bot, callbackQuery.id, {
     text: clampCallbackText(hintText),
     show_alert: true
   });
@@ -155,132 +137,31 @@ async function handleQueueHintCallback(bot, callbackQuery) {
  * Вызывается из setupCallbacks в botSetup.js.
  */
 export async function handleAnswerCallback(bot, callbackQuery) {
+  const userId = callbackQuery.from.id;
+  if (callbackQuery.data.startsWith('aq_hint_')) {
+    await handleQueueHintCallback(bot, callbackQuery);
+    return;
+  }
+  await acknowledgeCallback(bot, callbackQuery.id);
+  let saved = false;
   try {
-    const data = callbackQuery.data;
-    const userId = callbackQuery.from.id;
-
-    if (data.startsWith('aq_hint_')) {
-      await handleQueueHintCallback(bot, callbackQuery);
-      return;
-    }
-
-    // Parse: aq_{type}_{queueId}_{answer}
-    // Split only on first 3 underscores to handle potential underscores in answer
-    const firstUnderscore = data.indexOf('_');
-    const rest = data.slice(firstUnderscore + 1); // type_{queueId}_{answer}
-    const secondUnderscore = rest.indexOf('_');
-    const type = rest.slice(0, secondUnderscore);
-    const afterType = rest.slice(secondUnderscore + 1); // {queueId}_{answer}
-    const thirdUnderscore = afterType.indexOf('_');
-    const queueId = parseInt(afterType.slice(0, thirdUnderscore), 10);
-    const answer = afterType.slice(thirdUnderscore + 1);
-
-    if (!VALID_TYPES.has(type) || isNaN(queueId)) return;
-
-    // Anti-race: prevent double tap
-    const pendingKey = `${userId}:${type}:${queueId}`;
-    if (pendingAnswers.has(pendingKey)) {
-      await bot.answerCallbackQuery(callbackQuery.id, {
-        text: 'ℹ️ Ты уже ответил',
-        show_alert: true
-      });
-      return;
-    }
-
-    // Check DB for previous answer today
-    const today = getTodayDate();
-    const gameTypeKey = `q_${type}`;
-    const alreadyAnswered = await hasUserAnsweredGame(userId, gameTypeKey, 'queue', today);
-
-    if (alreadyAnswered) {
-      await disableKeyboard(bot, callbackQuery);
-      await bot.answerCallbackQuery(callbackQuery.id, {
-        text: 'ℹ️ Ты уже ответил на этот вопрос сегодня',
-        show_alert: true
-      });
-      return;
-    }
-
-    pendingAnswers.add(pendingKey);
+    const match = callbackQuery.data.match(/^aq_(word|quiz|idiom|phrasal|fact)_(\d+)_(true|false|[0-3])$/);
+    if (!match) throw new Error('Invalid answer');
+    const [, type, queueId, answer] = match;
+    const messageDate = new Date(callbackQuery.message.date * 1000).toLocaleDateString('en-CA', { timeZone: TZ });
+    if (messageDate !== getTodayDate()) throw new Error('Question expired');
+    const result = await submitQueueAnswer({ userId, type, queueId: Number(queueId), answer, gameDate: getTodayDate() });
+    saved = true;
     await disableKeyboard(bot, callbackQuery);
-
-    try {
-      // Load item from queue table
-      const queueRow = await ContentQueue.findByPk(queueId);
-      if (!queueRow) {
-        await bot.answerCallbackQuery(callbackQuery.id, {
-          text: '⏰ Вопрос больше недоступен',
-          show_alert: true
-        });
-        return;
-      }
-
-      const item = queueRow.content;
-      let isCorrect = false;
-
-      if (type === 'fact') {
-        const userSaidTrue = answer === 'true';
-        isCorrect = userSaidTrue === Boolean(item.isTrue);
-      } else {
-        const selectedIndex = parseInt(answer, 10);
-        if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex > 3) {
-          await bot.answerCallbackQuery(callbackQuery.id, {
-            text: '⚠️ Неверный вариант ответа',
-            show_alert: true
-          });
-          return;
-        }
-        isCorrect = selectedIndex === item.correctIndex;
-      }
-
-      const points = getPoints(type, item, isCorrect);
-
-      // Award points
-      if (points > 0) {
-        await awardPoints(userId, points);
-      }
-
-      // Build key for participation record
-      const wordKey =
-        type === 'word'    ? (item.word || '').slice(0, 100) :
-        type === 'idiom'   ? (item.idiom || '').slice(0, 100) :
-        type === 'phrasal' ? (item.verb || item.phrasalVerb || '').slice(0, 100) :
-        type === 'quiz'    ? (item.question || '').slice(0, 100) :
-                             (item.claim || '').slice(0, 100);
-
-      // Record in word_game_participation (prevents double answer on next check)
-      await recordGameParticipation({
-        userId,
-        word: wordKey,
-        answered: true,
-        correct: isCorrect,
-        pointsEarned: points,
-        responseTime: null,
-        gameType: gameTypeKey,
-        slot: 'queue',
-        gameDate: today
-      });
-
-      // Send result message
-      const resultMsg = buildResultMessage(type, item, isCorrect, points);
-      await sendUserMessage(bot, userId, resultMsg, { parse_mode: 'HTML' });
-
-      await bot.answerCallbackQuery(callbackQuery.id, {
-        text: isCorrect ? '✅ Верно!' : '❌ Неверно',
-        show_alert: false
-      });
-
-      console.log(`[ANSWER] userId=${userId} type=${type} queueId=${queueId} correct=${isCorrect} points=${points}`);
-    } finally {
-      pendingAnswers.delete(pendingKey);
-    }
+    const message = result.duplicate
+      ? 'ℹ️ Ответ уже сохранён. Повторные очки не начислены.'
+      : buildResultMessage(type, result.item, result.correct, result.points) + (result.bonus ? '\n\n🎁 Ежедневный бонус: +20 очков!' : '');
+    await sendUserMessage(bot, userId, message, { parse_mode: 'HTML' });
   } catch (error) {
-    console.error(`[ANSWER] Ошибка обработки ответа:`, error.message);
-    try {
-      await bot.answerCallbackQuery(callbackQuery.id, {
-        text: '⚠️ Произошла ошибка',
-        show_alert: true
-      });
-    } catch (_) {}
+    console.error('[ANSWER] Failed:', error.message);
+    if (!saved) {
+      await sendUserMessage(bot, userId, '⚠️ Ответ не сохранён. Попробуй снова или открой актуальный вопрос.')
+        .catch(error => console.warn('[ANSWER] Notification failed:', error.message));
+    }
   }
 }

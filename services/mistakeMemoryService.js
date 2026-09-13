@@ -12,9 +12,11 @@ export async function rememberMistake({
   correctedText = '',
   explanation = '',
   metadata = null,
+  transaction,
 } = {}) {
   const normalizedLanguage = normalizeTargetLanguage(targetLanguage);
   const [memory, created] = await MistakeMemory.findOrCreate({
+    transaction,
     where: {
       user_id: userId,
       target_language: normalizedLanguage,
@@ -52,7 +54,7 @@ export async function rememberMistake({
         attempts: memory.count || 1,
       }),
       metadata: metadata || memory.metadata,
-    });
+    }, { transaction });
   }
 
   return memory;

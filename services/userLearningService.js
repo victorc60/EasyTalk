@@ -58,9 +58,11 @@ export async function getOrCreateUserLearningItem({
   userId,
   targetLanguage,
   learningItemId,
+  transaction,
 } = {}) {
   const normalizedLanguage = normalizeTargetLanguage(targetLanguage);
   const [userItem] = await UserLearningItem.findOrCreate({
+    transaction,
     where: {
       user_id: userId,
       target_language: normalizedLanguage,
@@ -85,11 +87,13 @@ export async function applyLearningExerciseResult({
   learningItemId,
   exerciseType,
   isCorrect,
+  transaction,
 } = {}) {
   const userItem = await getOrCreateUserLearningItem({
     userId,
     targetLanguage,
     learningItemId,
+    transaction,
   });
 
   const now = new Date();
@@ -136,7 +140,7 @@ export async function applyLearningExerciseResult({
     ease_factor: nextEaseFactor,
     last_exercise_type: exerciseType,
     first_seen_at: userItem.first_seen_at || now,
-  });
+  }, { transaction });
 
   return {
     userItem,

@@ -309,7 +309,7 @@ async function sendToTelegram(summary) {
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   const ADMIN_ID  = process.env.ADMIN_ID;
 
-  if (!BOT_TOKEN || !ADMIN_ID) {
+  if (process.env.TEST_NOTIFY_TELEGRAM !== 'true' || !BOT_TOKEN || !ADMIN_ID) {
     console.log('ℹ️  Telegram-уведомление пропущено (нет TELEGRAM_BOT_TOKEN или ADMIN_ID в .env)\n');
     return;
   }

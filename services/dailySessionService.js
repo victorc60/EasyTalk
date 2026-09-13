@@ -1,4 +1,6 @@
 import { OpenAI } from 'openai';
+import sequelize from '../database/database.js';
+import User from '../models/User.js';
 import { Op } from 'sequelize';
 import DailySession from '../models/DailySession.js';
 import SessionExercise from '../models/SessionExercise.js';
@@ -304,13 +306,14 @@ export async function startDailySession({ userId, targetLanguage, openai } = {})
   return session;
 }
 
-export async function getCurrentSessionExercise(sessionId) {
-  const session = await DailySession.findByPk(sessionId);
+export async function getCurrentSessionExercise(sessionId, transaction) {
+  const session = await DailySession.findByPk(sessionId, { transaction });
   if (!session || session.status !== 'active') {
     return null;
   }
 
   const exercise = await SessionExercise.findOne({
+    transaction,
     where: {
       daily_session_id: session.id,
       position: session.current_position,
@@ -335,7 +338,7 @@ export function formatSessionExerciseMessage(session, exercise) {
       reply_markup: {
         inline_keyboard: exercise.prompt.options.map((option, index) => ([{
           text: option,
-          callback_data: `session_answer_${session.id}_${index}`,
+          callback_data: `session_answer_${session.id}_${exercise.id}_${index}`,
         }])),
       },
     };
@@ -354,8 +357,9 @@ export function formatSessionExerciseMessage(session, exercise) {
   };
 }
 
-async function completeSession(session) {
+async function completeSession(session, transaction) {
   const attempts = await ExerciseAttempt.findAll({
+    transaction,
     include: [{
       model: SessionExercise,
       as: 'SessionExercise',
@@ -377,26 +381,27 @@ async function completeSession(session) {
       correct,
       accuracy: attempts.length > 0 ? Math.round((correct / attempts.length) * 100) : 0,
     },
-  });
+  }, { transaction });
 
   return session.summary;
 }
 
 export async function submitSessionAnswer({
   sessionId,
+  exerciseId,
   userId,
   answer,
   nativeLanguage,
   openai,
 } = {}) {
-  const session = await DailySession.findByPk(sessionId);
-  if (!session || session.status !== 'active') {
+  let session = await DailySession.findByPk(sessionId);
+  if (!session || session.status !== 'active' || String(session.user_id) !== String(userId)) {
     throw new Error('Session is not active');
   }
 
   const exercise = await getCurrentSessionExercise(session.id);
-  if (!exercise) {
-    throw new Error('Exercise not found');
+  if (!exercise || String(exercise.id) !== String(exerciseId)) {
+    throw new Error('Question expired. Open /session to continue.');
   }
 
   let isCorrect = false;
@@ -406,6 +411,9 @@ export async function submitSessionAnswer({
 
   if (exercise.exercise_type === 'translation_choice') {
     const selectedIndex = Number(answer);
+    if (!Number.isInteger(selectedIndex) || selectedIndex < 0 || selectedIndex >= exercise.prompt.options.length) {
+      throw new Error('Invalid answer option');
+    }
     isCorrect = selectedIndex === exercise.expected_answer?.correctIndex;
     feedback = isCorrect
       ? `✅ ${exercise.LearningItem.text} = ${exercise.LearningItem.translation}`
@@ -433,66 +441,77 @@ export async function submitSessionAnswer({
     score = isCorrect ? 1 : 0.5;
   }
 
-  const learningUpdate = await applyLearningExerciseResult({
-    userId,
-    targetLanguage: session.target_language,
-    learningItemId: exercise.learning_item_id,
-    exerciseType: exercise.exercise_type,
-    isCorrect,
-  });
-
-  if (!isCorrect) {
-    await rememberMistake({
+  return sequelize.transaction(async transaction => {
+    const user = await User.findOne({ where: { telegram_id: userId }, transaction, lock: transaction.LOCK.UPDATE });
+    if (!user) throw new Error('User not found');
+    const locked = await DailySession.findByPk(sessionId, { transaction, lock: transaction.LOCK.UPDATE });
+    if (!locked || locked.status !== 'active' || locked.current_position !== session.current_position || String(locked.user_id) !== String(userId)) {
+      throw new Error('Answer already processed. Open /session to continue.');
+    }
+    session = locked;
+    const learningUpdate = await applyLearningExerciseResult({
+      transaction,
       userId,
       targetLanguage: session.target_language,
       learningItemId: exercise.learning_item_id,
-      category: inferMistakeCategory(exercise.LearningItem, exercise.exercise_type),
-      patternKey: `${exercise.exercise_type}:${exercise.LearningItem.text.toLowerCase()}`,
-      sourceText: String(answer || ''),
-      correctedText: correctedText || exercise.LearningItem.text,
-      explanation: feedback,
-      metadata: {
-        exerciseType: exercise.exercise_type,
-      },
+      exerciseType: exercise.exercise_type,
+      isCorrect,
     });
-  }
 
-  await ExerciseAttempt.create({
-    session_exercise_id: exercise.id,
-    user_id: userId,
-    answer_text: String(answer || ''),
-    is_correct: isCorrect,
-    score,
-    feedback,
-    recognition_delta: learningUpdate.deltas.recognition,
-    production_delta: learningUpdate.deltas.production,
-    metadata: {
-      nextState: learningUpdate.nextState,
-      nextReviewAt: learningUpdate.nextReviewAt,
-    },
-  });
+    if (!isCorrect) {
+      await rememberMistake({
+        transaction,
+        userId,
+        targetLanguage: session.target_language,
+        learningItemId: exercise.learning_item_id,
+        category: inferMistakeCategory(exercise.LearningItem, exercise.exercise_type),
+        patternKey: `${exercise.exercise_type}:${exercise.LearningItem.text.toLowerCase()}`,
+        sourceText: String(answer || ''),
+        correctedText: correctedText || exercise.LearningItem.text,
+        explanation: feedback,
+        metadata: {
+          exerciseType: exercise.exercise_type,
+        },
+      });
+    }
 
-  const nextPosition = session.current_position + 1;
-  if (nextPosition >= session.total_exercises) {
-    await session.update({ current_position: nextPosition });
-    const summary = await completeSession(session);
-    return {
-      finished: true,
+    await ExerciseAttempt.create({
+      session_exercise_id: exercise.id,
+      user_id: userId,
+      answer_text: String(answer || ''),
+      is_correct: isCorrect,
+      score,
       feedback,
-      summary,
+      recognition_delta: learningUpdate.deltas.recognition,
+      production_delta: learningUpdate.deltas.production,
+      metadata: {
+        nextState: learningUpdate.nextState,
+        nextReviewAt: learningUpdate.nextReviewAt,
+      },
+    }, { transaction });
+
+    const nextPosition = session.current_position + 1;
+    if (nextPosition >= session.total_exercises) {
+      await session.update({ current_position: nextPosition }, { transaction });
+      const summary = await completeSession(session, transaction);
+      return {
+        finished: true,
+        feedback,
+        summary,
+        session,
+      };
+    }
+
+    await session.update({ current_position: nextPosition }, { transaction });
+    const nextExercise = await getCurrentSessionExercise(session.id, transaction);
+
+    return {
+      finished: false,
+      feedback,
+      nextExercise,
       session,
     };
-  }
-
-  await session.update({ current_position: nextPosition });
-  const nextExercise = await getCurrentSessionExercise(session.id);
-
-  return {
-    finished: false,
-    feedback,
-    nextExercise,
-    session,
-  };
+  });
 }
 
 export async function getActiveDailySession(userId) {

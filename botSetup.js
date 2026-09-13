@@ -4,7 +4,7 @@ import { CONFIG } from './config.js';
 import { sendUserMessage, sendAdminMessage } from './utils/botUtils.js';
 import { sendRandomSticker, saveSticker, getStickerStats } from './utils/stickerUtils.js';
 import { weeklyLeaderboardBroadcast, startRolePlay, broadcastMessage } from './features/botFeatures.js';
-import { runDailyContent } from './services/dailyContentService.js';
+import { runDailyContent, resumeDailyContent } from './services/dailyContentService.js';
 import { notifyDailyWordGameStats, handleEndOfDayWordGames } from './features/wordGameNotifications.js';
 import { cleanupInactiveUsers, awardPoints } from './services/userServices.js';
 import { start, leaderboard, startRolePlayCommand, conversationTopic, setMode, showProgress, broadcast, handleWordGameCallback, handleWordHintCallback, handleIdiomGameCallback, handlePhrasalVerbGameCallback, handleQuizGameCallback, handleFactGameCallback, showModeSelection, showLanguageSelection, saveNativeLanguage, testHoroscope, addWordToHistory, wordGameStats, testAdmin, startPollCreation, showPollResults, periodStats, userStats, topUsers, miniGame, miniEventInviteAdmin, miniEventFinalizeAdmin, dbCheck, wordsUsed } from './handlers/commandHandlers.js';
@@ -65,6 +65,10 @@ export async function setupBot(bot, userSessions, openai) {
 }
 
 function setupSchedulers(bot, userSessions) {
+  resumeDailyContent(bot).catch(error => console.error('[DELIVERY] Resume failed:', error.message));
+  schedule.scheduleJob('*/1 * * * *', () => {
+    resumeDailyContent(bot).catch(error => console.error('[DELIVERY] Resume failed:', error.message));
+  });
   try {
     console.log('Текущее время сервера:', new Date().toLocaleString('ru-RU', { timeZone: 'UTC' }));
     console.log('Текущее время Chisinau:', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Chisinau' }));
@@ -364,8 +368,8 @@ function setupCommandHandlers(bot, userSessions, openai) {
 
 function setupCallbacks(bot, userSessions, openai) {
   bot.on('callback_query', async (callbackQuery) => {
+    const chatId = callbackQuery.message?.chat?.id || callbackQuery.from?.id;
     try {
-      const chatId = callbackQuery.message?.chat?.id || callbackQuery.from?.id;
       const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
 
@@ -527,8 +531,9 @@ function setupCallbacks(bot, userSessions, openai) {
 
       await bot.answerCallbackQuery(callbackQuery.id);
     } catch (error) {
-      console.error('Ошибка обработки callback:', error);
-      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при обработке действия.');
+      console.error('Ошибка обработки callback:', error.message);
+      await sendUserMessage(bot, chatId, '⚠️ Произошла ошибка при обработке действия.')
+        .catch(notificationError => console.warn('Callback notification failed:', notificationError.message));
       await sendAdminMessage(bot, `‼️ Ошибка обработки callback: ${error.message}`);
     }
   });

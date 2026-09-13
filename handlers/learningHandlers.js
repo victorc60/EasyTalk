@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import { acknowledgeCallback } from '../utils/callbackUtils.js';
 import { sendUserMessage, escapeHtml } from '../utils/botUtils.js';
 import { buildWelcomeMessage, normalizeNativeLanguage } from '../utils/nativeLanguage.js';
 import {
@@ -280,26 +281,26 @@ export async function handleLearningCallback(bot, callbackQuery, openai) {
   }
 
   if (data.startsWith('session_answer_')) {
-    const match = data.match(/^session_answer_(\d+)_(\d+)$/);
+    await acknowledgeCallback(bot, callbackQuery.id);
+    const match = data.match(/^session_answer_(\d+)_(\d+)_(\d+)$/);
     if (!match) {
-      await bot.answerCallbackQuery(callbackQuery.id, { text: 'Invalid answer' });
+      await sendUserMessage(bot, chatId, 'Этот вопрос устарел. Открой /session, чтобы продолжить.');
       return true;
     }
 
     const nativeLanguage = await getUserNativeLanguage(userId);
     const sessionId = Number(match[1]);
-    const answerIndex = Number(match[2]);
+    const exerciseId = Number(match[2]);
+    const answerIndex = Number(match[3]);
     const result = await submitSessionAnswer({
       sessionId,
+      exerciseId,
       userId,
       answer: answerIndex,
       nativeLanguage,
       openai,
     });
 
-    await bot.answerCallbackQuery(callbackQuery.id, {
-      text: result.finished ? 'Session complete' : 'Answer saved',
-    });
     await sendUserMessage(bot, chatId, result.feedback, { parse_mode: 'HTML' });
 
     if (result.finished) {
@@ -345,6 +346,7 @@ export async function handleLearningTextMessage(bot, msg, openai) {
   const nativeLanguage = await getUserNativeLanguage(userId);
   const result = await submitSessionAnswer({
     sessionId: session.id,
+    exerciseId: exercise.id,
     userId,
     answer: msg.text?.trim() || '',
     nativeLanguage,

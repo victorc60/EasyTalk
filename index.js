@@ -20,6 +20,7 @@ import './models/MiniEventDay.js';
 import './models/MiniEventParticipant.js';
 import './models/MiniEventResponse.js';
 import './models/ContentQueue.js';
+import './models/ContentDelivery.js';
 import './models/DailyLog.js';
 import './models/UserLanguageProfile.js';
 import './models/LearningItem.js';
