@@ -1,6 +1,8 @@
 // services/queueService.js
 import ContentQueue from '../models/ContentQueue.js';
 import DailyLog from '../models/DailyLog.js';
+import sequelize from '../database/database.js';
+import { appendQueueRecord, queueFingerprint } from './contentIdentityService.js';
 
 const TZ = 'Europe/Chisinau';
 
@@ -92,10 +94,10 @@ export function buildQueueRecord(type, item, index, bankData) {
 
   return {
     type,
-    content_id: contentId,
+    content_id: `${type}_${queueFingerprint(type, item).slice(0, 32)}`,
     content: enriched,
-    used: false,
-    used_at: null
+    used: Boolean(item.isUsed),
+    used_at: item.isUsed ? new Date() : null
   };
 }
 
@@ -108,9 +110,12 @@ export async function loadBankToQueue(type, bankData) {
     console.log(`[QUEUE] Загружаем банк "${type}" в очередь (${bankData.length} элементов)...`);
     const records = bankData.map((item, index) => buildQueueRecord(type, item, index, bankData));
 
-    await ContentQueue.bulkCreate(records);
-    console.log(`[QUEUE] ✅ Загружено ${records.length} элементов для типа "${type}"`);
-    return records.length;
+    let added = 0;
+    for (const record of records) {
+      added += Number(await sequelize.transaction(transaction => appendQueueRecord(record, transaction)));
+    }
+    console.log(`[QUEUE] ✅ Добавлено ${added} новых элементов для типа "${type}"`);
+    return added;
   } catch (error) {
     console.error(`[QUEUE] Ошибка загрузки банка "${type}":`, error.message);
     throw error;
@@ -119,12 +124,11 @@ export async function loadBankToQueue(type, bankData) {
 
 /**
  * Возвращает следующий неиспользованный элемент очереди с наименьшим id.
- * Перед поиском проверяет нужен ли сброс очереди.
+ * Исчерпанная очередь не сбрасывается.
  * @returns {{ item, queueId, contentId } | null}
  */
 export async function getNextItem(type) {
   try {
-    await resetQueueIfNeeded(type);
 
     const row = await ContentQueue.findOne({
       where: { type, used: false },
@@ -190,30 +194,5 @@ export async function logDaily(type, contentId) {
   }
 }
 
-/**
- * Если все элементы очереди данного типа использованы — сбрасывает их обратно в used=false.
- * @returns {boolean} true если был выполнен сброс
- */
-export async function resetQueueIfNeeded(type) {
-  try {
-    const totalCount = await ContentQueue.count({ where: { type } });
-    if (totalCount === 0) return false;
-
-    const unusedCount = await ContentQueue.count({ where: { type, used: false } });
-
-    if (unusedCount === 0) {
-      console.log(`[QUEUE] Все ${totalCount} элементов "${type}" использованы — сбрасываем очередь`);
-      await ContentQueue.update(
-        { used: false, used_at: null },
-        { where: { type } }
-      );
-      console.log(`[QUEUE] Очередь "${type}" сброшена, цикл начинается заново`);
-      return true;
-    }
-
-    return false;
-  } catch (error) {
-    console.error(`[QUEUE] Ошибка сброса очереди "${type}":`, error.message);
-    return false;
-  }
-}
+// Compatibility export: exhaustion never clears publication history.
+export async function resetQueueIfNeeded() { return false; }

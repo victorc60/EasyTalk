@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { Op } from 'sequelize';
 import User from '../models/User.js';
 import MiniEventDay from '../models/MiniEventDay.js';
@@ -8,7 +5,7 @@ import MiniEventParticipant from '../models/MiniEventParticipant.js';
 import MiniEventResponse from '../models/MiniEventResponse.js';
 import { awardPoints } from './userServices.js';
 import { sendUserMessage, sendAdminMessage, escapeHtml } from '../utils/botUtils.js';
-import { appendBankHistoryEntries } from './bankLifecycleService.js';
+import { prepareMiniEventPlan, getPlannedQuestion } from './miniEventPlanService.js';
 
 const TZ = 'Europe/Chisinau';
 const QUESTIONS_PER_EVENT = 10;
@@ -17,8 +14,6 @@ const PARTICIPATION_REWARD = 50;
 const PLACE_REWARDS = [300, 200, 100];
 const MIN_INTERVAL_MS = 30 * 1000;
 
-let questionBankCache = null;
-let miniEventHistoryPathCache = null;
 
 function getMoscowNow() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: TZ }));
@@ -58,95 +53,6 @@ function isSaturdayInMoscow() {
   return getMoscowNow().getDay() === 6;
 }
 
-function loadQuestionBank() {
-  if (questionBankCache) {
-    return questionBankCache;
-  }
-
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const bankPath = path.join(__dirname, '..', 'data', 'mini_event_questions.json');
-  const raw = fs.readFileSync(bankPath, 'utf-8');
-  const parsed = JSON.parse(raw);
-
-  if (!Array.isArray(parsed) || parsed.length < QUESTIONS_PER_EVENT) {
-    throw new Error(`mini_event_questions.json должен содержать минимум ${QUESTIONS_PER_EVENT} вопросов`);
-  }
-
-  questionBankCache = parsed;
-  return questionBankCache;
-}
-
-function getMiniEventHistoryPath() {
-  if (miniEventHistoryPathCache) {
-    return miniEventHistoryPathCache;
-  }
-
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  miniEventHistoryPathCache = path.join(__dirname, '..', 'data', 'mini_event_history.json');
-  return miniEventHistoryPathCache;
-}
-
-function loadUsedMiniEventQuestionIds() {
-  const historyPath = getMiniEventHistoryPath();
-
-  if (!fs.existsSync(historyPath)) {
-    return new Set();
-  }
-
-  try {
-    const raw = fs.readFileSync(historyPath, 'utf-8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return new Set();
-    }
-    return new Set(parsed.map((id) => String(id).trim()).filter(Boolean));
-  } catch (error) {
-    console.error('Ошибка чтения mini_event_history.json:', error.message);
-    return new Set();
-  }
-}
-
-function shuffleInPlace(arr) {
-  for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function pickQuestionIds() {
-  const bank = loadQuestionBank();
-  const usedQuestionIds = loadUsedMiniEventQuestionIds();
-  const unusedQuestions = bank.filter((q) => !usedQuestionIds.has(String(q.id)));
-  const selected = [];
-  const selectedIds = new Set();
-
-  for (const question of shuffleInPlace([...unusedQuestions])) {
-    if (selected.length >= QUESTIONS_PER_EVENT) break;
-    selected.push(question);
-    selectedIds.add(String(question.id));
-  }
-
-  if (selected.length < QUESTIONS_PER_EVENT) {
-    const fallback = shuffleInPlace([...bank]);
-    for (const question of fallback) {
-      if (selected.length >= QUESTIONS_PER_EVENT) break;
-      const key = String(question.id);
-      if (selectedIds.has(key)) continue;
-      selected.push(question);
-      selectedIds.add(key);
-    }
-  }
-
-  return selected.slice(0, QUESTIONS_PER_EVENT).map((q) => q.id);
-}
-
-function getQuestionById(questionId) {
-  return loadQuestionBank().find((q) => q.id === questionId) || null;
-}
-
 function buildQuestionKeyboard(eventKey, questionIndex, options) {
   return {
     inline_keyboard: options.map((option, optionIndex) => ([{
@@ -170,29 +76,18 @@ function calculateNextIntervalMs(now, cutoff, remainingQuestions) {
 }
 
 async function getOrCreateEventDay(eventDate) {
-  const defaults = {
-    event_date: eventDate,
-    total_questions: QUESTIONS_PER_EVENT,
-    question_ids: pickQuestionIds(),
-    is_closed: false
-  };
-
-  const [day, created] = await MiniEventDay.findOrCreate({
+  const existing = await MiniEventDay.findOne({ where: { event_date: eventDate } });
+  if (existing) return existing;
+  const plan = await prepareMiniEventPlan(eventDate);
+  const [day] = await MiniEventDay.findOrCreate({
     where: { event_date: eventDate },
-    defaults
+    defaults: {
+      event_date: eventDate,
+      total_questions: QUESTIONS_PER_EVENT,
+      question_ids: plan.questions.map(question => question.id),
+      is_closed: false,
+    },
   });
-
-  if (created && Array.isArray(day.question_ids)) {
-    appendBankHistoryEntries('mini_event', day.question_ids);
-  }
-
-  if (!Array.isArray(day.question_ids) || day.question_ids.length < QUESTIONS_PER_EVENT) {
-    const newQuestionIds = pickQuestionIds();
-    await day.update({ question_ids: newQuestionIds, total_questions: QUESTIONS_PER_EVENT });
-    await day.reload();
-    appendBankHistoryEntries('mini_event', newQuestionIds);
-  }
-
   return day;
 }
 
@@ -244,7 +139,7 @@ async function sendQuestionToParticipant(bot, day, participant) {
   }
 
   const questionId = day.question_ids[participant.current_question_index];
-  const question = getQuestionById(questionId);
+  const question = await getPlannedQuestion(questionId, eventDate);
   if (!question || !Array.isArray(question.options) || question.options.length < 2) {
     return false;
   }
@@ -556,7 +451,7 @@ export async function handleMiniEventAnswerCallback(bot, callbackQuery) {
     }
 
     const questionId = day.question_ids[questionIndex];
-    const question = getQuestionById(questionId);
+    const question = await getPlannedQuestion(questionId, eventDate);
     if (!question) {
       await bot.answerCallbackQuery(callbackQuery.id, { text: '⚠️ Вопрос не найден', show_alert: true });
       return true;

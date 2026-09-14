@@ -4,6 +4,9 @@ import { sendAdminMessage } from '../utils/botUtils.js';
 import { DATA_DIR } from '../utils/projectPaths.js';
 import ContentQueue from '../models/ContentQueue.js';
 import DailyLog from '../models/DailyLog.js';
+import GeneratedBankItem from '../models/GeneratedBankItem.js';
+import { maintainBanks, getBankSupply } from './bankAutofillService.js';
+import { prepareUpcomingMiniEvent } from './miniEventPlanService.js';
 
 const AUDIT_TZ = 'Europe/Chisinau';
 
@@ -87,8 +90,13 @@ async function getQueueCoverageForBank(bankKey) {
   const source = getCoverageForBank(bankKey);
 
   if (!spec?.queueType) {
+    const generated = await GeneratedBankItem.count({ where: { bank: bankKey } });
+    const supply = await getBankSupply(spec);
     return {
       ...source,
+      generated,
+      remaining: supply.remaining,
+      exhausted: supply.remaining === 0,
       source,
       queue: null,
       today: null
@@ -167,18 +175,30 @@ export function appendBankHistoryEntries(bankKey, ids) {
   }
 }
 
-export async function runDailyBankAuditAndAutofill(bot) {
+export async function runDailyBankAuditAndAutofill(bot, { generate = true, openai } = {}) {
+  const maintenance = generate ? await maintainBanks(BANK_SPECS, { openai }) : [];
+  let eventPlan = null;
+  if (generate) {
+    try { eventPlan = await prepareUpcomingMiniEvent(); }
+    catch (error) { eventPlan = { status: 'failed', error: error.message }; }
+  }
   const coverage = await getAllBankQueueCoverage();
 
   const lines = [];
   lines.push(`🧠 Bank audit ${moscowDateTime()} (${AUDIT_TZ})`);
   lines.push('');
+  if (generate) {
+    lines.push('Autofill:');
+    for (const result of maintenance) lines.push(`• ${result.bank || 'all'}: ${result.status}, added=${result.published || 0}`);
+    lines.push(`Saturday: ${JSON.stringify(eventPlan)}`);
+    lines.push('');
+  }
   lines.push('Queue coverage (real daily rotation):');
 
   for (const row of coverage) {
     if (!row.queue) {
       const warning = row.exhausted ? ' ⚠️ ПУСТ' : row.remaining <= 3 ? ' ⚠️ мало' : '';
-      lines.push(`• ${row.title}: file ${row.used}/${row.total} (${row.usageRate}%), remaining=${row.remaining}${warning}`);
+      lines.push(`• ${row.title}: seed=${row.total}, generated=${row.generated || 0}, free=${row.remaining}${warning}`);
       continue;
     }
 
@@ -209,7 +229,7 @@ export async function runDailyBankAuditAndAutofill(bot) {
     await sendAdminMessage(bot, lines.join('\n'));
   }
 
-  return { coverage };
+  return { coverage, maintenance, eventPlan };
 }
 
 export { BANK_SPECS };

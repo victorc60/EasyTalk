@@ -556,5 +556,305 @@
     "explanation": "Travel helps people discover the world and different cultures.",
     "hint": "Мир вокруг нас",
     "topic": "travel"
+  },
+  {
+    "question": "Choose the correct sentence.",
+    "options": [
+      "She doesn't eat meat.",
+      "She don't eat meat.",
+      "She not eats meat.",
+      "She doesn't eats meat."
+    ],
+    "correctIndex": 0,
+    "explanation": "После doesn't используется начальная форма глагола: eat.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_8cc6f55cc0fca761cae2fa3f40c24ced",
+    "isUsed": false
+  },
+  {
+    "question": "Which word means a person who works with you?",
+    "options": [
+      "customer",
+      "colleague",
+      "passenger",
+      "stranger"
+    ],
+    "correctIndex": 1,
+    "explanation": "Colleague — коллега; customer — покупатель, passenger — пассажир.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_a09be7b2b1ea3b2cafb4a7fa4bca6b63",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: There isn't ___ milk in the fridge.",
+    "options": [
+      "many",
+      "a",
+      "any",
+      "few"
+    ],
+    "correctIndex": 2,
+    "explanation": "В отрицании с неисчисляемым milk используется any.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_5b2ed2b7eb866753590ac5c70f4eb0d2",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: I have lived here ___ 2020.",
+    "options": [
+      "for",
+      "during",
+      "until",
+      "since"
+    ],
+    "correctIndex": 3,
+    "explanation": "Since указывает на начальный момент: since 2020.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_1f3187791bf621c621ade9f3e585ee0c",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: This bag is ___ than that one.",
+    "options": [
+      "cheaper",
+      "cheap",
+      "cheapest",
+      "more cheap"
+    ],
+    "correctIndex": 0,
+    "explanation": "У короткого прилагательного cheap сравнительная степень — cheaper.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_2b39792cb7d1616e5be65dda321b4819",
+    "isUsed": false
+  },
+  {
+    "question": "Choose the past form of buy.",
+    "options": [
+      "buyed",
+      "bought",
+      "buying",
+      "buys"
+    ],
+    "correctIndex": 1,
+    "explanation": "Buy — неправильный глагол: buy, bought, bought.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_d586811bbc652e2fa13c29873b68f41e",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: You ___ smoke here. It is forbidden.",
+    "options": [
+      "don't have to",
+      "might",
+      "mustn't",
+      "can"
+    ],
+    "correctIndex": 2,
+    "explanation": "Mustn't обозначает запрет; don't have to — отсутствие необходимости.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_4e3fb5e782d2e3b72a1b3aa9ede2010e",
+    "isUsed": false
+  },
+  {
+    "question": "Which question asks about a price?",
+    "options": [
+      "How old is it?",
+      "How far is it?",
+      "How often is it?",
+      "How much is it?"
+    ],
+    "correctIndex": 3,
+    "explanation": "How much is it? означает «Сколько это стоит?».",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_998c8be95a93ec43786427760cf226fb",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: She is interested ___ photography.",
+    "options": [
+      "in",
+      "on",
+      "at",
+      "for"
+    ],
+    "correctIndex": 0,
+    "explanation": "Устойчивое сочетание: interested in something.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_fa02f2d832ec3a96a58b7d1f2161333b",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: If it rains, we ___ at home.",
+    "options": [
+      "stayed",
+      "will stay",
+      "would stayed",
+      "staying"
+    ],
+    "correctIndex": 1,
+    "explanation": "В первом условном предложении после if — Present Simple, в главной части — will + глагол.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_a5ebc196a946de698eb36b17d45ba8fe",
+    "isUsed": false
+  },
+  {
+    "question": "Which word is the opposite of borrow?",
+    "options": [
+      "keep",
+      "find",
+      "lend",
+      "save"
+    ],
+    "correctIndex": 2,
+    "explanation": "Borrow — взять взаймы, lend — дать взаймы.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_34570cc9ab2383d874ca0d66260e8767",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: I look forward to ___ you.",
+    "options": [
+      "see",
+      "saw",
+      "seen",
+      "seeing"
+    ],
+    "correctIndex": 3,
+    "explanation": "После look forward to используется форма с -ing: seeing.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_a25afa5eec09a3896e3b05d9478f60ab",
+    "isUsed": false
+  },
+  {
+    "question": "Which adverb means «уже» in \"We have ___ finished lunch\"?",
+    "options": [
+      "already",
+      "yet",
+      "ever",
+      "still not"
+    ],
+    "correctIndex": 0,
+    "explanation": "Already подчёркивает, что действие уже завершено.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_bc4d3f92c6da4f529e5f4d9df6b8cf13",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: This book belongs to Anna. It is ___.",
+    "options": [
+      "her",
+      "hers",
+      "she",
+      "herself"
+    ],
+    "correctIndex": 1,
+    "explanation": "Hers — самостоятельное притяжательное местоимение: это её книга.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_78d22d234d40cb0550b638d90fd46f24",
+    "isUsed": false
+  },
+  {
+    "question": "Which word names the place where you wait for a train?",
+    "options": [
+      "runway",
+      "garage",
+      "platform",
+      "crossroads"
+    ],
+    "correctIndex": 2,
+    "explanation": "Platform — железнодорожная платформа; runway — взлётная полоса.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_b10e0d145868f8964d02dce7b2a7cd5f",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: My brother is good ___ cooking.",
+    "options": [
+      "in",
+      "on",
+      "to",
+      "at"
+    ],
+    "correctIndex": 3,
+    "explanation": "Устойчивое сочетание: good at something.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_52c957d880e71d7002e14d16ad5727e4",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: How ___ people are coming?",
+    "options": [
+      "many",
+      "much",
+      "little",
+      "any"
+    ],
+    "correctIndex": 0,
+    "explanation": "С исчисляемым people используется how many.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_a3df48a15e6406c7e9722e83a3bb0350",
+    "isUsed": false
+  },
+  {
+    "question": "Choose the correct plural of child.",
+    "options": [
+      "childs",
+      "children",
+      "childes",
+      "childrens"
+    ],
+    "correctIndex": 1,
+    "explanation": "Children — неправильная форма множественного числа от child.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_ca0f1dfff7637119d54c983c3fb3d0a1",
+    "isUsed": false
+  },
+  {
+    "question": "Complete: I was cooking when the phone ___.",
+    "options": [
+      "ring",
+      "rung",
+      "rang",
+      "was ring"
+    ],
+    "correctIndex": 2,
+    "explanation": "Длительное действие — was cooking; прервавшее его событие — rang.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_1bba5f510d770e67a4636f03b39a6390",
+    "isUsed": false
+  },
+  {
+    "question": "Which phrase politely asks someone to repeat their words?",
+    "options": [
+      "You must be quiet.",
+      "Never mind the time.",
+      "It doesn't fit me.",
+      "Could you say that again, please?"
+    ],
+    "correctIndex": 3,
+    "explanation": "Could you say that again, please? — вежливая просьба повторить сказанное.",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_321c584878bd24ca67cc99b68d061eb3",
+    "isUsed": false
   }
 ]

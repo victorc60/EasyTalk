@@ -44,7 +44,7 @@ export async function setupBot(bot, userSessions, openai) {
   setupCallbacks(bot, userSessions, openai);
   setupPollAnswerHandler(bot);
   setupMessageHandler(bot, userSessions, openai);
-  runDailyBankAuditAndAutofill(bot).catch((error) => {
+  runDailyBankAuditAndAutofill(bot, { openai }).catch((error) => {
     console.error('Ошибка стартового аудита банков:', error.message);
   });
 
@@ -176,12 +176,11 @@ function setupSchedulers(bot, userSessions) {
       await notifyDailyWordGameStats(bot, { isScheduledRun: true });
     });
 
-    // Аудит покрытия банков раз в неделю в 03:00 по Кишинёву (воскресенье)
+    // Daily stock check and preparation of the upcoming Saturday event.
     schedule.scheduleJob(
-      { dayOfWeek: 0, hour: 3, minute: 0, tz: 'Europe/Chisinau' },
+      { hour: 3, minute: 0, tz: 'Europe/Chisinau' },
       async () => {
-        console.log('Запуск еженедельного аудита банков контента');
-        await runDailyBankAuditAndAutofill(bot);
+        runDailyBankAuditAndAutofill(bot).catch(error => console.error('[BANK] Maintenance failed:', error.message));
       }
     );
     

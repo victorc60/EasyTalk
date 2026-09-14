@@ -208,5 +208,125 @@
     "claimRu": "Первое кругосветное путешествие было завершено более 500 лет назад.",
     "isTrue": true,
     "explanation": "🇬🇧 True! Magellan's expedition completed the first circumnavigation of Earth in 1522.\n🇷🇺 Правда! Экспедиция Магеллана завершила первое кругосветное путешествие в 1522 году.\n💡 Imagine doing that without GPS."
+  },
+  {
+    "claim": "The plural of \"mouse\" is \"mice\".",
+    "claimRu": "Множественное число от mouse — mice.",
+    "isTrue": true,
+    "explanation": "Mouse образует неправильное множественное число mice, а не mouses, когда речь о животных.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_e45b4ff36b39e8d55a48ba5c5321d0bd",
+    "isUsed": false
+  },
+  {
+    "claim": "In standard English, \"I\" is written with a capital letter.",
+    "claimRu": "В стандартном английском местоимение I пишется с заглавной буквы.",
+    "isTrue": true,
+    "explanation": "Местоимение I сохраняет заглавную букву даже в середине предложения.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_fa27a5b75193791fccdd744187d43a4a",
+    "isUsed": false
+  },
+  {
+    "claim": "The past tense of \"go\" is \"goed\".",
+    "claimRu": "Прошедшая форма go — goed.",
+    "isTrue": false,
+    "explanation": "Go — неправильный глагол. Его форма Past Simple — went.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_08e5bb1f1cc9fcccb710c8c568c60d96",
+    "isUsed": false
+  },
+  {
+    "claim": "\"Advice\" is normally uncountable in English.",
+    "claimRu": "Advice в английском обычно неисчисляемое.",
+    "isTrue": true,
+    "explanation": "Говорят some advice или a piece of advice, а не an advice.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_ce43bca1cea8156fb9e30c85f1cbdc97",
+    "isUsed": false
+  },
+  {
+    "claim": "\"Their\" and \"there\" always have the same meaning.",
+    "claimRu": "Their и there всегда означают одно и то же.",
+    "isTrue": false,
+    "explanation": "Their означает «их», а there может означать «там» или входить в конструкцию there is.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_ec214248afeae90b084e13d2846b1f3e",
+    "isUsed": false
+  },
+  {
+    "claim": "An hour contains sixty minutes.",
+    "claimRu": "В одном часе шестьдесят минут.",
+    "isTrue": true,
+    "explanation": "Hour — час, minute — минута. Один час равен 60 минутам.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_a072854f5475607300be07d71c4f5e94",
+    "isUsed": false
+  },
+  {
+    "claim": "A triangle has four sides.",
+    "claimRu": "У треугольника четыре стороны.",
+    "isTrue": false,
+    "explanation": "У треугольника три стороны. У четырёхугольника их четыре.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_dda9dcc0e8d27e38e182611a5f3e1514",
+    "isUsed": false
+  },
+  {
+    "claim": "The English word \"Monday\" names a month.",
+    "claimRu": "Английское слово Monday обозначает месяц.",
+    "isTrue": false,
+    "explanation": "Monday — понедельник, день недели, а не месяц.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_837fee47025b8dacddf1be878c00746e",
+    "isUsed": false
+  },
+  {
+    "claim": "\"Cannot\" can be written as one word.",
+    "claimRu": "Cannot может писаться одним словом.",
+    "isTrue": true,
+    "explanation": "Cannot — обычная полная отрицательная форма can; сокращённая форма — can’t.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_23c39ca6d750595a9848b6368e7d3ec4",
+    "isUsed": false
+  },
+  {
+    "claim": "\"Better\" is the comparative form of \"good\".",
+    "claimRu": "Better — сравнительная степень good.",
+    "isTrue": true,
+    "explanation": "Неправильные степени сравнения: good, better, best.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_946df71e1c7f17cc4dd4a74db8bed334",
+    "isUsed": false
+  },
+  {
+    "claim": "\"Must not\" always means that something is optional.",
+    "claimRu": "Must not всегда означает, что действие необязательно.",
+    "isTrue": false,
+    "explanation": "Must not выражает запрет. Отсутствие необходимости обычно выражается через do not have to.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_ff8fc96aa6ec3aca136288b1dcdb6dd7",
+    "isUsed": false
+  },
+  {
+    "claim": "There are twelve months in a year.",
+    "claimRu": "В году двенадцать месяцев.",
+    "isTrue": true,
+    "explanation": "Month — месяц, year — год. В обычном календарном году 12 месяцев.",
+    "level": "A2",
+    "topic": "language_and_basics",
+    "id": "r260914_f805f8d2229b57aaabe353b603675adc",
+    "isUsed": false
   }
 ]

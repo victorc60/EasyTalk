@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import DailyLog from '../models/DailyLog.js';
 import ContentQueue from '../models/ContentQueue.js';
 import ContentDelivery from '../models/ContentDelivery.js';
+import { lockContentIdentity } from './contentIdentityService.js';
 
 export async function prepareContentDelivery(type, date) {
   try {
@@ -11,8 +12,13 @@ export async function prepareContentDelivery(type, date) {
       const existing = await DailyLog.findOne({ where: { type, date }, transaction });
       if (existing) return existing;
       let queue = await ContentQueue.findOne({ where: { type, used: false }, order: [['id', 'ASC']], transaction, lock: transaction.LOCK.UPDATE });
-      if (!queue) {
-        await ContentQueue.update({ used: false, used_at: null }, { where: { type }, transaction });
+      while (queue) {
+        const identity = await lockContentIdentity(type, queue.content, transaction);
+        if (!identity.used_at) {
+          await identity.update({ used_at: new Date(), queue_id: identity.queue_id || queue.id }, { transaction });
+          break;
+        }
+        await queue.update({ used: true, used_at: identity.used_at }, { transaction });
         queue = await ContentQueue.findOne({ where: { type, used: false }, order: [['id', 'ASC']], transaction, lock: transaction.LOCK.UPDATE });
       }
       if (!queue) return null;

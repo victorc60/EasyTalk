@@ -208,5 +208,170 @@
     "meaning": "исследовать необычные места",
     "example": "We ventured off the beaten track and found an ancient temple.",
     "hint": "искать скрытые места"
+  },
+  {
+    "idiom": "break the ice",
+    "translation": "разрядить обстановку",
+    "meaning": "разрядить обстановку",
+    "example": "A funny story helped us break the ice at the meeting.",
+    "hint": "Помочь незнакомым людям почувствовать себя свободнее.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_8ea3190d98312a6779d779821e3d301a",
+    "isUsed": false
+  },
+  {
+    "idiom": "a piece of cake",
+    "translation": "проще простого",
+    "meaning": "проще простого",
+    "example": "The test was a piece of cake after all that practice.",
+    "hint": "Так говорят об очень лёгкой задаче.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_3a595be0af30e92d706df4d780b8e969",
+    "isUsed": false
+  },
+  {
+    "idiom": "under the weather",
+    "translation": "нездоровый",
+    "meaning": "нездоровый",
+    "example": "I'm feeling under the weather, so I'll stay home.",
+    "hint": "Человек чувствует себя немного больным.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_8e7fcb6746ee2124019f6eb2581cb590",
+    "isUsed": false
+  },
+  {
+    "idiom": "once in a blue moon",
+    "translation": "крайне редко",
+    "meaning": "крайне редко",
+    "example": "We eat at expensive restaurants once in a blue moon.",
+    "hint": "Событие происходит почти никогда.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_935c37a70213f46feff567897e9fa6d6",
+    "isUsed": false
+  },
+  {
+    "idiom": "cost an arm and a leg",
+    "translation": "стоить целое состояние",
+    "meaning": "стоить целое состояние",
+    "example": "That designer bag costs an arm and a leg.",
+    "hint": "Цена кажется очень высокой.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_6ea624c12fa912df4fe31b4853c37f8a",
+    "isUsed": false
+  },
+  {
+    "idiom": "on the same page",
+    "translation": "одинаково понимать ситуацию",
+    "meaning": "одинаково понимать ситуацию",
+    "example": "Let's check that we're on the same page before we start.",
+    "hint": "Люди согласны с общим планом.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_6b295287b10623171325fc48c7e289a0",
+    "isUsed": false
+  },
+  {
+    "idiom": "a blessing in disguise",
+    "translation": "нет худа без добра",
+    "meaning": "нет худа без добра",
+    "example": "Missing that train was a blessing in disguise: I met an old friend.",
+    "hint": "Неприятное событие неожиданно приносит пользу.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_e772d258972b0359b871a0c2965866a0",
+    "isUsed": false
+  },
+  {
+    "idiom": "call it a day",
+    "translation": "закончить работу на сегодня",
+    "meaning": "закончить работу на сегодня",
+    "example": "We've finished the report. Let's call it a day.",
+    "hint": "Решить, что сегодня уже достаточно поработали.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_365bb1d22d3e3840c1ce502d75ca2ee3",
+    "isUsed": false
+  },
+  {
+    "idiom": "keep an eye on",
+    "translation": "присматривать за",
+    "meaning": "присматривать за",
+    "example": "Could you keep an eye on my bag for a minute?",
+    "hint": "Следить, чтобы с вещью или человеком всё было в порядке.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_3a19cf41d616c027eb9b65c3ddae81e9",
+    "isUsed": false
+  },
+  {
+    "idiom": "miss the boat",
+    "translation": "упустить возможность",
+    "meaning": "упустить возможность",
+    "example": "I waited too long to apply and missed the boat.",
+    "hint": "Подходящий момент уже прошёл.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_7365345a0a1018029b9e904a0c1999e2",
+    "isUsed": false
+  },
+  {
+    "idiom": "spill the beans",
+    "translation": "выдать секрет",
+    "meaning": "выдать секрет",
+    "example": "Don't spill the beans about the surprise party.",
+    "hint": "Рассказать то, что должны были скрывать.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_6bebf867b76eb4452aeadd00c752d670",
+    "isUsed": false
+  },
+  {
+    "idiom": "get cold feet",
+    "translation": "струсить в последний момент",
+    "meaning": "струсить в последний момент",
+    "example": "He got cold feet before his first public speech.",
+    "hint": "Потерять смелость перед важным действием.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_855c83d8511c278eddb6deee78a24398",
+    "isUsed": false
+  },
+  {
+    "idiom": "the last straw",
+    "translation": "последняя капля",
+    "meaning": "последняя капля",
+    "example": "Another cancelled meeting was the last straw.",
+    "hint": "Последняя неприятность, после которой терпение кончается.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_9ca400af777549d4c2d4561f3ca96f30",
+    "isUsed": false
+  },
+  {
+    "idiom": "in the long run",
+    "translation": "в долгосрочной перспективе",
+    "meaning": "в долгосрочной перспективе",
+    "example": "Learning to cook saves money in the long run.",
+    "hint": "Результат станет заметен спустя длительное время.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_6cedb335060461762e2b57f01396b132",
+    "isUsed": false
+  },
+  {
+    "idiom": "by the book",
+    "translation": "строго по правилам",
+    "meaning": "строго по правилам",
+    "example": "The new manager does everything by the book.",
+    "hint": "Действовать точно по установленным инструкциям.",
+    "level": "B1",
+    "topic": "everyday_life",
+    "id": "r260914_cf0fecb7584da2998cc49c54fe3caeab",
+    "isUsed": false
   }
 ]

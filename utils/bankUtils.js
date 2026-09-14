@@ -4,6 +4,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { bankEntryKey } from './bankMerge.js';
 
 export function readBankFile(filePath) {
   try {
@@ -24,24 +25,19 @@ export function writeJsonArray(filePath, rows) {
 }
 
 // Pick a random unused item from the bank file and immediately mark it as used.
-// If all items are used — resets all to isUsed: false and starts over.
+// Exhaustion returns null; published content must never be recycled.
 export function pickFromBank(filePath) {
   let rows = readBankFile(filePath);
   if (!rows.length) return null;
 
-  let available = rows.filter(r => !r.isUsed);
-  if (!available.length) {
-    rows = rows.map(r => ({ ...r, isUsed: false }));
-    available = rows;
-    console.log(`🔄 Банк ${path.basename(filePath)} сброшен — все элементы снова доступны`);
-  }
+  const used = new Set(rows.filter(row => row.isUsed).map(bankEntryKey));
+  const available = rows.filter(row => !used.has(bankEntryKey(row)));
+  if (!available.length) return null;
 
   const chosen = available[Math.floor(Math.random() * available.length)];
 
-  const idx = rows.indexOf(chosen);
-  if (idx !== -1) {
-    rows[idx] = { ...rows[idx], isUsed: true };
-  }
+  const key = bankEntryKey(chosen);
+  rows = rows.map(row => bankEntryKey(row) === key ? { ...row, isUsed: true } : row);
   writeJsonArray(filePath, rows);
 
   return chosen;

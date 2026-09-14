@@ -5,7 +5,12 @@
     "id": "mini_a2_51",
     "type": "preposition",
     "question": "You talk about time: 'The movie starts ___ 7:30.' Which preposition is correct?",
-    "options": ["on", "at", "in", "for"],
+    "options": [
+      "on",
+      "at",
+      "in",
+      "for"
+    ],
     "correctIndex": 1,
     "explanation": "Use at for exact times: at 7:30, at noon, at midnight."
   },
@@ -13,7 +18,12 @@
     "id": "mini_a2_52",
     "type": "vocabulary",
     "question": "You are at a restaurant and want to pay. You say: 'Can I have the ___, please?'",
-    "options": ["menu", "receipt", "bill", "order"],
+    "options": [
+      "menu",
+      "receipt",
+      "bill",
+      "order"
+    ],
     "correctIndex": 2,
     "explanation": "'The bill, please' is the standard phrase when you want to pay in a restaurant."
   },
@@ -21,7 +31,12 @@
     "id": "mini_a2_53",
     "type": "fill_gap",
     "question": "You describe your friend: 'She ___ to the gym three times a week.' Which form is correct?",
-    "options": ["go", "goes", "going", "is go"],
+    "options": [
+      "go",
+      "goes",
+      "going",
+      "is go"
+    ],
     "correctIndex": 1,
     "explanation": "For he/she/it in Present Simple, add -es to some verbs: goes, does, watches."
   },
@@ -29,7 +44,12 @@
     "id": "mini_a2_54",
     "type": "question_form",
     "question": "You ask a colleague: '___ you usually work on Saturdays?' Choose the correct form.",
-    "options": ["Does", "Do", "Are", "Is"],
+    "options": [
+      "Does",
+      "Do",
+      "Are",
+      "Is"
+    ],
     "correctIndex": 1,
     "explanation": "Use Do with you, we, they, and plural subjects."
   },
@@ -37,7 +57,12 @@
     "id": "mini_a2_55",
     "type": "article",
     "question": "You are at the airport: 'I need ___ passport before check-in.' Which article fits?",
-    "options": ["a", "an", "the", "—"],
+    "options": [
+      "a",
+      "an",
+      "the",
+      "—"
+    ],
     "correctIndex": 2,
     "explanation": "Use the when talking about a specific passport that belongs to you."
   },
@@ -45,7 +70,12 @@
     "id": "mini_a2_56",
     "type": "vocabulary",
     "question": "Your friend tells a funny joke. You say: 'That's really ___.''",
-    "options": ["hungry", "funny", "expensive", "busy"],
+    "options": [
+      "hungry",
+      "funny",
+      "expensive",
+      "busy"
+    ],
     "correctIndex": 1,
     "explanation": "'Funny' means something makes you laugh."
   },
@@ -53,7 +83,12 @@
     "id": "mini_a2_57",
     "type": "preposition",
     "question": "You talk about your home: 'I live ___ a small apartment.' Which preposition is correct?",
-    "options": ["at", "on", "in", "to"],
+    "options": [
+      "at",
+      "on",
+      "in",
+      "to"
+    ],
     "correctIndex": 2,
     "explanation": "Use in for places where someone lives: in a house, in an apartment, in a city."
   },
@@ -61,7 +96,12 @@
     "id": "mini_a2_58",
     "type": "fill_gap",
     "question": "You are thirsty and say: 'I need ___ some water.' Which form is correct?",
-    "options": ["drink", "to drink", "drinking", "drinks"],
+    "options": [
+      "drink",
+      "to drink",
+      "drinking",
+      "drinks"
+    ],
     "correctIndex": 1,
     "explanation": "After need, we often use the infinitive: need to drink, need to go, need to buy."
   },
@@ -69,7 +109,12 @@
     "id": "mini_a2_59",
     "type": "vocabulary",
     "question": "You miss your bus. You say: 'Oh no, I'm ___.''",
-    "options": ["early", "ready", "late", "open"],
+    "options": [
+      "early",
+      "ready",
+      "late",
+      "open"
+    ],
     "correctIndex": 2,
     "explanation": "If you miss your bus or arrive after the expected time, you are late."
   },
@@ -77,8 +122,493 @@
     "id": "mini_a2_60",
     "type": "fill_gap",
     "question": "You talk about your family: 'My parents ___ abroad.' Which form is correct?",
-    "options": ["lives", "live", "living", "is live"],
+    "options": [
+      "lives",
+      "live",
+      "living",
+      "is live"
+    ],
     "correctIndex": 1,
     "explanation": "With plural subjects like parents, they, and we, use the base verb: live, work, travel."
+  },
+  {
+    "question": "At a cafe: 'I'd like ___ cup of tea, please.'",
+    "options": [
+      "a",
+      "an",
+      "many",
+      "any"
+    ],
+    "correctIndex": 0,
+    "explanation": "Перед исчисляемым существительным cup в единственном числе нужен артикль a.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_d9955484814bfe17b465163365493709",
+    "isUsed": false
+  },
+  {
+    "question": "On the phone: 'Can I ___ a message?'",
+    "options": [
+      "do",
+      "leave",
+      "putting",
+      "leaves"
+    ],
+    "correctIndex": 1,
+    "explanation": "Leave a message — оставить сообщение.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_ec4f6bfd98c9c9403efa0049316dfcd0",
+    "isUsed": false
+  },
+  {
+    "question": "Yesterday: 'We ___ the museum in the morning.'",
+    "options": [
+      "visit",
+      "visiting",
+      "visited",
+      "visits"
+    ],
+    "correctIndex": 2,
+    "explanation": "Yesterday требует прошедшего времени: visited.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_d1f886a31838fabe8a8f2bdf7bcd807b",
+    "isUsed": false
+  },
+  {
+    "question": "Right now: 'The children ___ in the garden.'",
+    "options": [
+      "plays",
+      "is playing",
+      "play yesterday",
+      "are playing"
+    ],
+    "correctIndex": 3,
+    "explanation": "Для действия сейчас используется Present Continuous: are playing.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_b3eb0b6f70bfe16777fa11df37b5bbbe",
+    "isUsed": false
+  },
+  {
+    "question": "Directions: 'Go straight ___ and turn right.'",
+    "options": [
+      "ahead",
+      "above",
+      "under",
+      "inside of"
+    ],
+    "correctIndex": 0,
+    "explanation": "Go straight ahead — идите прямо.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_728af1aed83920402ef4314f093de04b",
+    "isUsed": false
+  },
+  {
+    "question": "At work: 'Could you send the report ___ email?'",
+    "options": [
+      "on",
+      "by",
+      "at",
+      "from"
+    ],
+    "correctIndex": 1,
+    "explanation": "By email означает «по электронной почте».",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_e48f155f5a76e267e02e13588850baf6",
+    "isUsed": false
+  },
+  {
+    "question": "Travel plans: 'We are going ___ Rome next week.'",
+    "options": [
+      "at",
+      "on",
+      "to",
+      "by"
+    ],
+    "correctIndex": 2,
+    "explanation": "Для движения в город используется to: go to Rome.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_5440b44a2c01365aeb5c615104acbdd0",
+    "isUsed": false
+  },
+  {
+    "question": "Dinner: 'Would you like ___ water?'",
+    "options": [
+      "many",
+      "a",
+      "few",
+      "some"
+    ],
+    "correctIndex": 3,
+    "explanation": "В предложении угощения обычно употребляется some; water неисчисляемое.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_3463c67f234634ba501456ca391d59a1",
+    "isUsed": false
+  },
+  {
+    "question": "Shopping: 'These shoes are too small. Do you have a ___ size?'",
+    "options": [
+      "larger",
+      "largest",
+      "large than",
+      "most large"
+    ],
+    "correctIndex": 0,
+    "explanation": "При сравнении размеров используется larger.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_896970a96fdcfa1230712938642aca7f",
+    "isUsed": false
+  },
+  {
+    "question": "A habit: 'Tom always ___ his teeth before bed.'",
+    "options": [
+      "brush",
+      "brushes",
+      "brushing",
+      "is brush"
+    ],
+    "correctIndex": 1,
+    "explanation": "В Present Simple с Tom (he) к brush добавляется -es.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_ceebe0229b50e9f11b241ed963f985b2",
+    "isUsed": false
+  },
+  {
+    "question": "A finished trip: 'Did you ___ a good holiday?'",
+    "options": [
+      "had",
+      "has",
+      "have",
+      "having"
+    ],
+    "correctIndex": 2,
+    "explanation": "После did используется начальная форма have.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_e9b449bea0f6fb371ea54b714ccd5148",
+    "isUsed": false
+  },
+  {
+    "question": "A rule: 'You must ___ your seat belt.'",
+    "options": [
+      "wears",
+      "wearing",
+      "wore",
+      "wear"
+    ],
+    "correctIndex": 3,
+    "explanation": "После модального must используется начальная форма глагола.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_f693ae08ca5a23bceae120e48c5dbede",
+    "isUsed": false
+  },
+  {
+    "question": "At home: 'There ___ two chairs in the kitchen.'",
+    "options": [
+      "are",
+      "is",
+      "be",
+      "was"
+    ],
+    "correctIndex": 0,
+    "explanation": "Перед множественным числом two chairs используется there are.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_fc470ab2db111f20c265f13d995422f5",
+    "isUsed": false
+  },
+  {
+    "question": "Comparing: 'My sister is taller ___ me.'",
+    "options": [
+      "as",
+      "than",
+      "that",
+      "then"
+    ],
+    "correctIndex": 1,
+    "explanation": "После сравнительной степени taller используется than.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_d986bd3dd0e8b8b4a2bd37c06e022921",
+    "isUsed": false
+  },
+  {
+    "question": "A plan: 'I'm going to ___ dinner tonight.'",
+    "options": [
+      "cooked",
+      "cooks",
+      "cook",
+      "cooking"
+    ],
+    "correctIndex": 2,
+    "explanation": "Конструкция be going to требует начальной формы глагола.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_f384b8931ce449794ed1649ebaec28d2",
+    "isUsed": false
+  },
+  {
+    "question": "A request: 'Could you help ___ with this box?'",
+    "options": [
+      "I",
+      "my",
+      "mine",
+      "me"
+    ],
+    "correctIndex": 3,
+    "explanation": "После help нужно объектное местоимение me.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_f1cd1f47479b1c5eda45d9d8db9dec2d",
+    "isUsed": false
+  },
+  {
+    "question": "Weather: 'It ___ raining, so take an umbrella.'",
+    "options": [
+      "is",
+      "are",
+      "has",
+      "does"
+    ],
+    "correctIndex": 0,
+    "explanation": "Present Continuous: it is raining.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_3cb40aa82d71b03202674d0d96f1ccc6",
+    "isUsed": false
+  },
+  {
+    "question": "A timetable: 'The shop closes ___ Sundays.'",
+    "options": [
+      "at",
+      "on",
+      "to",
+      "by"
+    ],
+    "correctIndex": 1,
+    "explanation": "С днями недели используется предлог on.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_1e43d0f316a7e8bba393a2c98c4462f2",
+    "isUsed": false
+  },
+  {
+    "question": "A duration: 'The journey takes two ___.'",
+    "options": [
+      "hour",
+      "hour's",
+      "hours",
+      "hourly"
+    ],
+    "correctIndex": 2,
+    "explanation": "После two нужно множественное число: hours.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_081b8eb9fa7c2ae53258179cc86647b9",
+    "isUsed": false
+  },
+  {
+    "question": "An invitation: 'Let's ___ for a walk.'",
+    "options": [
+      "going",
+      "went",
+      "goes",
+      "go"
+    ],
+    "correctIndex": 3,
+    "explanation": "После let's используется начальная форма глагола.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_fc6fc8479983af2a336c81e51b51de4a",
+    "isUsed": false
+  },
+  {
+    "question": "At the station: 'Which ___ does the train leave from?'",
+    "options": [
+      "platform",
+      "receipt",
+      "pillow",
+      "salary"
+    ],
+    "correctIndex": 0,
+    "explanation": "Поезд отправляется с платформы: platform.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_c26eacf8ac38513671fbdfb95a2198cf",
+    "isUsed": false
+  },
+  {
+    "question": "A possession: 'That is ___ umbrella, not mine.'",
+    "options": [
+      "you",
+      "your",
+      "yours",
+      "yourself"
+    ],
+    "correctIndex": 1,
+    "explanation": "Перед существительным umbrella нужно притяжательное your.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_fc13d32ce0f025bfd0409b68a785c73f",
+    "isUsed": false
+  },
+  {
+    "question": "Free time: 'She enjoys ___ books.'",
+    "options": [
+      "read",
+      "reads",
+      "reading",
+      "to reading"
+    ],
+    "correctIndex": 2,
+    "explanation": "После enjoy используется форма с -ing.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_b58a156dc0b01958d4b0ba3caa187fd1",
+    "isUsed": false
+  },
+  {
+    "question": "A recent experience: 'Have you ever ___ sushi?'",
+    "options": [
+      "ate",
+      "eat",
+      "eating",
+      "eaten"
+    ],
+    "correctIndex": 3,
+    "explanation": "Present Perfect: have + причастие прошедшего времени; eat — eaten.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_34ab5ab152c0ecb609f4d50adf6a8ccd",
+    "isUsed": false
+  },
+  {
+    "question": "An apology: 'I'm sorry ___ being late.'",
+    "options": [
+      "for",
+      "at",
+      "on",
+      "of"
+    ],
+    "correctIndex": 0,
+    "explanation": "Устойчивое сочетание: sorry for doing something.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_dcb4e5efb404c321eca0ce0f7fdcb166",
+    "isUsed": false
+  },
+  {
+    "question": "In a shop: 'Can I pay ___ card?'",
+    "options": [
+      "at",
+      "by",
+      "on",
+      "from"
+    ],
+    "correctIndex": 1,
+    "explanation": "By card означает «картой».",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_70b71c4af4fbd9b1ec22fd43e9d04d54",
+    "isUsed": false
+  },
+  {
+    "question": "A comparison: 'This is the ___ day of the year.'",
+    "options": [
+      "colder",
+      "cold",
+      "coldest",
+      "more cold"
+    ],
+    "correctIndex": 2,
+    "explanation": "The и of the year указывают на превосходную степень: coldest.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_b566762f44f529034f69f223687aa652",
+    "isUsed": false
+  },
+  {
+    "question": "A promise: 'I will ___ you tomorrow.'",
+    "options": [
+      "called",
+      "calling",
+      "calls",
+      "call"
+    ],
+    "correctIndex": 3,
+    "explanation": "После will используется начальная форма глагола.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_8b986ad1f9473a4dec4580092d4fa85b",
+    "isUsed": false
+  },
+  {
+    "question": "A past ability: 'When I was five, I ___ swim.'",
+    "options": [
+      "could",
+      "can",
+      "am able",
+      "will"
+    ],
+    "correctIndex": 0,
+    "explanation": "Для способности в прошлом используется could.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_b763efdd8662c0236e62d9d349fcad04",
+    "isUsed": false
+  },
+  {
+    "question": "A preference: 'I prefer tea ___ coffee.'",
+    "options": [
+      "than",
+      "to",
+      "from",
+      "of"
+    ],
+    "correctIndex": 1,
+    "explanation": "Устойчивое сочетание: prefer one thing to another.",
+    "type": "fill_gap",
+    "level": "A2",
+    "topic": "everyday_english",
+    "id": "r260914_e0a74cc3ec86f7969e603f41a908eb1e",
+    "isUsed": false
   }
 ]

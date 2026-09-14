@@ -116,17 +116,17 @@ async function runAllTests() {
     } finally { cleanUp(f); }
   });
 
-  await test('когда все использованы — сбрасывает и берёт заново', () => {
+  await test('когда все использованы — не повторяет', () => {
     const f = tempBank([
       { word: 'x', isUsed: true },
       { word: 'y', isUsed: true },
     ]);
     try {
       const result = pickFromBank(f);
-      ok(result !== null, 'После сброса должен вернуть элемент');
+      eq(result, null, 'Исчерпанный банк не повторяется');
       const rows = readBankFile(f);
       const usedCount = rows.filter(r => r.isUsed).length;
-      eq(usedCount, 1, 'После сброса ровно 1 элемент должен быть использован');
+      eq(usedCount, 2, 'История должна сохраниться');
     } finally { cleanUp(f); }
   });
 
@@ -145,7 +145,7 @@ async function runAllTests() {
     } finally { cleanUp(f); }
   });
 
-  await test('после полного цикла — на 4-й вызов слова начинаются заново', () => {
+  await test('после полного цикла — на 4-й вызов возвращается null', () => {
     const f = tempBank([
       { word: 'one',   isUsed: false },
       { word: 'two',   isUsed: false },
@@ -156,7 +156,7 @@ async function runAllTests() {
       pickFromBank(f); // 2
       pickFromBank(f); // 3 — все использованы
       const result4 = pickFromBank(f); // 4 — сброс → снова берёт
-      ok(result4 !== null, '4-й вызов после сброса должен вернуть элемент');
+      eq(result4, null, '4-й вызов не должен повторять слово');
     } finally { cleanUp(f); }
   });
 

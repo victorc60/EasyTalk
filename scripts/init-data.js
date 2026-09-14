@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
  * Скрипт инициализации данных.
- * Копирует файлы банков из /app/data_defaults в /app/data если их там нет или банк уменьшился.
+ * Копирует файлы банков из /app/data_defaults в /app/data если их там нет; новые записи добавляются без замены старых.
  * Файлы истории и стриков никогда не перезаписываются.
  * Запускается перед стартом бота при каждом деплое.
  */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { mergeBankEntries } from '../utils/bankMerge.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULTS_DIR = path.resolve(__dirname, '..', 'data_defaults');
@@ -53,13 +54,16 @@ for (const file of files) {
       const srcParsed = JSON.parse(fs.readFileSync(src, 'utf8'));
       const destParsed = JSON.parse(fs.readFileSync(dest, 'utf8'));
       if (Array.isArray(srcParsed) && Array.isArray(destParsed)) {
-        if (destParsed.length < srcParsed.length) {
-          needsCopy = true;
-          console.log(`⚠️ ${file}: в банке ${destParsed.length} записей (по умолчанию ${srcParsed.length}), восстанавливаем`);
+        const merged = mergeBankEntries(destParsed, srcParsed);
+        if (JSON.stringify(merged) !== JSON.stringify(destParsed)) {
+          const temporary = dest + '.tmp';
+          fs.writeFileSync(temporary, JSON.stringify(merged, null, 2) + '\n');
+          fs.renameSync(temporary, dest);
+          console.log('[BANK:MERGE]', file, 'added', merged.length - destParsed.length);
         }
       }
-    } catch {
-      needsCopy = true;
+    } catch (error) {
+      throw new Error('Refusing to overwrite bank ' + file + ': ' + error.message);
     }
   }
 

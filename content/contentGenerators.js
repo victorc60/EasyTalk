@@ -5,7 +5,8 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { dataFilePath } from '../utils/projectPaths.js';
-import { readBankFile, writeJsonArray, pickFromBank } from '../utils/bankUtils.js';
+import { pickUnusedLegacyItem } from '../services/legacyBankSelectionService.js';
+import { readBankFile, writeJsonArray } from '../utils/bankUtils.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -268,8 +269,8 @@ loadCuratedFactsBank();
 
 // ---------------------- Pick functions ----------------------
 
-function pickCuratedWord() {
-  const raw = pickFromBank(WORD_BANK_FILE);
+async function pickCuratedWord() {
+  const raw = await pickUnusedLegacyItem('word', WORD_BANK_FILE);
   if (!raw) return null;
   const fromSingle = typeof raw.translation === 'string' ? raw.translation.trim() : '';
   const fromList = Array.isArray(raw.translations)
@@ -285,8 +286,8 @@ function pickCuratedWord() {
   };
 }
 
-function pickCuratedIdiom() {
-  const raw = pickFromBank(IDIOM_BANK_FILE);
+async function pickCuratedIdiom() {
+  const raw = await pickUnusedLegacyItem('idiom', IDIOM_BANK_FILE);
   if (!raw) return null;
   return {
     idiom: raw.idiom.trim(),
@@ -297,8 +298,8 @@ function pickCuratedIdiom() {
   };
 }
 
-function pickCuratedPhrasalVerb() {
-  const raw = pickFromBank(PHRASAL_VERBS_BANK_FILE);
+async function pickCuratedPhrasalVerb() {
+  const raw = await pickUnusedLegacyItem('phrasal', PHRASAL_VERBS_BANK_FILE);
   if (!raw) return null;
   return {
     phrasalVerb: raw.phrasalVerb.trim(),
@@ -309,8 +310,8 @@ function pickCuratedPhrasalVerb() {
   };
 }
 
-function pickQuizQuestion() {
-  const raw = pickFromBank(QUIZ_BANK_FILE);
+async function pickQuizQuestion() {
+  const raw = await pickUnusedLegacyItem('quiz', QUIZ_BANK_FILE);
   if (!raw) return null;
   const options = Array.isArray(raw.options)
     ? raw.options.map(opt => (opt || '').toString().trim()).filter(Boolean)
@@ -325,8 +326,8 @@ function pickQuizQuestion() {
   };
 }
 
-function pickCuratedFact() {
-  return pickFromBank(FACTS_BANK_FILE);
+async function pickCuratedFact() {
+  return pickUnusedLegacyItem('fact', FACTS_BANK_FILE);
 }
 
 
@@ -341,7 +342,7 @@ export function getPhrasalVerbUsageStats() {
     total,
     used,
     remaining,
-    nextWillRepeat: total > 0 && remaining <= 1,
+    nextWillRepeat: false,
     usageRate: total > 0 ? Math.round((used / total) * 100) : 0
   };
 }
@@ -484,7 +485,7 @@ function buildPhrasalVerbOptions(entry) {
 // ---------------------- Daily game generators ----------------------
 
 export async function dailyFact() {
-  const factEntry = pickCuratedFact();
+  const factEntry = await pickCuratedFact();
   if (!factEntry) {
     console.warn('⚠️ Fact of the Day не может быть сформирован: facts_bank.json пуст или недоступен');
     return null;
@@ -499,7 +500,7 @@ export async function dailyFact() {
 }
 
 export async function wordOfTheDay() {
-  const wordEntry = pickCuratedWord();
+  const wordEntry = await pickCuratedWord();
   if (!wordEntry) {
     console.warn('⚠️ Word of the Day не может быть сформирован: word_bank.json пуст или недоступен');
     return null;
@@ -521,7 +522,7 @@ export async function wordOfTheDay() {
 }
 
 export async function idiomOfTheDay() {
-  const idiomEntry = pickCuratedIdiom();
+  const idiomEntry = await pickCuratedIdiom();
   if (!idiomEntry) {
     console.warn('⚠️ Idiom of the Day не может быть сформирован: idiom_bank.json пуст или недоступен');
     return null;
@@ -541,7 +542,7 @@ export async function idiomOfTheDay() {
 }
 
 export async function phrasalVerbOfTheDay() {
-  const phrasalVerbEntry = pickCuratedPhrasalVerb();
+  const phrasalVerbEntry = await pickCuratedPhrasalVerb();
   if (!phrasalVerbEntry) {
     console.warn('⚠️ Phrasal Verb of the Day не может быть сформирован: phrasal_verbs_bank.json пуст или недоступен');
     return null;
@@ -561,7 +562,7 @@ export async function phrasalVerbOfTheDay() {
 }
 
 export async function quizOfTheDay() {
-  const quizEntry = pickQuizQuestion();
+  const quizEntry = await pickQuizQuestion();
   if (!quizEntry) {
     console.warn('⚠️ Список вопросов квиза пуст');
     return null;

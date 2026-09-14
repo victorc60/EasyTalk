@@ -11,7 +11,7 @@ try {
 (async () => {
   try {
     const { runDailyBankAuditAndAutofill } = await import('../services/bankLifecycleService.js');
-    const result = await runDailyBankAuditAndAutofill(null, { batchSize: 30 });
+    const result = await runDailyBankAuditAndAutofill(null, { generate: process.argv.includes('--apply') });
     console.log(JSON.stringify(result, null, 2));
     process.exit(0);
   } catch (error) {
