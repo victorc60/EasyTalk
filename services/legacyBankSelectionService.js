@@ -4,6 +4,25 @@ import { pickFromBank } from '../utils/bankUtils.js';
 import { lockContentIdentity } from './contentIdentityService.js';
 
 export async function pickUnusedLegacyItem(type, file) {
+  // Generated items live in MySQL. Lock the queue before its identity, matching
+  // scheduled delivery, so either route can consume a text only once.
+  const queued = await sequelize.transaction(async transaction => {
+    while (true) {
+      const row = await ContentQueue.findOne({
+        where: { type, used: false }, order: [['id', 'ASC']],
+        transaction, lock: transaction.LOCK.UPDATE,
+      });
+      if (!row) return null;
+      const identity = await lockContentIdentity(type, row.content, transaction);
+      const wasUsed = Boolean(identity.used_at);
+      const usedAt = identity.used_at || new Date();
+      await row.update({ used: true, used_at: usedAt }, { transaction });
+      if (wasUsed) continue;
+      await identity.update({ used_at: usedAt }, { transaction });
+      return { ...row.content, phrasalVerb: row.content.phrasalVerb || row.content.verb };
+    }
+  });
+  if (queued) return queued;
   let item;
   while ((item = pickFromBank(file))) {
     const claim = await sequelize.transaction(async transaction => {

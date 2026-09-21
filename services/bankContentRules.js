@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 
-export const CONTENT_FIELDS = { word: 'word', idiom: 'idiom', phrasal_verb: 'phrasalVerb', quiz: 'question', fact: 'claim', mini_event: 'question' };
+export const CONTENT_FIELDS = { word: 'word', idiom: 'idiom', phrasal_verb: 'phrasalVerb', quiz: 'question', fact: 'claim', mini_event: 'question', catalog: 'text' };
 const ALLOWED_FIELDS = {
+  catalog: ['text', 'translation', 'example', 'example_translation', 'type'],
   word: ['word', 'translation', 'example', 'hint', 'partOfSpeech'],
   idiom: ['idiom', 'translation', 'meaning', 'example', 'hint'],
   phrasal_verb: ['phrasalVerb', 'translation', 'meaning', 'example', 'hint'],
@@ -26,6 +27,8 @@ export function validateBankItem(bank, item, { legacy = false } = {}) {
   if (!item || typeof item !== 'object' || !CONTENT_FIELDS[bank]) return false;
   if (!text(item[CONTENT_FIELDS[bank]], ['word', 'idiom', 'phrasal_verb'].includes(bank) ? 150 : 500)) return false;
   if (!legacy && (!['A1', 'A2', 'B1', 'B2'].includes(item.level) || !text(item.topic, 64))) return false;
+  if (bank === 'catalog') return text(item.text, 150) && text(item.translation, 150) &&
+    text(item.example) && text(item.example_translation) && ['word', 'expression'].includes(item.type);
   if (['word', 'idiom', 'phrasal_verb'].includes(bank)) {
     return text(item.translation, 150) && text(item.example) && text(item.hint, 190);
   }

@@ -6,11 +6,13 @@ import ContentQueue from '../models/ContentQueue.js';
 import DailyLog from '../models/DailyLog.js';
 import GeneratedBankItem from '../models/GeneratedBankItem.js';
 import { maintainBanks, getBankSupply } from './bankAutofillService.js';
+import { LEARNING_BANK_SPECS } from './learningBankSupplyService.js';
 import { prepareUpcomingMiniEvent } from './miniEventPlanService.js';
 
 const AUDIT_TZ = 'Europe/Chisinau';
 
 const BANK_SPECS = {
+  ...LEARNING_BANK_SPECS,
   word: {
     key: 'word',
     queueType: 'word',
@@ -69,7 +71,7 @@ function getCoverageForBank(bankKey) {
   const spec = BANK_SPECS[bankKey];
   if (!spec) throw new Error(`Неизвестный банк: ${bankKey}`);
 
-  const bankRows = readJsonArray(spec.bankFile);
+  const bankRows = spec.bankFile ? readJsonArray(spec.bankFile) : [];
   const total = bankRows.length;
   const used = bankRows.filter(row => row.isUsed).length;
   const remaining = total - used;
@@ -88,6 +90,13 @@ function getCoverageForBank(bankKey) {
 async function getQueueCoverageForBank(bankKey) {
   const spec = BANK_SPECS[bankKey];
   const source = getCoverageForBank(bankKey);
+
+  if (spec.kind === 'catalog') {
+    const supply = await getBankSupply(spec);
+    return { ...source, catalog: true, levels: supply.levels, remaining: supply.remaining,
+      total: supply.levels.reduce((sum, level) => sum + level.total, 0),
+      exhausted: supply.remaining === 0, source, queue: null, today: null };
+  }
 
   if (!spec?.queueType) {
     const generated = await GeneratedBankItem.count({ where: { bank: bankKey } });
@@ -196,6 +205,10 @@ export async function runDailyBankAuditAndAutofill(bot, { generate = true, opena
   lines.push('Queue coverage (real daily rotation):');
 
   for (const row of coverage) {
+    if (row.catalog) {
+      lines.push(`• ${row.title}: ${row.levels.map(level => `${level.level}: ${level.remaining} new/${level.total} total`).join(', ')}`);
+      continue;
+    }
     if (!row.queue) {
       const warning = row.exhausted ? ' ⚠️ ПУСТ' : row.remaining <= 3 ? ' ⚠️ мало' : '';
       lines.push(`• ${row.title}: seed=${row.total}, generated=${row.generated || 0}, free=${row.remaining}${warning}`);
@@ -222,6 +235,7 @@ export async function runDailyBankAuditAndAutofill(bot, { generate = true, opena
   lines.push('');
   lines.push('Legacy JSON isUsed marks:');
   for (const row of coverage) {
+    if (row.catalog) continue;
     lines.push(`• ${row.title}: ${row.source.used}/${row.source.total}`);
   }
 
