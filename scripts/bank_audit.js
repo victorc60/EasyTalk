@@ -10,8 +10,15 @@ try {
 
 (async () => {
   try {
+    const generate = process.argv.includes('--apply');
+    if (generate) {
+      const { default: sequelize } = await import('../database/database.js');
+      const { ensureContentSchema } = await import('../database/ensureContentSchema.js');
+      await sequelize.authenticate();
+      await ensureContentSchema(sequelize);
+    }
     const { runDailyBankAuditAndAutofill } = await import('../services/bankLifecycleService.js');
-    const result = await runDailyBankAuditAndAutofill(null, { generate: process.argv.includes('--apply') });
+    const result = await runDailyBankAuditAndAutofill(null, { generate });
     console.log(JSON.stringify(result, null, 2));
     process.exit(0);
   } catch (error) {

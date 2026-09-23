@@ -27,9 +27,10 @@ they are not covered by the queue transaction guarantee.
 2. Run npm ci and npm test in an isolated checkout with no production credentials.
 3. Test against a disposable MySQL database and a test Telegram bot. The committed
    reliability unit tests mock database methods; they do not prove MySQL locking.
-4. Apply database/migrations/001_content_deliveries.sql when DB_SYNC_MODE=off.
-   The default safe sync also creates this new table. Never use force or alter
-   for this rollout. Existing tables do not need to be rewritten.
+4. Startup and writable content CLI commands automatically apply the additive
+   SQL migrations 001–003, including with DB_SYNC_MODE=off. The database account
+   needs CREATE privileges. Existing tables and records remain unchanged; do not
+   use force or alter for this rollout.
 5. Stop all old instances before starting this version. Mixed versions can bypass
    the new reward and broadcast protections. Deploy outside an active broadcast.
 6. Verify duplicate clicks, concurrent workers, rollback on failed writes, and
