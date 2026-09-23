@@ -32,8 +32,8 @@ reader sees them immediately. Italian/German entries never enter English games.
 No database schema change is required beyond the existing bank migrations.
 
 Generation and independent review each have a 45-second timeout, no SDK retries,
-and a maximum of 4,000 output tokens. There are at most 16 requests per day by
-default (18 with fact generation enabled; 10 with catalog generation disabled). The duplicate context is capped at 200
+and a maximum of 4,000 output tokens. There are at most 18 requests per day by
+default (16 with facts disabled; 12 with catalog generation disabled). The duplicate context is capped at 200
 items and 12,000 characters. These are usage caps, not a guaranteed currency budget;
 cost also depends on input tokens and selected models.
 
@@ -43,8 +43,14 @@ Candidates must pass local schema checks and normalized-text duplicate detection
 Only an explicit boolean approval by the second model call allows publication.
 Missing, duplicated or malformed review decisions reject the affected candidate.
 Candidates/reviews are recorded in the maintenance run, and publication is atomic.
-Semantic and factual accuracy cannot be guaranteed by AI review. Fact generation
-is disabled by default; existing unused facts remain available, but are never recycled.
+Fact generation is enabled by default, with the same stock threshold and daily
+batch limit as other game banks. True/False items require an independent review
+that explicitly returns verifiedIsTrue matching the candidate's boolean isTrue.
+False claims are accepted only as correctly labelled myths with a corrective
+explanation. Facts use stable topics and explanations in English and Russian;
+changing statistics, disputed claims and health advice are excluded by the prompt.
+This is AI review, not external-source verification, and cannot guarantee factual
+accuracy. Existing unused facts remain available and are never recycled.
 
 Failed or interrupted runs are not retried on the same date. The next day's run
 checks supply again. A processing row left after a restart needs investigation;
@@ -71,7 +77,7 @@ are for operational recovery; they do not silently replace questions mid-game.
 | --- | --- | --- |
 | BANK_AUTOFILL_ENABLED | true | false disables AI generation |
 | BANK_AUTOFILL_CATALOGS | true | false disables English/Italian/German catalog generation |
-| BANK_AUTOFILL_FACTS | false | Explicit opt-in to reviewed AI facts |
+| BANK_AUTOFILL_FACTS | true | false disables generation of reviewed True/False facts |
 | BANK_AUTOFILL_BATCH_SIZE | 10 | Positive integer, capped at 10 |
 | BANK_MIN_REMAINING | 30 | Stock threshold, capped at 90 |
 | BANK_TARGET_REMAINING | 60 | Refill ceiling, at least BANK_MIN_REMAINING and capped at 90 |
