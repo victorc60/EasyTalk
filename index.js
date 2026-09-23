@@ -6,6 +6,7 @@ import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
 import { OpenAI } from 'openai';
 import sequelize from './database/database.js';
+import { ensureContentSchema } from './database/ensureContentSchema.js';
 import { sendAdminMessage } from './utils/botUtils.js';
 import { setupBot } from './botSetup.js';
 import { startBossGrammarWebhook } from './services/bossGrammarWebhook.js';
@@ -144,6 +145,7 @@ async function initializeDatabase() {
       } else {
         console.log('🗄️ Синхронизация схемы БД отключена (DB_SYNC_MODE=off)');
       }
+      await ensureContentSchema(sequelize);
       await runMigrations();
       console.log('✅ База данных подключена');
       return;

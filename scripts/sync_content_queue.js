@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import sequelize from '../database/database.js';
+import { ensureContentSchema } from '../database/ensureContentSchema.js';
 import ContentQueue from '../models/ContentQueue.js';
 import { QUEUE_BANKS, readQueueBank, synchronizeQueueBank } from '../services/queueImportService.js';
 import { queueFingerprint } from '../services/contentIdentityService.js';
@@ -10,6 +11,7 @@ const types = args.filter(arg => !arg.startsWith('--'));
 try {
   if (types.some(type => !QUEUE_BANKS.some(bank => bank.type === type))) throw new Error('Unknown queue type');
   await sequelize.authenticate();
+  if (!dryRun) await ensureContentSchema(sequelize);
   for (const spec of QUEUE_BANKS.filter(bank => !types.length || types.includes(bank.type))) {
     if (!dryRun) console.log('[QUEUE:SYNC]', await synchronizeQueueBank(spec));
     else {

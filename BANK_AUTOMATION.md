@@ -87,9 +87,10 @@ content or normal games.
 - npm run bank:audit: read-only coverage report; no AI requests or plan writes.
 - npm run bank:maintain: perform maintenance, including real OpenAI requests.
 - npm test: local checks with mocked OpenAI and database; no production access.
-- Apply database/migrations/002_bank_automation.sql before starting with
-  DB_SYNC_MODE=off, together with 003_content_identities.sql. Default safe sync creates the four new tables; no existing
-  schema or user data needs rewriting. Do not use force/alter.
+- Startup, queue:sync (without --dry-run), and bank:maintain automatically run
+  the checked-in additive migrations 001–003 before using content tables. This
+  also applies when DB_SYNC_MODE=off. Existing tables and rows are preserved.
+  No force/alter sync is required. The database account needs CREATE privileges.
 - Test against isolated MySQL before production; unit tests do not establish
   actual database locking guarantees. Never launch a second polling production bot.
 - Back up the new tables together with the existing MySQL database. Old code
@@ -147,7 +148,8 @@ order. The seed-file fallback preserves its existing no-repeat guard.
 Rollout verification:
 
 1. Back up the existing database and volume, and inspect the Railway startup error.
-2. Apply the previously documented bank migrations if DB_SYNC_MODE=off.
+2. Allow the checked-in CREATE TABLE IF NOT EXISTS migrations to complete,
+   including when DB_SYNC_MODE=off. Migration errors stop startup before queue writes.
 3. Run npm run bank:audit in the deployed environment. This command is read-only;
    it must show all six game banks plus learning_en, learning_it and learning_de.
 4. After a successful deployment, inspect the startup maintenance report or run
@@ -170,3 +172,16 @@ flags. Saturday supply uses the same legacy history reader as plan preparation
 and excludes structurally invalid questions. The admin report uses this corrected
 remaining count. Two regression tests reproduce these previously inflated counts.
 The Docker runtime now uses Node 22, matching package.json's minimum version.
+
+## Automatic schema preparation
+
+Railway reported `[QUEUE:SYNC] Table railway.content_identities doesn't exist`.
+The separate queue import command ran before model synchronization and previously
+never applied migrations. It now prepares all five content-support tables using
+the existing additive SQL migrations before accessing the queue. The bot startup
+and writable bank-maintenance command use the same preparation.
+
+The migration runner only accepts the fixed CREATE TABLE IF NOT EXISTS statements
+in migrations 001–003. Repeated starts preserve tables, history and user records.
+Failed preparation stops the caller and names the failing migration file.
+`queue:sync -- --dry-run` and `bank:audit` remain read-only and never create tables.
