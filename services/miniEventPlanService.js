@@ -5,6 +5,13 @@ import MiniEventDay from '../models/MiniEventDay.js';
 import GeneratedBankItem from '../models/GeneratedBankItem.js';
 import { nextSaturday, selectEventQuestions } from './bankContentRules.js';
 
+export function readMiniEventHistory() {
+  const historyFile = dataFilePath('mini_event_history.json');
+  const history = fs.existsSync(historyFile) ? JSON.parse(fs.readFileSync(historyFile, 'utf8')) : [];
+  if (!Array.isArray(history)) throw new Error('Invalid mini-event history');
+  return history;
+}
+
 export async function loadMiniEventBank() {
   const seed = JSON.parse(fs.readFileSync(dataFilePath('mini_event_questions.json'), 'utf8'));
   if (!Array.isArray(seed)) throw new Error('Invalid mini-event seed bank');
@@ -20,9 +27,7 @@ export async function prepareMiniEventPlan(eventDate) {
   const history = await MiniEventDay.findAll({ attributes: ['event_date', 'question_ids'] });
   const plans = await MiniEventPlan.findAll();
   history.push(...plans.map(plan => ({ event_date: plan.event_date, question_ids: plan.questions.map(item => item.id), questions: plan.questions })));
-  const historyFile = dataFilePath('mini_event_history.json');
-  const legacy = fs.existsSync(historyFile) ? JSON.parse(fs.readFileSync(historyFile, 'utf8')) : [];
-  if (!Array.isArray(legacy)) throw new Error('Invalid mini-event history');
+  const legacy = readMiniEventHistory();
   history.push({ event_date: '1970-01-01', question_ids: [...legacy, ...bank.filter(item => item.isUsed).map(item => item.id)] });
   let selected;
   if (day) {

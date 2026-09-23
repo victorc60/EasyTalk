@@ -197,6 +197,7 @@ test('startup backfills publication and legacy history without replacing existin
 });
 
 test('legacy selection uses the same durable publication history as scheduled games', async context => {
+  context.mock.method(ContentQueue, 'findOne', async () => null);
   const identities = identityHarness(context);
   const fingerprint = queueFingerprint('word', { word: 'cat' });
   await ContentIdentity.findOrCreate({ where: { fingerprint }, transaction });
