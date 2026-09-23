@@ -120,7 +120,7 @@ async function getQueueCoverageForBank(bankKey) {
       attributes: ['content_id']
     })
   ]);
-  const remaining = total - used;
+  const remaining = (await getBankSupply(spec)).remaining;
 
   return {
     ...source,

@@ -1,4 +1,7 @@
 import fs from 'node:fs';
+import { Op } from 'sequelize';
+import ContentIdentity from '../models/ContentIdentity.js';
+import { readMiniEventHistory } from './miniEventPlanService.js';
 import { OpenAI } from 'openai';
 import sequelize from '../database/database.js';
 import BankMaintenanceRun from '../models/BankMaintenanceRun.js';
@@ -10,7 +13,7 @@ import MiniEventPlan from '../models/MiniEventPlan.js';
 import LearningItem from '../models/LearningItem.js';
 import { buildQueueRecord } from './queueService.js';
 import { getLearningBankSupply, learningItemRecord } from './learningBankSupplyService.js';
-import { CONTENT_FIELDS, acceptedCandidates, contentFingerprint, normalizedContentText } from './bankContentRules.js';
+import { CONTENT_FIELDS, acceptedCandidates, contentFingerprint, normalizedContentText, validateBankItem } from './bankContentRules.js';
 
 const SHAPES = {
   catalog: '{text,translation,example,example_translation,type:word|expression,level,topic}',
@@ -136,17 +139,28 @@ export async function getBankSupply(spec, date = new Date().toLocaleDateString('
     const queue = await ContentQueue.findAll({ where: { type: spec.queueType }, attributes: ['content', 'used'] });
     const used = new Set(queue.filter(row => row.used).map(row => queueFingerprint(spec.queueType, row.content)));
     const free = new Set(queue.filter(row => !row.used).map(row => queueFingerprint(spec.queueType, row.content)).filter(key => !used.has(key)));
+    // Queue flags are mutable; the durable ledger is authoritative after an
+    // interrupted legacy publication or a restored/imported queue.
+    const fingerprints = [...free];
+    for (let offset = 0; offset < fingerprints.length; offset += 400) {
+      const consumed = await ContentIdentity.findAll({
+        where: { fingerprint: { [Op.in]: fingerprints.slice(offset, offset + 400) }, used_at: { [Op.ne]: null } },
+        attributes: ['fingerprint'],
+      });
+      for (const identity of consumed) free.delete(identity.fingerprint);
+    }
     return { existing: [...existing, ...queue.map(row => row.content)], remaining: free.size };
   }
   const days = await MiniEventDay.findAll({ attributes: ['question_ids'] });
   const plans = await MiniEventPlan.findAll({ attributes: ['event_date', 'questions', 'reserve'] });
-  const used = new Set(days.flatMap(day => day.question_ids || []).map(String));
+  const used = new Set([...days.flatMap(day => day.question_ids || []), ...readMiniEventHistory()].map(String));
   const usedText = new Set();
   for (const plan of plans) for (const item of [...plan.questions, ...(plan.event_date >= date ? plan.reserve : [])]) {
     used.add(String(item.id)); usedText.add(contentFingerprint(spec.key, item));
   }
   for (const item of existing) if (item.isUsed || used.has(String(item.id))) usedText.add(contentFingerprint(spec.key, item));
-  return { existing, remaining: new Set(existing.map(item => contentFingerprint(spec.key, item)).filter(key => !usedText.has(key))).size };
+  return { existing, remaining: new Set(existing.filter(item => validateBankItem(spec.key, item, { legacy: true }))
+    .map(item => contentFingerprint(spec.key, item)).filter(key => !usedText.has(key))).size };
 }
 
 export async function maintainBanks(specs, { openai, now = new Date(), settings = getAutofillSettings() } = {}) {

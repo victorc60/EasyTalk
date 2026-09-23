@@ -162,3 +162,11 @@ New automated tests use mocked OpenAI and database methods. They establish
 language isolation, per-language daily limits, stock selection, atomic-operation
 boundaries, duplicate rejection and access from legacy games. They do not verify
 real model quality, MySQL locking or the Railway environment.
+
+## September 23 review fixes
+
+Stock accounting now consults content_identities in addition to mutable queue
+flags. Saturday supply uses the same legacy history reader as plan preparation
+and excludes structurally invalid questions. The admin report uses this corrected
+remaining count. Two regression tests reproduce these previously inflated counts.
+The Docker runtime now uses Node 22, matching package.json's minimum version.

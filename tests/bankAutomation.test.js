@@ -8,9 +8,10 @@ import GeneratedBankItem from '../models/GeneratedBankItem.js';
 import ContentQueue from '../models/ContentQueue.js';
 import LearningItem from '../models/LearningItem.js';
 import MiniEventPlan from '../models/MiniEventPlan.js';
+import MiniEventDay from '../models/MiniEventDay.js';
 import { dataFilePath } from '../utils/projectPaths.js';
 import { acceptedCandidates, contentFingerprint, validateBankItem, nextSaturday, selectEventQuestions } from '../services/bankContentRules.js';
-import { generateReviewedBatch, getAutofillSettings, maintainBanks, publishReviewedBatch } from '../services/bankAutofillService.js';
+import { generateReviewedBatch, getAutofillSettings, getBankSupply, maintainBanks, publishReviewedBatch } from '../services/bankAutofillService.js';
 import { prepareMiniEventPlan, getPlannedQuestion, prepareUpcomingMiniEvent } from '../services/miniEventPlanService.js';
 
 const word = { word: 'lantern', translation: 'фонарь', example: 'Bring a lantern.', hint: 'A portable light', level: 'A2', topic: 'travel' };
@@ -110,6 +111,7 @@ test('only one parallel daily maintenance attempt allocates API requests', async
 });
 
 test('sufficient stock never claims run or calls OpenAI', async context => {
+  context.mock.method(ContentIdentity, 'findAll', async () => []);
   context.mock.method(GeneratedBankItem, 'findAll', async () => []);
   context.mock.method(ContentQueue, 'findAll', async () => Array.from({ length: 30 }, (_, index) => ({ content: { ...word, word: 'item ' + index }, used: false })));
   context.mock.method(BankMaintenanceRun, 'create', async () => { throw new Error('unexpected claim'); });
@@ -171,4 +173,29 @@ test('saved plan is reused and question snapshot wins over bank updates', async 
 
 test('automatic plan preparation waits until Thursday', async () => {
   assert.equal((await prepareUpcomingMiniEvent(new Date('2026-09-14T12:00:00Z'))).status, 'waiting_until_thursday');
+});
+
+test('maintenance excludes queue aliases already consumed in durable identity history', async context => {
+  const entries = Array.from({ length: 30 }, (_, i) => ({ ...word, word: `consumed ${i}` }));
+  context.mock.method(GeneratedBankItem, 'findAll', async () => []);
+  context.mock.method(ContentQueue, 'findAll', async () => entries.map(content => ({ content, used: false })));
+  context.mock.method(ContentIdentity, 'findAll', async () => entries.map(content => ({ fingerprint: contentFingerprint('word', content), used_at: new Date() })));
+  const supply = await getBankSupply(spec);
+  assert.equal(supply.remaining, 0);
+});
+
+test('Saturday supply excludes legacy JSON history and structurally invalid questions', async context => {
+  const entries = Array.from({ length: 30 }, (_, i) => ({ ...quiz, id: `legacy-${i}`, question: `Legacy question ${i}?` }));
+  const bankFile = dataFilePath('mini_event_questions.json');
+  const historyFile = dataFilePath('mini_event_history.json');
+  const original = fs.readFileSync;
+  context.mock.method(fs, 'readFileSync', (file, ...args) => {
+    if (file === bankFile) return JSON.stringify([...entries, { id: 'broken', question: 'Malformed question?' }]);
+    if (file === historyFile) return JSON.stringify(entries.map(item => item.id));
+    return original(file, ...args);
+  });
+  context.mock.method(GeneratedBankItem, 'findAll', async () => []);
+  context.mock.method(MiniEventDay, 'findAll', async () => []);
+  context.mock.method(MiniEventPlan, 'findAll', async () => []);
+  assert.equal((await getBankSupply({ key: 'mini_event', bankFile })).remaining, 0);
 });

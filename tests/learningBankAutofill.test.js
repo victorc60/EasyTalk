@@ -113,6 +113,7 @@ test('catalog generation fails before spending for unsupported language', async 
 });
 
 test('low stock triggers a full bounded batch, not a daily single-item request', async context => {
+  context.mock.method(ContentIdentity, 'findAll', async () => []);
   context.mock.method(GeneratedBankItem, 'findAll', async () => []);
   context.mock.method(ContentQueue, 'findAll', async () => Array.from({ length: 29 }, (_, i) => ({ content: { word: `word ${i}` }, used: false })));
   const run = mockPublication(context);
@@ -211,6 +212,7 @@ test('legacy selection skips consumed aliases before choosing fresh generated co
 });
 
 test('read-only audit covers all nine banks without claiming runs or calling AI', async context => {
+  context.mock.method(ContentQueue, 'findAll', async () => []);
   mockCatalog(context);
   context.mock.method(GeneratedBankItem, 'count', async () => 0);
   context.mock.method(GeneratedBankItem, 'findAll', async () => []);
