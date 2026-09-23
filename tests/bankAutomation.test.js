@@ -87,7 +87,8 @@ test('settings cap batch size and allow disabling spending', () => {
   assert.equal(getAutofillSettings({ BANK_AUTOFILL_BATCH_SIZE: '900' }).batchSize, 10);
   assert.equal(getAutofillSettings({ BANK_AUTOFILL_BATCH_SIZE: '-1' }).batchSize, 10);
   assert.equal(getAutofillSettings({ BANK_AUTOFILL_ENABLED: 'false' }).enabled, false);
-  assert.equal(settings.facts, false);
+  assert.equal(settings.facts, true);
+  assert.equal(getAutofillSettings({ BANK_AUTOFILL_FACTS: 'false' }).facts, false);
 });
 
 test('only one parallel daily maintenance attempt allocates API requests', async context => {
@@ -198,4 +199,78 @@ test('Saturday supply excludes legacy JSON history and structurally invalid ques
   context.mock.method(MiniEventDay, 'findAll', async () => []);
   context.mock.method(MiniEventPlan, 'findAll', async () => []);
   assert.equal((await getBankSupply({ key: 'mini_event', bankFile })).remaining, 0);
+});
+
+const fact = { claim: 'An octopus has three hearts.', claimRu: 'У осьминога три сердца.', isTrue: true,
+  explanation: 'An octopus has three hearts. У осьминога три сердца.', level: 'A2', topic: 'nature' };
+const myth = { claim: 'Spiders are insects.', claimRu: 'Пауки — насекомые.', isTrue: false,
+  explanation: 'Spiders are arachnids, not insects. Пауки относятся к паукообразным.', level: 'A2', topic: 'nature' };
+
+test('facts accept true claims and correctly labelled false myths after independent classification', async () => {
+  const { client, calls } = clientFor([fact, myth], entries => entries.map(item => ({
+    id: item.id, approved: true, verifiedIsTrue: item.isTrue,
+  })));
+  const batch = await generateReviewedBatch(client, 'fact', [], settings, 10);
+  assert.deepEqual(batch.approved.map(item => item.isTrue), [true, false]);
+  assert.equal(calls.length, 2);
+  assert.match(calls[1].request.messages[0].content, /verifiedIsTrue/);
+});
+
+test('facts reject missing, string or contradictory independent truth labels', async () => {
+  for (const value of [undefined, 'true', false]) {
+    const { client } = clientFor([fact], entries => [{ id: entries[0].id, approved: true, verifiedIsTrue: value }]);
+    assert.equal((await generateReviewedBatch(client, 'fact', [], settings, 10)).approved.length, 0);
+  }
+});
+
+test('rejected fact review cannot be overridden by a matching truth label', async () => {
+  const { client } = clientFor([fact], entries => [{ id: entries[0].id, approved: false, verifiedIsTrue: true }]);
+  assert.equal((await generateReviewedBatch(client, 'fact', [], settings, 10)).approved.length, 0);
+});
+
+test('invalid fact booleans and duplicate claims are rejected before a review request', async () => {
+  const { client, calls } = clientFor([{ ...fact, isTrue: 'true' }, { ...fact, claim: ' AN OCTOPUS HAS THREE HEARTS! ' }]);
+  const batch = await generateReviewedBatch(client, 'fact', [fact], settings, 10);
+  assert.equal(batch.approved.length, 0);
+  assert.equal(calls.length, 1);
+});
+
+test('fact opt-out makes no model requests or maintenance claims', async context => {
+  context.mock.method(BankMaintenanceRun, 'create', async () => { throw new Error('must not claim'); });
+  const { client, calls } = clientFor([fact]);
+  const result = await maintainBanks({ fact: { key: 'fact', queueType: 'fact', bankFile: dataFilePath('facts_bank.json') } },
+    { openai: client, settings: getAutofillSettings({ BANK_AUTOFILL_FACTS: 'false' }) });
+  assert.equal(result[0].status, 'manual_facts');
+  assert.equal(calls.length, 0);
+});
+
+test('default fact maintenance publishes reviewed false items once and preserves their answer', async context => {
+  const transaction = { LOCK: { UPDATE: 'UPDATE' } };
+  context.mock.method(sequelize, 'transaction', async callback => callback(transaction));
+  context.mock.method(GeneratedBankItem, 'findAll', async () => []);
+  context.mock.method(ContentQueue, 'findAll', async () => []);
+  let claimed = false;
+  const run = { id: 1, status: 'processing', update: async values => Object.assign(run, values) };
+  context.mock.method(BankMaintenanceRun, 'create', async () => {
+    if (claimed) throw Object.assign(new Error('duplicate'), { name: 'SequelizeUniqueConstraintError' });
+    claimed = true; return run;
+  });
+  context.mock.method(BankMaintenanceRun, 'findByPk', async () => run);
+  context.mock.method(GeneratedBankItem, 'findOrCreate', async () => [{}, true]);
+  const identity = { queue_id: null, used_at: null, update: async values => Object.assign(identity, values) };
+  context.mock.method(ContentIdentity, 'findOrCreate', async () => [identity, true]);
+  context.mock.method(ContentIdentity, 'findByPk', async () => identity);
+  const rows = [];
+  context.mock.method(ContentQueue, 'create', async (row, options) => {
+    assert.equal(options.transaction, transaction); rows.push(row); return { id: rows.length };
+  });
+  context.mock.method(LearningItem, 'create', async () => { throw new Error('fact must not enter vocabulary'); });
+  const { client, calls } = clientFor([myth], entries => entries.map(item => ({ id: item.id, approved: true, verifiedIsTrue: false })));
+  const specs = { fact: { key: 'fact', queueType: 'fact', bankFile: dataFilePath('facts_bank.json') } };
+  const options = { openai: client, settings, now: new Date('2026-09-23T12:00:00Z') };
+  assert.equal((await maintainBanks(specs, options))[0].published, 1);
+  assert.equal(rows[0].type, 'fact');
+  assert.equal(rows[0].content.isTrue, false);
+  assert.equal((await maintainBanks(specs, options))[0].status, 'already_attempted_today');
+  assert.equal(calls.length, 2);
 });
